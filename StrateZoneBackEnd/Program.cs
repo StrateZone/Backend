@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
 using StrateZone_APIs.ServiceExtensions;
+using StrateZone_Service.Implements;
 using StrateZone_Service.Mapper;
 using System.Reflection;
 using System.Text;
@@ -31,6 +32,9 @@ builder.WebHost.UseUrls($"http://*:{port}");
 //Add health check
 builder.Services.AddHealthChecks();
 
+//Config GHN
+builder.Services.AddHttpClient<GHNService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -50,7 +54,7 @@ builder.Services.AddSingleton(payOS);
 // Swagger configuration for security
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "MealHunt_APIs", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "StrateZone_APIs", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
