@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -12,6 +13,8 @@ public partial class Message
     public int? ReceiverId { get; set; }
 
     public string? Content { get; set; }
+
+    public MessageStatus Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

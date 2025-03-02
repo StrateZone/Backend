@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
 public partial class Event
 {
     public int EventId { get; set; }
+
+    public EventType EventType { get; set; }
 
     public int? UserId { get; set; }
 
@@ -16,6 +19,8 @@ public partial class Event
     public DateOnly? StartDate { get; set; }
 
     public DateOnly? EndDate { get; set; }
+
+    public EventStatus Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

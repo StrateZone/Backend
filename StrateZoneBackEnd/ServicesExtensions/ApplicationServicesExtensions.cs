@@ -1,4 +1,9 @@
-﻿namespace StrateZone_APIs.ServiceExtensions
+﻿using StrateZone_Repository.Implements;
+using StrateZone_Repository.Interfaces;
+using StrateZone_Service.Implements;
+using StrateZone_Service.Interfaces;
+
+namespace StrateZone_APIs.ServiceExtensions
 {
     public static class ApplicationServicesExtensions
     {
@@ -20,14 +25,19 @@
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             // Add your repositories here
-
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IGameTypeRepository, GameTypeRepository>();
+            services.AddScoped<IGameExtensionRepository, GameExtensionRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             return services;
         }
 
         private static IServiceCollection AddServices(this IServiceCollection services)
         {
             // Add your services here
-
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IGameTypeService, GameTypeService>();
+            services.AddScoped<IGameExtensionService, GameExtensionService>();
             return services;
         }
 

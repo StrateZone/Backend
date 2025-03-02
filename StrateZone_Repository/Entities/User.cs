@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -11,6 +12,8 @@ public partial class User
 
     public string? Username { get; set; }
 
+    public UserRole UserRole { get; set; }
+
     public string? Email { get; set; }
 
     public string? Phone { get; set; }
@@ -21,6 +24,8 @@ public partial class User
     /// Depends on Role
     /// </summary>
     public string Status { get; set; } = null!;
+
+    public Gender Gender { get; set; }
 
     public string? Address { get; set; }
 

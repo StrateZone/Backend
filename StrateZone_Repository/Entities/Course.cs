@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -13,11 +14,17 @@ public partial class Course
 
     public int? InstructorId { get; set; }
 
+    public Parameters.PostgreEnums.GameType GameType { get; set; }
+
+    public SkillLevel SkillLevel { get; set; }
+
     public DateOnly? StartDate { get; set; }
 
     public DateOnly? EndDate { get; set; }
 
     public int? MaxParticipants { get; set; }
+
+    public CourseStatus CourseStatus { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

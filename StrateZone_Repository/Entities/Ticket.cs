@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -10,6 +11,8 @@ public partial class Ticket
     public int? SenderId { get; set; }
 
     public string? Reason { get; set; }
+
+    public TicketType TicketType { get; set; } 
 
     public DateTime? SentAt { get; set; }
 

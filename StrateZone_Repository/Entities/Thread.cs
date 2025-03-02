@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -16,6 +17,8 @@ public partial class Thread
     public string? Content { get; set; }
 
     public double? Rating { get; set; }
+
+    public ThreadStatus Status { get; set; } 
 
     public DateTime? CreatedAt { get; set; }
 

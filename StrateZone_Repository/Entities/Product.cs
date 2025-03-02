@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -15,6 +16,8 @@ public partial class Product
 
     public string? ImageUrl { get; set; }
 
+    public ProductStatus Status { get; set; }
+    
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();

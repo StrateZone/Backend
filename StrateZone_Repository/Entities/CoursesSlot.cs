@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -18,6 +19,8 @@ public partial class CoursesSlot
     public DateTime? StartAt { get; set; }
 
     public DateTime? EndAt { get; set; }
+
+    public CourseSlotStatus Status { get; set; }
 
     public virtual Course? Course { get; set; }
 

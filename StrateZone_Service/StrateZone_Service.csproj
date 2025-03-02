@@ -11,11 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BusinessModels\" />
     <Folder Include="CustomModels\ResponseModels\" />
-    <Folder Include="CustomModels\RequestModels\" />
-    <Folder Include="Implements\" />
-    <Folder Include="Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>

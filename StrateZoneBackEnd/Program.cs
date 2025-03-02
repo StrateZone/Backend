@@ -1,14 +1,17 @@
-using CloudinaryDotNet.Actions;
+﻿using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
+using Npgsql;
 using StrateZone_APIs.ServiceExtensions;
+using StrateZone_Repository.Data;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Mapper;
 using System.Reflection;
 using System.Text;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 var MyAllowSpecificOrigins = "myAllowSpecificOrigins";
 
@@ -19,7 +22,36 @@ PayOS payOS = new PayOS(configuration["Environment:PAYOS_CLIENT_ID"] ?? throw ne
                     configuration["Environment:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Cannot find environment"));
 
 var builder = WebApplication.CreateBuilder(args);
+// ✅ Manually map enums BEFORE app starts
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(
+    configuration["ConnectionStrings:DB"] ?? throw new InvalidOperationException("Database connection string not found.")
+);
+
+dataSourceBuilder.MapEnum<CourseSlotStatus>("course_slot_status");
+dataSourceBuilder.MapEnum<CourseStatus>("course_status");
+dataSourceBuilder.MapEnum<EventStatus>("event_status");
+dataSourceBuilder.MapEnum<EventType>("event_type");
+dataSourceBuilder.MapEnum<GameExtension>("game_extension");
+dataSourceBuilder.MapEnum<GameType>("game_type");
+dataSourceBuilder.MapEnum<Gender>("gender");
+dataSourceBuilder.MapEnum<MessageStatus>("message_status");
+dataSourceBuilder.MapEnum<OrderStatus>("order_status");
+dataSourceBuilder.MapEnum<ParticipantStatus>("participant_status");
+dataSourceBuilder.MapEnum<ProductStatus>("product_status");
+dataSourceBuilder.MapEnum<Ranking>("ranking");
+dataSourceBuilder.MapEnum<RequestStatus>("request_status");
+dataSourceBuilder.MapEnum<RoomStatus>("room_status");
+dataSourceBuilder.MapEnum<RoomType>("room_type");
+dataSourceBuilder.MapEnum<SkillLevel>("skill_level");
+dataSourceBuilder.MapEnum<ThreadStatus>("thread_status");
+dataSourceBuilder.MapEnum<TicketType>("ticket_type");
+dataSourceBuilder.MapEnum<TransactionType>("transaction_type");
+dataSourceBuilder.MapEnum<UserCourseResult>("user_course_result");
+dataSourceBuilder.MapEnum<UserRole>("user_role");
+dataSourceBuilder.MapEnum<VoucherStatus>("voucher_status");
+dataSourceBuilder.MapEnum<WalletStatus>("wallet_status");
 
 //*****************************************************************************************************************
 // Add services to the container.
@@ -41,6 +73,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add dbcontext
+builder.Services.AddDbContext<StrateZoneDbContext>();
 
 // Auto Mapper
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);

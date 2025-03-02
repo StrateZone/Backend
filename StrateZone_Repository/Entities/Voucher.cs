@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -14,6 +15,8 @@ public partial class Voucher
     public decimal? MinPriceCondition { get; set; }
 
     public DateOnly? ExpireDate { get; set; }
+
+    public VoucherStatus Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
