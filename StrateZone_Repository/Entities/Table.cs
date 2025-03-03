@@ -11,9 +11,9 @@ public partial class Table
 
     public decimal? Fee { get; set; }
 
-    public int? GameExtensionId { get; set; }
+    public int? GameTypeId { get; set; }
 
-    public virtual GameExtension? GameExtension { get; set; }
+    public virtual GameType? GameType { get; set; }
 
     public virtual Room? Room { get; set; }
 

@@ -3,18 +3,22 @@ using System;
 using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
+using StrateZone_Repository.Parameters;
 
 #nullable disable
 
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    partial class StrateZoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250303140248_Fix_GameTypes_GameExtensions_Tables_Appointments_Relationships")]
+    partial class Fix_GameTypes_GameExtensions_Tables_Appointments_Relationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -826,14 +830,12 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("character varying(5)")
                         .HasColumnName("room_name");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<PostgreEnums.RoomStatus>("Status")
+                        .HasColumnType("room_status")
                         .HasColumnName("status");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<PostgreEnums.RoomType>("Type")
+                        .HasColumnType("room_type")
                         .HasColumnName("room_type");
 
                     b.HasKey("RoomId")
@@ -1288,9 +1290,8 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnName("balance")
                         .HasDefaultValueSql("0");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<PostgreEnums.WalletStatus>("Status")
+                        .HasColumnType("wallet_status")
                         .HasColumnName("status");
 
                     b.Property<int?>("UserId")

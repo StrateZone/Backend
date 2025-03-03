@@ -16,6 +16,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<User, UserModel>().ReverseMap();
             CreateMap<GameType, GameTypeModel>().ForMember(gtm => gtm.TypeName, gt => gt.MapFrom(src => src.TypeName.ToString()));
             CreateMap<GameExtension, GameExtensionModel>().ForMember(gtm => gtm.ExtensionName, gt => gt.MapFrom(src => src.ExtensionName.ToString()));
+            CreateMap<Table, TableModel>().ReverseMap();
             CreateMap<Appointment, AppointmentModel>().ReverseMap();
 
             // add other mapping here

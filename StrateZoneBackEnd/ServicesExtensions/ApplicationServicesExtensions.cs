@@ -29,6 +29,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IGameTypeRepository, GameTypeRepository>();
             services.AddScoped<IGameExtensionRepository, GameExtensionRepository>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+            services.AddScoped<ITableRepository, TableRepository>();
             return services;
         }
 
@@ -38,6 +39,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IGameTypeService, GameTypeService>();
             services.AddScoped<IGameExtensionService, GameExtensionService>();
+            services.AddScoped<ITableService, TableService>();
             return services;
         }
 

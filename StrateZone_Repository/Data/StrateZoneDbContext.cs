@@ -701,8 +701,14 @@ public partial class StrateZoneDbContext : DbContext
                 .HasMaxLength(5)
                 .HasColumnName("room_name");
 
-            entity.Property(e => e.Type).HasColumnName("room_type");
-            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Type).HasColumnName("room_type").HasConversion(
+                    v => v.ToString(),
+                    v => (RoomType)Enum.Parse(typeof(RoomType), v)
+                    );
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (RoomStatus)Enum.Parse(typeof(RoomStatus), v)
+                    );
         });
 
         modelBuilder.Entity<Table>(entity =>
@@ -715,12 +721,12 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Fee)
                 .HasPrecision(10, 2)
                 .HasColumnName("fee");
-            entity.Property(e => e.GameExtensionId).HasColumnName("gameExtension_id");
+            entity.Property(e => e.GameTypeId).HasColumnName("gameType_id");
             entity.Property(e => e.RoomId).HasColumnName("room_id");
 
-            entity.HasOne(d => d.GameExtension).WithMany(p => p.Tables)
-                .HasForeignKey(d => d.GameExtensionId)
-                .HasConstraintName("tables_gameExtension_id_fkey");
+            entity.HasOne(d => d.GameType).WithMany(p => p.Tables)
+                .HasForeignKey(d => d.GameTypeId)
+                .HasConstraintName("tables_gameType_id_fkey");
 
             entity.HasOne(d => d.Room).WithMany(p => p.Tables)
                 .HasForeignKey(d => d.RoomId)
@@ -741,6 +747,8 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.TableId).HasColumnName("table_id");
 
+            entity.Property(e => e.GameExtensionId).HasColumnName("extension_id");
+
             entity.HasOne(d => d.Appointment).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.AppointmentId)
                 .HasConstraintName("tables_appointments_appointment_id_fkey");
@@ -748,6 +756,10 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.Table).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.TableId)
                 .HasConstraintName("tables_appointments_table_id_fkey");
+
+            entity.HasOne(d => d.GameExtension).WithMany(p => p.TablesAppointments)
+                .HasForeignKey(d => d.GameExtensionId)
+                .HasConstraintName("tables_appointments_extension_id_fkey");
         });
 
         modelBuilder.Entity<Tag>(entity =>
@@ -994,7 +1006,10 @@ public partial class StrateZoneDbContext : DbContext
                 .HasDefaultValueSql("0")
                 .HasColumnName("balance");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (WalletStatus)Enum.Parse(typeof(WalletStatus), v)
+                    );
             entity.HasOne(d => d.User).WithMany(p => p.Wallets)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("wallet_user_id_fkey");

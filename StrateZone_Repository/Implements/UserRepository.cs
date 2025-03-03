@@ -68,8 +68,6 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                Console.WriteLine(user.Gender);
-
                 var existingUser = await _context.Users
                     .Where(u => u.Email == user.Email || u.Username == user.Username)
                     .FirstOrDefaultAsync();

@@ -11,7 +11,7 @@ public partial class GameExtension
 
     public Parameters.PostgreEnums.GameExtension ExtensionName { get; set; }
 
-    public virtual ICollection<Table> Tables { get; set; } = new List<Table>();
+    public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
 
     public virtual GameType? Type { get; set; }
 }
