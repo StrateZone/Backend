@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.CustomModels.RequestModels
 {
@@ -24,8 +26,11 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public string Password { get; set; }
 
         [Phone]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
-        public string Address { get; set; }
+        public string? Address { get; set; }
+
+        [Required]
+        public Gender? Gender { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Gender.male;
     }
 }

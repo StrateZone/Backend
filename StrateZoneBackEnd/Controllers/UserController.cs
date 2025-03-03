@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
 
@@ -79,13 +80,29 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _userService.CreateUserAsync(user);
-                return Ok("User deleted:\n" + result);
+                return Ok("User added:\n" + result);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        /*
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser([FromBody] UserModel user, int id)
+        {
+            try
+            {
+                var result = await _userService.UpdateUserAsync(user, id);
+                return Ok("User updated:\n" + result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+        */
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)

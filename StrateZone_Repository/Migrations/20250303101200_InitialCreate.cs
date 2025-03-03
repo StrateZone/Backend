@@ -8,35 +8,59 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace StrateZone_Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class FixEnums : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("CREATE TYPE course_slot_status AS ENUM ('upcoming', 'in_progress', 'completed', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE course_status AS ENUM ('open', 'closed', 'in_progress', 'completed', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE event_type AS ENUM ('tournament', 'promotion');");
+            migrationBuilder.Sql("CREATE TYPE game_extension AS ENUM ('bullet', 'lightning', 'flip', 'traditional');");
+            migrationBuilder.Sql("CREATE TYPE game_type AS ENUM ('chess', 'xiangqi', 'go');");
+            migrationBuilder.Sql("CREATE TYPE gender AS ENUM ('male', 'female');");
+            migrationBuilder.Sql("CREATE TYPE message_status AS ENUM ('read', 'unread');");
+            migrationBuilder.Sql("CREATE TYPE order_status AS ENUM ('pending', 'shipped', 'delivered', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE participant_status AS ENUM ('enrolled', 'drop_out', 'in_progress', 'completed');");
+            migrationBuilder.Sql("CREATE TYPE product_status AS ENUM ('available', 'out_of_stock', 'discontinued');");
+            migrationBuilder.Sql("CREATE TYPE ranking AS ENUM ('basic', 'silver', 'gold', 'platinum');");
+            migrationBuilder.Sql("CREATE TYPE request_status AS ENUM ('pending', 'accepted', 'rejected', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE room_status AS ENUM ('available', 'unavailable', 'closed');");
+            migrationBuilder.Sql("CREATE TYPE room_type AS ENUM ('study', 'appointment');");
+            migrationBuilder.Sql("CREATE TYPE skill_level AS ENUM ('beginner', 'intermediate', 'advanced');");
+            migrationBuilder.Sql("CREATE TYPE thread_status AS ENUM ('published', 'rejected', 'pending', 'deleted');");
+            migrationBuilder.Sql("CREATE TYPE ticket_type AS ENUM ('withdrawal', 'feedback', 'other');");
+            migrationBuilder.Sql("CREATE TYPE transaction_type AS ENUM ('deposit', 'withdrawal', 'refund');");
+            migrationBuilder.Sql("CREATE TYPE user_course_result AS ENUM ('passed', 'failed');");
+            migrationBuilder.Sql("CREATE TYPE user_role AS ENUM ('registered_user', 'member', 'instructor', 'staff', 'admin');");
+            migrationBuilder.Sql("CREATE TYPE voucher_status AS ENUM ('active', 'expired');");
+            migrationBuilder.Sql("CREATE TYPE wallet_status AS ENUM ('active', 'closed');");
+
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:course_slot_status", "upcoming,in_progress,completed,cancelled")
-                .Annotation("Npgsql:Enum:course_status", "open,closed,in_progress,completed,cancelled")
-                .Annotation("Npgsql:Enum:event_status", "upcoming,ongoing,completed,cancelled")
-                .Annotation("Npgsql:Enum:event_type", "tournament,promotion")
-                .Annotation("Npgsql:Enum:game_extension", "bullet,lightning,flip,traditional")
-                .Annotation("Npgsql:Enum:game_type", "chess,xiangqi,go")
-                .Annotation("Npgsql:Enum:gender", "male,female")
-                .Annotation("Npgsql:Enum:message_status", "read,unread")
-                .Annotation("Npgsql:Enum:order_status", "pending,shipped,delivered,cancelled")
-                .Annotation("Npgsql:Enum:participant_status", "enrolled,drop_out,in_progress,completed")
-                .Annotation("Npgsql:Enum:product_status", "available,out_of_stock,discontinued")
-                .Annotation("Npgsql:Enum:ranking", "basic,silver,gold,platinum")
-                .Annotation("Npgsql:Enum:request_status", "pending,accepted,rejected,cancelled")
-                .Annotation("Npgsql:Enum:room_status", "available,unavailable,closed")
-                .Annotation("Npgsql:Enum:room_type", "study,appointment")
-                .Annotation("Npgsql:Enum:skill_level", "beginner,intermediate,advanced")
-                .Annotation("Npgsql:Enum:thread_status", "published,rejected,pending,deleted")
-                .Annotation("Npgsql:Enum:ticket_type", "withdrawal,feedback,other")
-                .Annotation("Npgsql:Enum:transaction_type", "deposit,withdrawal,refund")
-                .Annotation("Npgsql:Enum:user_course_result", "passed,failed")
-                .Annotation("Npgsql:Enum:user_role", "registered_user,member,instructor,staff,admin")
-                .Annotation("Npgsql:Enum:voucher_status", "active,expired")
-                .Annotation("Npgsql:Enum:wallet_status", "active,closed");
+                .Annotation("Npgsql:Enum:course_slot_status.course_slot_status", "upcoming,in_progress,completed,cancelled")
+                .Annotation("Npgsql:Enum:course_status.course_status", "open,closed,in_progress,completed,cancelled")
+                .Annotation("Npgsql:Enum:event_status.event_status", "upcoming,ongoing,completed,cancelled")
+                .Annotation("Npgsql:Enum:event_type.event_type", "tournament,promotion")
+                .Annotation("Npgsql:Enum:game_extension.game_extension", "bullet,lightning,flip,traditional")
+                .Annotation("Npgsql:Enum:game_type.game_type", "chess,xiangqi,go")
+                .Annotation("Npgsql:Enum:gender.gender", "male,female")
+                .Annotation("Npgsql:Enum:message_status.message_status", "read,unread")
+                .Annotation("Npgsql:Enum:order_status.order_status", "pending,shipped,delivered,cancelled")
+                .Annotation("Npgsql:Enum:participant_status.participant_status", "enrolled,drop_out,in_progress,completed")
+                .Annotation("Npgsql:Enum:product_status.product_status", "available,out_of_stock,discontinued")
+                .Annotation("Npgsql:Enum:ranking.ranking", "basic,silver,gold,platinum")
+                .Annotation("Npgsql:Enum:request_status.request_status", "pending,accepted,rejected,cancelled")
+                .Annotation("Npgsql:Enum:room_status.room_status", "available,unavailable,closed")
+                .Annotation("Npgsql:Enum:room_type.room_type", "study,appointment")
+                .Annotation("Npgsql:Enum:skill_level.skill_level", "beginner,intermediate,advanced")
+                .Annotation("Npgsql:Enum:thread_status.thread_status", "published,rejected,pending,deleted")
+                .Annotation("Npgsql:Enum:ticket_type.ticket_type", "withdrawal,feedback,other")
+                .Annotation("Npgsql:Enum:transaction_type.transaction_type", "deposit,withdrawal,refund")
+                .Annotation("Npgsql:Enum:user_course_result.user_course_result", "passed,failed")
+                .Annotation("Npgsql:Enum:user_role.user_role", "registered_user,member,instructor,staff,admin")
+                .Annotation("Npgsql:Enum:voucher_status.voucher_status", "active,expired")
+                .Annotation("Npgsql:Enum:wallet_status.wallet_status", "active,closed");
 
             migrationBuilder.CreateTable(
                 name: "carts",
@@ -57,7 +81,7 @@ namespace StrateZone_Repository.Migrations
                 {
                     type_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    type_name = table.Column<int>(type: "game_type", nullable: false)
+                    type_name = table.Column<string>(type: "game_type", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -74,7 +98,7 @@ namespace StrateZone_Repository.Migrations
                     description = table.Column<string>(type: "text", nullable: true),
                     inventory_count = table.Column<int>(type: "integer", nullable: true),
                     image_url = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -121,7 +145,7 @@ namespace StrateZone_Repository.Migrations
                     description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     min_price_condition = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: true, defaultValueSql: "0"),
                     expire_date = table.Column<DateOnly>(type: "date", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -137,12 +161,12 @@ namespace StrateZone_Repository.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     cart_id = table.Column<int>(type: "integer", nullable: true),
                     username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    role = table.Column<int>(type: "integer", nullable: false),
+                    role = table.Column<string>(type: "user_role", nullable: false),
                     email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     phone = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
                     password = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, comment: "Depends on Role"),
-                    gender = table.Column<int>(type: "integer", nullable: false),
+                    gender = table.Column<string>(type: "gender", nullable: false),
                     address = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     avatar_url = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     bio = table.Column<string>(type: "text", nullable: true),
@@ -167,7 +191,7 @@ namespace StrateZone_Repository.Migrations
                     extension_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     type_id = table.Column<int>(type: "integer", nullable: true),
-                    extension_name = table.Column<int>(type: "game_extension", nullable: false)
+                    extension_name = table.Column<string>(type: "game_extension", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -237,7 +261,7 @@ namespace StrateZone_Repository.Migrations
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     schedule_time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     end_time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -260,12 +284,12 @@ namespace StrateZone_Repository.Migrations
                     course_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
                     instructor_id = table.Column<int>(type: "integer", nullable: true),
-                    chess_type = table.Column<int>(type: "integer", nullable: false),
-                    skill_level = table.Column<int>(type: "integer", nullable: false),
+                    chess_type = table.Column<string>(type: "text", nullable: false),
+                    skill_level = table.Column<string>(type: "text", nullable: false),
                     start_date = table.Column<DateOnly>(type: "date", nullable: true),
                     end_date = table.Column<DateOnly>(type: "date", nullable: true),
                     max_participants = table.Column<int>(type: "integer", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -284,13 +308,13 @@ namespace StrateZone_Repository.Migrations
                 {
                     event_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    type = table.Column<int>(type: "integer", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: true),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
                     start_date = table.Column<DateOnly>(type: "date", nullable: true),
                     end_date = table.Column<DateOnly>(type: "date", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -335,7 +359,7 @@ namespace StrateZone_Repository.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     from_user = table.Column<int>(type: "integer", nullable: false),
                     to_user = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "status", nullable: false),
+                    status = table.Column<string>(type: "request_status", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -362,7 +386,7 @@ namespace StrateZone_Repository.Migrations
                     sender_id = table.Column<int>(type: "integer", nullable: true),
                     receiver_id = table.Column<int>(type: "integer", nullable: true),
                     content = table.Column<string>(type: "text", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "message_status", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -391,7 +415,7 @@ namespace StrateZone_Repository.Migrations
                     order_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     tracking_number = table.Column<string>(type: "character varying(22)", maxLength: 22, nullable: true, defaultValueSql: "NULL::character varying"),
                     total_amount = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false)
+                    status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -419,7 +443,7 @@ namespace StrateZone_Repository.Migrations
                     thumbnail_url = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     content = table.Column<string>(type: "text", nullable: true),
                     rating = table.Column<double>(type: "double precision", nullable: true, defaultValueSql: "0"),
-                    status = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -440,7 +464,7 @@ namespace StrateZone_Repository.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     sender_id = table.Column<int>(type: "integer", nullable: true),
                     reason = table.Column<string>(type: "text", nullable: true),
-                    ticket_type = table.Column<int>(type: "integer", nullable: false),
+                    ticket_type = table.Column<string>(type: "text", nullable: false),
                     sent_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     attachment_url = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
                 },
@@ -464,7 +488,7 @@ namespace StrateZone_Repository.Migrations
                     reference_id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     content = table.Column<string>(type: "text", nullable: true),
                     amount = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: true),
-                    type = table.Column<int>(type: "integer", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
@@ -534,7 +558,7 @@ namespace StrateZone_Repository.Migrations
                     on_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     start_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     end_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false)
+                    status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -598,9 +622,9 @@ namespace StrateZone_Repository.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     course_id = table.Column<int>(type: "integer", nullable: true),
                     user_id = table.Column<int>(type: "integer", nullable: true),
-                    result = table.Column<int>(type: "integer", nullable: false),
+                    result = table.Column<string>(type: "text", nullable: false),
                     enrolled_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    participant_status = table.Column<int>(type: "integer", nullable: true)
+                    participant_status = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1160,6 +1184,30 @@ namespace StrateZone_Repository.Migrations
 
             migrationBuilder.DropTable(
                 name: "carts");
+
+            migrationBuilder.Sql("DROP TYPE course_slot_status;");
+            migrationBuilder.Sql("DROP TYPE course_status;");
+            migrationBuilder.Sql("DROP TYPE event_status;");
+            migrationBuilder.Sql("DROP TYPE event_type;");
+            migrationBuilder.Sql("DROP TYPE game_extension;");
+            migrationBuilder.Sql("DROP TYPE game_type;");
+            migrationBuilder.Sql("DROP TYPE gender;");
+            migrationBuilder.Sql("DROP TYPE message_status;");
+            migrationBuilder.Sql("DROP TYPE order_status;");
+            migrationBuilder.Sql("DROP TYPE participant_status;");
+            migrationBuilder.Sql("DROP TYPE product_status;");
+            migrationBuilder.Sql("DROP TYPE ranking;");
+            migrationBuilder.Sql("DROP TYPE request_status;");
+            migrationBuilder.Sql("DROP TYPE room_status;");
+            migrationBuilder.Sql("DROP TYPE room_type;");
+            migrationBuilder.Sql("DROP TYPE skill_level;");
+            migrationBuilder.Sql("DROP TYPE thread_status;");
+            migrationBuilder.Sql("DROP TYPE ticket_type;");
+            migrationBuilder.Sql("DROP TYPE transaction_type;");
+            migrationBuilder.Sql("DROP TYPE user_course_result;");
+            migrationBuilder.Sql("DROP TYPE user_role;");
+            migrationBuilder.Sql("DROP TYPE voucher_status;");
+            migrationBuilder.Sql("DROP TYPE wallet_status;");
         }
     }
 }

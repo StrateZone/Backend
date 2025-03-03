@@ -554,7 +554,7 @@ namespace StrateZone_Repository.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("message_status")
                         .HasColumnName("status");
 
                     b.HasKey("MessageId")
@@ -826,14 +826,12 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("character varying(5)")
                         .HasColumnName("room_name");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
                         .HasColumnName("status");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
                         .HasColumnName("room_type");
 
                     b.HasKey("RoomId")
@@ -1124,7 +1122,7 @@ namespace StrateZone_Repository.Migrations
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("gender")
                         .HasColumnName("gender");
 
                     b.Property<string>("Password")
@@ -1156,7 +1154,7 @@ namespace StrateZone_Repository.Migrations
 
                     b.Property<string>("UserRole")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("user_role")
                         .HasColumnName("role");
 
                     b.Property<string>("Username")
@@ -1198,8 +1196,8 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("enrolled_at");
 
-                    b.Property<int?>("ParticipantStatus")
-                        .HasColumnType("integer")
+                    b.Property<string>("ParticipantStatus")
+                        .HasColumnType("text")
                         .HasColumnName("participant_status");
 
                     b.Property<string>("Result")
@@ -1282,9 +1280,8 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnName("balance")
                         .HasDefaultValueSql("0");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
                         .HasColumnName("status");
 
                     b.Property<int?>("UserId")

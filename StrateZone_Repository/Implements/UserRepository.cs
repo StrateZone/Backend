@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using System.Data;
 
 namespace StrateZone_Repository.Implements
 {
@@ -66,13 +68,32 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                List<User> users = await _context.Users.ToListAsync();
-                if (users.FirstOrDefault(u => u.Email == user.Email) != null) throw new Exception("A user with this email already exists");
-                else if (users.FirstOrDefault(u => u.Username == user.Username) != null) throw new Exception("A user with this username already exists");
+                Console.WriteLine(user.Gender);
 
-                await _context.Users.AddAsync(user);
-                await _context.SaveChangesAsync();
+                var existingUser = await _context.Users
+                    .Where(u => u.Email == user.Email || u.Username == user.Username)
+                    .FirstOrDefaultAsync();
+                if (existingUser != null) throw new Exception("A user with this email or username already exists");
 
+                string insertQuery = @"
+                        INSERT INTO users (username, email, phone, password, gender, role, status, created_at) 
+                        VALUES ({0}, {1}, {2}, {3}, {4}::gender, {5}::user_role, {6}, {7})
+                        RETURNING user_id;";  // RETURNING user_id allows getting the new ID
+
+                // Execute SQL Raw with parameters
+                var newUserId = await _context.Database.ExecuteSqlRawAsync(
+                    insertQuery,
+                    user.Username,
+                    user.Email,
+                    user.Phone,
+                    user.Password,
+                    user.Gender.ToString().ToLower(), // Ensure it's lowercase like PostgreSQL enums
+                    user.UserRole.ToString(),
+                    user.Status,
+                    user.CreatedAt
+                );
+
+                user.UserId = newUserId; // Assign the returned ID to the user object
                 return user;
             }
             catch (Exception ex)

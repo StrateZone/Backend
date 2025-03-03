@@ -50,6 +50,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (id <= 0) return BadRequest("Invalid ID");
+
                 var gametypes = await _gameTypeService.GetGameTypeByIdAsync(id);
                 return Ok(gametypes);
             }
@@ -64,6 +66,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (id <= 0) return BadRequest("Invalid ID");
+
                 var gametypes = await _gameTypeService.GetGameTypeWithExtensionsByIdAsync(id);
                 return Ok(gametypes);
             }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.BusinessModels
 {
@@ -24,7 +25,7 @@ namespace StrateZone_Service.BusinessModels
         /// <summary>
         /// Depends on Role
         /// </summary>
-        public string Status { get; set; } = null!;
+        public string Status { get; set; } = "Active";
 
         public string? Address { get; set; }
 
@@ -33,6 +34,10 @@ namespace StrateZone_Service.BusinessModels
         public string? Bio { get; set; }
 
         public int? Points { get; set; }
+
+        public UserRole UserRole { get; set; } = UserRole.registered_user;
+
+        public Gender Gender { get; set; } = Gender.male;
 
         public DateTime? CreatedAt { get; set; }
 
