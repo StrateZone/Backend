@@ -29,7 +29,25 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Appointments.FindAsync(id);
+                return await _context.Appointments
+                    .Where(a => a.AppointmentId == id)
+                    .Include(a => a.TablesAppointments)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Appointment>> GetAppointmentsByUserIdAsync(int id)
+        {
+            try
+            {
+                return await _context.Appointments
+                    .Where(a => a.UserId == id)
+                    .Include(a => a.TablesAppointments)
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -51,6 +69,7 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
 
         public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment, int id)
         {

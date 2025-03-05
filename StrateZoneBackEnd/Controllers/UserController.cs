@@ -51,8 +51,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var user = await _userService.GetUserByUsernameAsync(username);
-                return Ok(user);
+                var user = await _userService.GetUsersByUsernameAsync(username);
+                return user.Count > 0 ? Ok(user) : Ok("No user with this username was found");
             }
             catch (Exception ex)
             {
@@ -66,7 +66,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var user = await _userService.GetUserByIdAsync(id);
-                return Ok(user);
+                return user != null ? Ok(user) : NotFound("No user with this ID was found.");
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _userService.CreateUserAsync(user);
-                return Ok("User added:\n" + result);
+                return Created("User added", result);
             }
             catch (Exception ex)
             {
@@ -88,21 +88,19 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        /*
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserModel user, int id)
         {
             try
             {
                 var result = await _userService.UpdateUserAsync(user, id);
-                return Ok("User updated:\n" + result);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        */
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)

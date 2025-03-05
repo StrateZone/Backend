@@ -32,11 +32,37 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<TableModel>> GetTablesByGameTypeAsync(StrateZone_Repository.Parameters.PostgreEnums.GameType gameType)
+        public async Task<List<TableModel>> GetAvailableTablesAsync()
+        {
+            try
+            {
+                var result = await _tableRepository.GetAvailableTablesAsync();
+                return _mapper.Map<List<TableModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TableModel>> GetTablesByGameTypeAsync(StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
                 var result = await _tableRepository.GetTablesByGameTypeAsync(gameType);
+                return _mapper.Map<List<TableModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TableModel>> GetAvailableTablesByGameTypeAsync(StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        {
+            try
+            {
+                var result = await _tableRepository.GetAvailableTablesByGameTypeAsync(gameType);
                 return _mapper.Map<List<TableModel>>(result);
             }
             catch (Exception ex)

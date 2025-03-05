@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -11,17 +12,21 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Service.Implements
 {
-    public class AppointmentService 
+    public class AppointmentService : IAppointmentService
     {
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IUserService _userService;
+        private readonly ITableService _tableService;
+        private readonly ITablesAppointmentService _tablesAppointmentService;
         private readonly IMapper _mapper;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, IMapper mapper)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IMapper mapper)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
             _mapper = mapper;
+            _tableService = tableService;
+            _tablesAppointmentService = tablesAppointmentService;
         }
 
         public async Task<List<AppointmentModel>> GetAppointmentsAsync()
@@ -29,6 +34,19 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRepository.GetAppointmentsAsync();
+                return _mapper.Map<List<AppointmentModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<AppointmentModel>> GetAppointmentsByUserIdAsync(int userId)
+        {
+            try
+            {
+                var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(userId);
                 return _mapper.Map<List<AppointmentModel>>(result);
             }
             catch (Exception ex)
@@ -50,18 +68,80 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task CreateAppointmentAsync(AppointmentRequest request)
+        public async Task<AppointmentModel> CreateAppointmentAsync(AppointmentRequest request)
         {
             try
             {
-                AppointmentModel appointment = new AppointmentModel()
+                List<TableModel> Tables = await _tableService.GetTablesAsync();
+                List<TableModel> AvailableTables = await _tableService.GetAvailableTablesAsync();
+
+                var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
+                var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));
+
+                var unavailableTables = request.TableIds
+                    .Where(t => tableIds.Contains(t) && !availableTableIds.Contains(t))
+                    .ToList();
+
+                if (unavailableTables.Count > 0)
                 {
-                    User = await _userService.GetUserByIdAsync(request.UserId),
-                    ScheduleTime = request.ScheduleTime,
-                    EndTime = request.EndTime,
-                    CreatedAt = DateTime.UtcNow
+                    throw new InvalidOperationException($"The following tables are not available: {string.Join(", ", unavailableTables)}");
+                }
+
+                AppointmentModel appointmentModel = new AppointmentModel()
+                {
+                    UserId = request.UserId,
+                    ScheduleTime = DateTime.SpecifyKind(request.ScheduleTime, DateTimeKind.Unspecified),
+                    EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
                 };
-                var result = _mapper.Map<AppointmentModel>(appointment);
+
+                var appointment = _mapper.Map<Appointment>(appointmentModel);
+                var result = _mapper.Map<AppointmentModel>(await _appointmentRepository.CreateAppointmentAsync(appointment));
+
+                foreach (var tableId in request.TableIds)
+                {
+                    TablesAppointmentModel tablesAppointmentModel = new TablesAppointmentModel()
+                    {
+                        TableId = tableId,
+                        AppointmentId = result.AppointmentId,
+                        GameExtensionId = request.GameExtensionId
+                    };
+
+                    result.TablesAppointments.Add(tablesAppointmentModel);
+                }
+
+                var tablesAppointment = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
+                result.TablesAppointments = tablesAppointment;
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<AppointmentModel> UpdateAppointmentAsync(AppointmentModel appointmentModel, int id)
+        {
+            try
+            {
+                var appointment = _mapper.Map<Appointment>(appointmentModel);
+                var result = await _appointmentRepository.UpdateAppointmentAsync(appointment, id);
+
+                return _mapper.Map<AppointmentModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<AppointmentModel> DeleteAppointmentAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentRepository.DeleteAppointmentAsync(id);
+                return _mapper.Map<AppointmentModel>(result);
             }
             catch (Exception ex)
             {

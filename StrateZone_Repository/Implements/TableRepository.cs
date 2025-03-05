@@ -2,6 +2,7 @@
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Table>> GetTablesByGameTypeAsync(Parameters.PostgreEnums.GameType gameType)
+        public async Task<List<Table>> GetTablesByGameTypeAsync(PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
@@ -69,6 +70,55 @@ namespace StrateZone_Repository.Implements
                     .Where(t => t.GameTypeId == expectedId)
                     .Include(t => t.GameType)
                     .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Table>> GetAvailableTablesAsync()
+        {
+            try
+            {
+                var currentTime = DateTime.Now;
+
+                return await _context.Tables
+                                .Where(t => !t.TablesAppointments.Any() ||
+                                            t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime))
+                                .Include(t => t.GameType)
+                                .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Table>> GetAvailableTablesByGameTypeAsync(PostgreEnums.GameTypeEnum gameType)
+        {
+            try
+            {
+                var currentTime = DateTime.Now;
+                string query =
+                    @"
+                        SELECT g.type_id FROM public.""gameTypes"" AS g 
+                        WHERE g.type_name = @p0::public.game_type
+                        LIMIT 1
+                    ";
+
+                var expectedId = await _context.GameTypes
+                    .FromSqlRaw(query, gameType.ToString())
+                    .Select(g => g.TypeId)
+                    .FirstOrDefaultAsync();
+
+                if (expectedId == null) throw new Exception("Game type not found.");
+
+                return await _context.Tables
+                                .Where(t => !t.TablesAppointments.Any() ||
+                                            t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime))
+                                .Include(t => t.GameType)
+                                .ToListAsync();
             }
             catch (Exception ex)
             {

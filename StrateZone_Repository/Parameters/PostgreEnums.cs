@@ -15,8 +15,8 @@ namespace StrateZone_Repository.Parameters
         public enum CourseStatus { open, closed, in_progress, completed, cancelled }
         public enum EventStatus { upcoming, ongoing, completed, cancelled }
         public enum EventType { tournament, promotion }
-        public enum GameExtension { bullet, lightning, flip, traditional }
-        public enum GameType { chess, xiangqi, go }
+        public enum GameExtensionEnum { bullet, lightning, flip, traditional }
+        public enum GameTypeEnum { chess, xiangqi, go }
         public enum Gender { male, female }
         public enum MessageStatus { read, unread }
         public enum OrderStatus { pending, shipped, delivered, cancelled }
@@ -31,9 +31,8 @@ namespace StrateZone_Repository.Parameters
         public enum TicketType { withdrawal, feedback, other }
         public enum TransactionType { deposit, withdrawal, refund }
         public enum UserCourseResult { passed, failed }
-        public enum UserRole { registered_user, member, instructor, staff, admin }
+        public enum UserRole { RegisteredUser, Member, Instructor, Staff, Admin }
         public enum VoucherStatus { active, expired }
         public enum WalletStatus { active, closed }
-
     }
 }

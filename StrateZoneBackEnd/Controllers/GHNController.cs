@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StrateZone_Service.Implements;
+using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -7,9 +7,9 @@ namespace StrateZone_APIs.Controllers
     [ApiController]
     public class GHNController : ControllerBase
     {
-        private readonly GHNService _ghnService;
+        private readonly IGHNService _ghnService;
 
-        public GHNController(GHNService ghnService)
+        public GHNController(IGHNService ghnService)
         {
             _ghnService = ghnService;
         }

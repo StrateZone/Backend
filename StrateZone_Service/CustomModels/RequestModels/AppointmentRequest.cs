@@ -11,19 +11,19 @@ namespace StrateZone_Service.CustomModels.RequestModels
     public class AppointmentRequest
     {
         [Required]
-        public int UserId;
+        public int UserId { get; set; }
 
         [Required]
-        public int GameExtensionId;
+        public int GameExtensionId { get; set; }
 
         [Required]
-        public DateTime ScheduleTime;
+        public DateTime ScheduleTime { get; set; }
 
         [Required]
-        public DateTime EndTime;
+        public DateTime EndTime { get; set; }
 
         [Required]
         [MinLength(1)]
-        public List<int> TableIds = new List<int>();
+        public List<int> TableIds { get; set; } = new List<int>();
     }
 }

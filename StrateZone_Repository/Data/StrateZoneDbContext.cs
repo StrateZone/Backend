@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using StrateZone_Repository.Entities;
 using static StrateZone_Repository.Parameters.PostgreEnums;
-using GameExtension = StrateZone_Repository.Parameters.PostgreEnums.GameExtension;
+using GameExtensionEnum = StrateZone_Repository.Parameters.PostgreEnums.GameExtensionEnum;
 
 namespace StrateZone_Repository.Data;
 
@@ -98,8 +98,8 @@ public partial class StrateZoneDbContext : DbContext
                         dataSourceBuilder.MapEnum<CourseStatus>("course_status");
                         dataSourceBuilder.MapEnum<EventStatus>("event_status");
                         dataSourceBuilder.MapEnum<EventType>("event_type");
-                        dataSourceBuilder.MapEnum<GameExtension>("game_extension");
-                        dataSourceBuilder.MapEnum<Parameters.PostgreEnums.GameType>("game_type");
+                        dataSourceBuilder.MapEnum<GameExtensionEnum>("game_extension");
+                        dataSourceBuilder.MapEnum<GameTypeEnum>("game_type");
                         dataSourceBuilder.MapEnum<Gender>("gender");
                         dataSourceBuilder.MapEnum<MessageStatus>("message_status");
                         dataSourceBuilder.MapEnum<OrderStatus>("order_status");
@@ -125,8 +125,8 @@ public partial class StrateZoneDbContext : DbContext
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();
-        var connection = configuration["ConnectionStrings:DB"];
-        return "Host=switchyard.proxy.rlwy.net;Port=35707;Database=railway;Username=postgres;Password=fqLsUMeFmmCJNzTcjKiqGPVswmwmjIOj;SslMode=Disable";
+        string connection = configuration["ConnectionStrings:DB"];
+        return connection;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -135,8 +135,8 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<CourseStatus>();
         modelBuilder.HasPostgresEnum<EventStatus>();
         modelBuilder.HasPostgresEnum<EventType>();
-        modelBuilder.HasPostgresEnum<Parameters.PostgreEnums.GameExtension>();
-        modelBuilder.HasPostgresEnum<Parameters.PostgreEnums.GameType>();
+        modelBuilder.HasPostgresEnum<GameExtensionEnum>();
+        modelBuilder.HasPostgresEnum<GameTypeEnum>();
         modelBuilder.HasPostgresEnum<Gender>();
         modelBuilder.HasPostgresEnum<MessageStatus>();
         modelBuilder.HasPostgresEnum<OrderStatus>();
@@ -275,7 +275,7 @@ public partial class StrateZoneDbContext : DbContext
                   .HasColumnName("chess_type")
                   .HasConversion(
                     v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameType)Enum.Parse(typeof(Parameters.PostgreEnums.GameType), v)
+                    v => (Parameters.PostgreEnums.GameTypeEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameTypeEnum), v)
                   );
 
             entity.Property(e => e.SkillLevel).HasColumnName("skill_level")
@@ -426,7 +426,7 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.ExtensionName).HasColumnName("extension_name").HasColumnType("game_extension").HasConversion(
                     v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameExtension)Enum.Parse(typeof(Parameters.PostgreEnums.GameExtension), v)
+                    v => (Parameters.PostgreEnums.GameExtensionEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameExtensionEnum), v)
                     );
 
             entity.HasOne(d => d.Type).WithMany(p => p.GameExtensions)
@@ -443,7 +443,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TypeId).HasColumnName("type_id");
             entity.Property(e => e.TypeName).HasColumnName("type_name").HasColumnType("game_type").HasConversion(
                     v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameType)Enum.Parse(typeof(Parameters.PostgreEnums.GameType), v)
+                    v => (Parameters.PostgreEnums.GameTypeEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameTypeEnum), v)
                     );
         });
 

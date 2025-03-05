@@ -52,11 +52,11 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<User> GetUserByUsernameAsync(string username)
+        public async Task<List<User>> GetUsersByUsernameAsync(string username)
         {
             try
             {
-                return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                return await _context.Users.Where(u => u.Username.ToLower().Contains(username.ToLower())).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -78,14 +78,13 @@ namespace StrateZone_Repository.Implements
                         VALUES ({0}, {1}, {2}, {3}, {4}::gender, {5}::user_role, {6}, {7})
                         RETURNING user_id;";  // RETURNING user_id allows getting the new ID
 
-                // Execute SQL Raw with parameters
                 var newUserId = await _context.Database.ExecuteSqlRawAsync(
                     insertQuery,
                     user.Username,
                     user.Email,
                     user.Phone,
                     user.Password,
-                    user.Gender.ToString().ToLower(), // Ensure it's lowercase like PostgreSQL enums
+                    user.Gender.ToString(),
                     user.UserRole.ToString(),
                     user.Status,
                     user.CreatedAt

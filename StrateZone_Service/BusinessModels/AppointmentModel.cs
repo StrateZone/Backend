@@ -11,14 +11,14 @@ namespace StrateZone_Service.BusinessModels
     {
         public int AppointmentId { get; set; }
 
+        public int UserId { get; set; }
+
         public DateTime ScheduleTime { get; set; }
 
         public DateTime EndTime { get; set; }
 
         public DateTime? CreatedAt { get; set; }
 
-        public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
-
-        public virtual UserModel? User { get; set; }
+        public virtual ICollection<TablesAppointmentModel> TablesAppointments { get; set; } = [];
     }
 }

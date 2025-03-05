@@ -7,7 +7,7 @@ public partial class GameType
 {
     public int TypeId { get; set; }
 
-    public Parameters.PostgreEnums.GameType TypeName { get; set; }
+    public Parameters.PostgreEnums.GameTypeEnum TypeName { get; set; }
 
     public virtual ICollection<Table> Tables { get; set; } = new List<Table>();
 
