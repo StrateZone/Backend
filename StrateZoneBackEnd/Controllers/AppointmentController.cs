@@ -62,7 +62,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAppointment([FromBody] AppointmentRequest request)
+        public async Task<IActionResult> CreateAppointment([FromBody] StrateZone_Service.CustomModels.RequestModels.AppointmentRequest request)
         {
             try
             {

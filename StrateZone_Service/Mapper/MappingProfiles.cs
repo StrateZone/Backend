@@ -19,13 +19,21 @@ namespace StrateZone_Service.Mapper
             CreateMap<UserModel, UserResponse>()
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
+                    .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
                 .ReverseMap();
 
-            CreateMap<GameType, GameTypeModel>().ForMember(gtm => gtm.TypeName, gt => gt.MapFrom(src => src.TypeName.ToString()));
-            CreateMap<GameExtension, GameExtensionModel>().ForMember(gtm => gtm.ExtensionName, gt => gt.MapFrom(src => src.ExtensionName.ToString()));
+            CreateMap<GameType, GameTypeModel>()
+                .ForMember(gtm => gtm.TypeName, gt => gt.MapFrom(src => src.TypeName.ToString()))
+                .ReverseMap();
+
+            CreateMap<GameExtension, GameExtensionModel>()
+                .ForMember(gtm => gtm.ExtensionName, gt => gt.MapFrom(src => src.ExtensionName.ToString()))
+                .ReverseMap();
+
             CreateMap<Table, TableModel>().ReverseMap();
             CreateMap<Appointment, AppointmentModel>().ReverseMap();
             CreateMap<TablesAppointment, TablesAppointmentModel>().ReverseMap();
+            CreateMap<Message, MessageModel>().ReverseMap();
             // add other mappings here
         }
     }

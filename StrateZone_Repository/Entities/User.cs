@@ -30,6 +30,9 @@ public partial class User
     [Column(TypeName = "gender")]
     public Gender Gender { get; set; }
 
+    [Column(TypeName = "skill_level")]
+    public SkillLevel SkillLevel { get; set; }
+
     public string? Address { get; set; }
 
     public string? AvatarUrl { get; set; }
@@ -61,6 +64,10 @@ public partial class User
     public virtual ICollection<Friendrequest> FriendrequestFromUserNavigations { get; set; } = new List<Friendrequest>();
 
     public virtual ICollection<Friendrequest> FriendrequestToUserNavigations { get; set; } = new List<Friendrequest>();
+
+    public virtual ICollection<AppointmentRequest> AppointmentRequestsFromUserNavigations { get; set; } = new List<AppointmentRequest>();
+
+    public virtual ICollection<AppointmentRequest> AppointmentRequestsToUserNavigations { get; set; } = new List<AppointmentRequest>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 

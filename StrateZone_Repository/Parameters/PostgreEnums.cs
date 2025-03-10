@@ -11,6 +11,7 @@ namespace StrateZone_Repository.Parameters
 {
     public class PostgreEnums
     {
+        public enum AppointmentStatus { pending, confirmed, acncelled, completed, expired }
         public enum CourseSlotStatus { upcoming, in_progress, completed, cancelled }
         public enum CourseStatus { open, closed, in_progress, completed, cancelled }
         public enum EventStatus { upcoming, ongoing, completed, cancelled }

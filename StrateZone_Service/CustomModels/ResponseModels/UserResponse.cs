@@ -37,6 +37,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string Gender { get; set; }
 
+        public string SkillLevel { get; set; }
+
         public DateTime? CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }

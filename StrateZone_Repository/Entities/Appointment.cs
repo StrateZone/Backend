@@ -14,11 +14,13 @@ public partial class Appointment
 
     public DateTime EndTime { get; set; }
 
-    public RequestStatus Status { get; set; }
+    public AppointmentStatus Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
+
+    public virtual ICollection<AppointmentRequest> AppointmentRequests { get; set; } = new List<AppointmentRequest>();
 
     public virtual User? User { get; set; }
 }

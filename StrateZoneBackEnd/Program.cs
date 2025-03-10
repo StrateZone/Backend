@@ -7,7 +7,9 @@ using Net.payOS;
 using Npgsql;
 using StrateZone_APIs.ServiceExtensions;
 using StrateZone_Repository.Data;
+using StrateZone_Service.Hubs;
 using StrateZone_Service.Implements;
+using StrateZone_Service.Interfaces;
 using StrateZone_Service.Mapper;
 using System.Reflection;
 using System.Text;
@@ -34,9 +36,6 @@ builder.WebHost.UseUrls($"http://*:{port}");
 
 //Add health check
 builder.Services.AddHealthChecks();
-
-//Config GHN
-builder.Services.AddHttpClient<GHNService>();
 
 builder.Services.AddControllers()
      .AddJsonOptions(options =>
@@ -88,59 +87,10 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-// Identity, authentication and authorization
-/*
-builder.Services.AddIdentity<User, Role>(
-        options =>
-        {
-            options.Password.RequireDigit = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredLength = 3;
-        }
-    )
-    .AddEntityFrameworkStores<MealHuntContext>()
-    .AddDefaultTokenProviders();
-*/
-
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme =
-//    options.DefaultChallengeScheme =
-//    options.DefaultForbidScheme =
-//    options.DefaultScheme =
-//    options.DefaultSignInScheme =
-//    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = false,
-//            //ValidIssuer = builder.Configuration["JWT:Issuer"],
-//            ValidateAudience = false,
-//            //ValidAudience = builder.Configuration["JWT:Audience"],
-//            RequireExpirationTime = true,
-//            ValidateIssuerSigningKey = true,
-//            ClockSkew = TimeSpan.Zero,
-//            IssuerSigningKey = new SymmetricSecurityKey(
-//                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
-//                    )
-//        };
-//    });
-
 // Service Extensions
 builder.Services.AddApplicationServices();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
 
 app.UseHealthChecks("/health");
 
@@ -149,9 +99,12 @@ app.UseSwaggerUI();
 
 app.UseCors(MyAllowSpecificOrigins);
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<ChatHub>("/chatHub");
 app.MapControllers();
 
 app.Run();

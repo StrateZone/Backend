@@ -15,11 +15,7 @@ namespace StrateZone_Service.BusinessModels
 
         public int? AppointmentId { get; set; }
 
-        public int? GameExtensionId { get; set; }
-
         public DateTime? CreatedAt { get; set; }
-
-        public virtual GameExtensionModel? GameExtension { get; set; }
 
         public virtual TableModel? Table { get; set; }
     }

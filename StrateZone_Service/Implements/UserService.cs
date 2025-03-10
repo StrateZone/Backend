@@ -87,7 +87,8 @@ namespace StrateZone_Service.Implements
                     Email = userRequest.Email,
                     Phone = userRequest.PhoneNumber,
                     Address = userRequest.Address,
-                    Gender = (StrateZone_Repository.Parameters.PostgreEnums.Gender) userRequest.Gender,
+                    Gender = (StrateZone_Repository.Parameters.PostgreEnums.Gender)userRequest.Gender,
+                    SkillLevel = (StrateZone_Repository.Parameters.PostgreEnums.SkillLevel)userRequest.SkillLevel,
                     CreatedAt = DateTime.UtcNow,
                 };
 

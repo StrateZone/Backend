@@ -13,9 +13,10 @@ namespace StrateZone_Repository.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("CREATE TYPE course_slot_status AS ENUM ('upcoming', 'in_progress', 'completed', 'cancelled');");
-            migrationBuilder.Sql("CREATE TYPE course_status AS ENUM ('open', 'closed', 'in_progress', 'completed', 'cancelled');");
-            migrationBuilder.Sql("CREATE TYPE event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE appointment_request AS ENUM('Pending', 'Confirmed', 'Cancelled', 'Completed', 'Expired')");
+            migrationBuilder.Sql("CREATE TYPE course_slot_status AS ENUM ('upcoming', 'InProgress', 'Completed', 'Cancelled');");
+            migrationBuilder.Sql("CREATE TYPE course_status AS ENUM ('Open', 'Closed', 'InProgress', 'Completed', 'Cancelled');");
+            migrationBuilder.Sql("CREATE TYPE event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'Cancelled');");
             migrationBuilder.Sql("CREATE TYPE event_type AS ENUM ('tournament', 'promotion');");
             migrationBuilder.Sql("CREATE TYPE game_extension AS ENUM ('bullet', 'lightning', 'flip', 'traditional');");
             migrationBuilder.Sql("CREATE TYPE game_type AS ENUM ('chess', 'xiangqi', 'go');");
@@ -37,6 +38,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("CREATE TYPE voucher_status AS ENUM ('active', 'expired');");
             migrationBuilder.Sql("CREATE TYPE wallet_status AS ENUM ('active', 'closed');");
 
+            /*
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:course_slot_status.course_slot_status", "upcoming,in_progress,completed,cancelled")
                 .Annotation("Npgsql:Enum:course_status.course_status", "open,closed,in_progress,completed,cancelled")
@@ -61,6 +63,7 @@ namespace StrateZone_Repository.Migrations
                 .Annotation("Npgsql:Enum:user_role.user_role", "registered_user,member,instructor,staff,admin")
                 .Annotation("Npgsql:Enum:voucher_status.voucher_status", "active,expired")
                 .Annotation("Npgsql:Enum:wallet_status.wallet_status", "active,closed");
+            */
 
             migrationBuilder.CreateTable(
                 name: "carts",
@@ -1185,6 +1188,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.DropTable(
                 name: "carts");
 
+            migrationBuilder.Sql("DROP TYPE appointment_request;");
             migrationBuilder.Sql("DROP TYPE course_slot_status;");
             migrationBuilder.Sql("DROP TYPE course_status;");
             migrationBuilder.Sql("DROP TYPE event_status;");

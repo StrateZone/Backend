@@ -68,7 +68,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<AppointmentModel> CreateAppointmentAsync(AppointmentRequest request)
+        public async Task<AppointmentModel> CreateAppointmentAsync(CustomModels.RequestModels.AppointmentRequest request)
         {
             try
             {
@@ -103,8 +103,7 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel tablesAppointmentModel = new TablesAppointmentModel()
                     {
                         TableId = tableId,
-                        AppointmentId = result.AppointmentId,
-                        GameExtensionId = request.GameExtensionId
+                        AppointmentId = result.AppointmentId
                     };
 
                     result.TablesAppointments.Add(tablesAppointmentModel);

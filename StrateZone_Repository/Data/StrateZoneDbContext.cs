@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using StrateZone_Repository.Entities;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using GameExtensionEnum = StrateZone_Repository.Parameters.PostgreEnums.GameExtensionEnum;
@@ -38,6 +34,8 @@ public partial class StrateZoneDbContext : DbContext
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<Friendlist> Friendlists { get; set; }
+
+    public virtual DbSet<AppointmentRequest> AppointmentRequests { get; set; }
 
     public virtual DbSet<Friendrequest> Friendrequests { get; set; }
 
@@ -91,7 +89,7 @@ public partial class StrateZoneDbContext : DbContext
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder
                 .UseNpgsql(
-                    GetConnectionString(), 
+                    GetConnectionString(),
                     dataSourceBuilder =>
                     {
                         dataSourceBuilder.MapEnum<CourseSlotStatus>("course_slot_status");
@@ -126,11 +124,12 @@ public partial class StrateZoneDbContext : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();
         string connection = configuration["ConnectionStrings:DB"];
-        return connection;
+        return "Host=switchyard.proxy.rlwy.net;Port=35707;Database=railway;Username=postgres;Password=fqLsUMeFmmCJNzTcjKiqGPVswmwmjIOj;SslMode=Disable";
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<AppointmentStatus>();
         modelBuilder.HasPostgresEnum<CourseSlotStatus>();
         modelBuilder.HasPostgresEnum<CourseStatus>();
         modelBuilder.HasPostgresEnum<EventStatus>();
@@ -154,7 +153,7 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<UserRole>();
         modelBuilder.HasPostgresEnum<VoucherStatus>();
         modelBuilder.HasPostgresEnum<WalletStatus>();
-        
+
         modelBuilder.Entity<Appointment>(entity =>
         {
             entity.HasKey(e => e.AppointmentId).HasName("appointments_pkey");
@@ -176,8 +175,8 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasConversion(
-                    v => v.ToString(), 
-                    v => (RequestStatus) Enum.Parse(typeof(RequestStatus), v)
+                    v => v.ToString(),
+                    v => (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), v)
                     );
 
             entity.HasOne(d => d.User).WithMany(p => p.Appointments)
@@ -415,6 +414,40 @@ public partial class StrateZoneDbContext : DbContext
                 .HasConstraintName("friendrequests_to_user_fkey");
         });
 
+        modelBuilder.Entity<AppointmentRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("appointment_requests_pkey");
+
+            entity.ToTable("appointment_requests");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.FromUser).HasColumnName("from_user");
+            entity.Property(e => e.ToUser).HasColumnName("to_user");
+            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.Status).HasColumnType("request_status").HasConversion(
+                    v => v.ToString(),
+                    v => (RequestStatus)Enum.Parse(typeof(RequestStatus), v)
+                    );
+
+            entity.HasOne(d => d.FromUserNavigation).WithMany(p => p.AppointmentRequestsFromUserNavigations)
+                .HasForeignKey(d => d.FromUser)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_from_user_fkey");
+
+            entity.HasOne(d => d.ToUserNavigation).WithMany(p => p.AppointmentRequestsToUserNavigations)
+                .HasForeignKey(d => d.ToUser)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_to_user_fkey");
+
+            entity.HasOne(d => d.Appointment).WithMany(p => p.AppointmentRequests)
+                .HasForeignKey(d => d.AppointmentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_to_appointment_fkey");
+        });
+
         modelBuilder.Entity<Entities.GameExtension>(entity =>
         {
             entity.HasKey(e => e.ExtensionId).HasName("gameExtensions_pkey");
@@ -524,7 +557,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status").HasColumnType("message_status").HasConversion(
                     v => v.ToString(),
                     v => (MessageStatus)Enum.Parse(typeof(MessageStatus), v)
-                    ); 
+                    );
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -756,10 +789,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.Table).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.TableId)
                 .HasConstraintName("tables_appointments_table_id_fkey");
-
-            entity.HasOne(d => d.GameExtension).WithMany(p => p.TablesAppointments)
-                .HasForeignKey(d => d.GameExtensionId)
-                .HasConstraintName("tables_appointments_extension_id_fkey");
         });
 
         modelBuilder.Entity<Tag>(entity =>
@@ -906,6 +935,12 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (Gender)Enum.Parse(typeof(Gender), v)
                 );
+
+            entity.Property(e => e.SkillLevel).HasColumnName("skill_level").HasColumnType("skill_level").HasConversion(
+                    v => v.ToString(),
+                    v => (SkillLevel) Enum.Parse(typeof(SkillLevel), v)
+                );
+
             entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
