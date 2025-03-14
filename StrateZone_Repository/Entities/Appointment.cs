@@ -22,5 +22,7 @@ public partial class Appointment
 
     public virtual ICollection<AppointmentRequest> AppointmentRequests { get; set; } = new List<AppointmentRequest>();
 
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
     public virtual User? User { get; set; }
 }

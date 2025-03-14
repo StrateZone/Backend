@@ -20,6 +20,7 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
                     .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
+                    .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
                 .ReverseMap();
 
             CreateMap<GameType, GameTypeModel>()

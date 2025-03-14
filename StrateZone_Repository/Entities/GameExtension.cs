@@ -9,6 +9,8 @@ public partial class GameExtension
 
     public int? TypeId { get; set; }
 
+    public short NumberOfPlayers { get; set; }
+
     public Parameters.PostgreEnums.GameExtensionEnum ExtensionName { get; set; }
 
     public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();

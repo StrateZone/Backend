@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
@@ -20,13 +21,15 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<List<Table>> GetTablesAsync()
+        public async Task<PagedList<Table>> GetTablesAsync(TableParameters parameters)
         {
             try
             {
-                return await _context.Tables
+                var tables = _context.Tables
                                     .Include(t => t.GameType)
-                                    .ToListAsync();
+                                    .AsQueryable();
+
+                return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -48,7 +51,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Table>> GetTablesByGameTypeAsync(PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
@@ -66,10 +69,12 @@ namespace StrateZone_Repository.Implements
 
                 if (expectedId == null) throw new Exception("Game type not found.");
 
-                return await _context.Tables
-                    .Where(t => t.GameTypeId == expectedId)
-                    .Include(t => t.GameType)
-                    .ToListAsync();
+                var tables = _context.Tables
+                                    .Where(t => t.GameTypeId == expectedId)
+                                    .Include(t => t.GameType)
+                                    .AsQueryable();
+
+                return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -77,17 +82,19 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Table>> GetAvailableTablesAsync()
+        public async Task<PagedList<Table>> GetAvailableTablesAsync(TableParameters parameters)
         {
             try
             {
                 var currentTime = DateTime.Now;
 
-                return await _context.Tables
+                var tables = _context.Tables
                                 .Where(t => !t.TablesAppointments.Any() ||
                                             t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime))
                                 .Include(t => t.GameType)
-                                .ToListAsync();
+                                .AsQueryable();
+
+                return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -95,7 +102,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Table>> GetAvailableTablesByGameTypeAsync(PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<Table>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
@@ -114,11 +121,13 @@ namespace StrateZone_Repository.Implements
 
                 if (expectedId == null) throw new Exception("Game type not found.");
 
-                return await _context.Tables
-                                .Where(t => !t.TablesAppointments.Any() ||
-                                            t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime))
+                var tables = _context.Tables
+                                .Where(t => t.GameTypeId == expectedId && 
+                                    (!t.TablesAppointments.Any() || t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime)))
                                 .Include(t => t.GameType)
-                                .ToListAsync();
+                                .AsQueryable();
+
+                return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {

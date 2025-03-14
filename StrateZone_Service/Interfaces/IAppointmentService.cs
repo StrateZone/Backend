@@ -1,4 +1,6 @@
-﻿using StrateZone_Service.BusinessModels;
+﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Parameters;
+using StrateZone_Service.BusinessModels;
 
 namespace StrateZone_Service.Interfaces
 {
@@ -7,8 +9,8 @@ namespace StrateZone_Service.Interfaces
         Task<AppointmentModel> CreateAppointmentAsync(CustomModels.RequestModels.AppointmentRequest request);
         Task<AppointmentModel> DeleteAppointmentAsync(int id);
         Task<AppointmentModel> GetAppointmentByIdAsync(int id);
-        Task<List<AppointmentModel>> GetAppointmentsAsync();
-        Task<List<AppointmentModel>> GetAppointmentsByUserIdAsync(int userId);
+        Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters);
+        Task<PagedList<AppointmentModel>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int id);
         Task<AppointmentModel> UpdateAppointmentAsync(AppointmentModel appointmentModel, int id);
     }
 }

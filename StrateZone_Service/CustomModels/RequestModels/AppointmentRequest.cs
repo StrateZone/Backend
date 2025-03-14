@@ -14,9 +14,6 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public int UserId { get; set; }
 
         [Required]
-        public int GameExtensionId { get; set; }
-
-        [Required]
         public DateTime ScheduleTime { get; set; }
 
         [Required]

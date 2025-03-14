@@ -1,17 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
-namespace StrateZone_Repository.Parameters
+﻿namespace StrateZone_Repository.Parameters
 {
     public class PostgreEnums
     {
-        public enum AppointmentStatus { pending, confirmed, acncelled, completed, expired }
+        public enum AppointmentStatus { pending, confirmed, cancelled, completed, expired }
         public enum CourseSlotStatus { upcoming, in_progress, completed, cancelled }
         public enum CourseStatus { open, closed, in_progress, completed, cancelled }
         public enum EventStatus { upcoming, ongoing, completed, cancelled }
@@ -26,11 +17,12 @@ namespace StrateZone_Repository.Parameters
         public enum Ranking { basic, silver, gold, platinum }
         public enum RequestStatus { pending, accepted, rejected, cancelled }
         public enum RoomStatus { available, unavailable, closed }
-        public enum RoomType { study, appointment }
+        public enum RoomType { study, premium, basic, openspaced }
         public enum SkillLevel { beginner, intermediate, advanced }
         public enum ThreadStatus { published, rejected, pending, deleted }
         public enum TicketType { withdrawal, feedback, other }
         public enum TransactionType { deposit, withdrawal, refund }
+        public enum PaymentType { order, appointment, course, membership }
         public enum UserCourseResult { passed, failed }
         public enum UserRole { RegisteredUser, Member, Instructor, Staff, Admin }
         public enum VoucherStatus { active, expired }

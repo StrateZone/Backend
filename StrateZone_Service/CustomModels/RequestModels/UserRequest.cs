@@ -35,5 +35,7 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public SkillLevel? SkillLevel { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner;
+
+        public Ranking? Ranking { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic;
     }
 }

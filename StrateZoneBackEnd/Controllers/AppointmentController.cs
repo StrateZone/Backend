@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
@@ -19,11 +20,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAppointments()
+        public async Task<IActionResult> GetAppointments([FromQuery] AppointmentParameters parameters)
         {
             try
             {
-                var appointments = await _appointmentService.GetAppointmentsAsync();
+                var appointments = await _appointmentService.GetAppointmentsAsync(parameters);
                 return appointments.Count > 0 ? Ok(appointments) : Ok("No appointment.");
             }
             catch (Exception ex)
@@ -33,7 +34,7 @@ namespace StrateZone_APIs.Controllers
         }
 
 
-        [HttpGet("by-id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAppointmentById(int id)
         {
             try
@@ -47,12 +48,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-user-id")]
-        public async Task<IActionResult> GetAppointmentByUserId(int userId)
+        [HttpGet("users/{userId}")]
+        public async Task<IActionResult> GetAppointmentByUserId(int userId, [FromQuery] AppointmentParameters parameters)
         {
             try
             {
-                var appointment = await _appointmentService.GetAppointmentsByUserIdAsync(userId);
+                var appointment = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
                 return appointment != null ? Ok(appointment) : NotFound("No appointment was found for this user.");
             }
             catch (Exception ex)
@@ -75,7 +76,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAppointment([FromBody] AppointmentModel appointmentModel, int id)
         {
             try
@@ -89,7 +90,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
             try

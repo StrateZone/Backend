@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using System.Data;
 using System.Text;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -17,11 +20,12 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<List<User>> GetUsersAsync()
+        public async Task<PagedList<User>> GetUsersAsync(UserListParameters parameters)
         {
             try
             {
-                return await _context.Users.ToListAsync();
+                var users = _context.Users.AsQueryable();
+                return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -53,11 +57,47 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<User>> GetUsersByUsernameAsync(string username)
+        public async Task<PagedList<User>> GetUsersByUsernameAsync(UserListParameters parameters, string username)
         {
             try
             {
-                return await _context.Users.Where(u => u.Username.ToLower().Contains(username.ToLower())).ToListAsync();
+                var users = _context.Users
+                                    .Where(u => u.Username.ToLower().Contains(username.ToLower()))
+                                    .AsQueryable();
+                
+                return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<User>> GetUsersByRanking(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down)
+        {
+            try
+            {
+                if (up < down)
+                {
+                    (down, up) = (up, down);
+                }
+
+                Ranking minRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Min();
+                Ranking maxRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Max();
+
+                Ranking upperBound = (Ranking)Math.Clamp((int)ranking + up, (int)minRanking, (int)maxRanking);
+                Ranking lowerBound = (Ranking)Math.Clamp((int)ranking - down, (int)minRanking, (int)maxRanking);
+
+                var users = _context.Users
+                                    .FromSqlRaw(
+                                            @"SELECT * FROM users WHERE ranking >= @r1::ranking 
+                                                AND ranking <= @r2::ranking",
+                                        new NpgsqlParameter("@r1", lowerBound.ToString()),
+                                        new NpgsqlParameter("@r2", upperBound.ToString()))
+                                    .AsQueryable();
+
+
+                return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -74,25 +114,29 @@ namespace StrateZone_Repository.Implements
                     .FirstOrDefaultAsync();
                 if (existingUser != null) throw new Exception("A user with this email or username already exists");
 
-                string insertQuery = @"
-                        INSERT INTO users (username, email, phone, password, gender, role, skill_level, status, created_at) 
-                        VALUES ({0}, {1}, {2}, {3}, {4}::gender, {5}::user_role, {6}::skill_level, {7}, {8})
-                        RETURNING user_id;";  // RETURNING user_id allows getting the new ID
+                using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
 
-                var newUserId = await _context.Database.ExecuteSqlRawAsync(
-                    insertQuery,
-                    user.Username,
-                    user.Email,
-                    user.Phone,
-                    user.Password,
-                    user.Gender.ToString(),
-                    user.UserRole.ToString(),
-                    user.SkillLevel.ToString(),
-                    user.Status,
-                    user.CreatedAt
-                );
+                    using var cmd = new NpgsqlCommand(@"
+                            INSERT INTO users (username, email, phone, password, gender, role, skill_level, status, created_at) 
+                            VALUES (@username, @email, @phone, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @status, @createdAt)
+                            RETURNING user_id;", connection);
 
-                user.UserId = newUserId; // Assign the returned ID to the user object
+                    cmd.Parameters.AddWithValue("@username", user.Username);
+                    cmd.Parameters.AddWithValue("@email", user.Email);
+                    cmd.Parameters.AddWithValue("@phone", user.Phone ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@password", user.Password);
+                    cmd.Parameters.AddWithValue("@gender", user.Gender.ToString());
+                    cmd.Parameters.AddWithValue("@role", user.UserRole.ToString());
+                    cmd.Parameters.AddWithValue("@skillLevel", user.SkillLevel.ToString());
+                    cmd.Parameters.AddWithValue("@status", user.Status);
+                    cmd.Parameters.AddWithValue("@createdAt", user.CreatedAt ?? DateTime.UtcNow);
+
+                    var newUserId = await cmd.ExecuteScalarAsync();
+                    user.UserId = Convert.ToInt32(newUserId);
+                }
+
                 return user;
             }
             catch (Exception ex)
@@ -159,6 +203,9 @@ namespace StrateZone_Repository.Implements
                 sql.Append("skill_level = @skillLevel::skill_level, ");
                 parameters.Add(new NpgsqlParameter("@skillLevel", updatedUser.SkillLevel.ToString()));
 
+                sql.Append("ranking = @ranking::ranking, ");
+                parameters.Add(new NpgsqlParameter("@ranking", updatedUser.Ranking.ToString()));
+
                 if (!string.IsNullOrEmpty(updatedUser.Address))
                 {
                     sql.Append("address = @address, ");
@@ -211,6 +258,18 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return toRemove;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<User> GetUserByPhoneNumberAsync(string phoneNumber)
+        {
+            try
+            {
+                return await _context.Users.FirstOrDefaultAsync(u => u.Phone == phoneNumber);
             }
             catch (Exception ex)
             {

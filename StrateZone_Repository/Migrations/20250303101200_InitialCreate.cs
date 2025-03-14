@@ -28,7 +28,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("CREATE TYPE ranking AS ENUM ('basic', 'silver', 'gold', 'platinum');");
             migrationBuilder.Sql("CREATE TYPE request_status AS ENUM ('pending', 'accepted', 'rejected', 'cancelled');");
             migrationBuilder.Sql("CREATE TYPE room_status AS ENUM ('available', 'unavailable', 'closed');");
-            migrationBuilder.Sql("CREATE TYPE room_type AS ENUM ('study', 'appointment');");
+            migrationBuilder.Sql("CREATE TYPE room_type AS ENUM ('study', 'premium', 'basic', 'openspaced');");
             migrationBuilder.Sql("CREATE TYPE skill_level AS ENUM ('beginner', 'intermediate', 'advanced');");
             migrationBuilder.Sql("CREATE TYPE thread_status AS ENUM ('published', 'rejected', 'pending', 'deleted');");
             migrationBuilder.Sql("CREATE TYPE ticket_type AS ENUM ('withdrawal', 'feedback', 'other');");
@@ -37,7 +37,8 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("CREATE TYPE user_role AS ENUM ('registered_user', 'member', 'instructor', 'staff', 'admin');");
             migrationBuilder.Sql("CREATE TYPE voucher_status AS ENUM ('active', 'expired');");
             migrationBuilder.Sql("CREATE TYPE wallet_status AS ENUM ('active', 'closed');");
-
+            migrationBuilder.Sql("CREATE TYPE payment_type AS ENUM ('order', 'appointment', 'course', 'membership')");
+            
             /*
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:course_slot_status.course_slot_status", "upcoming,in_progress,completed,cancelled")
@@ -1212,6 +1213,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("DROP TYPE user_role;");
             migrationBuilder.Sql("DROP TYPE voucher_status;");
             migrationBuilder.Sql("DROP TYPE wallet_status;");
+            migrationBuilder.Sql("DROP TYPE payment_type");
         }
     }
 }

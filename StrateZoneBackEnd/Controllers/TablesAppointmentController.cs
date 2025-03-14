@@ -32,7 +32,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-table-id")]
+        [HttpGet("tables/{id}")]
         public async Task<IActionResult> GetTablesAppointmentsByTableId(int id)
         {
             try
@@ -46,7 +46,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-appointment-id")]
+        [HttpGet("appointments/{id}")]
         public async Task<IActionResult> GetTablesAppointmentsByAppointmentId(int id)
         {
             try
@@ -60,7 +60,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-table-and-appointment-id")]
+        [HttpGet("tables/{tableId}/appointments/{appointmentId}")]
         public async Task<IActionResult> GetTablesAppointmentByTableIdAndAppointmentId(int tableId, int appointmentId)
         {
             try

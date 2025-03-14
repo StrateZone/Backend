@@ -14,6 +14,8 @@ public partial class Price
 
     public int? CourseId { get; set; }
 
+    public int? RoomId { get; set; }
+
     public BitArray? MemberFee { get; set; }
 
     public BitArray? TeachingSalary { get; set; }
@@ -22,6 +24,8 @@ public partial class Price
 
     public string? Unit { get; set; }
 
+    public virtual Room? Room { get; set; }
+    
     public virtual Course? Course { get; set; }
 
     public virtual GameType? GameType { get; set; }

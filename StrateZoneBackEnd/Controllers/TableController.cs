@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
@@ -21,11 +22,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetTables()
+        public async Task<IActionResult> GetTables([FromQuery] TableParameters parameters)
         {
             try
             {
-                var tables = await _tableService.GetTablesAsync();
+                var tables = await _tableService.GetTablesAsync(parameters);
                 return Ok(tables);
             }
             catch (Exception ex)
@@ -35,11 +36,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all/available")]
-        public async Task<IActionResult> GetAvailableTables()
+        public async Task<IActionResult> GetAvailableTables([FromQuery] TableParameters parameters)
         {
             try
             {
-                var tables = await _tableService.GetAvailableTablesAsync();
+                var tables = await _tableService.GetAvailableTablesAsync(parameters);
                 return Ok(tables);
             }
             catch (Exception ex)
@@ -48,7 +49,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetTableById(int id)
         {
             try
@@ -63,11 +64,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("by-game-type")]
-        public async Task<IActionResult> GetTablesByGameType(StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<IActionResult> GetTablesByGameType([FromQuery] TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
-                var tables = await _tableService.GetTablesByGameTypeAsync(gameType);
+                var tables = await _tableService.GetTablesByGameTypeAsync(parameters, gameType);
                 return tables.Count > 0 ? Ok(tables) : Ok("No table was found for this gametype.");
             }
             catch (Exception ex)
@@ -77,11 +78,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("by-game-type/available")]
-        public async Task<IActionResult> GetAvailableTablesByGameType(StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<IActionResult> GetAvailableTablesByGameType([FromQuery] TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
-                var tables = await _tableService.GetAvailableTablesByGameTypeAsync(gameType);
+                var tables = await _tableService.GetAvailableTablesByGameTypeAsync(parameters, gameType);
                 return tables.Count > 0 ? Ok(tables) : Ok("No table available was found for this gametype.");
             }
             catch (Exception ex)
@@ -104,7 +105,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTable([FromBody] TableModel tableModel, int id)
         {
             try
@@ -118,7 +119,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTable(int id)
         {
             try

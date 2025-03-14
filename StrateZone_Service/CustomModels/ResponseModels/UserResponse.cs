@@ -23,6 +23,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? Password { get; set; }
 
+        public string UserRole { get; set; }
+
         public string Status { get; set; }
 
         public string? Address { get; set; }
@@ -33,11 +35,11 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public int? Points { get; set; }
 
-        public string UserRole { get; set; }
-
         public string Gender { get; set; }
 
         public string SkillLevel { get; set; }
+
+        public string Ranking { get; set; }
 
         public DateTime? CreatedAt { get; set; }
 

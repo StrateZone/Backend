@@ -29,7 +29,10 @@ namespace StrateZone_Service.Implements
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(_configuration["EmailSettings:FromEmail"]),
+                From = new MailAddress(
+                    _configuration["EmailSettings:FromEmail"], 
+                    "StrateZone"
+                ),
                 Subject = request.Subject,
                 Body = request.Content,
                 IsBodyHtml = true,

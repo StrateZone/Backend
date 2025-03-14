@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Hubs;
@@ -20,7 +21,7 @@ namespace StrateZone_APIs.Controllers
             _chatHub = chatHub;
         }
 
-        [HttpGet("user")]
+        [HttpGet("users/{id}")]
         public async Task<IActionResult> GetConversation(int id)
         {
             try
@@ -34,7 +35,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("send-to")]
+        [HttpGet("users/{senderId}/to/{receiverId}")]
         public async Task<IActionResult> GetMessagesFromSenderToReceiver(int senderId, int receiverId)
         {
             try
@@ -48,11 +49,14 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("conversation")]
+        [HttpGet("users/{user1_id}/and/{user2_id}")]
         public async Task<IActionResult> GetConversation(int user1_id, int user2_id)
         {
             try
             {
+                if (user1_id <= 0 || user2_id <= 0)
+                    return BadRequest("Sender and Receiver ID can not be null");
+
                 var messages = await _messageService.GetConversationMessagesAsync(user1_id, user2_id);
                 return Ok(messages);
             }
@@ -62,7 +66,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost("send")]
+        [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] MessageRequest request)
         {
             try

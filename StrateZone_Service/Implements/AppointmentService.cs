@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using MealHunt_Repositories.Pagination;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
@@ -29,12 +31,14 @@ namespace StrateZone_Service.Implements
             _tablesAppointmentService = tablesAppointmentService;
         }
 
-        public async Task<List<AppointmentModel>> GetAppointmentsAsync()
+        public async Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters)
         {
             try
             {
-                var result = await _appointmentRepository.GetAppointmentsAsync();
-                return _mapper.Map<List<AppointmentModel>>(result);
+                var result = await _appointmentRepository.GetAppointmentsAsync(parameters);
+                var appointments = _mapper.Map<PagedList<AppointmentModel>>(result);
+
+                return new PagedList<AppointmentModel>(appointments, appointments.TotalCount, appointments.CurrentPage, appointments.PageSize);
             }
             catch (Exception ex)
             {
@@ -42,12 +46,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<AppointmentModel>> GetAppointmentsByUserIdAsync(int userId)
+        public async Task<PagedList<AppointmentModel>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int userId)
         {
             try
             {
-                var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(userId);
-                return _mapper.Map<List<AppointmentModel>>(result);
+                var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(parameters, userId);
+                var appointments = _mapper.Map<PagedList<AppointmentModel>>(result);
+
+                return new PagedList<AppointmentModel>(appointments, appointments.TotalCount, appointments.CurrentPage, appointments.PageSize);
             }
             catch (Exception ex)
             {
@@ -72,8 +78,14 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                List<TableModel> Tables = await _tableService.GetTablesAsync();
-                List<TableModel> AvailableTables = await _tableService.GetAvailableTablesAsync();
+                TableParameters tableParameters = new()
+                {
+                    PageNumber = 1,
+                    PageSize = 100_000
+                };
+
+                List<TableModel> Tables = await _tableService.GetTablesAsync(tableParameters);
+                List<TableModel> AvailableTables = await _tableService.GetAvailableTablesAsync(tableParameters);
 
                 var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
                 var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));

@@ -32,6 +32,8 @@ namespace StrateZone_Service.BusinessModels
 
         public StrateZone_Repository.Parameters.PostgreEnums.SkillLevel SkillLevel { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner;
 
+        public StrateZone_Repository.Parameters.PostgreEnums.Ranking Ranking { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic;
+
         public DateTime? CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }

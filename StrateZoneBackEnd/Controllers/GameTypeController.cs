@@ -31,7 +31,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetWithExtensionsByTypeId(int id)
         {
             try

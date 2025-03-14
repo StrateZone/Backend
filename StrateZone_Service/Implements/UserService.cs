@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
+using MealHunt_Repositories.Pagination;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StrateZone_Service.Implements
 {
@@ -24,12 +21,27 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
         }
 
-        public async Task<List<UserResponse>> GetUsersAsync()
+        public async Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters)
         {
             try
             {
-                var results = await _userRepository.GetUsersAsync();
-                return _mapper.Map<List<UserResponse>>(results);
+                var results = await _userRepository.GetUsersAsync(parameters);
+                var users = _mapper.Map<PagedList<UserResponse>>(results);
+                return new PagedList<UserResponse>(users, users.Count, users.CurrentPage, users.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down)
+        {
+            try
+            {
+                var results = await _userRepository.GetUsersByRanking(parameters, ranking, up, down);
+                var users = _mapper.Map<PagedList<UserResponse>>(results);
+                return new PagedList<UserResponse>(users, users.Count, users.CurrentPage, users.PageSize);
             }
             catch (Exception ex)
             {
@@ -63,12 +75,26 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<UserResponse>> GetUsersByUsernameAsync(string username)
+        public async Task<UserResponse> GetUserByPhoneNumberAsync(string phoneNumber)
         {
             try
             {
-                var results = await _userRepository.GetUsersByUsernameAsync(username);
-                return _mapper.Map<List<UserResponse>>(results);
+                var results = await _userRepository.GetUserByPhoneNumberAsync(phoneNumber);
+                return _mapper.Map<UserResponse>(results);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<PagedList<UserResponse>> GetUsersByUsernameAsync(UserListParameters parameters, string username)
+        {
+            try
+            {
+                var results = await _userRepository.GetUsersByUsernameAsync(parameters, username);
+                var users = _mapper.Map<PagedList<UserResponse>>(results);
+                return new PagedList<UserResponse>(users, users.Count, users.CurrentPage, users.PageSize);
             }
             catch (Exception ex)
             {

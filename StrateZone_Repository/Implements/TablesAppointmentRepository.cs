@@ -19,7 +19,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.TablesAppointments.ToListAsync();
+                return await _context.TablesAppointments
+                                    .Include(ta => ta.Table)
+                                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -48,9 +50,10 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.TablesAppointments
-                    .Where(ta => ta.AppointmentId == id)
-                    .Include(ta => ta.Table)
-                    .ToListAsync();
+                                    .Where(ta => ta.AppointmentId == id)
+                                    .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.GameType)
+                                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -64,6 +67,8 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.TablesAppointments
                                     .Where(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.Appointment.EndTime < DateTime.Now)
+                                    .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.GameType)
                                     .FirstOrDefaultAsync();
                                     
             }
