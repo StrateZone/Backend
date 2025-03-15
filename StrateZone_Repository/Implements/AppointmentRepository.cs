@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Parameters;
 
 namespace StrateZone_Repository.Implements
 {
@@ -13,11 +15,14 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<List<Appointment>> GetAppointmentsAsync()
+        public async Task<PagedList<Appointment>> GetAppointmentsAsync(AppointmentParameters parameters)
         {
             try
             {
-                return await _context.Appointments.ToListAsync();
+                var result = _context.Appointments
+                                    .Include(a => a.User)
+                                    .AsQueryable();
+                return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -29,7 +34,26 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Appointments.FindAsync(id);
+                return await _context.Appointments
+                    .Where(a => a.AppointmentId == id)
+                    .Include(a => a.TablesAppointments)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Appointment>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int id)
+        {
+            try
+            {
+                var result = _context.Appointments
+                                    .Where(a => a.UserId == id)
+                                    .Include(a => a.User)
+                                    .AsQueryable();
+                return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -51,6 +75,7 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
 
         public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment, int id)
         {

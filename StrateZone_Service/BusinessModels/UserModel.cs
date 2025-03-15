@@ -1,10 +1,4 @@
 ﻿using StrateZone_Repository.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.BusinessModels
 {
@@ -22,9 +16,6 @@ namespace StrateZone_Service.BusinessModels
 
         public string? Password { get; set; }
 
-        /// <summary>
-        /// Depends on Role
-        /// </summary>
         public string Status { get; set; } = "Active";
 
         public string? Address { get; set; }
@@ -35,9 +26,13 @@ namespace StrateZone_Service.BusinessModels
 
         public int? Points { get; set; }
 
-        public UserRole UserRole { get; set; } = UserRole.RegisteredUser;
+        public StrateZone_Repository.Parameters.PostgreEnums.UserRole UserRole { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.UserRole.RegisteredUser;
 
-        public Gender Gender { get; set; } = Gender.male;
+        public StrateZone_Repository.Parameters.PostgreEnums.Gender Gender { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Gender.male;
+
+        public StrateZone_Repository.Parameters.PostgreEnums.SkillLevel SkillLevel { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner;
+
+        public StrateZone_Repository.Parameters.PostgreEnums.Ranking Ranking { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic;
 
         public DateTime? CreatedAt { get; set; }
 
@@ -48,8 +43,8 @@ namespace StrateZone_Service.BusinessModels
 
         public DateTime? RefreshTokenExpiry { get; set; }
 
-        public virtual ICollection<Friendlist> FriendlistUsers { get; set; } = new List<Friendlist>();
+        public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
 
-        public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
+        public virtual ICollection<WalletModel> Wallets { get; set; } = new List<WalletModel>();
     }
 }

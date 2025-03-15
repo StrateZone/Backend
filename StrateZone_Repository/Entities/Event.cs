@@ -8,8 +8,6 @@ public partial class Event
 {
     public int EventId { get; set; }
 
-    public EventType EventType { get; set; }
-
     public int? UserId { get; set; }
 
     public string? Name { get; set; }

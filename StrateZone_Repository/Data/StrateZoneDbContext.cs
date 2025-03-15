@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using StrateZone_Repository.Entities;
 using static StrateZone_Repository.Parameters.PostgreEnums;
-using GameExtension = StrateZone_Repository.Parameters.PostgreEnums.GameExtension;
+using GameExtensionEnum = StrateZone_Repository.Parameters.PostgreEnums.GameExtensionEnum;
 
 namespace StrateZone_Repository.Data;
 
@@ -38,6 +34,8 @@ public partial class StrateZoneDbContext : DbContext
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<Friendlist> Friendlists { get; set; }
+
+    public virtual DbSet<AppointmentRequest> AppointmentRequests { get; set; }
 
     public virtual DbSet<Friendrequest> Friendrequests { get; set; }
 
@@ -77,6 +75,10 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Ticket> Tickets { get; set; }
 
+    public virtual DbSet<Tournament> Tournaments { get; set; }
+
+    public virtual DbSet<TournamentsParticipants> TournamentsParticipants { get; set; }
+
     public virtual DbSet<Transaction> Transactions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -91,18 +93,18 @@ public partial class StrateZoneDbContext : DbContext
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder
                 .UseNpgsql(
-                    GetConnectionString(), 
+                    GetConnectionString(),
                     dataSourceBuilder =>
                     {
                         dataSourceBuilder.MapEnum<CourseSlotStatus>("course_slot_status");
                         dataSourceBuilder.MapEnum<CourseStatus>("course_status");
                         dataSourceBuilder.MapEnum<EventStatus>("event_status");
-                        dataSourceBuilder.MapEnum<EventType>("event_type");
-                        dataSourceBuilder.MapEnum<GameExtension>("game_extension");
-                        dataSourceBuilder.MapEnum<Parameters.PostgreEnums.GameType>("game_type");
+                        dataSourceBuilder.MapEnum<GameExtensionEnum>("game_extension");
+                        dataSourceBuilder.MapEnum<GameTypeEnum>("game_type");
                         dataSourceBuilder.MapEnum<Gender>("gender");
                         dataSourceBuilder.MapEnum<MessageStatus>("message_status");
                         dataSourceBuilder.MapEnum<OrderStatus>("order_status");
+                        dataSourceBuilder.MapEnum<PaymentType>("payment_type");
                         dataSourceBuilder.MapEnum<ParticipantStatus>("participant_status");
                         dataSourceBuilder.MapEnum<ProductStatus>("product_status");
                         dataSourceBuilder.MapEnum<Ranking>("ranking");
@@ -125,22 +127,23 @@ public partial class StrateZoneDbContext : DbContext
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();
-        var connection = configuration["ConnectionStrings:DB"];
+        string connection = configuration["ConnectionStrings:DB"];
         return "Host=switchyard.proxy.rlwy.net;Port=35707;Database=railway;Username=postgres;Password=fqLsUMeFmmCJNzTcjKiqGPVswmwmjIOj;SslMode=Disable";
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<AppointmentStatus>();
         modelBuilder.HasPostgresEnum<CourseSlotStatus>();
         modelBuilder.HasPostgresEnum<CourseStatus>();
         modelBuilder.HasPostgresEnum<EventStatus>();
-        modelBuilder.HasPostgresEnum<EventType>();
-        modelBuilder.HasPostgresEnum<Parameters.PostgreEnums.GameExtension>();
-        modelBuilder.HasPostgresEnum<Parameters.PostgreEnums.GameType>();
+        modelBuilder.HasPostgresEnum<GameExtensionEnum>();
+        modelBuilder.HasPostgresEnum<GameTypeEnum>();
         modelBuilder.HasPostgresEnum<Gender>();
         modelBuilder.HasPostgresEnum<MessageStatus>();
         modelBuilder.HasPostgresEnum<OrderStatus>();
         modelBuilder.HasPostgresEnum<ParticipantStatus>();
+        modelBuilder.HasPostgresEnum<PaymentType>();
         modelBuilder.HasPostgresEnum<ProductStatus>();
         modelBuilder.HasPostgresEnum<Ranking>();
         modelBuilder.HasPostgresEnum<RequestStatus>();
@@ -154,7 +157,7 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<UserRole>();
         modelBuilder.HasPostgresEnum<VoucherStatus>();
         modelBuilder.HasPostgresEnum<WalletStatus>();
-        
+
         modelBuilder.Entity<Appointment>(entity =>
         {
             entity.HasKey(e => e.AppointmentId).HasName("appointments_pkey");
@@ -176,8 +179,8 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasConversion(
-                    v => v.ToString(), 
-                    v => (RequestStatus) Enum.Parse(typeof(RequestStatus), v)
+                    v => v.ToString(),
+                    v => (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), v)
                     );
 
             entity.HasOne(d => d.User).WithMany(p => p.Appointments)
@@ -275,7 +278,7 @@ public partial class StrateZoneDbContext : DbContext
                   .HasColumnName("chess_type")
                   .HasConversion(
                     v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameType)Enum.Parse(typeof(Parameters.PostgreEnums.GameType), v)
+                    v => (Parameters.PostgreEnums.GameTypeEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameTypeEnum), v)
                   );
 
             entity.Property(e => e.SkillLevel).HasColumnName("skill_level")
@@ -353,11 +356,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.StartDate).HasColumnName("start_date");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.Property(e => e.EventType).HasColumnName("type").HasConversion(
-                    v => v.ToString(),
-                    v => (EventType)Enum.Parse(typeof(EventType), v)
-                    );
-
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (EventStatus)Enum.Parse(typeof(EventStatus), v)
@@ -415,6 +413,40 @@ public partial class StrateZoneDbContext : DbContext
                 .HasConstraintName("friendrequests_to_user_fkey");
         });
 
+        modelBuilder.Entity<AppointmentRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("appointment_requests_pkey");
+
+            entity.ToTable("appointment_requests");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.FromUser).HasColumnName("from_user");
+            entity.Property(e => e.ToUser).HasColumnName("to_user");
+            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.Status).HasColumnType("request_status").HasConversion(
+                    v => v.ToString(),
+                    v => (RequestStatus)Enum.Parse(typeof(RequestStatus), v)
+                    );
+
+            entity.HasOne(d => d.FromUserNavigation).WithMany(p => p.AppointmentRequestsFromUserNavigations)
+                .HasForeignKey(d => d.FromUser)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_from_user_fkey");
+
+            entity.HasOne(d => d.ToUserNavigation).WithMany(p => p.AppointmentRequestsToUserNavigations)
+                .HasForeignKey(d => d.ToUser)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_to_user_fkey");
+
+            entity.HasOne(d => d.Appointment).WithMany(p => p.AppointmentRequests)
+                .HasForeignKey(d => d.AppointmentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_to_appointment_fkey");
+        });
+
         modelBuilder.Entity<Entities.GameExtension>(entity =>
         {
             entity.HasKey(e => e.ExtensionId).HasName("gameExtensions_pkey");
@@ -426,7 +458,7 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.ExtensionName).HasColumnName("extension_name").HasColumnType("game_extension").HasConversion(
                     v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameExtension)Enum.Parse(typeof(Parameters.PostgreEnums.GameExtension), v)
+                    v => (Parameters.PostgreEnums.GameExtensionEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameExtensionEnum), v)
                     );
 
             entity.HasOne(d => d.Type).WithMany(p => p.GameExtensions)
@@ -443,7 +475,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TypeId).HasColumnName("type_id");
             entity.Property(e => e.TypeName).HasColumnName("type_name").HasColumnType("game_type").HasConversion(
                     v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameType)Enum.Parse(typeof(Parameters.PostgreEnums.GameType), v)
+                    v => (Parameters.PostgreEnums.GameTypeEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameTypeEnum), v)
                     );
         });
 
@@ -524,7 +556,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status").HasColumnType("message_status").HasConversion(
                     v => v.ToString(),
                     v => (MessageStatus)Enum.Parse(typeof(MessageStatus), v)
-                    ); 
+                    );
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -558,7 +590,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (OrderStatus)Enum.Parse(typeof(OrderStatus), v)
-                    ); ;
+                    );
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -597,8 +629,16 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.OrderId).HasColumnName("order_id");
+
+            entity.Property(e => e.PaymentType).HasColumnName("payment_type").HasConversion(
+                    v => v.ToString(),
+                    v => (PaymentType) Enum.Parse(typeof(PaymentType), v)
+                );
+
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.OrderId)
@@ -607,6 +647,14 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("payments_user_id_fkey");
+
+            entity.HasOne(d => d.Course).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("payments_course_id_fkey");
+
+            entity.HasOne(d => d.Appointment).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("payments_appointment_id_fkey");
         });
 
         modelBuilder.Entity<Price>(entity =>
@@ -618,6 +666,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
             entity.Property(e => e.GameTypeId).HasColumnName("game_type_id");
+            entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.MemberFee)
                 .HasColumnType("bit(1)")
                 .HasColumnName("member_fee");
@@ -639,6 +688,10 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.GameType).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.GameTypeId)
                 .HasConstraintName("prices_game_type_id_fkey");
+
+            entity.HasOne(d => d.Room).WithMany(p => p.Prices)
+                .HasForeignKey(d => d.RoomId)
+                .HasConstraintName("prices_room_id_fkey");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.ProductId)
@@ -705,6 +758,11 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (RoomType)Enum.Parse(typeof(RoomType), v)
                     );
+
+            entity.Property(e => e.Description).HasColumnName("description")
+                .HasMaxLength(200)
+                .HasColumnName("description");
+
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (RoomStatus)Enum.Parse(typeof(RoomStatus), v)
@@ -756,10 +814,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.Table).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.TableId)
                 .HasConstraintName("tables_appointments_table_id_fkey");
-
-            entity.HasOne(d => d.GameExtension).WithMany(p => p.TablesAppointments)
-                .HasForeignKey(d => d.GameExtensionId)
-                .HasConstraintName("tables_appointments_extension_id_fkey");
         });
 
         modelBuilder.Entity<Tag>(entity =>
@@ -849,6 +903,65 @@ public partial class StrateZoneDbContext : DbContext
                     );
         });
 
+        modelBuilder.Entity<Tournament>(entity => 
+        {
+            entity.HasKey(e => e.TournamentId).HasName("tournaments_pkey");
+
+            entity.ToTable("tournaments");
+
+            entity.Property(e => e.TournamentId).HasColumnName("tournament_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.StartDate).HasColumnName("start_date");
+            entity.Property(e => e.EndDate).HasColumnName("end_date");
+
+            entity.Property(e => e.TargetedRanking).HasColumnName("targeted_ranking").HasConversion(
+                    v => v.ToString(),
+                    v => (Ranking) Enum.Parse(typeof(Ranking), v)
+                );
+
+            entity.Property(e => e.MaxParticipants).HasColumnName("max_participants");
+
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (EventStatus) Enum.Parse(typeof(EventStatus), v)
+                    );
+
+            entity.HasOne(d => d.User).WithMany(p => p.Tournaments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("tournaments_user_id_fkey");
+        });
+
+        modelBuilder.Entity<TournamentsParticipants>(entity => 
+        {
+            entity.HasKey(e => e.Id).HasName("tournaments_participants_pkey");
+
+            entity.ToTable("tournaments_participants");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.TournamentId).HasColumnName("tournament_id");
+            entity.Property(e => e.ParticipantId).HasColumnName("participant_id");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Tournament).WithMany(p => p.TournamentsParticipants)
+                .HasForeignKey(d => d.TournamentId)
+                .HasConstraintName("tournament_participants_tournament_id_fkey");
+
+            entity.HasOne(d => d.Participant).WithMany(p => p.TournamentsParticipants)
+                .HasForeignKey(d => d.ParticipantId)
+                .HasConstraintName("tournament_participants_participant_id_fkey");
+        });
+
         modelBuilder.Entity<Transaction>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("transactions_pkey");
@@ -875,7 +988,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TransactionType).HasColumnName("type").HasConversion(
                     v => v.ToString(),
                     v => (TransactionType)Enum.Parse(typeof(TransactionType), v)
-                    ); ;
+                    );
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -906,6 +1019,17 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (Gender)Enum.Parse(typeof(Gender), v)
                 );
+
+            entity.Property(e => e.SkillLevel).HasColumnName("skill_level").HasColumnType("skill_level").HasConversion(
+                    v => v.ToString(),
+                    v => (SkillLevel) Enum.Parse(typeof(SkillLevel), v)
+                );
+
+            entity.Property(e => e.Ranking).HasColumnName("ranking").HasColumnType("ranking").HasConversion(
+                    v => v.ToString(),
+                    v => (Ranking)Enum.Parse(typeof(Ranking), v)
+                );
+
             entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")

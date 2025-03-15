@@ -9,7 +9,9 @@ using Npgsql;
 using StrateZone_APIs.ServiceExtensions;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
+using StrateZone_Service.Hubs;
 using StrateZone_Service.Implements;
+using StrateZone_Service.Interfaces;
 using StrateZone_Service.Mapper;
 using System.Reflection;
 using System.Text;
@@ -36,9 +38,6 @@ builder.WebHost.UseUrls($"http://*:{port}");
 
 //Add health check
 builder.Services.AddHealthChecks();
-
-//Config GHN
-builder.Services.AddHttpClient<GHNService>();
 
 builder.Services.AddControllers()
      .AddJsonOptions(options =>
@@ -120,13 +119,6 @@ builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
 app.UseHealthChecks("/health");
 
 app.UseSwagger();
@@ -134,9 +126,12 @@ app.UseSwaggerUI();
 
 app.UseCors(MyAllowSpecificOrigins);
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<ChatHub>("/chatHub");
 app.MapControllers();
 
 app.Run();

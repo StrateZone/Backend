@@ -13,9 +13,10 @@ namespace StrateZone_Repository.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("CREATE TYPE course_slot_status AS ENUM ('upcoming', 'in_progress', 'completed', 'cancelled');");
-            migrationBuilder.Sql("CREATE TYPE course_status AS ENUM ('open', 'closed', 'in_progress', 'completed', 'cancelled');");
-            migrationBuilder.Sql("CREATE TYPE event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'cancelled');");
+            migrationBuilder.Sql("CREATE TYPE appointment_request AS ENUM('Pending', 'Confirmed', 'Cancelled', 'Completed', 'Expired')");
+            migrationBuilder.Sql("CREATE TYPE course_slot_status AS ENUM ('upcoming', 'InProgress', 'Completed', 'Cancelled');");
+            migrationBuilder.Sql("CREATE TYPE course_status AS ENUM ('Open', 'Closed', 'InProgress', 'Completed', 'Cancelled');");
+            migrationBuilder.Sql("CREATE TYPE event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'Cancelled');");
             migrationBuilder.Sql("CREATE TYPE event_type AS ENUM ('tournament', 'promotion');");
             migrationBuilder.Sql("CREATE TYPE game_extension AS ENUM ('bullet', 'lightning', 'flip', 'traditional');");
             migrationBuilder.Sql("CREATE TYPE game_type AS ENUM ('chess', 'xiangqi', 'go');");
@@ -27,7 +28,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("CREATE TYPE ranking AS ENUM ('basic', 'silver', 'gold', 'platinum');");
             migrationBuilder.Sql("CREATE TYPE request_status AS ENUM ('pending', 'accepted', 'rejected', 'cancelled');");
             migrationBuilder.Sql("CREATE TYPE room_status AS ENUM ('available', 'unavailable', 'closed');");
-            migrationBuilder.Sql("CREATE TYPE room_type AS ENUM ('study', 'appointment');");
+            migrationBuilder.Sql("CREATE TYPE room_type AS ENUM ('study', 'premium', 'basic', 'openspaced');");
             migrationBuilder.Sql("CREATE TYPE skill_level AS ENUM ('beginner', 'intermediate', 'advanced');");
             migrationBuilder.Sql("CREATE TYPE thread_status AS ENUM ('published', 'rejected', 'pending', 'deleted');");
             migrationBuilder.Sql("CREATE TYPE ticket_type AS ENUM ('withdrawal', 'feedback', 'other');");
@@ -36,7 +37,9 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("CREATE TYPE user_role AS ENUM ('registered_user', 'member', 'instructor', 'staff', 'admin');");
             migrationBuilder.Sql("CREATE TYPE voucher_status AS ENUM ('active', 'expired');");
             migrationBuilder.Sql("CREATE TYPE wallet_status AS ENUM ('active', 'closed');");
-
+            migrationBuilder.Sql("CREATE TYPE payment_type AS ENUM ('order', 'appointment', 'course', 'membership')");
+            
+            /*
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:course_slot_status.course_slot_status", "upcoming,in_progress,completed,cancelled")
                 .Annotation("Npgsql:Enum:course_status.course_status", "open,closed,in_progress,completed,cancelled")
@@ -61,6 +64,7 @@ namespace StrateZone_Repository.Migrations
                 .Annotation("Npgsql:Enum:user_role.user_role", "registered_user,member,instructor,staff,admin")
                 .Annotation("Npgsql:Enum:voucher_status.voucher_status", "active,expired")
                 .Annotation("Npgsql:Enum:wallet_status.wallet_status", "active,closed");
+            */
 
             migrationBuilder.CreateTable(
                 name: "carts",
@@ -1185,6 +1189,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.DropTable(
                 name: "carts");
 
+            migrationBuilder.Sql("DROP TYPE appointment_request;");
             migrationBuilder.Sql("DROP TYPE course_slot_status;");
             migrationBuilder.Sql("DROP TYPE course_status;");
             migrationBuilder.Sql("DROP TYPE event_status;");
@@ -1208,6 +1213,7 @@ namespace StrateZone_Repository.Migrations
             migrationBuilder.Sql("DROP TYPE user_role;");
             migrationBuilder.Sql("DROP TYPE voucher_status;");
             migrationBuilder.Sql("DROP TYPE wallet_status;");
+            migrationBuilder.Sql("DROP TYPE payment_type");
         }
     }
 }

@@ -18,7 +18,5 @@ namespace StrateZone_Service.BusinessModels
         public int? GameTypeId { get; set; }
 
         public virtual GameTypeModel? GameType { get; set; }
-
-        public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
     }
 }

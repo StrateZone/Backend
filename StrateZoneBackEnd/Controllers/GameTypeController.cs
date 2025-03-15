@@ -18,20 +18,6 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllGameTypes()
-        {
-            try
-            {
-                var gametypes = await _gameTypeService.GetGameTypesAsync();
-                return Ok(gametypes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("all-extend")]
         public async Task<IActionResult> GetAllGameTypesWithExtensions()
         {
             try
@@ -45,23 +31,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-id")]
-        public async Task<IActionResult> GetByTypeId(int id)
-        {
-            try
-            {
-                if (id <= 0) return BadRequest("Invalid ID");
-
-                var gametypes = await _gameTypeService.GetGameTypeByIdAsync(id);
-                return Ok(gametypes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("by-id-extend")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetWithExtensionsByTypeId(int id)
         {
             try

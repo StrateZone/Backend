@@ -12,9 +12,13 @@ public partial class Room
 
     public RoomType Type { get; set; }
 
+    public string? Description {  get; set; }
+
     public int? Capacity { get; set; }
 
     public RoomStatus Status { get; set; }
+
+    public virtual ICollection<Price> Prices { get; set; } = new List<Price>();
 
     public virtual ICollection<CoursesSlot> CoursesSlots { get; set; } = new List<CoursesSlot>();
 

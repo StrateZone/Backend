@@ -1,5 +1,6 @@
 ﻿using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Service.Hubs;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 
@@ -11,6 +12,8 @@ namespace StrateZone_APIs.ServiceExtensions
 
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
+            services.AddSignalR();
+
             // Add your application services here
             services
                 .AddRepositories()
@@ -29,7 +32,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IGameTypeRepository, GameTypeRepository>();
             services.AddScoped<IGameExtensionRepository, GameExtensionRepository>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+            services.AddScoped<ITablesAppointmentRepository, TablesAppointmentRepository>();
             services.AddScoped<ITableRepository, TableRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
             return services;
         }
 
@@ -39,8 +44,14 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IGameTypeService, GameTypeService>();
             services.AddScoped<IGameExtensionService, GameExtensionService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<ITablesAppointmentService, TablesAppointmentService>();
             services.AddScoped<ITableService, TableService>();
             services.AddScoped<TokenService>();
+            services.AddScoped<IMessageService, MessageService>();
+
+            services.AddHttpClient<IGHNService, GHNService>();
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
 
@@ -70,7 +81,6 @@ namespace StrateZone_APIs.ServiceExtensions
 					// Configure JSON options to handle circular references
 					options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error;
 				});
-
 
 			return services;
 		}

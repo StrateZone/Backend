@@ -50,13 +50,11 @@ namespace StrateZone_Service.Implements
             }
             catch (HttpRequestException ex)
             {
-                // Log the error (or handle it as needed)
                 Console.WriteLine($"Request failed: {ex.Message}");
                 return $"Error: {ex.Message}";
             }
             catch (Exception ex)
             {
-                // Catch any other unexpected errors
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 return $"Unexpected error: {ex.Message}";
             }
@@ -72,13 +70,11 @@ namespace StrateZone_Service.Implements
             }
             catch (HttpRequestException ex)
             {
-                // Log the error (or handle it as needed)
                 Console.WriteLine($"Request failed: {ex.Message}");
                 return $"Error: {ex.Message}";
             }
             catch (Exception ex)
             {
-                // Catch any other unexpected errors
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 return $"Unexpected error: {ex.Message}";
             }
@@ -89,6 +85,16 @@ namespace StrateZone_Service.Implements
             var request = CreateRequest(HttpMethod.Post, "/v2/shipping-order/create", orderData);
             var response = await _httpClient.SendAsync(request);
             return await response.Content.ReadAsStringAsync();
+        }
+
+        public Task<string> UpdateOrderAsync(object orderData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> CalculaExpectedDeliveryTime()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,16 +1,22 @@
-﻿using StrateZone_Service.BusinessModels;
+﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Parameters;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Interfaces
 {
     public interface IUserService
     {
-        Task<UserModel> CreateUserAsync(UserRequest userRequest);
-        Task<UserModel> DeleteUserAsync(int id);
-        Task<UserModel> GetUserByEmailAsync(string email);
-        Task<UserModel> GetUserByIdAsync(int id);
-        Task<UserModel> GetUserByUsernameAsync(string username);
-        Task<List<UserModel>> GetUsersAsync();
-        Task<UserModel> UpdateUserAsync(UserModel userModel, int id);
+        Task<UserResponse> CreateUserAsync(UserRequest userRequest);
+        Task<UserResponse> DeleteUserAsync(int id);
+        Task<UserResponse> GetUserByEmailAsync(string email);
+        Task<UserResponse> GetUserByIdAsync(int id);
+        Task<UserResponse> GetUserByPhoneNumberAsync(string phoneNumber);
+        Task<PagedList<UserResponse>> GetUsersByUsernameAsync(UserListParameters parameters, string username);
+        Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters);
+        Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, Ranking ranking, int up, int down);
+        Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);
     }
 }

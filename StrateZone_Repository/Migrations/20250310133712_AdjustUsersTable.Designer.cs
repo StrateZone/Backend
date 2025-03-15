@@ -13,8 +13,8 @@ using StrateZone_Repository.Data;
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    [Migration("20250303141436_Fix_GameTypes_GameExtensions_Tables_Appointments_Relationships_2")]
-    partial class Fix_GameTypes_GameExtensions_Tables_Appointments_Relationships_2
+    [Migration("20250310133712_AdjustUsersTable")]
+    partial class AdjustUsersTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,12 +24,15 @@ namespace StrateZone_Repository.Migrations
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "appointment_status", new[] { "pending", "confirmed", "acncelled", "completed", "expired" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "course_slot_status", new[] { "upcoming", "in_progress", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "course_status", new[] { "open", "closed", "in_progress", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "event_status", new[] { "upcoming", "ongoing", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "event_type", new[] { "tournament", "promotion" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_extension", new[] { "bullet", "lightning", "flip", "traditional" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_type", new[] { "chess", "xiangqi", "go" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_extension", new[] { "bullet", "flip", "lightning", "traditional" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_extension_enum", new[] { "bullet", "lightning", "flip", "traditional" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_type", new[] { "chess", "go", "xiangqi" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_type_enum", new[] { "chess", "xiangqi", "go" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "gender", new[] { "male", "female" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "message_status", new[] { "read", "unread" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "order_status", new[] { "pending", "shipped", "delivered", "cancelled" });
@@ -48,6 +51,47 @@ namespace StrateZone_Repository.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "voucher_status", new[] { "active", "expired" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "wallet_status", new[] { "active", "closed" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("AppointmentRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("appointment_id");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("FromUser")
+                        .HasColumnType("integer")
+                        .HasColumnName("from_user");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("request_status");
+
+                    b.Property<int>("ToUser")
+                        .HasColumnType("integer")
+                        .HasColumnName("to_user");
+
+                    b.HasKey("Id")
+                        .HasName("appointment_requests_pkey");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("FromUser");
+
+                    b.HasIndex("ToUser");
+
+                    b.ToTable("appointment_requests", (string)null);
+                });
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Appointment", b =>
                 {
@@ -1152,6 +1196,11 @@ namespace StrateZone_Repository.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("points");
 
+                    b.Property<string>("SkillLevel")
+                        .IsRequired()
+                        .HasColumnType("skill_level")
+                        .HasColumnName("skill_level");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1306,6 +1355,33 @@ namespace StrateZone_Repository.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("wallet", (string)null);
+                });
+
+            modelBuilder.Entity("AppointmentRequest", b =>
+                {
+                    b.HasOne("StrateZone_Repository.Entities.Appointment", "Appointment")
+                        .WithMany("AppointmentRequests")
+                        .HasForeignKey("AppointmentId")
+                        .IsRequired()
+                        .HasConstraintName("appointment_requests_to_appointment_fkey");
+
+                    b.HasOne("StrateZone_Repository.Entities.User", "FromUserNavigation")
+                        .WithMany("AppointmentRequestsFromUserNavigations")
+                        .HasForeignKey("FromUser")
+                        .IsRequired()
+                        .HasConstraintName("appointment_requests_from_user_fkey");
+
+                    b.HasOne("StrateZone_Repository.Entities.User", "ToUserNavigation")
+                        .WithMany("AppointmentRequestsToUserNavigations")
+                        .HasForeignKey("ToUser")
+                        .IsRequired()
+                        .HasConstraintName("appointment_requests_to_user_fkey");
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("FromUserNavigation");
+
+                    b.Navigation("ToUserNavigation");
                 });
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Appointment", b =>
@@ -1728,6 +1804,8 @@ namespace StrateZone_Repository.Migrations
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Appointment", b =>
                 {
+                    b.Navigation("AppointmentRequests");
+
                     b.Navigation("TablesAppointments");
                 });
 
@@ -1820,6 +1898,10 @@ namespace StrateZone_Repository.Migrations
 
             modelBuilder.Entity("StrateZone_Repository.Entities.User", b =>
                 {
+                    b.Navigation("AppointmentRequestsFromUserNavigations");
+
+                    b.Navigation("AppointmentRequestsToUserNavigations");
+
                     b.Navigation("Appointments");
 
                     b.Navigation("Comments");

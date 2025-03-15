@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Azure.Core;
+using MealHunt_Repositories.Pagination;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
@@ -19,12 +21,14 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
         }
 
-        public async Task<List<TableModel>> GetTablesAsync()
+        public async Task<PagedList<TableModel>> GetTablesAsync(TableParameters parameters)
         {
             try
             {
-                var result = await _tableRepository.GetTablesAsync();
-                return _mapper.Map<List<TableModel>>(result);
+                var result = await _tableRepository.GetTablesAsync(parameters);
+                var tables = _mapper.Map<PagedList<TableModel>>(result);
+
+                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
             }
             catch (Exception ex)
             {
@@ -32,12 +36,44 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<TableModel>> GetTablesByGameTypeAsync(StrateZone_Repository.Parameters.PostgreEnums.GameType gameType)
+        public async Task<PagedList<TableModel>> GetAvailableTablesAsync(TableParameters parameters)
         {
             try
             {
-                var result = await _tableRepository.GetTablesByGameTypeAsync(gameType);
-                return _mapper.Map<List<TableModel>>(result);
+                var result = await _tableRepository.GetAvailableTablesAsync(parameters);
+                var tables = _mapper.Map<PagedList<TableModel>>(result);
+
+                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<TableModel>> GetTablesByGameTypeAsync(TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        {
+            try
+            {
+                var result = await _tableRepository.GetTablesByGameTypeAsync(parameters, gameType);
+                var tables = _mapper.Map<PagedList<TableModel>>(result);
+
+                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<TableModel>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        {
+            try
+            {
+                var result = await _tableRepository.GetAvailableTablesByGameTypeAsync(parameters, gameType);
+                var tables = _mapper.Map<PagedList<TableModel>>(result);
+
+                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
             }
             catch (Exception ex)
             {
