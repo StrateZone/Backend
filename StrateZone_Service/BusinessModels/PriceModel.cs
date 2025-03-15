@@ -1,0 +1,32 @@
+﻿using StrateZone_Repository.Entities;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
+
+namespace StrateZone_Service.BusinessModels
+{
+    public class PriceModel
+    {
+        public int Id { get; set; }
+
+        public int? GameTypeId { get; set; }
+
+        public int? ProductId { get; set; }
+
+        public int? CourseId { get; set; }
+
+        public RoomType RoomType { get; set; }
+
+        public bool MemberFee { get; set; } = false;
+
+        public bool TeachingSalary { get; set; } = false;
+
+        public decimal? Price1 { get; set; }
+
+        public string? Unit { get; set; }
+    }
+}
