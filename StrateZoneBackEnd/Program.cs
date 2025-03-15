@@ -1,12 +1,14 @@
 ﻿using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
 using Npgsql;
 using StrateZone_APIs.ServiceExtensions;
 using StrateZone_Repository.Data;
+using StrateZone_Repository.Entities;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Mapper;
 using System.Reflection;
@@ -89,47 +91,30 @@ builder.Services.AddSwaggerGen(option =>
 });
 
 // Identity, authentication and authorization
-/*
-builder.Services.AddIdentity<User, Role>(
-        options =>
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            options.Password.RequireDigit = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredLength = 3;
-        }
-    )
-    .AddEntityFrameworkStores<MealHuntContext>()
-    .AddDefaultTokenProviders();
-*/
-
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme =
-//    options.DefaultChallengeScheme =
-//    options.DefaultForbidScheme =
-//    options.DefaultScheme =
-//    options.DefaultSignInScheme =
-//    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = false,
-//            //ValidIssuer = builder.Configuration["JWT:Issuer"],
-//            ValidateAudience = false,
-//            //ValidAudience = builder.Configuration["JWT:Audience"],
-//            RequireExpirationTime = true,
-//            ValidateIssuerSigningKey = true,
-//            ClockSkew = TimeSpan.Zero,
-//            IssuerSigningKey = new SymmetricSecurityKey(
-//                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
-//                    )
-//        };
-//    });
-
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+        };
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("StaffOnly", policy => policy.RequireRole("Staff"));
+    options.AddPolicy("InstructorOrAbove", policy => policy.RequireRole("Instructor", "Staff", "Admin"));
+});
 // Service Extensions
 builder.Services.AddApplicationServices();
 

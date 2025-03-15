@@ -31,7 +31,7 @@ namespace StrateZone_Repository.Parameters
         public enum TicketType { withdrawal, feedback, other }
         public enum TransactionType { deposit, withdrawal, refund }
         public enum UserCourseResult { passed, failed }
-        public enum UserRole { registered_user, member, instructor, staff, admin }
+        public enum UserRole { RegisteredUser, Member, Instructor, Staff, Admin }
         public enum VoucherStatus { active, expired }
         public enum WalletStatus { active, closed }
 

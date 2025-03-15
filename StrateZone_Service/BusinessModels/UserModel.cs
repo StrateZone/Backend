@@ -35,13 +35,18 @@ namespace StrateZone_Service.BusinessModels
 
         public int? Points { get; set; }
 
-        public UserRole UserRole { get; set; } = UserRole.registered_user;
+        public UserRole UserRole { get; set; } = UserRole.RegisteredUser;
 
         public Gender Gender { get; set; } = Gender.male;
 
         public DateTime? CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+        // Refresh Token Fields
+        public string? RefreshToken { get; set; }
+
+        public DateTime? RefreshTokenExpiry { get; set; }
 
         public virtual ICollection<Friendlist> FriendlistUsers { get; set; } = new List<Friendlist>();
 

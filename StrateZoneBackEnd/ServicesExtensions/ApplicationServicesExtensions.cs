@@ -40,6 +40,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IGameTypeService, GameTypeService>();
             services.AddScoped<IGameExtensionService, GameExtensionService>();
             services.AddScoped<ITableService, TableService>();
+            services.AddScoped<TokenService>();
             return services;
         }
 

@@ -11,5 +11,6 @@ namespace StrateZone_Repository.Interfaces
         Task<User> GetUserByUsernameAsync(string username);
         Task<List<User>> GetUsersAsync();
         Task<User> UpdateUserAsync(User user, int id);
+        Task<User> GetByRefreshTokenAsync(string refreshToken);
     }
 }
