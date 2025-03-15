@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StrateZone_Repository.Entities;
@@ -666,17 +667,21 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
             entity.Property(e => e.GameTypeId).HasColumnName("game_type_id");
-            entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.MemberFee)
-                .HasColumnType("bit(1)")
+                .HasColumnType("boolean")
                 .HasColumnName("member_fee");
             entity.Property(e => e.Price1)
                 .HasPrecision(10, 2)
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.TeachingSalary)
-                .HasColumnType("bit(1)")
+                .HasColumnType("boolean")
                 .HasColumnName("teaching_salary");
+            entity.Property(e => e.RoomType).HasColumnName("room_type")
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (RoomType) Enum.Parse(typeof(RoomType), v)
+                );
             entity.Property(e => e.Unit)
                 .HasMaxLength(50)
                 .HasColumnName("unit");
@@ -688,10 +693,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.GameType).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.GameTypeId)
                 .HasConstraintName("prices_game_type_id_fkey");
-
-            entity.HasOne(d => d.Room).WithMany(p => p.Prices)
-                .HasForeignKey(d => d.RoomId)
-                .HasConstraintName("prices_room_id_fkey");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.ProductId)

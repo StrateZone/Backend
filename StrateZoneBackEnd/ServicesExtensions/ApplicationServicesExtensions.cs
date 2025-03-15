@@ -34,7 +34,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<ITablesAppointmentRepository, TablesAppointmentRepository>();
             services.AddScoped<ITableRepository, TableRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IPriceRepository, PriceRepository>();
             return services;
         }
 
@@ -48,7 +50,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ITablesAppointmentService, TablesAppointmentService>();
             services.AddScoped<ITableService, TableService>();
             services.AddScoped<TokenService>();
+            services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IPriceService, PriceService>();
 
             services.AddHttpClient<IGHNService, GHNService>();
             services.AddScoped<IEmailService, EmailService>();

@@ -20,7 +20,7 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Messages
                     .Where(m => m.SenderId == id)
-                    .OrderBy(m => m.CreatedAt)
+                    .OrderByDescending(m => m.CreatedAt)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Messages
                     .Where(m => m.SenderId == senderId && m.ReceiverId == receiverId)
-                    .OrderBy(m => m.CreatedAt)
+                    .OrderByDescending(m => m.CreatedAt)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -56,7 +56,7 @@ namespace StrateZone_Repository.Implements
                                         (m.SenderId == user_1_Id && m.ReceiverId == user_2_Id)
                                         ||
                                         (m.SenderId == user_2_Id && m.ReceiverId == user_1_Id))
-                                    .OrderBy(m => m.CreatedAt)
+                                    .OrderByDescending(m => m.CreatedAt)
                                     .ToListAsync();
             }
             catch (Exception ex)
