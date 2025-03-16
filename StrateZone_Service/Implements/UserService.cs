@@ -13,11 +13,13 @@ namespace StrateZone_Service.Implements
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IImageRepository _imageRepository;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IMapper mapper)
+        public UserService(IUserRepository userRepository, IImageRepository imageRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _imageRepository = imageRepository;
             _mapper = mapper;
         }
 

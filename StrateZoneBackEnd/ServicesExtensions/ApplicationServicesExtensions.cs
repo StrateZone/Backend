@@ -37,6 +37,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IPriceRepository, PriceRepository>();
+            services.AddScoped<IAppointmentrequestRepository, AppointmentrequestRepository>();
+            services.AddScoped<IFriendrequestRepository, FriendrequestRepository>();
+            services.AddScoped<IImageRepository, ImageRepository>();
             return services;
         }
 
@@ -54,7 +57,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IPriceService, PriceService>();
+            services.AddScoped<IImageService, ImageService>();
 
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();
             services.AddScoped<IEmailService, EmailService>();
             return services;
@@ -83,7 +88,6 @@ namespace StrateZone_APIs.ServiceExtensions
 			services.AddControllers()
 				.AddNewtonsoftJson(options =>
 				{
-					// Configure JSON options to handle circular references
 					options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error;
 				});
 

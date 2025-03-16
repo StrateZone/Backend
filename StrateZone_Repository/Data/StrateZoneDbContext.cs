@@ -36,7 +36,7 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Friendlist> Friendlists { get; set; }
 
-    public virtual DbSet<AppointmentRequest> AppointmentRequests { get; set; }
+    public virtual DbSet<Appointmentrequest> AppointmentRequests { get; set; }
 
     public virtual DbSet<Friendrequest> Friendrequests { get; set; }
 
@@ -414,7 +414,7 @@ public partial class StrateZoneDbContext : DbContext
                 .HasConstraintName("friendrequests_to_user_fkey");
         });
 
-        modelBuilder.Entity<AppointmentRequest>(entity =>
+        modelBuilder.Entity<Appointmentrequest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("appointment_requests_pkey");
 
@@ -490,11 +490,31 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ThreadId).HasColumnName("thread_id");
+            entity.Property(e => e.GameTypeId).HasColumnName("gametype_id");
+            entity.Property(e => e.TournamentId).HasColumnName("tournament_id");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
             entity.Property(e => e.Url)
                 .HasMaxLength(255)
                 .HasColumnName("url");
+
+            entity.HasOne(d => d.User).WithOne(p => p.Image)
+                .HasForeignKey<User>(d => d.UserId)
+                .HasConstraintName("images_user_id_fkey");
+
+            entity.HasOne(d => d.GameType).WithOne(p => p.Image)
+                .HasForeignKey<GameType>(d => d.TypeId)
+                .HasConstraintName("images_gametype_id_fkey");
+
+            entity.HasOne(d => d.Event).WithOne(p => p.Image)
+                .HasForeignKey<Event>(d => d.EventId)
+                .HasConstraintName("images_event_id_fkey");
+
+            entity.HasOne(d => d.Tournament).WithOne(p => p.Image)
+                .HasForeignKey<Tournament>(d => d.TournamentId)
+                .HasConstraintName("images_tournament_id_fkey");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Images)
                 .HasForeignKey(d => d.ProductId)
@@ -721,7 +741,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (ProductStatus)Enum.Parse(typeof(ProductStatus), v)
-                    ); ;
+                    );
         });
 
         modelBuilder.Entity<ProductTag>(entity =>
@@ -755,7 +775,7 @@ public partial class StrateZoneDbContext : DbContext
                 .HasMaxLength(5)
                 .HasColumnName("room_name");
 
-            entity.Property(e => e.Type).HasColumnName("room_type").HasConversion(
+            entity.Property(e => e.Type).HasColumnName("room_type").HasColumnType("room_type").HasConversion(
                     v => v.ToString(),
                     v => (RoomType)Enum.Parse(typeof(RoomType), v)
                     );
@@ -764,7 +784,7 @@ public partial class StrateZoneDbContext : DbContext
                 .HasMaxLength(200)
                 .HasColumnName("description");
 
-            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+            entity.Property(e => e.Status).HasColumnName("status").HasColumnType("room_status").HasConversion(
                     v => v.ToString(),
                     v => (RoomStatus)Enum.Parse(typeof(RoomStatus), v)
                     );
@@ -1012,9 +1032,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Address)
                 .HasMaxLength(100)
                 .HasColumnName("address");
-            entity.Property(e => e.AvatarUrl)
-                .HasMaxLength(255)
-                .HasColumnName("avatar_url");
             entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.Gender).HasColumnName("gender").HasColumnType("gender").HasConversion(
                     v => v.ToString(),

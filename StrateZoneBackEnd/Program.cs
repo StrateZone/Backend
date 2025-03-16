@@ -1,4 +1,5 @@
-﻿using CloudinaryDotNet.Actions;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -54,7 +55,15 @@ builder.Services.AddDbContext<StrateZoneDbContext>();
 // Auto Mapper
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
-// Add payOS
+// Load Cloudinary settings
+var cloudinarySettings = builder.Configuration.GetSection("Cloudinary");
+var account = new Account(
+    cloudinarySettings["CloudName"],
+    cloudinarySettings["ApiKey"],
+    cloudinarySettings["ApiSecret"]
+);
+builder.Services.AddSingleton(new Cloudinary(account));
+
 builder.Services.AddSingleton(payOS);
 
 // Seed data

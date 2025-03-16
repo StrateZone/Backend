@@ -41,7 +41,8 @@ namespace StrateZone_Repository.Implements
                                         @"SELECT p.*
                                         FROM public.""prices"" p
                                         JOIN public.""gameTypes"" g ON p.game_type_id = g.type_id
-                                        WHERE g.type_name = @gt::game_type
+                                        WHERE g.type_name = @gt::game_type 
+                                            AND p.member_fee = false AND p.teaching_salary = false
                                         LIMIT 1",
                                         new NpgsqlParameter("@gt", gameType.ToString())
                                         )
@@ -61,7 +62,10 @@ namespace StrateZone_Repository.Implements
             {
                 var price = await _context.Prices
                                     .FromSqlRaw(
-                                        @"SELECT * FROM prices WHERE room_type = @rt::room_type LIMIT 1",
+                                        @"SELECT * FROM prices 
+                                        WHERE room_type = @rt::room_type 
+                                            AND member_fee = false AND teaching_salary = false 
+                                        LIMIT 1",
                                         new NpgsqlParameter("@rt", roomType.ToString())
                                         )
                                     .FirstOrDefaultAsync();

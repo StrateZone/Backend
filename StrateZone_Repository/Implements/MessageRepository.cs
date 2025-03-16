@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
@@ -20,6 +21,8 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Messages
                     .Where(m => m.SenderId == id)
+                    .Include(m => m.Sender)
+                    .Include(m => m.Receiver)
                     .OrderByDescending(m => m.CreatedAt)
                     .ToListAsync();
             }
@@ -35,6 +38,8 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Messages
                     .Where(m => m.SenderId == senderId && m.ReceiverId == receiverId)
+                    .Include(m => m.Sender)
+                    .Include(m => m.Receiver)
                     .OrderByDescending(m => m.CreatedAt)
                     .ToListAsync();
             }
@@ -56,6 +61,8 @@ namespace StrateZone_Repository.Implements
                                         (m.SenderId == user_1_Id && m.ReceiverId == user_2_Id)
                                         ||
                                         (m.SenderId == user_2_Id && m.ReceiverId == user_1_Id))
+                                    .Include(m => m.Sender)
+                                    .Include(m => m.Receiver)
                                     .OrderByDescending(m => m.CreatedAt)
                                     .ToListAsync();
             }
@@ -69,21 +76,24 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                string insertQuery = @"
-                        INSERT INTO messages (sender_id, receiver_id, content, status, created_at) 
-                        VALUES ({0}, {1}, {2}, {3}::message_status, {4})
-                        RETURNING message_id;"; 
+                var connection = _context.Database.GetDbConnection();
+                await connection.OpenAsync();
 
-                var newMessageId = await _context.Database.ExecuteSqlRawAsync(
-                    insertQuery,
-                    message.SenderId,
-                    message.ReceiverId,
-                    message.Content,
-                    message.Status.ToString(),
-                    message.CreatedAt
-                );
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    INSERT INTO messages (sender_id, receiver_id, content, status, created_at) 
+                    VALUES (@sender_id, @receiver_id, @content, @status::message_status, @created_at)
+                    RETURNING message_id;";
 
-                message.MessageId = newMessageId; // Assign the returned ID to the user object
+                cmd.Parameters.Add(new NpgsqlParameter("@sender_id", message.SenderId));
+                cmd.Parameters.Add(new NpgsqlParameter("@receiver_id", message.ReceiverId));
+                cmd.Parameters.Add(new NpgsqlParameter("@content", message.Content));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", message.Status.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", message.CreatedAt ?? DateTime.UtcNow));
+
+                var newMessageId = await cmd.ExecuteScalarAsync();
+                message.MessageId = Convert.ToInt32(newMessageId);
+
                 return message;
             }
             catch (Exception ex)

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
@@ -11,9 +12,11 @@ using StrateZone_Repository.Data;
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    partial class StrateZoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316121114_AdjustTable_Images")]
+    partial class AdjustTable_Images
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1198,12 +1201,6 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("gender")
                         .HasColumnName("gender");
 
-                    b.Property<string>("OTP")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("OTPExpiry")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Password")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
@@ -1219,18 +1216,12 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("points");
+
                     b.Property<string>("Ranking")
                         .IsRequired()
                         .HasColumnType("ranking")
                         .HasColumnName("ranking");
-                    b.Property<string>("RefreshToken")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("refresh_token");
 
-                    b.Property<DateTime?>("RefreshTokenExpiry")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("refresh_token_expiry");
                     b.Property<string>("SkillLevel")
                         .IsRequired()
                         .HasColumnType("skill_level")

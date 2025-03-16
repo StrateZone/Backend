@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
-public partial class AppointmentRequest
+public partial class Appointmentrequest
 {
     public int Id { get; set; }
 

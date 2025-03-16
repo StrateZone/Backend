@@ -37,8 +37,6 @@ public partial class User
 
     public string? Address { get; set; }
 
-    public string? AvatarUrl { get; set; }
-
     public string? Bio { get; set; }
 
     public int? Points { get; set; }
@@ -59,6 +57,8 @@ public partial class User
 
     public virtual Cart? Cart { get; set; }
 
+    public virtual Image? Image { get; set; }
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
@@ -75,9 +75,9 @@ public partial class User
 
     public virtual ICollection<Friendrequest> FriendrequestToUserNavigations { get; set; } = new List<Friendrequest>();
 
-    public virtual ICollection<AppointmentRequest> AppointmentRequestsFromUserNavigations { get; set; } = new List<AppointmentRequest>();
+    public virtual ICollection<Appointmentrequest> AppointmentRequestsFromUserNavigations { get; set; } = new List<Appointmentrequest>();
 
-    public virtual ICollection<AppointmentRequest> AppointmentRequestsToUserNavigations { get; set; } = new List<AppointmentRequest>();
+    public virtual ICollection<Appointmentrequest> AppointmentRequestsToUserNavigations { get; set; } = new List<Appointmentrequest>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
