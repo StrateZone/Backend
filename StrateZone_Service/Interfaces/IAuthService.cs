@@ -3,6 +3,7 @@ using StrateZone_Service.CustomModels.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,7 +11,8 @@ namespace StrateZone_Service.Interfaces
 {
     public interface IAuthService
     {
-        Task<ApiResponse<LoginResponse>> Login(LoginRequest loginRequest);
+        Task<ApiResponse<MailMessage>> SendOTP(string email);
+        Task<ApiResponse<LoginResponse>> VerifyOTP(LoginRequest loginRequest);
         Task<ApiResponse<RefreshTokenResponse>> RefreshToken(string refreshToken);
     }
 }

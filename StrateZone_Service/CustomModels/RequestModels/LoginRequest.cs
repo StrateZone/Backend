@@ -14,6 +14,6 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public string Email { get; set; }
 
         [Required]
-        public string Password { get; set; }
+        public string OTP { get; set; }
     }
 }

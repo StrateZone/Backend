@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace StrateZone_Repository.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddOTPFields : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+
+            migrationBuilder.AddColumn<string>(
+                name: "otp",
+                table: "users",
+                type: "text",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "otp_expiry",
+                table: "users",
+                type: "timestamp with time zone",
+                nullable: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "otp",
+                table: "users");
+
+            migrationBuilder.DropColumn(
+                name: "otp_expiry",
+                table: "users");
+        }
+    }
+}

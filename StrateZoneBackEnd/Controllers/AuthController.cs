@@ -16,12 +16,40 @@ namespace StrateZone_APIs.Controllers
             _authService = authService;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        [HttpPost("send-otp")]
+        public async Task<IActionResult> SendOTP(string email)
         {
             try
             {
-                var result = await _authService.Login(loginRequest);
+                var result = await _authService.SendOTP(email);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOTP([FromBody] LoginRequest loginRequest)
+        {
+            try
+            {
+                var result = await _authService.VerifyOTP(loginRequest);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(string refreshToken)
+        {
+            try
+            {
+                var result = await _authService.RefreshToken(refreshToken);
                 return Ok(result);
             }
             catch (Exception ex)

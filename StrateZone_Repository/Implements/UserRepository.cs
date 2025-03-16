@@ -234,6 +234,26 @@ namespace StrateZone_Repository.Implements
                 sql.Append("updated_at = @updatedAt, ");
                 parameters.Add(new NpgsqlParameter("@updatedAt", updatedUser.UpdatedAt));
 
+                if (updatedUser.OTP == null)
+                {
+                    sql.Append("otp = NULL, ");
+                }
+                else
+                {
+                    sql.Append("otp = @OTP, ");
+                    parameters.Add(new NpgsqlParameter("@OTP", updatedUser.OTP));
+                }
+
+                if (updatedUser.OTPExpiry == null)
+                {
+                    sql.Append("otp_expiry = NULL, ");
+                }
+                else
+                {
+                    sql.Append("otp_expiry = @OTPExpiry, ");
+                    parameters.Add(new NpgsqlParameter("@OTPExpiry", updatedUser.OTPExpiry ?? (object)DBNull.Value));
+                }
+
                 if (!string.IsNullOrEmpty(updatedUser.RefreshToken))
                 {
                     sql.Append("refresh_token = @refreshToken, ");
