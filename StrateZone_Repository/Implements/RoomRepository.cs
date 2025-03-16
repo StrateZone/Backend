@@ -26,24 +26,23 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
-                {
-                    await connection.OpenAsync();
+                var connection = _context.Database.GetDbConnection();
+                await connection.OpenAsync();
 
-                    using var cmd = new NpgsqlCommand(@"
-                            INSERT INTO rooms (room_name, room_type, description, capacity, status) 
-                            VALUES (@name, @type::room_type, @description, @capacity, @status::room_status)
-                            RETURNING room_id;", connection);
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    INSERT INTO rooms (room_name, room_type, description, capacity, status) 
+                    VALUES (@name, @type::room_type, @description, @capacity, @status::room_status)
+                    RETURNING room_id;";
 
-                    cmd.Parameters.AddWithValue("@name", room.RoomName);
-                    cmd.Parameters.AddWithValue("@type", room.Type.ToString());
-                    cmd.Parameters.AddWithValue("@description", room.Description);
-                    cmd.Parameters.AddWithValue("@capacity", room.Capacity);
-                    cmd.Parameters.AddWithValue("@status", room.Status.ToString());
+                cmd.Parameters.Add(new NpgsqlParameter("@name", room.RoomName));
+                cmd.Parameters.Add(new NpgsqlParameter("@type", room.Type.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@description", room.Description));
+                cmd.Parameters.Add(new NpgsqlParameter("@capacity", room.Capacity));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", room.Status.ToString()));
 
-                    var newRoomId = await cmd.ExecuteScalarAsync();
-                    room.RoomId = Convert.ToInt32(newRoomId);
-                }
+                var newRoomId = await cmd.ExecuteScalarAsync();
+                room.RoomId = Convert.ToInt32(newRoomId);
 
                 return room;
             }
@@ -126,32 +125,41 @@ namespace StrateZone_Repository.Implements
 
                 room.RoomId = id;
 
-                using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
+                var parameters = new List<NpgsqlParameter>();
+                var sql = new StringBuilder("UPDATE rooms SET ");
+
+                if (!string.IsNullOrEmpty(room.RoomName))
                 {
-                    await connection.OpenAsync();
-
-                    using var cmd = new NpgsqlCommand(@"
-                            UPDATE rooms SET 
-                                room_name = @name, 
-                                room_type = @type::room_type, 
-                                description = @description, 
-                                capacity = @capacity, 
-                                status = @status::room_status 
-                            WHERE room_id = @id
-                            RETURNING room_id;", connection);
-
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.Parameters.AddWithValue("@name", room.RoomName);
-                    cmd.Parameters.AddWithValue("@type", room.Type.ToString());
-                    cmd.Parameters.AddWithValue("@description", room.Description);
-                    cmd.Parameters.AddWithValue("@capacity", room.Capacity);
-                    cmd.Parameters.AddWithValue("@status", room.Status.ToString());
-
-                    await cmd.ExecuteScalarAsync();
-
-                    var updatedRoom = await _context.Rooms.FindAsync(id);
-                    return updatedRoom;
+                    sql.Append("room_name = @room_name, ");
+                    parameters.Add(new NpgsqlParameter("@room_name", room.RoomName));
                 }
+
+                if (room.Capacity.HasValue)
+                {
+                    sql.Append("capacity = @capacity, ");
+                    parameters.Add(new NpgsqlParameter("@capacity", room.Capacity));
+                }
+
+                if (!string.IsNullOrEmpty(room.Description))
+                {
+                    sql.Append("description = @description, ");
+                    parameters.Add(new NpgsqlParameter("@description", room.Description));
+                }
+
+                sql.Append("room_type = @room_type::room_type, ");
+                parameters.Add(new NpgsqlParameter("@room_type", room.Type.ToString()));
+
+                sql.Append("status = @status::room_status, ");
+                parameters.Add(new NpgsqlParameter("@status", room.Status.ToString()));
+
+                sql.Remove(sql.Length - 2, 2);
+                sql.Append(" WHERE room_id = @id");
+                parameters.Add(new NpgsqlParameter("@id", id));
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
+                var updatedRoom = await _context.Rooms.FindAsync(id);
+                return updatedRoom;
             }
             catch (Exception ex)
             {

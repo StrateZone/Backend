@@ -28,6 +28,8 @@ public class Tournament
 
     public DateTime? CreatedAt { get; set; }
 
+    public virtual Image? Image { get; set; }
+
     public virtual User? User { get; set; }
 
     public virtual ICollection<TournamentsParticipants> TournamentsParticipants { get; set; } = new List<TournamentsParticipants>();

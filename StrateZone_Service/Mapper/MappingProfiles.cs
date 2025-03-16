@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Interfaces;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.ResponseModels;
+using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
 
@@ -9,6 +11,7 @@ namespace StrateZone_Service.Mapper
 {
     public class MappingProfiles : Profile
     {
+
         public MappingProfiles()
         {   
             CreateMap<User, UserModel>().ReverseMap();
@@ -17,7 +20,8 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
                     .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
-                    .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()));
+                    .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
+                    .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserAvatarResolver>());
 
             CreateMap<UserModel, UserResponse>()
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
@@ -43,8 +47,16 @@ namespace StrateZone_Service.Mapper
             CreateMap<Table, TableModel>().ReverseMap();
             CreateMap<Appointment, AppointmentModel>().ReverseMap();
             CreateMap<TablesAppointment, TablesAppointmentModel>().ReverseMap();
+            
             CreateMap<Message, MessageModel>().ReverseMap();
+            CreateMap<Message, MessageResponse>()
+                .ForMember(mr => mr.SenderName, u => u.MapFrom(src => src.Sender.Username))
+                .ForMember(mr => mr.ReceiverName, u => u.MapFrom(src => src.Receiver.Username));
+
+            CreateMap<Image, ImageModel>().ReverseMap();    
             CreateMap<Price, PriceModel>().ReverseMap();
+            CreateMap<Appointmentrequest, AppointmentrequestModel>().ReverseMap();
+            CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
             // add other mappings here
         }
     }

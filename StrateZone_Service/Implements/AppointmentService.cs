@@ -102,13 +102,14 @@ namespace StrateZone_Service.Implements
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {
                     UserId = request.UserId,
-                    ScheduleTime = DateTime.SpecifyKind(request.ScheduleTime, DateTimeKind.Unspecified),
-                    EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                    ScheduleTime = request.ScheduleTime,
+                    EndTime = request.EndTime, 
+                    CreatedAt = DateTime.UtcNow,
                 };
 
-                var appointment = _mapper.Map<Appointment>(appointmentModel);
-                var result = _mapper.Map<AppointmentModel>(await _appointmentRepository.CreateAppointmentAsync(appointment));
+                var mappedAppointment = _mapper.Map<Appointment>(appointmentModel);
+                var appointment = await _appointmentRepository.CreateAppointmentAsync(mappedAppointment);
+                var result = _mapper.Map<AppointmentModel>(appointment);
 
                 foreach (var tableId in request.TableIds)
                 {

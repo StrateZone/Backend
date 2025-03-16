@@ -9,6 +9,8 @@ public partial class GameType
 
     public Parameters.PostgreEnums.GameTypeEnum TypeName { get; set; }
 
+    public virtual Image? Image { get; set; }
+
     public virtual ICollection<Table> Tables { get; set; } = new List<Table>();
 
     public virtual ICollection<GameExtension> GameExtensions { get; set; } = new List<GameExtension>();

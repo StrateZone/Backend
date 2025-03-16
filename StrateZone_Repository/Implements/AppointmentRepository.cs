@@ -1,8 +1,10 @@
 ﻿using MealHunt_Repositories.Pagination;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
+using System.Data;
 
 namespace StrateZone_Repository.Implements
 {
@@ -65,14 +67,29 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                await _context.Appointments.AddAsync(appointment);
-                await _context.SaveChangesAsync();
+                var connection = _context.Database.GetDbConnection();
+                await connection.OpenAsync();
+
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    INSERT INTO appointments (schedule_time, end_time, user_id, status, created_at) 
+                    VALUES (@schedule_time, @end_time, @user_id, @status::appointment_status, @created_at)
+                    RETURNING appointment_id;";
+
+                cmd.Parameters.Add(new NpgsqlParameter("@schedule_time", appointment.ScheduleTime));
+                cmd.Parameters.Add(new NpgsqlParameter("@end_time", appointment.EndTime));
+                cmd.Parameters.Add(new NpgsqlParameter("@user_id", appointment.UserId));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", appointment.Status.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.UtcNow));
+
+                var newAppointmentId = await cmd.ExecuteScalarAsync();
+                appointment.AppointmentId = Convert.ToInt32(newAppointmentId);
 
                 return appointment;
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception($"Error creating appointment: {ex.Message}");
             }
         }
 

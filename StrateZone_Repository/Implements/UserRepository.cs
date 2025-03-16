@@ -114,28 +114,28 @@ namespace StrateZone_Repository.Implements
                     .FirstOrDefaultAsync();
                 if (existingUser != null) throw new Exception("A user with this email or username already exists");
 
-                using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
-                {
-                    await connection.OpenAsync();
+                var connection = _context.Database.GetDbConnection();
 
-                    using var cmd = new NpgsqlCommand(@"
-                            INSERT INTO users (username, email, phone, password, gender, role, skill_level, status, created_at) 
-                            VALUES (@username, @email, @phone, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @status, @createdAt)
-                            RETURNING user_id;", connection);
+                await connection.OpenAsync();
 
-                    cmd.Parameters.AddWithValue("@username", user.Username);
-                    cmd.Parameters.AddWithValue("@email", user.Email);
-                    cmd.Parameters.AddWithValue("@phone", user.Phone ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@password", user.Password);
-                    cmd.Parameters.AddWithValue("@gender", user.Gender.ToString());
-                    cmd.Parameters.AddWithValue("@role", user.UserRole.ToString());
-                    cmd.Parameters.AddWithValue("@skillLevel", user.SkillLevel.ToString());
-                    cmd.Parameters.AddWithValue("@status", user.Status);
-                    cmd.Parameters.AddWithValue("@createdAt", user.CreatedAt ?? DateTime.UtcNow);
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                        INSERT INTO users (username, email, phone, password, gender, role, skill_level, status, created_at) 
+                        VALUES (@username, @email, @phone, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @status, @createdAt)
+                        RETURNING user_id;";
 
-                    var newUserId = await cmd.ExecuteScalarAsync();
-                    user.UserId = Convert.ToInt32(newUserId);
-                }
+                cmd.Parameters.Add(new NpgsqlParameter("@username", user.Username));
+                cmd.Parameters.Add(new NpgsqlParameter("@email", user.Email));
+                cmd.Parameters.Add(new NpgsqlParameter("@phone", user.Phone ?? (object)DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@password", user.Password));
+                cmd.Parameters.Add(new NpgsqlParameter("@gender", user.Gender.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status));
+                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.UtcNow));
+
+                var newUserId = await cmd.ExecuteScalarAsync();
+                user.UserId = Convert.ToInt32(newUserId);
 
                 return user;
             }
@@ -210,12 +210,6 @@ namespace StrateZone_Repository.Implements
                 {
                     sql.Append("address = @address, ");
                     parameters.Add(new NpgsqlParameter("@address", updatedUser.Address));
-                }
-
-                if (!string.IsNullOrEmpty(updatedUser.AvatarUrl))
-                {
-                    sql.Append("avatar_url = @avatarUrl, ");
-                    parameters.Add(new NpgsqlParameter("@avatarUrl", updatedUser.AvatarUrl));
                 }
 
                 if (!string.IsNullOrEmpty(updatedUser.Bio))

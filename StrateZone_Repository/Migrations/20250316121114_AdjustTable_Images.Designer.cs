@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
@@ -11,9 +12,11 @@ using StrateZone_Repository.Data;
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    partial class StrateZoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316121114_AdjustTable_Images")]
+    partial class AdjustTable_Images
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1214,11 +1217,6 @@ namespace StrateZone_Repository.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("points");
 
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("RefreshTokenExpiry")
-                        .HasColumnType("timestamp with time zone");
                     b.Property<string>("Ranking")
                         .IsRequired()
                         .HasColumnType("ranking")
