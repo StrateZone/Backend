@@ -225,8 +225,41 @@ namespace StrateZone_Repository.Implements
                 }
 
                 updatedUser.UpdatedAt = DateTime.UtcNow;
-                sql.Append("updated_at = @updatedAt ");
+                sql.Append("updated_at = @updatedAt, ");
                 parameters.Add(new NpgsqlParameter("@updatedAt", updatedUser.UpdatedAt));
+
+                if (updatedUser.OTP == null)
+                {
+                    sql.Append("otp = NULL, ");
+                }
+                else
+                {
+                    sql.Append("otp = @OTP, ");
+                    parameters.Add(new NpgsqlParameter("@OTP", updatedUser.OTP));
+                }
+
+                if (updatedUser.OTPExpiry == null)
+                {
+                    sql.Append("otp_expiry = NULL, ");
+                }
+                else
+                {
+                    sql.Append("otp_expiry = @OTPExpiry, ");
+                    parameters.Add(new NpgsqlParameter("@OTPExpiry", updatedUser.OTPExpiry ?? (object)DBNull.Value));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.RefreshToken))
+                {
+                    sql.Append("refresh_token = @refreshToken, ");
+                    parameters.Add(new NpgsqlParameter("@refreshToken", updatedUser.RefreshToken));
+                }
+
+                if (updatedUser.RefreshTokenExpiry != null)
+                {
+                    sql.Append("refresh_token_expiry = @refreshTokenExpiry ");
+                    parameters.Add(new NpgsqlParameter("@refreshTokenExpiry", updatedUser.RefreshTokenExpiry));
+                }
+
 
                 sql.Append("WHERE user_id = @userId");
                 parameters.Add(new NpgsqlParameter("@userId", id));
@@ -259,7 +292,20 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<User> GetUserByPhoneNumberAsync(string phoneNumber)
+        public async Task<User> GetByRefreshTokenAsync(string refreshToken)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+                return user;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+            public async Task<User> GetUserByPhoneNumberAsync(string phoneNumber)
         {
             try
             {

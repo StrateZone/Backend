@@ -44,6 +44,14 @@ public partial class User
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    
+    // Refresh Token Fields
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiry { get; set; }
+
+    public string? OTP { get; set; } // Store OTP
+    public DateTime? OTPExpiry { get; set; } // OTP expiration time
 
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 

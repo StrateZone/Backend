@@ -1071,6 +1071,18 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.RefreshToken)
+              .HasMaxLength(100)
+              .HasColumnName("refresh_token");
+            entity.Property(e => e.RefreshTokenExpiry)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("refresh_token_expiry");
+            entity.Property(e => e.OTP)
+                .HasMaxLength(100)
+                .HasColumnName("otp");
+            entity.Property(e => e.OTPExpiry)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("otp_expiry");
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .HasColumnName("username");

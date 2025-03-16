@@ -15,5 +15,6 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<User>> GetUsersAsync(UserListParameters parameters);
         Task<PagedList<User>> GetUsersByRanking(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down);
         Task<User> UpdateUserAsync(User user, int id);
+        Task<User> GetByRefreshTokenAsync(string refreshToken);
     }
 }

@@ -38,6 +38,16 @@ namespace StrateZone_Service.BusinessModels
 
         public DateTime? UpdatedAt { get; set; }
 
+        /***************************************************ONLY RESPONSE TO AUTH APIS*********************************************************/
+        // Refresh Token Fields
+        public string? RefreshToken { get; set; }
+
+        public DateTime? RefreshTokenExpiry { get; set; }
+
+        public string? OTP { get; set; } // Store OTP
+        public DateTime? OTPExpiry { get; set; } // OTP expiration time
+        /***************************************************************************************************************************************/
+
         public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
 
         public virtual ICollection<WalletModel> Wallets { get; set; } = new List<WalletModel>();

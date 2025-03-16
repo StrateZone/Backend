@@ -2,12 +2,14 @@
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
 using Npgsql;
 using StrateZone_APIs.ServiceExtensions;
 using StrateZone_Repository.Data;
+using StrateZone_Repository.Entities;
 using StrateZone_Service.Hubs;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
@@ -96,6 +98,31 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+// Identity, authentication and authorization
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+        };
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("StaffOnly", policy => policy.RequireRole("Staff"));
+    options.AddPolicy("InstructorOrAbove", policy => policy.RequireRole("Instructor", "Staff", "Admin"));
+});
 // Service Extensions
 builder.Services.AddApplicationServices();
 

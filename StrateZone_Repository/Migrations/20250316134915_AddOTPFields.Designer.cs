@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
@@ -11,9 +12,11 @@ using StrateZone_Repository.Data;
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    partial class StrateZoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316134915_AddOTPFields")]
+    partial class AddOTPFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace StrateZone_Repository.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "wallet_status", new[] { "active", "closed" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Appointmentrequest", b =>
+            modelBuilder.Entity("AppointmentRequest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -340,8 +343,11 @@ namespace StrateZone_Repository.Migrations
             modelBuilder.Entity("StrateZone_Repository.Entities.Event", b =>
                 {
                     b.Property<int>("EventId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("event_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EventId"));
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("timestamp without time zone")
@@ -475,8 +481,11 @@ namespace StrateZone_Repository.Migrations
             modelBuilder.Entity("StrateZone_Repository.Entities.GameType", b =>
                 {
                     b.Property<int>("TypeId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("type_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TypeId"));
 
                     b.Property<string>("TypeName")
                         .IsRequired()
@@ -502,14 +511,6 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<int?>("EventId")
-                        .HasColumnType("integer")
-                        .HasColumnName("event_id");
-
-                    b.Property<int?>("GameTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("gametype_id");
-
                     b.Property<int?>("ProductId")
                         .HasColumnType("integer")
                         .HasColumnName("product_id");
@@ -518,18 +519,10 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("thread_id");
 
-                    b.Property<int?>("TournamentId")
-                        .HasColumnType("integer")
-                        .HasColumnName("tournament_id");
-
                     b.Property<string>("Url")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("url");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
 
                     b.HasKey("ImageId")
                         .HasName("images_pkey");
@@ -901,12 +894,12 @@ namespace StrateZone_Repository.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("room_status")
+                        .HasColumnType("text")
                         .HasColumnName("status");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("room_type")
+                        .HasColumnType("text")
                         .HasColumnName("room_type");
 
                     b.HasKey("RoomId")
@@ -1168,13 +1161,21 @@ namespace StrateZone_Repository.Migrations
             modelBuilder.Entity("StrateZone_Repository.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
 
                     b.Property<string>("Address")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("address");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("avatar_url");
 
                     b.Property<string>("Bio")
                         .HasColumnType("text")
@@ -1219,10 +1220,12 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("points");
+
                     b.Property<string>("Ranking")
                         .IsRequired()
                         .HasColumnType("ranking")
                         .HasColumnName("ranking");
+
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
@@ -1231,6 +1234,7 @@ namespace StrateZone_Repository.Migrations
                     b.Property<DateTime?>("RefreshTokenExpiry")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("refresh_token_expiry");
+
                     b.Property<string>("SkillLevel")
                         .IsRequired()
                         .HasColumnType("skill_level")
@@ -1395,8 +1399,11 @@ namespace StrateZone_Repository.Migrations
             modelBuilder.Entity("Tournament", b =>
                 {
                     b.Property<int>("TournamentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("tournament_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TournamentId"));
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("timestamp without time zone")
@@ -1476,7 +1483,7 @@ namespace StrateZone_Repository.Migrations
                     b.ToTable("tournaments_participants", (string)null);
                 });
 
-            modelBuilder.Entity("Appointmentrequest", b =>
+            modelBuilder.Entity("AppointmentRequest", b =>
                 {
                     b.HasOne("StrateZone_Repository.Entities.Appointment", "Appointment")
                         .WithMany("AppointmentRequests")
@@ -1592,19 +1599,10 @@ namespace StrateZone_Repository.Migrations
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Event", b =>
                 {
-                    b.HasOne("StrateZone_Repository.Entities.Image", "Image")
-                        .WithOne("Event")
-                        .HasForeignKey("StrateZone_Repository.Entities.Event", "EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("images_event_id_fkey");
-
                     b.HasOne("StrateZone_Repository.Entities.User", "User")
                         .WithMany("Events")
                         .HasForeignKey("UserId")
                         .HasConstraintName("events_user_id_fkey");
-
-                    b.Navigation("Image");
 
                     b.Navigation("User");
                 });
@@ -1653,18 +1651,6 @@ namespace StrateZone_Repository.Migrations
                         .HasConstraintName("gameExtensions_type_id_fkey");
 
                     b.Navigation("Type");
-                });
-
-            modelBuilder.Entity("StrateZone_Repository.Entities.GameType", b =>
-                {
-                    b.HasOne("StrateZone_Repository.Entities.Image", "Image")
-                        .WithOne("GameType")
-                        .HasForeignKey("StrateZone_Repository.Entities.GameType", "TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("images_gametype_id_fkey");
-
-                    b.Navigation("Image");
                 });
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Image", b =>
@@ -1923,16 +1909,7 @@ namespace StrateZone_Repository.Migrations
                         .HasForeignKey("CartId")
                         .HasConstraintName("users_cart_id_fkey");
 
-                    b.HasOne("StrateZone_Repository.Entities.Image", "Image")
-                        .WithOne("User")
-                        .HasForeignKey("StrateZone_Repository.Entities.User", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("images_user_id_fkey");
-
                     b.Navigation("Cart");
-
-                    b.Navigation("Image");
                 });
 
             modelBuilder.Entity("StrateZone_Repository.Entities.UsersCourse", b =>
@@ -1964,19 +1941,10 @@ namespace StrateZone_Repository.Migrations
 
             modelBuilder.Entity("Tournament", b =>
                 {
-                    b.HasOne("StrateZone_Repository.Entities.Image", "Image")
-                        .WithOne("Tournament")
-                        .HasForeignKey("Tournament", "TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("images_tournament_id_fkey");
-
                     b.HasOne("StrateZone_Repository.Entities.User", "User")
                         .WithMany("Tournaments")
                         .HasForeignKey("UserId")
                         .HasConstraintName("tournaments_user_id_fkey");
-
-                    b.Navigation("Image");
 
                     b.Navigation("User");
                 });
@@ -2044,17 +2012,6 @@ namespace StrateZone_Repository.Migrations
                     b.Navigation("Prices");
 
                     b.Navigation("Tables");
-                });
-
-            modelBuilder.Entity("StrateZone_Repository.Entities.Image", b =>
-                {
-                    b.Navigation("Event");
-
-                    b.Navigation("GameType");
-
-                    b.Navigation("Tournament");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Order", b =>
