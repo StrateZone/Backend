@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
 {
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -12,6 +16,18 @@ namespace StrateZone_APIs.Controllers
             _authService = authService;
         }
 
-        public async Task<IActionResult> 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            try
+            {
+                var result = await _authService.Login(loginRequest);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

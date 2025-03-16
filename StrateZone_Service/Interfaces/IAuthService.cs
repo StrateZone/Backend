@@ -11,6 +11,6 @@ namespace StrateZone_Service.Interfaces
     public interface IAuthService
     {
         Task<ApiResponse<LoginResponse>> Login(LoginRequest loginRequest);
-        Task<ApiResponse<LoginResponse>> RefreshToken(string refreshToken);
+        Task<ApiResponse<RefreshTokenResponse>> RefreshToken(string refreshToken);
     }
 }

@@ -49,7 +49,8 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<ITablesAppointmentService, TablesAppointmentService>();
             services.AddScoped<ITableService, TableService>();
-            services.AddScoped<TokenService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IPriceService, PriceService>();

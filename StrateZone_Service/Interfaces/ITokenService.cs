@@ -12,6 +12,5 @@ namespace StrateZone_Service.Interfaces
     {
         string GenerateAccessToken(User user);
         string GenerateRefreshToken();
-        ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
     }
 }

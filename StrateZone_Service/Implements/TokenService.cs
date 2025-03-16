@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using StrateZone_Repository.Entities;
+using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Service.Implements
 {
-    public class TokenService
+    public class TokenService: ITokenService
     {
         private readonly IConfiguration _config;
 
@@ -23,7 +24,7 @@ namespace StrateZone_Service.Implements
 
         public string GenerateAccessToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:SecretKey"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>

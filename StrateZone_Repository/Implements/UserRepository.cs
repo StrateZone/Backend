@@ -231,8 +231,21 @@ namespace StrateZone_Repository.Implements
                 }
 
                 updatedUser.UpdatedAt = DateTime.UtcNow;
-                sql.Append("updated_at = @updatedAt ");
+                sql.Append("updated_at = @updatedAt, ");
                 parameters.Add(new NpgsqlParameter("@updatedAt", updatedUser.UpdatedAt));
+
+                if (!string.IsNullOrEmpty(updatedUser.RefreshToken))
+                {
+                    sql.Append("refresh_token = @refreshToken, ");
+                    parameters.Add(new NpgsqlParameter("@refreshToken", updatedUser.RefreshToken));
+                }
+
+                if (updatedUser.RefreshTokenExpiry != null)
+                {
+                    sql.Append("refresh_token_expiry = @refreshTokenExpiry ");
+                    parameters.Add(new NpgsqlParameter("@refreshTokenExpiry", updatedUser.RefreshTokenExpiry));
+                }
+
 
                 sql.Append("WHERE user_id = @userId");
                 parameters.Add(new NpgsqlParameter("@userId", id));
