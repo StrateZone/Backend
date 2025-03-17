@@ -1032,7 +1032,11 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Address)
                 .HasMaxLength(100)
                 .HasColumnName("address");
+            
             entity.Property(e => e.Bio).HasColumnName("bio");
+            
+            entity.Property(e => e.FullName).HasColumnName("full_name");
+
             entity.Property(e => e.Gender).HasColumnName("gender").HasColumnType("gender").HasConversion(
                     v => v.ToString(),
                     v => (Gender)Enum.Parse(typeof(Gender), v)

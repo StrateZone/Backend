@@ -77,11 +77,6 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                if (up < down)
-                {
-                    (down, up) = (up, down);
-                }
-
                 Ranking minRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Min();
                 Ranking maxRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Max();
 
@@ -120,12 +115,13 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                        INSERT INTO users (username, email, phone, password, gender, role, skill_level, status, created_at) 
-                        VALUES (@username, @email, @phone, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @status, @createdAt)
+                        INSERT INTO users (username, email, phone, full_name, password, gender, role, skill_level, status, created_at) 
+                        VALUES (@username, @email, @phone, @fullname, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @status, @createdAt)
                         RETURNING user_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@username", user.Username));
                 cmd.Parameters.Add(new NpgsqlParameter("@email", user.Email));
+                cmd.Parameters.Add(new NpgsqlParameter("@fullname", user.FullName));
                 cmd.Parameters.Add(new NpgsqlParameter("@phone", user.Phone ?? (object)DBNull.Value));
                 cmd.Parameters.Add(new NpgsqlParameter("@password", user.Password));
                 cmd.Parameters.Add(new NpgsqlParameter("@gender", user.Gender.ToString()));
@@ -150,6 +146,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var existingUser = await _context.Users.FindAsync(id) ?? throw new Exception("User with this ID does not exist");
+
+                if (await _context.Users.AnyAsync(u => u != existingUser && u.Username == updatedUser.Username))
+                    throw new Exception("Duplicated username detected.");
 
                 _context.Entry(existingUser).State = EntityState.Detached;
 
@@ -189,6 +188,12 @@ namespace StrateZone_Repository.Implements
                 {
                     sql.Append("password = @password, ");
                     parameters.Add(new NpgsqlParameter("@password", updatedUser.Password));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.FullName))
+                {
+                    sql.Append("full_name = @fullname, ");
+                    parameters.Add(new NpgsqlParameter("@fullname", updatedUser.FullName));
                 }
 
                 if (!string.IsNullOrEmpty(updatedUser.Status))
@@ -260,8 +265,8 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@refreshTokenExpiry", updatedUser.RefreshTokenExpiry));
                 }
 
-
-                sql.Append("WHERE user_id = @userId");
+                sql.Remove(sql.Length - 2, 2);
+                sql.Append(" WHERE user_id = @userId");
                 parameters.Add(new NpgsqlParameter("@userId", id));
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());

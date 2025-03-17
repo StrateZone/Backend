@@ -35,6 +35,8 @@ public partial class User
 
     public Ranking Ranking { get; set; }
 
+    public string? FullName { get; set; }
+
     public string? Address { get; set; }
 
     public string? Bio { get; set; }
@@ -51,6 +53,7 @@ public partial class User
     public DateTime? RefreshTokenExpiry { get; set; }
 
     public string? OTP { get; set; } // Store OTP
+
     public DateTime? OTPExpiry { get; set; } // OTP expiration time
 
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();

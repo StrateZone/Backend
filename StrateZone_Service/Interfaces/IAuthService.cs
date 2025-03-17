@@ -13,6 +13,7 @@ namespace StrateZone_Service.Interfaces
     {
         Task<ApiResponse<MailMessage>> SendOTP(string email);
         Task<ApiResponse<LoginResponse>> VerifyOTP(LoginRequest loginRequest);
+        Task<ApiResponse<UserResponse>> RegisterAccount(RegisterRequest registerRequest);
         Task<ApiResponse<RefreshTokenResponse>> RefreshToken(string refreshToken);
     }
 }

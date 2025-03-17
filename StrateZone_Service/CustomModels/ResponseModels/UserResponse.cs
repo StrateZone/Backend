@@ -25,6 +25,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string UserRole { get; set; }
 
+        public string? FullName { get; set; }
+
         public string Status { get; set; }
 
         public string? Address { get; set; }

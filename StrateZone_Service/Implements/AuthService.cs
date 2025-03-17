@@ -1,8 +1,11 @@
-﻿using Azure.Core;
+﻿using AutoMapper;
+using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
@@ -20,12 +23,14 @@ namespace StrateZone_Service.Implements
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
+        private readonly IMapper _mapper;
 
-        public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService)
+        public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService, IMapper mapper)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
+            _mapper = mapper;
         }
         public async Task<ApiResponse<MailMessage>> SendOTP(string email)
         {
@@ -53,7 +58,7 @@ namespace StrateZone_Service.Implements
                 {
                     ToEmail = email,
                     Subject = "Login Verification",
-                    Content = "Your login OTP is " + updatedUser.OTP
+                    Content = $"<p>Your login OTP is:</p><h1><b>{updatedUser.OTP}</b></h1><p>If this request wasn't made by you, please ignore it.</p>"
                 };
 
                 var mailMessage = await _emailService.SendEmailAsync(emailSending);
@@ -65,7 +70,6 @@ namespace StrateZone_Service.Implements
                     Message = "OTP sent",
                     Data = mailMessage
                 };
-
             }
             catch (Exception ex)
             {
@@ -141,7 +145,7 @@ namespace StrateZone_Service.Implements
                 {
                     Success = true,
                     StatusCode = 200,
-                    Message = "OTP sent",
+                    Message = "Login successfully!",
                     Data = new LoginResponse
                     {
                         UserId = updatedUser.UserId,
@@ -153,6 +157,53 @@ namespace StrateZone_Service.Implements
                     }
                 };
 
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<UserResponse>> RegisterAccount(RegisterRequest registerRequest)
+        {
+            try
+            {
+                var existingUsers = await _userRepository.GetUsersAsync(new StrateZone_Repository.Parameters.UserListParameters());
+
+                foreach (var existingUser in existingUsers)
+                {
+                    if (existingUser.Email == registerRequest.Email)
+                        throw new Exception("This email already exists.");
+                    else if (existingUser.Phone == registerRequest.PhoneNumber)
+                        throw new Exception("This phone number already exists.");
+                    else if (existingUser.Username == registerRequest.UserName)
+                        throw new Exception("This username already exists.");
+                }
+
+                UserModel userModel = new()
+                {
+                    Email = registerRequest.Email,
+                    Phone = registerRequest.PhoneNumber,
+                    Username = registerRequest.UserName,
+                    Address = registerRequest.Address,
+                    FullName = registerRequest.FullName,
+                    Password = "",
+                    Gender = registerRequest.Gender,
+                    SkillLevel = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner,
+                    Ranking = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic
+                };
+
+                var user = _mapper.Map<User> (userModel);
+
+                var createdUser = await _userRepository.CreateUserAsync(user);
+
+                return new ApiResponse<UserResponse>
+                {
+                    Success = true,
+                    StatusCode = 201,
+                    Message = "Account created successfully!",
+                    Data = _mapper.Map<UserResponse>(createdUser)
+                };
             }
             catch (Exception ex)
             {

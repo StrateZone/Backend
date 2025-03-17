@@ -80,8 +80,8 @@ namespace StrateZone_Service.Implements
             {
                 TableParameters tableParameters = new()
                 {
-                    PageNumber = 1,
-                    PageSize = 100_000
+                    StartTime = request.ScheduleTime,
+                    EndTime = request.EndTime,
                 };
 
                 List<TableModel> Tables = await _tableService.GetTablesAsync(tableParameters);
@@ -103,7 +103,7 @@ namespace StrateZone_Service.Implements
                 {
                     UserId = request.UserId,
                     ScheduleTime = request.ScheduleTime,
-                    EndTime = request.EndTime, 
+                    EndTime = request.EndTime,
                     CreatedAt = DateTime.UtcNow,
                 };
 

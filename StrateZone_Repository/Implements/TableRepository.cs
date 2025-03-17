@@ -1,5 +1,6 @@
 ﻿using MealHunt_Repositories.Pagination;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -86,19 +88,34 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var currentTime = DateTime.Now;
+                var query = @"
+                            SELECT t.*
+                            FROM tables t
+                            JOIN rooms r ON t.room_id = r.room_id
+                            WHERE r.status = 'available'
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM tables_appointments ta
+                                JOIN appointments a ON ta.appointment_id = a.appointment_id
+                                WHERE ta.table_id = t.table_id
+                                AND a.schedule_time < @EndTime
+                                AND a.end_time > @StartTime
+                                AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                            )";
 
                 var tables = _context.Tables
-                                .Where(t => !t.TablesAppointments.Any() ||
-                                            t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime))
-                                .Include(t => t.GameType)
-                                .AsQueryable();
+                    .FromSqlRaw(query,
+                        new NpgsqlParameter("@StartTime", parameters.StartTime),
+                        new NpgsqlParameter("@EndTime", parameters.EndTime))
+                    .Include(t => t.GameType)
+                    .Include(t => t.Room)
+                    .AsQueryable();
 
                 return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw;
             }
         }
 
@@ -106,26 +123,30 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var currentTime = DateTime.Now;
-                string query =
-                    @"
-                        SELECT g.type_id FROM public.""gameTypes"" AS g 
-                        WHERE g.type_name = @p0::public.game_type
-                        LIMIT 1
-                    ";
-
-                var expectedId = await _context.GameTypes
-                    .FromSqlRaw(query, gameType.ToString())
-                    .Select(g => g.TypeId)
-                    .FirstOrDefaultAsync();
-
-                if (expectedId == null) throw new Exception("Game type not found.");
+                var query = @"
+                            SELECT t.*
+                            FROM tables t
+                            JOIN rooms r ON t.room_id = r.room_id
+                            JOIN ""gameTypes"" gt ON gt.type_name = @TypeName::game_type
+                            WHERE r.status = 'available' AND gt.type_id = t.""gameType_id""
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM tables_appointments ta
+                                JOIN appointments a ON ta.appointment_id = a.appointment_id
+                                WHERE ta.table_id = t.table_id
+                                AND a.schedule_time < @EndTime
+                                AND a.end_time > @StartTime
+                                AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                            )";
 
                 var tables = _context.Tables
-                                .Where(t => t.GameTypeId == expectedId && 
-                                    (!t.TablesAppointments.Any() || t.TablesAppointments.All(ta => ta.Appointment.EndTime < currentTime)))
-                                .Include(t => t.GameType)
-                                .AsQueryable();
+                    .FromSqlRaw(query,
+                        new NpgsqlParameter("@TypeName", gameType.ToString()),
+                        new NpgsqlParameter("@StartTime", parameters.StartTime),
+                        new NpgsqlParameter("@EndTime", parameters.EndTime))
+                    .Include(t => t.GameType)
+                    .Include(t => t.Room)
+                    .AsQueryable();
 
                 return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
             }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
@@ -30,8 +31,22 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterAccount([FromBody] StrateZone_Service.CustomModels.RequestModels.RegisterRequest request)
+        {
+            try
+            {
+                var result = await _authService.RegisterAccount(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOTP([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> VerifyOTP([FromBody] StrateZone_Service.CustomModels.RequestModels.LoginRequest loginRequest)
         {
             try
             {
