@@ -196,6 +196,7 @@ namespace StrateZone_Service.Implements
                 var user = _mapper.Map<User> (userModel);
 
                 var createdUser = await _userRepository.CreateUserAsync(user);
+                await SendOTP(createdUser.Email);
 
                 return new ApiResponse<UserResponse>
                 {

@@ -261,7 +261,7 @@ namespace StrateZone_Repository.Implements
 
                 if (updatedUser.RefreshTokenExpiry != null)
                 {
-                    sql.Append("refresh_token_expiry = @refreshTokenExpiry ");
+                    sql.Append("refresh_token_expiry = @refreshTokenExpiry, ");
                     parameters.Add(new NpgsqlParameter("@refreshTokenExpiry", updatedUser.RefreshTokenExpiry));
                 }
 
