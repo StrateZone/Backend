@@ -98,7 +98,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                TableModel model = new TableModel()
+                TableModel model = new()
                 {
                     RoomId = request.Room_Id,
                     GameTypeId = request.GameType_Id

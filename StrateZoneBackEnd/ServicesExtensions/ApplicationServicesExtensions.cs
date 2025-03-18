@@ -62,6 +62,8 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();
             services.AddScoped<IEmailService, EmailService>();
+
+            services.AddHostedService<TimedHostedService>();
             return services;
         }
 

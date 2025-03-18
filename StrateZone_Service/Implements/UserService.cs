@@ -118,6 +118,7 @@ namespace StrateZone_Service.Implements
                     Gender = (StrateZone_Repository.Parameters.PostgreEnums.Gender)userRequest.Gender,
                     SkillLevel = (StrateZone_Repository.Parameters.PostgreEnums.SkillLevel)userRequest.SkillLevel,
                     CreatedAt = DateTime.UtcNow,
+                    Status = "Unactivated"
                 };
 
                 var user = _mapper.Map<User>(userModel);
@@ -157,6 +158,20 @@ namespace StrateZone_Service.Implements
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<UserResponse>> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate)
+        {
+            try
+            {
+                var accounts = await _userRepository.DeleteUnactivatedAccountsAsync(daysAfterAccountCreate);
+
+                return _mapper.Map<List<UserResponse>>(accounts);
+            }
+            catch
+            {
+                throw;
             }
         }
     }

@@ -47,19 +47,33 @@ namespace StrateZone_Service.Implements
                 string otp = GenerateOTP();
 
                 user.OTP = otp;
-                user.OTPExpiry = DateTime.UtcNow.AddSeconds(40); // OTP valid for 5 minutes
+                user.OTPExpiry = DateTime.UtcNow.AddSeconds(5 * 60); // OTP valid for 5 minutes
 
                 user.RefreshToken = newRefreshToken;
                 user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
                 var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
-                var emailSending = new EmailRequest
+                EmailRequest emailSending;
+
+                if (user.Status == "Unactivated")
                 {
-                    ToEmail = email,
-                    Subject = "Login Verification",
-                    Content = $"<p>Your login OTP is:</p><h1><b>{updatedUser.OTP}</b></h1><p>If this request wasn't made by you, please ignore it.</p>"
-                };
+                    emailSending = new EmailRequest
+                    {
+                        ToEmail = email,
+                        Subject = "Account Verification",
+                        Content = $"<p>Your activation OTP is:</p><h1><b>{updatedUser.OTP}</b></h1><p>This OTP valids for 5 minutes.<br>If this request wasn't made by you, please ignore it.</p>"
+                    };
+                }
+                else
+                {
+                    emailSending = new EmailRequest
+                    {
+                        ToEmail = email,
+                        Subject = "Login Verification",
+                        Content = $"<p>Your login OTP is:</p><h1><b>{updatedUser.OTP}</b></h1><p>This OTP valids for 5 minutes.<br>If this request wasn't made by you, please ignore it.</p>"
+                    };
+                }
 
                 var mailMessage = await _emailService.SendEmailAsync(emailSending);
 
@@ -82,6 +96,7 @@ namespace StrateZone_Service.Implements
             var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
             if (user == null)
                 return null;
+
             if (user.RefreshTokenExpiry < DateTime.UtcNow)
                 return new ApiResponse<RefreshTokenResponse>
                 {
@@ -139,6 +154,8 @@ namespace StrateZone_Service.Implements
                 user.RefreshToken = newRefreshToken;
                 user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
+                if (user.Status == "Unactivated") user.Status = "Active";
+
                 var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
                 return new ApiResponse<LoginResponse>
@@ -190,7 +207,8 @@ namespace StrateZone_Service.Implements
                     Password = "",
                     Gender = registerRequest.Gender,
                     SkillLevel = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner,
-                    Ranking = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic
+                    Ranking = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic,
+                    Status = "Unactivated"
                 };
 
                 var user = _mapper.Map<User> (userModel);

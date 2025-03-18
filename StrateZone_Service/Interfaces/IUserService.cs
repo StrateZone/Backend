@@ -18,5 +18,6 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters);
         Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, Ranking ranking, int up, int down);
         Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);
+        Task<List<UserResponse>> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
     }
 }

@@ -82,11 +82,8 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var price = await _context.Prices
-                                    .Where(p => p.MemberFee)
-                                    .FirstOrDefaultAsync();
-
-                return price;
+                return await _context.Prices
+                                    .FirstOrDefaultAsync(p => p.MemberFee);
             }
             catch (Exception ex)
             {
@@ -98,11 +95,8 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var price = await _context.Prices
-                                    .Where(p => p.TeachingSalary)
-                                    .FirstOrDefaultAsync();
-
-                return price;
+                return await _context.Prices
+                                    .FirstOrDefaultAsync(p => p.TeachingSalary);
             }
             catch (Exception ex)
             {
@@ -114,11 +108,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var price = await _context.Prices
-                                    .Where(p => p.ProductId == productId)
-                                    .FirstOrDefaultAsync();
+                return await _context.Prices
+                                    .FirstOrDefaultAsync(p => p.ProductId == productId);
 
-                return price;
             }
             catch (Exception ex)
             {
@@ -186,6 +178,33 @@ namespace StrateZone_Repository.Implements
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Price> GetPriceOfCourseAsync(int courseId)
+        {
+            try
+            {
+                return await _context.Prices.FirstOrDefaultAsync(p => p.CourseId == courseId);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<Price> GetPriceOfAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                //var appointment = await _context.Appointments.FindAsync(appointmentId) ?? throw new Exception("sasa");
+                //double appointmentDurationInHours = appointment.EndTime.Subtract(appointment.ScheduleTime).TotalHours;
+
+                throw new NotImplementedException();
+            }
+            catch
+            {
+                throw;
             }
         }
     }

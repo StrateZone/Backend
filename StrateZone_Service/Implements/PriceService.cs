@@ -5,11 +5,6 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
@@ -17,6 +12,10 @@ namespace StrateZone_Service.Implements
     public class PriceService : IPriceService
     {
         private readonly IPriceRepository _priceRepository;
+        private readonly IAppointmentService _appointmentService;
+        private readonly ITableService _tableService;
+        private readonly ITablesAppointmentService _tablesAppointmentService;
+        private readonly IRoomService _roomService;
         private readonly IMapper _mapper;
 
         public PriceService(IPriceRepository priceRepository, IMapper mapper)
@@ -59,6 +58,31 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _priceRepository.GetPriceOfGameTypeAsync(gameType);
                 return _mapper.Map<PriceModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PriceModel> GetPriceOfCourseAsync(int courseId)
+        {
+            try
+            {
+                var result = await _priceRepository.GetPriceOfCourseAsync(courseId);
+                return _mapper.Map<PriceModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PriceModel> GetPriceOfAppointmentAsync(int appointmentId)
+        {
+            try
+            {
+                throw new NotImplementedException();
             }
             catch (Exception ex)
             {

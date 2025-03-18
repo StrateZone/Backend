@@ -27,5 +27,7 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public Gender Gender { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Gender.male;
+
+        
     }
 }

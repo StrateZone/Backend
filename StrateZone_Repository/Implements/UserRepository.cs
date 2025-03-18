@@ -321,5 +321,26 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<User>> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate)
+        {
+            try
+            {
+                var currentDay = DateTime.Now;
+                var accounts = await _context.Users.Where(a => 
+                        a.Status == "Unactivated" 
+                        && (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
+                    .ToListAsync();
+
+                _context.Users.RemoveRange(accounts);
+                await _context.SaveChangesAsync();
+
+                return accounts;
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }
