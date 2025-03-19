@@ -207,5 +207,21 @@ namespace StrateZone_Repository.Implements
                 throw;
             }
         }
+
+        public Task<decimal> GetTotalOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime)
+        {
+            try
+            {
+                if (FromTime > ToTime) (FromTime, ToTime) = (ToTime, FromTime);
+
+                double DurationInHours = ToTime.Subtract(FromTime).TotalHours;
+                
+                throw new NotImplementedException();
+            }                                 
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

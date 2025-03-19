@@ -36,6 +36,13 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(request.Email))
+                    throw new Exception("Email is required.");
+                else if (string.IsNullOrEmpty(request.UserName))
+                    throw new Exception("Username is required.");
+                else if (string.IsNullOrEmpty(request.PhoneNumber))
+                    throw new Exception("Phone number is required.");
+
                 var result = await _authService.RegisterAccount(request);
                 return Ok(result);
             }

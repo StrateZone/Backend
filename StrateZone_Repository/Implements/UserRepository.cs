@@ -104,10 +104,14 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingUser = await _context.Users
-                    .Where(u => u.Email == user.Email || u.Username == user.Username)
-                    .FirstOrDefaultAsync();
-                if (existingUser != null) throw new Exception("A user with this email or username already exists");
+                var existingUsers = await _context.Users.ToListAsync();
+
+                foreach (var existingUser in existingUsers)
+                {
+                    if (existingUser.Email == user.Email) throw new Exception("A user with this email already exists");
+                    else if (existingUser.Username == user.Username) throw new Exception("A user with this username already exists");
+                    else if (existingUser.Phone == user.Phone) throw new Exception("A user with this phone already exists");
+                }
 
                 var connection = _context.Database.GetDbConnection();
 

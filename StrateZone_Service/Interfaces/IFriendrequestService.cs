@@ -2,6 +2,7 @@
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace StrateZone_Service.Interfaces
     {
         Task<PagedList<FriendrequestModel>> GetFriendrequestsOfUserIdAsync(FriendrequestParameters parameters, int id);
         Task<FriendrequestModel> GetFriendrequestByIdAsync(int id);
-        Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestModel friendrequestModel);
+        Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestRequest friendrequestModel);
         Task<FriendrequestModel> UpdateFriendrequestAsync(FriendrequestModel friendrequestModel, int id);
         Task<FriendrequestModel> DeleteFriendrequestAsync(int id);
     }

@@ -1,0 +1,96 @@
+﻿using MealHunt_Repositories.Pagination;
+using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Entities;
+using StrateZone_Repository.Parameters;
+using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.Implements;
+using StrateZone_Service.Interfaces;
+
+namespace StrateZone_APIs.Controllers
+{
+    [ApiController]
+    [Route("api/friendrequests")]
+    public class FriendrequestController : ControllerBase
+    {
+        private readonly IFriendrequestService _friendrequestService;
+        private readonly ILogger<FriendrequestController> _logger;
+
+        public FriendrequestController(IFriendrequestService friendrequestService, ILogger<FriendrequestController> logger)
+        {
+            _friendrequestService = friendrequestService;
+            _logger = logger;
+        }
+
+
+        [HttpGet("to/{id}")]
+        public async Task<IActionResult> GetFriendrequestsOfUserIdAsync(FriendrequestParameters parameters, int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.GetFriendrequestsOfUserIdAsync(parameters, id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetFriendrequestByIdAsync(int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.GetFriendrequestByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateFriendrequestAsync([FromBody] FriendrequestRequest request)
+        {
+            try
+            {
+                var result = await _friendrequestService.CreateFriendrequestAsync(request);
+                return Created("Friendrequest created!", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateFriendrequestAsync([FromBody] FriendrequestModel friendrequestModel, int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.UpdateFriendrequestAsync(friendrequestModel, id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFriendrequestAsync(int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.DeleteFriendrequestAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+    }
+}

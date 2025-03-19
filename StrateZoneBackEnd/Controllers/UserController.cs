@@ -138,7 +138,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _userService.DeleteUserAsync(id);
-                return Ok("User deleted:\n" + result);
+                return Ok(result);
             }
             catch (Exception ex)
             {

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
 
 namespace StrateZone_Service.Implements
@@ -18,11 +20,20 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
         }
 
-        public async Task<AppointmentrequestModel> CreateAppointmentRequestAsync(AppointmentrequestModel appointmentRequestModel)
+        public async Task<AppointmentrequestModel> CreateAppointmentRequestAsync(AppointmentrequestRequest request)
         {
             try
             {
-                var appointmentRequest = _mapper.Map<Appointmentrequest>(appointmentRequestModel);
+                AppointmentrequestModel model = new()
+                {
+                    FromUser = request.FromUser,
+                    ToUser = request.ToUser,
+                    AppointmentId = request.AppointmentId,
+                    Status = PostgreEnums.RequestStatus.pending,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                var appointmentRequest = _mapper.Map<Appointmentrequest>(model);
                 var result = await _appointmentRequestRepository.CreateAppointmentRequestAsync(appointmentRequest);
 
                 return _mapper.Map<AppointmentrequestModel>(result);
@@ -54,6 +65,21 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestByIdAsync(id);
 
                 return _mapper.Map<AppointmentrequestModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsByAppointmnetIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByAppointmentIdAsync(parameters, appointmentId);
+                var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
+
+                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
             }
             catch (Exception ex)
             {

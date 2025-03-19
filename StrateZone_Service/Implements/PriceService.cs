@@ -142,5 +142,10 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public Task<PriceModel> GetPriceOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

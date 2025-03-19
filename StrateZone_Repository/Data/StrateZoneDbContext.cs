@@ -398,7 +398,7 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
-            entity.Property(e => e.Status).HasColumnType("status").HasConversion(
+            entity.Property(e => e.Status).HasColumnType("status").HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (RequestStatus)Enum.Parse(typeof(RequestStatus), v)
                     );
@@ -427,7 +427,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
             entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
-            entity.Property(e => e.Status).HasColumnType("request_status").HasConversion(
+            entity.Property(e => e.Status).HasColumnType("request_status").HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (RequestStatus)Enum.Parse(typeof(RequestStatus), v)
                     );

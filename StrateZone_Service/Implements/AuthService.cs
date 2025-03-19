@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
@@ -185,16 +186,22 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var existingUsers = await _userRepository.GetUsersAsync(new StrateZone_Repository.Parameters.UserListParameters());
+                UserListParameters userListParameters = new UserListParameters()
+                { 
+                    PageNumber = 1,
+                    PageSize = 100_000
+                };
+
+                var existingUsers = await _userRepository.GetUsersAsync(userListParameters);
 
                 foreach (var existingUser in existingUsers)
                 {
-                    if (existingUser.Email == registerRequest.Email)
+                    if (existingUser.Email != null && existingUser.Email.Equals(registerRequest.Email))
                         throw new Exception("This email already exists.");
-                    else if (existingUser.Phone == registerRequest.PhoneNumber)
-                        throw new Exception("This phone number already exists.");
-                    else if (existingUser.Username == registerRequest.UserName)
+                    else if (existingUser.Username != null && existingUser.Username.Equals(registerRequest.UserName))
                         throw new Exception("This username already exists.");
+                    else if (existingUser.Phone != null && existingUser.Phone.Equals(registerRequest.PhoneNumber))
+                        throw new Exception("This phone number already exists.");
                 }
 
                 UserModel userModel = new()

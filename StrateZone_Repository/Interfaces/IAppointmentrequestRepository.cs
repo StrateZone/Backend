@@ -10,6 +10,7 @@ namespace StrateZone_Repository.Interfaces
         Task<Appointmentrequest> GetAppointmentRequestByIdAsync(int id);
         Task<PagedList<Appointmentrequest>> GetAppointmentRequestsFromUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
         Task<PagedList<Appointmentrequest>> GetAppointmentRequestsOfUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
+        Task<PagedList<Appointmentrequest>> GetAppointmentRequestsOfUserByAppointmentIdAsync(AppointmentRequestParameters parameters, int appointmentId);
         Task<Appointmentrequest> UpdateAppointmentRequestAsync(Appointmentrequest appointmentRequest, int id);
     }
 }

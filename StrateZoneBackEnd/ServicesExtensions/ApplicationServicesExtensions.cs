@@ -40,6 +40,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IAppointmentrequestRepository, AppointmentrequestRepository>();
             services.AddScoped<IFriendrequestRepository, FriendrequestRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
+
             return services;
         }
 
@@ -57,6 +58,8 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IPriceService, PriceService>();
+            services.AddScoped<IAppointmentrequestService, AppointmentrequestService>();
+            services.AddScoped<IFriendrequestService, FriendrequestService>();
             services.AddScoped<IImageService, ImageService>();
 
             services.AddScoped<ICloudinaryService, CloudinaryService>();

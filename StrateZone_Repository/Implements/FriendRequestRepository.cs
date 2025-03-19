@@ -26,6 +26,10 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                var requestsList = await _context.Friendrequests.Where(ar => ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser).ToListAsync();
+                if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
+                    throw new Exception($"Friend request to this user already been sent.");
+
                 using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
                 {
                     await connection.OpenAsync();
@@ -103,11 +107,47 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public Task<Friendrequest> UpdateFriendrequestAsync(Friendrequest friendrequest, int id)
+        public async Task<Friendrequest> UpdateFriendrequestAsync(Friendrequest friendrequest, int id)
         {
             try
             {
-                throw new NotImplementedException();
+                var existingFriendrequest = await _context.Friendrequests.FindAsync(id) ?? throw new Exception("Friend request with this ID does not exist");
+
+                _context.Entry(existingFriendrequest).State = EntityState.Detached;
+
+                friendrequest.Id = id;
+                var parameters = new List<NpgsqlParameter>();
+                var sql = new StringBuilder("UPDATE friendrequests SET ");
+
+                if (friendrequest.FromUser > 0)
+                {
+                    sql.Append("from_user = @from_user, ");
+                    parameters.Add(new NpgsqlParameter("@from_user", friendrequest.FromUser));
+                }
+
+                if (friendrequest.ToUser > 0)
+                {
+                    sql.Append("to_user = @to_user, ");
+                    parameters.Add(new NpgsqlParameter("@to_user", friendrequest.ToUser));
+                }
+
+                sql.Append("status = @status::request_status, ");
+                parameters.Add(new NpgsqlParameter("@status", friendrequest.Status.ToString()));
+
+                if (friendrequest.CreatedAt.HasValue)
+                {
+                    sql.Append("created_at = @created_at, ");
+                    parameters.Add(new NpgsqlParameter("@created_at", friendrequest.CreatedAt.Value));
+                }
+
+                sql.Remove(sql.Length - 2, 2);
+                sql.Append(" WHERE id = @id");
+                parameters.Add(new NpgsqlParameter("@id", id));
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
+                var updatedFriendRequest = await _context.Friendrequests.FindAsync(id);
+                return updatedFriendRequest;
             }
             catch (Exception ex)
             {

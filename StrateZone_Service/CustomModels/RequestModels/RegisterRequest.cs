@@ -19,7 +19,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public string UserName { get; set; }
 
         [Phone]
-        public string? PhoneNumber { get; set; }
+        [Required]
+        public string PhoneNumber { get; set; }
 
         public string? FullName { get; set; }
 

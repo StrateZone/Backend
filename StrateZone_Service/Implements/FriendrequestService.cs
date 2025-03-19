@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
 
 namespace StrateZone_Service.Implements
@@ -18,29 +20,85 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
         }
 
-        public Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestModel friendrequestModel)
+        public async Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                FriendrequestModel model = new()
+                { 
+                    FromUser = request.FromUser,
+                    ToUser = request.ToUser,
+                    Status = PostgreEnums.RequestStatus.pending,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var friendrequest = _mapper.Map<Friendrequest>(model);
+                var result = await _friendRequestRepository.CreateFriendrequestAsync(friendrequest);
+
+                return _mapper.Map<FriendrequestModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public Task<FriendrequestModel> DeleteFriendrequestAsync(int id)
+        public async Task<FriendrequestModel> DeleteFriendrequestAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _friendRequestRepository.DeleteFriendrequestAsync(id);
+
+                return _mapper.Map<FriendrequestModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public Task<FriendrequestModel> GetFriendrequestByIdAsync(int id)
+        public async Task<FriendrequestModel> GetFriendrequestByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _friendRequestRepository.GetFriendrequestByIdAsync(id);
+
+                return _mapper.Map<FriendrequestModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public Task<PagedList<FriendrequestModel>> GetFriendrequestsOfUserIdAsync(FriendrequestParameters parameters, int id)
+        public async Task<PagedList<FriendrequestModel>> GetFriendrequestsOfUserIdAsync(FriendrequestParameters parameters, int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _friendRequestRepository.GetFriendrequestsOfUserIdAsync(parameters, id);
+                var friendrequests = _mapper.Map<PagedList<FriendrequestModel>>(result);
+
+                return new PagedList<FriendrequestModel>(friendrequests, friendrequests.Count, friendrequests.CurrentPage, friendrequests.PageSize);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public Task<FriendrequestModel> UpdateFriendrequestAsync(FriendrequestModel friendrequestModel, int id)
+        public async Task<FriendrequestModel> UpdateFriendrequestAsync(FriendrequestModel friendrequestModel, int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var request = _mapper.Map<Friendrequest>(friendrequestModel);
+                var result = await _friendRequestRepository.UpdateFriendrequestAsync(request, id);
+
+                return _mapper.Map<FriendrequestModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

@@ -68,23 +68,38 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                var appointment = await _context.Appointments.FindAsync(appointmentRequest.AppointmentId) ?? throw new Exception("Appointment with this ID does not exist.");
+
+                if (appointment.UserId != appointmentRequest.FromUser)
+                    throw new Exception("Appointment invitations must be made by the owner of this appointment.");
+
+                var requestsList = await _context.AppointmentRequests
+                                                .Where(ar => 
+                                                    ar.FromUser == appointmentRequest.FromUser 
+                                                    && ar.ToUser == appointmentRequest.ToUser 
+                                                    && ar.AppointmentId == appointmentRequest.AppointmentId)
+                                                .ToListAsync();
+
+                if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
+                    throw new Exception($"Appointment invitation to this user already been sent.");
+
                 var connection = _context.Database.GetDbConnection();
                 await connection.OpenAsync();
 
-                await using var cmd = connection.CreateCommand();
-                cmd.CommandText = @"
+                await using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = @"
                     INSERT INTO appointment_requests (from_user, to_user, appointment_id, status, created_at) 
                     VALUES (@from_user, @to_user, @appointment_id, @status::request_status, @created_at)
                     RETURNING id;"
                 ;
 
-                cmd.Parameters.Add(new NpgsqlParameter("@from_user", appointmentRequest.FromUser));
-                cmd.Parameters.Add(new NpgsqlParameter("@to_user", appointmentRequest.ToUser));
-                cmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
-                cmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
-                cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.UtcNow));
+                createCmd.Parameters.Add(new NpgsqlParameter("@from_user", appointmentRequest.FromUser));
+                createCmd.Parameters.Add(new NpgsqlParameter("@to_user", appointmentRequest.ToUser));
+                createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
+                createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
+                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.UtcNow));
 
-                var newAppointmentId = await cmd.ExecuteScalarAsync();
+                var newAppointmentId = await createCmd.ExecuteScalarAsync();
                 appointmentRequest.Id = Convert.ToInt32(newAppointmentId);
 
                 return appointmentRequest;
@@ -99,9 +114,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingPrice = await _context.Prices.FindAsync(id) ?? throw new Exception("Appointment request with this ID does not exist");
+                var existingAppointmentrequest = await _context.AppointmentRequests.FindAsync(id) ?? throw new Exception("Appointment request with this ID does not exist");
 
-                _context.Entry(existingPrice).State = EntityState.Detached;
+                _context.Entry(existingAppointmentrequest).State = EntityState.Detached;
 
                 appointmentRequest.Id = id;
                 var parameters = new List<NpgsqlParameter>();
@@ -158,6 +173,19 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return toDelete;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Appointmentrequest>> GetAppointmentRequestsOfUserByAppointmentIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        {
+            try
+            {
+                var result = _context.AppointmentRequests.Where(ar => ar.AppointmentId == appointmentId).AsQueryable();
+                return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {

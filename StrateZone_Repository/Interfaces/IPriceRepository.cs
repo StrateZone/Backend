@@ -13,6 +13,7 @@ namespace StrateZone_Repository.Interfaces
         Task<Price> GetPriceOfAppointmentAsync(int appointmentId);
         Task<Price> GetPriceOfCourseAsync(int courseId);
         Task<Price> GetProductPriceByIdAsync(int productId);
+        Task<decimal> GetTotalOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime);
         Task<PagedList<Price>> GetServicePrices(PriceParameters parameters);
         Task<Price> GetTeachingSalaryAsync();
         Task<Price> UpdatePriceAsync(Price price, int id);
