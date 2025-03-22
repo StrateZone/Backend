@@ -208,36 +208,29 @@ namespace StrateZone_Repository.Implements
         }
 
         public async Task<PagedList<Table>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(
-            TableParameters parameters,
-            GameTypeEnum[] gameTypes = null,
-            RoomType[] roomTypes = null)
+             TableParameters parameters,
+             GameTypeEnum[] gameTypes = null,
+             RoomType[] roomTypes = null)
         {
             try
             {
                 var query = @"
-                                SELECT t.*
-                                FROM tables t
-                                JOIN rooms r ON t.room_id = r.room_id
-                                JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
-                                WHERE r.status = 'available' 
-                                AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds::public.game_type[]))
-                                AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds::public.room_type[]))
-                                AND EXISTS (
-                                    SELECT 1
-                                    FROM (
-                                        SELECT ta.table_id, 
-                                               a.schedule_time AS booked_start, 
-                                               a.end_time AS booked_end
-                                        FROM tables_appointments ta
-                                        JOIN appointments a ON ta.appointment_id = a.appointment_id
-                                        WHERE ta.table_id = t.table_id
-                                        AND a.status NOT IN ('cancelled', 'completed', 'expired')
-                                    ) AS booked_times
-                                    WHERE booked_times.table_id = t.table_id
-                                    HAVING 
-                                        MIN(booked_times.booked_end) > @StartTime
-                                        OR MAX(booked_times.booked_start) < @EndTime
-                                )";
+                    SELECT t.*
+                    FROM tables t
+                    JOIN rooms r ON t.room_id = r.room_id
+                    JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
+                    WHERE r.status = 'available' 
+                    AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds::public.game_type[]))
+                    AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds::public.room_type[]))
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM tables_appointments ta
+                        JOIN appointments a ON ta.appointment_id = a.appointment_id
+                        WHERE ta.table_id = t.table_id
+                        AND a.schedule_time < @EndTime
+                        AND a.end_time > @StartTime
+                        AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                    )";
 
                 var gameTypeNames = gameTypes?.Select(gt => gt.ToString()).ToArray();
                 var roomTypeNames = roomTypes?.Select(rt => rt.ToString()).ToArray();
