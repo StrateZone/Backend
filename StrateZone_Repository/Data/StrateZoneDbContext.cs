@@ -177,6 +177,8 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnName("end_time");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
+            entity.Property(e => e.TotalPrice).HasColumnName("total_price");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasConversion(
@@ -426,7 +428,7 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
-            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.TablesAppointmentId).HasColumnName("table_appointment_id");
             entity.Property(e => e.Status).HasColumnType("request_status").HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (RequestStatus)Enum.Parse(typeof(RequestStatus), v)
@@ -442,10 +444,10 @@ public partial class StrateZoneDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("appointment_requests_to_user_fkey");
 
-            entity.HasOne(d => d.Appointment).WithMany(p => p.AppointmentRequests)
-                .HasForeignKey(d => d.AppointmentId)
+            entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Appointmentrequests)
+                .HasForeignKey(d => d.TablesAppointmentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("appointment_requests_to_appointment_fkey");
+                .HasConstraintName("appointment_requests_to_table_appointment_fkey");
         });
 
         modelBuilder.Entity<Entities.GameExtension>(entity =>

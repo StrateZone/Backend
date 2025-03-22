@@ -6,18 +6,22 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
     public class TableService : ITableService
     {
         private readonly ITableRepository _tableRepository;
+        private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
 
-        public TableService(ITableRepository tableRepository, IMapper mapper)
+        public TableService(ITableRepository tableRepository, IPriceService priceService, IMapper mapper)
         {
             _tableRepository = tableRepository;
+            _priceService = priceService;
             _mapper = mapper;
         }
 
@@ -36,14 +40,27 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TableModel>> GetAvailableTablesAsync(TableParameters parameters)
+        public async Task<PagedList<TableResponse>> GetAvailableTablesAsync(TableParameters parameters)
         {
             try
             {
                 var result = await _tableRepository.GetAvailableTablesAsync(parameters);
-                var tables = _mapper.Map<PagedList<TableModel>>(result);
+                var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
-                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                foreach (var table in tables)
+                {
+                    table.StartDate = parameters.StartTime;
+                    table.EndDate = parameters.EndTime;
+
+                    var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
+
+                    table.GameTypePrice = prices.ElementAt(0);
+                    table.RoomTypePrice = prices.ElementAt(1);
+                    table.DurationInHours = (float?)prices.ElementAt(2);
+                    table.TotalPrice = prices.ElementAt(3);
+                }
+
+                return new PagedList<TableResponse>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
             }
             catch (Exception ex)
             {
@@ -66,14 +83,86 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TableModel>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<TableResponse>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
                 var result = await _tableRepository.GetAvailableTablesByGameTypeAsync(parameters, gameType);
-                var tables = _mapper.Map<PagedList<TableModel>>(result);
+                var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
-                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                foreach (var table in tables)
+                {
+                    table.StartDate = parameters.StartTime;
+                    table.EndDate = parameters.EndTime;
+                    
+                    var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
+
+                    table.GameTypePrice = prices.ElementAt(0);
+                    table.RoomTypePrice = prices.ElementAt(1);
+                    table.DurationInHours = (float?) prices.ElementAt(2);
+                    table.TotalPrice = prices.ElementAt(3);
+                }
+
+                return new PagedList<TableResponse>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<TableResponse>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum[] gameTypes, PostgreEnums.RoomType[] roomTypes)
+        {
+            try
+            {
+                var result = await _tableRepository.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
+                var tables = _mapper.Map<PagedList<TableResponse>>(result);
+
+                foreach (var table in tables)
+                {
+                    table.StartDate = parameters.StartTime;
+                    table.EndDate = parameters.EndTime;
+
+                    var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
+
+                    table.GameTypePrice = prices.ElementAt(0);
+                    table.RoomTypePrice = prices.ElementAt(1);
+                    table.DurationInHours = (float?)prices.ElementAt(2);
+                    table.TotalPrice = prices.ElementAt(3);
+                }
+
+                return new PagedList<TableResponse>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Dictionary<PostgreEnums.GameTypeEnum, List<TableResponse>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount)
+        {
+            try
+            {
+                var result = await _tableRepository.GetAvailableTablesForEachGameTypeInTimeRangeAsync(parameters, tableCount);
+                var tables = _mapper.Map<Dictionary<GameTypeEnum, List<TableResponse>>>(result);
+
+                foreach (var tableList in tables.Values)
+                {
+                    foreach (var table in tableList)
+                    {
+                        table.StartDate = parameters.StartTime;
+                        table.EndDate = parameters.EndTime;
+
+                        var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
+
+                        table.GameTypePrice = prices.ElementAt(0);
+                        table.RoomTypePrice = prices.ElementAt(1);
+                        table.DurationInHours = (float?)prices.ElementAt(2);
+                        table.TotalPrice = prices.ElementAt(3);
+                    }
+                }
+
+                return tables;
             }
             catch (Exception ex)
             {

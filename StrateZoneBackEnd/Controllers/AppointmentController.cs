@@ -62,7 +62,25 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("check-availability")]
+        public async Task<IActionResult> CheckAppointmentAvailability([FromBody] AppointmentRequest request)
+        {
+            try
+            {
+                var result = await _appointmentService.CheckAppointmentAvailability(request);
+                return result.Count > 0
+                    ?
+                    StatusCode(500, $"The following tables are not available: {string.Join(", ", result)}")
+                    :
+                    Ok("All requested tables for this appointment are available.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("")]
         public async Task<IActionResult> CreateAppointment([FromBody] StrateZone_Service.CustomModels.RequestModels.AppointmentRequest request)
         {
             try

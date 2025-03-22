@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
@@ -100,6 +101,34 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _priceService.GetProductPriceByIdAsync(id);
                 return result != null ? Ok(result) : NotFound("Price for this product doesn't exist.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("appointments/{id}")]
+        public async Task<IActionResult> GetAppointmentPrice(int id)
+        {
+            try
+            {
+                var result = await _priceService.GetPriceOfAppointmentAsync(id);
+                return result != null ? Ok(result) : NotFound("Price for this appointment doesn't exist.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("appointments")]
+        public async Task<IActionResult> GetAppointmentPrice([FromQuery] int[] tableIds, [FromQuery] DateTime StartTime, [FromQuery] DateTime EndTime)
+        {
+            try
+            {
+                var result = await _priceService.GetPriceOfAppointmentFromAppointmentRequestAsync(tableIds, StartTime, EndTime);
+                return Ok(result);
             }
             catch (Exception ex)
             {

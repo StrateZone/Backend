@@ -11,7 +11,7 @@ namespace StrateZone_Repository.Implements
     public class AppointmentRepository : IAppointmentRepository
     {
         private readonly StrateZoneDbContext _context;
-
+        
         public AppointmentRepository(StrateZoneDbContext context)
         {
             _context = context;
@@ -55,6 +55,7 @@ namespace StrateZone_Repository.Implements
                                     .Where(a => a.UserId == id)
                                     .Include(a => a.User)
                                     .AsQueryable();
+
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -72,13 +73,14 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                    INSERT INTO appointments (schedule_time, end_time, user_id, status, created_at) 
-                    VALUES (@schedule_time, @end_time, @user_id, @status::appointment_status, @created_at)
+                    INSERT INTO appointments (schedule_time, end_time, user_id, total_price, status, created_at) 
+                    VALUES (@schedule_time, @end_time, @user_id, @total_price, @status::appointment_status, @created_at)
                     RETURNING appointment_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@schedule_time", appointment.ScheduleTime));
                 cmd.Parameters.Add(new NpgsqlParameter("@end_time", appointment.EndTime));
                 cmd.Parameters.Add(new NpgsqlParameter("@user_id", appointment.UserId));
+                cmd.Parameters.Add(new NpgsqlParameter("@total_price", appointment.TotalPrice));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", appointment.Status.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.UtcNow));
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
@@ -11,9 +12,11 @@ using StrateZone_Repository.Data;
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    partial class StrateZoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250322101533_AddPriceToAppointments")]
+    partial class AddPriceToAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,6 +60,10 @@ namespace StrateZone_Repository.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("appointment_id");
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at");
@@ -70,10 +77,6 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("request_status")
                         .HasColumnName("status");
 
-                    b.Property<int>("TableAppointmentId")
-                        .HasColumnType("integer")
-                        .HasColumnName("table_appointment_id");
-
                     b.Property<int>("ToUser")
                         .HasColumnType("integer")
                         .HasColumnName("to_user");
@@ -81,9 +84,9 @@ namespace StrateZone_Repository.Migrations
                     b.HasKey("Id")
                         .HasName("appointment_requests_pkey");
 
-                    b.HasIndex("FromUser");
+                    b.HasIndex("AppointmentId");
 
-                    b.HasIndex("TableAppointmentId");
+                    b.HasIndex("FromUser");
 
                     b.HasIndex("ToUser");
 
@@ -1494,17 +1497,17 @@ namespace StrateZone_Repository.Migrations
 
             modelBuilder.Entity("Appointmentrequest", b =>
                 {
+                    b.HasOne("StrateZone_Repository.Entities.Appointment", "Appointment")
+                        .WithMany("AppointmentRequests")
+                        .HasForeignKey("AppointmentId")
+                        .IsRequired()
+                        .HasConstraintName("appointment_requests_to_appointment_fkey");
+
                     b.HasOne("StrateZone_Repository.Entities.User", "FromUserNavigation")
                         .WithMany("AppointmentRequestsFromUserNavigations")
                         .HasForeignKey("FromUser")
                         .IsRequired()
                         .HasConstraintName("appointment_requests_from_user_fkey");
-
-                    b.HasOne("StrateZone_Repository.Entities.TablesAppointment", "TablesAppointment")
-                        .WithMany("Appointmentrequests")
-                        .HasForeignKey("TableAppointmentId")
-                        .IsRequired()
-                        .HasConstraintName("appointment_requests_to_table_appointment_fkey");
 
                     b.HasOne("StrateZone_Repository.Entities.User", "ToUserNavigation")
                         .WithMany("AppointmentRequestsToUserNavigations")
@@ -1512,9 +1515,9 @@ namespace StrateZone_Repository.Migrations
                         .IsRequired()
                         .HasConstraintName("appointment_requests_to_user_fkey");
 
-                    b.Navigation("FromUserNavigation");
+                    b.Navigation("Appointment");
 
-                    b.Navigation("TablesAppointment");
+                    b.Navigation("FromUserNavigation");
 
                     b.Navigation("ToUserNavigation");
                 });
@@ -2016,6 +2019,8 @@ namespace StrateZone_Repository.Migrations
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Appointment", b =>
                 {
+                    b.Navigation("AppointmentRequests");
+
                     b.Navigation("Payments");
 
                     b.Navigation("TablesAppointments");
@@ -2101,11 +2106,6 @@ namespace StrateZone_Repository.Migrations
             modelBuilder.Entity("StrateZone_Repository.Entities.Table", b =>
                 {
                     b.Navigation("TablesAppointments");
-                });
-
-            modelBuilder.Entity("StrateZone_Repository.Entities.TablesAppointment", b =>
-                {
-                    b.Navigation("Appointmentrequests");
                 });
 
             modelBuilder.Entity("StrateZone_Repository.Entities.Tag", b =>

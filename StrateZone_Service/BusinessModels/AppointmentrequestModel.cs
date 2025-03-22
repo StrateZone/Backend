@@ -16,7 +16,7 @@ namespace StrateZone_Service.BusinessModels
 
         public int ToUser { get; set; }
 
-        public int AppointmentId { get; set; }
+        public int TablesAppointmentId { get; set; }
 
         public RequestStatus Status { get; set; }
 
@@ -26,6 +26,6 @@ namespace StrateZone_Service.BusinessModels
 
         public virtual UserModel ToUserNavigation { get; set; } = null!;
 
-        public virtual AppointmentModel Appointment { get; set; } = null!;
+        public virtual TablesAppointmentModel Appointment { get; set; } = null!;
     }
 }

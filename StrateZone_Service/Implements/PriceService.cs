@@ -4,6 +4,7 @@ using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -78,11 +79,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PriceModel> GetPriceOfAppointmentAsync(int appointmentId)
+        public async Task<decimal> GetPriceOfAppointmentAsync(int appointmentId)
         {
             try
             {
-                throw new NotImplementedException();
+                return await _priceRepository.GetPriceOfAppointmentAsync(appointmentId);
             }
             catch (Exception ex)
             {
@@ -143,9 +144,28 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public Task<PriceModel> GetPriceOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime)
+        public async Task<List<decimal>> GetDetailedPriceOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _priceRepository.GetDetailedPriceOfTableFromTimeRangeAsync(tableId, FromTime, ToTime);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<decimal> GetPriceOfAppointmentFromAppointmentRequestAsync(int[] tableIds, DateTime FromTime, DateTime ToTime)
+        {
+            try
+            {
+                return await _priceRepository.GetPriceOfAppointmentTablesFromTimeRangeAsync(tableIds, FromTime, ToTime);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

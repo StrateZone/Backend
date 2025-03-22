@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -74,25 +76,32 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<int>> CheckAppointmentAvailability(AppointmentRequest request)
+        {
+            TableParameters tableParameters = new()
+            {
+                StartTime = request.ScheduleTime,
+                EndTime = request.EndTime,
+            };
+
+            List<TableModel> Tables = await _tableService.GetTablesAsync(tableParameters);
+            List<TableResponse> AvailableTables = await _tableService.GetAvailableTablesAsync(tableParameters);
+
+            var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
+            var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));
+
+            var unavailableTables = request.TableIds
+                                        .Where(t => !tableIds.Contains(t) || !availableTableIds.Contains(t))
+                                        .ToList();
+
+            return unavailableTables;
+        }
+
         public async Task<AppointmentModel> CreateAppointmentAsync(CustomModels.RequestModels.AppointmentRequest request)
         {
             try
             {
-                TableParameters tableParameters = new()
-                {
-                    StartTime = request.ScheduleTime,
-                    EndTime = request.EndTime,
-                };
-
-                List<TableModel> Tables = await _tableService.GetTablesAsync(tableParameters);
-                List<TableModel> AvailableTables = await _tableService.GetAvailableTablesAsync(tableParameters);
-
-                var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
-                var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));
-
-                var unavailableTables = request.TableIds
-                    .Where(t => tableIds.Contains(t) && !availableTableIds.Contains(t))
-                    .ToList();
+                List<int> unavailableTables = await CheckAppointmentAvailability(request);
 
                 if (unavailableTables.Count > 0)
                 {
@@ -104,6 +113,7 @@ namespace StrateZone_Service.Implements
                     UserId = request.UserId,
                     ScheduleTime = request.ScheduleTime,
                     EndTime = request.EndTime,
+                    TotalPrice = request.TotalPrice,
                     CreatedAt = DateTime.UtcNow,
                 };
 

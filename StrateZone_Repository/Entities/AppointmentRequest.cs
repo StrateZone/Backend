@@ -14,7 +14,7 @@ public partial class Appointmentrequest
 
     public int ToUser { get; set; }
 
-    public int AppointmentId { get; set; }
+    public int TablesAppointmentId { get; set; }
 
     public RequestStatus Status { get; set; }
 
@@ -24,5 +24,5 @@ public partial class Appointmentrequest
 
     public virtual User ToUserNavigation { get; set; } = null!;
 
-    public virtual Appointment Appointment { get; set; } = null!;
+    public virtual TablesAppointment TablesAppointment { get; set; } = null!;
 }

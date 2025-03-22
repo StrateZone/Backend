@@ -28,7 +28,7 @@ namespace StrateZone_Service.Implements
                 {
                     FromUser = request.FromUser,
                     ToUser = request.ToUser,
-                    AppointmentId = request.AppointmentId,
+                    TablesAppointmentId = request.TablesAppointmentId,
                     Status = PostgreEnums.RequestStatus.pending,
                     CreatedAt = DateTime.UtcNow,
                 };
@@ -72,14 +72,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsByAppointmnetIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        public async Task<List<AppointmentrequestModel>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tablesAppointmentId)
         {
             try
             {
-                var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByAppointmentIdAsync(parameters, appointmentId);
-                var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
+                var result = await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(userId, tablesAppointmentId);
+                var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
 
-                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
+                return appointmentRequestModels;
             }
             catch (Exception ex)
             {

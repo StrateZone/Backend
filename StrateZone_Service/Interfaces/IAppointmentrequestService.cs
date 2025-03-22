@@ -12,7 +12,7 @@ namespace StrateZone_Service.Interfaces
         Task<AppointmentrequestModel> GetAppointmentRequestByIdAsync(int id);
         Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsFromUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
         Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsOfUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
-        Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsByAppointmnetIdAsync(AppointmentRequestParameters parameters, int appointmentId);
+        Task<List<AppointmentrequestModel>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tableId);
         Task<AppointmentrequestModel> UpdateAppointmentRequestAsync(AppointmentrequestModel appointmentRequestModel, int id);
     }
 }

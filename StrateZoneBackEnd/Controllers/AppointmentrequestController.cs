@@ -50,12 +50,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-appointment/{appointmentId}")]
-        public async Task<IActionResult> GetAppointmentRequestsByAppointmentIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        [HttpGet("users/{userId}/tables_appointments/{tableAppointmentId}")]
+        public async Task<IActionResult> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tableAppointmentId)
         {
             try
             {
-                var result = await _appointmentrequestService.GetAppointmentRequestsByAppointmnetIdAsync(parameters, appointmentId);
+                var result = await _appointmentrequestService.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(userId, tableAppointmentId);
                 return Ok(result);
             }
             catch (Exception ex)
