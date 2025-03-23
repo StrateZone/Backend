@@ -426,9 +426,13 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
+            entity.Property(e => e.ExpireAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("expire_at");
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
-            entity.Property(e => e.TablesAppointmentId).HasColumnName("table_appointment_id");
+            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.TableId).HasColumnName("table_id");
             entity.Property(e => e.Status).HasColumnType("request_status").HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (RequestStatus)Enum.Parse(typeof(RequestStatus), v)
@@ -444,10 +448,15 @@ public partial class StrateZoneDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("appointment_requests_to_user_fkey");
 
-            entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Appointmentrequests)
-                .HasForeignKey(d => d.TablesAppointmentId)
+            entity.HasOne(d => d.Table).WithMany(p => p.Appointmentrequests)
+                .HasForeignKey(d => d.TableId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("appointment_requests_to_table_appointment_fkey");
+                .HasConstraintName("appointment_requests_to_table_fkey");
+
+            entity.HasOne(d => d.Appointment).WithMany(p => p.Appointmentrequests)
+                .HasForeignKey(d => d.AppointmentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_requests_to_appointment_fkey");
         });
 
         modelBuilder.Entity<Entities.GameExtension>(entity =>
@@ -828,8 +837,6 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.TableId).HasColumnName("table_id");
 
-            entity.Property(e => e.GameExtensionId).HasColumnName("extension_id");
-
             entity.HasOne(d => d.Appointment).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.AppointmentId)
                 .HasConstraintName("tables_appointments_appointment_id_fkey");
@@ -1170,8 +1177,8 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (WalletStatus)Enum.Parse(typeof(WalletStatus), v)
                     );
-            entity.HasOne(d => d.User).WithMany(p => p.Wallets)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.User).WithOne(p => p.Wallet)
+                .HasForeignKey<User>(d => d.UserId)
                 .HasConstraintName("wallet_user_id_fkey");
         });
 

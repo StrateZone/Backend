@@ -8,6 +8,7 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
@@ -115,6 +116,9 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    throw new Exception(msg);
+
                 var result = await _tableRepository.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
                 var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
@@ -226,6 +230,32 @@ namespace StrateZone_Service.Implements
                 var result = await _tableRepository.DeleteTableAsync(id);
 
                 return _mapper.Map<TableModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TableResponse>> GetAllTablesAsync()
+        {
+            try
+            {
+                var result = await _tableRepository.GetTablesAsync();
+                return _mapper.Map<List<TableResponse>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TableResponse>> GetAllAvailableTablesAsync(DateTime StartTime, DateTime EndTime)
+        {
+            try
+            {
+                var result = await _tableRepository.GetAvailableTablesAsync(StartTime, EndTime);
+                return _mapper.Map<List<TableResponse>>(result);
             }
             catch (Exception ex)
             {

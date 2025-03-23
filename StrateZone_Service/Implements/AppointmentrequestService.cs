@@ -28,8 +28,10 @@ namespace StrateZone_Service.Implements
                 {
                     FromUser = request.FromUser,
                     ToUser = request.ToUser,
-                    TablesAppointmentId = request.TablesAppointmentId,
+                    TableId = request.TableId,
+                    AppointmentId = request.AppointmentId,
                     Status = PostgreEnums.RequestStatus.pending,
+                    ExpireAt = DateTime.UtcNow.AddHours(3),
                     CreatedAt = DateTime.UtcNow,
                 };
 
@@ -117,6 +119,21 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<AppointmentrequestModel>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId);
+                var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
+
+                return appointmentRequestModels;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<AppointmentrequestModel> UpdateAppointmentRequestAsync(AppointmentrequestModel appointmentRequestModel, int id)
         {
             try
@@ -125,6 +142,46 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.UpdateAppointmentRequestAsync(appointmentRequest, id);
 
                 return _mapper.Map<AppointmentrequestModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<int> UpdateExpiredAppointmentRequests()
+        {
+            try
+            {
+                return await _appointmentRequestRepository.UpdateExpiredAppointmentRequests();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<AppointmentrequestModel>> LinkAppointmentrequestsToAppointmentAsync(AppointmentModel appointmentModel)
+        {
+            try
+            {
+                AppointmentRequestParameters parameters = new()
+                {
+                    PageNumber = 1,
+                    PageSize = int.MaxValue,
+                };
+
+                var user_requests = (await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, appointmentModel.UserId))
+                                .Where(ar => ar.Status == PostgreEnums.RequestStatus.pending || ar.Status == PostgreEnums.RequestStatus.accepted)
+                                .ToList();
+
+                foreach (var request in user_requests)
+                {
+                    request.AppointmentId = appointmentModel.AppointmentId;
+                    await _appointmentRequestRepository.UpdateAppointmentRequestAsync(request, request.Id);
+                }
+
+                return _mapper.Map<List<AppointmentrequestModel>>(user_requests);
             }
             catch (Exception ex)
             {

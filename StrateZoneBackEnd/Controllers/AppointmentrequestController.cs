@@ -64,6 +64,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("users/{userId}/tables/{tableId}")]
+        public async Task<IActionResult> GetCurrentAppointmentRequestsFromUserByUserAndTablesIdAsync(int userId, int tableId)
+        {
+            try
+            {
+                var result = await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("to/{userId}")]
         public async Task<IActionResult> GetAppointmentRequestsOfUserByUserIdAsync(AppointmentRequestParameters parameters, int userId)
         {

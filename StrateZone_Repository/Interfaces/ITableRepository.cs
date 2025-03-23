@@ -10,6 +10,8 @@ namespace StrateZone_Repository.Interfaces
         Task<Table> CreateTableAsync(Table table);
         Task<Table> DeleteTableAsync(int id);
         Task<Table> GetTableByIdAsync(int id);
+        Task<List<Table>> GetTablesAsync();
+        Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
         Task<PagedList<Table>> GetTablesAsync(TableParameters parameters);
         Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType);
         Task<PagedList<Table>> GetAvailableTablesAsync(TableParameters parameters);

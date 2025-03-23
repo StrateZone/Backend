@@ -62,6 +62,8 @@ public partial class User
 
     public virtual Image? Image { get; set; }
 
+    public virtual Wallet? Wallet { get; set; }
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
@@ -99,8 +101,6 @@ public partial class User
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
     public virtual ICollection<UsersCourse> UsersCourses { get; set; } = new List<UsersCourse>();
-
-    public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
 
     public virtual ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
 

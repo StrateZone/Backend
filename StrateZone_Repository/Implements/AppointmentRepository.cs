@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Data;
 
@@ -11,10 +12,12 @@ namespace StrateZone_Repository.Implements
     public class AppointmentRepository : IAppointmentRepository
     {
         private readonly StrateZoneDbContext _context;
-        
-        public AppointmentRepository(StrateZoneDbContext context)
+        private readonly IPriceRepository _priceRepository;
+
+        public AppointmentRepository(StrateZoneDbContext context, IPriceRepository priceRepository)
         {
             _context = context;
+            _priceRepository = priceRepository;
         }
 
         public async Task<PagedList<Appointment>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -23,6 +26,12 @@ namespace StrateZone_Repository.Implements
             {
                 var result = _context.Appointments
                                     .Include(a => a.User)
+                                    .Include(a => a.TablesAppointments)
+                                        .ThenInclude(ta => ta.Table)
+                                            .ThenInclude(t => t.GameType)
+                                    .Include(a => a.TablesAppointments)
+                                        .ThenInclude(ta => ta.Table)
+                                            .ThenInclude(t => t.Room)
                                     .AsQueryable();
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
@@ -39,6 +48,11 @@ namespace StrateZone_Repository.Implements
                 return await _context.Appointments
                     .Where(a => a.AppointmentId == id)
                     .Include(a => a.TablesAppointments)
+                        .ThenInclude(ta => ta.Table)
+                            .ThenInclude(t => t.GameType)
+                    .Include(a => a.TablesAppointments)
+                        .ThenInclude(ta => ta.Table)
+                            .ThenInclude(t => t.Room)
                     .FirstOrDefaultAsync();
             }
             catch (Exception ex)
@@ -54,6 +68,12 @@ namespace StrateZone_Repository.Implements
                 var result = _context.Appointments
                                     .Where(a => a.UserId == id)
                                     .Include(a => a.User)
+                                    .Include(a => a.TablesAppointments)
+                                        .ThenInclude(ta => ta.Table)
+                                            .ThenInclude(t => t.GameType)
+                                    .Include(a => a.TablesAppointments)
+                                        .ThenInclude(ta => ta.Table)
+                                            .ThenInclude(t => t.Room)
                                     .AsQueryable();
 
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
@@ -85,7 +105,9 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.UtcNow));
 
                 var newAppointmentId = await cmd.ExecuteScalarAsync();
-                appointment.AppointmentId = Convert.ToInt32(newAppointmentId);
+                int appointmentId = Convert.ToInt32(newAppointmentId);
+
+                appointment.AppointmentId = appointmentId;
 
                 return appointment;
             }

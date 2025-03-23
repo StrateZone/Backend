@@ -9,12 +9,12 @@ namespace StrateZone_Repository.Parameters
 {
     public abstract class PagedListParameters
     {
-        const int maxPageSize = 50;
+        const int maxPageSize = 100;
 
         [FromQuery(Name = "page-number")]
         public int PageNumber { get; set; } = 1;
 
-        private int pageSize = 10;
+        private int pageSize = 100;
 
         [FromQuery(Name = "page-size")]
         public int PageSize

@@ -13,13 +13,13 @@ namespace StrateZone_Service.Implements
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IImageRepository _imageRepository;
+        private readonly IWalletService _walletService;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IImageRepository imageRepository, IMapper mapper)
+        public UserService(IUserRepository userRepository, IWalletService walletService, IMapper mapper)
         {
             _userRepository = userRepository;
-            _imageRepository = imageRepository;
+            _walletService = walletService;
             _mapper = mapper;
         }
 
@@ -123,8 +123,19 @@ namespace StrateZone_Service.Implements
 
                 var user = _mapper.Map<User>(userModel);
                 var result = await _userRepository.CreateUserAsync(user);
+                var userResponse = _mapper.Map<UserResponse>(result);
 
-                return _mapper.Map<UserResponse>(result);
+                WalletModel walletModel = new WalletModel()
+                {
+                    UserId = result.UserId,
+                    Balance = 0,
+                    Status = PostgreEnums.WalletStatus.active,
+                };
+
+                var wallet = await _walletService.CreateWalletAsync(walletModel);
+                userResponse.Wallet = wallet;
+
+                return userResponse;
             }
             catch (Exception ex)
             {
@@ -161,13 +172,13 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<UserResponse>> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate)
+        public async Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate)
         {
             try
             {
-                var accounts = await _userRepository.DeleteUnactivatedAccountsAsync(daysAfterAccountCreate);
+                var accountsDeleted = await _userRepository.DeleteUnactivatedAccountsAsync(daysAfterAccountCreate);
 
-                return _mapper.Map<List<UserResponse>>(accounts);
+                return accountsDeleted;
             }
             catch
             {

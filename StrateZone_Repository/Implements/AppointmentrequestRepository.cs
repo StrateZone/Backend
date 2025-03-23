@@ -2,14 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using StrateZone_Repository.Data;
-using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace StrateZone_Repository.Implements
 {
@@ -74,21 +69,12 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var tablesAppointment = await _context.TablesAppointments
-                                                        .Include(ta => ta.Appointment)
-                                                        .SingleOrDefaultAsync(ta => ta.Id == appointmentRequest.TablesAppointmentId)
-                                                        ?? throw new KeyNotFoundException("Tables Appointment with this ID does not exist.");
-
-                var ownerId = tablesAppointment.Appointment.UserId;
-
-                if (ownerId != appointmentRequest.FromUser)
-                    throw new Exception("Appointment invitations must be made by the owner of this appointment.");
-
                 var requestsList = await _context.AppointmentRequests
                                                 .Where(ar => 
                                                     ar.FromUser == appointmentRequest.FromUser 
                                                     && ar.ToUser == appointmentRequest.ToUser 
-                                                    && ar.TablesAppointmentId == appointmentRequest.TablesAppointmentId)
+                                                    && ar.TableId == appointmentRequest.TableId
+                                                )
                                                 .ToListAsync();
 
                 if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
@@ -99,15 +85,17 @@ namespace StrateZone_Repository.Implements
 
                 await using var createCmd = connection.CreateCommand();
                 createCmd.CommandText = @"
-                    INSERT INTO appointment_requests (from_user, to_user, table_appointment_id, status, created_at) 
-                    VALUES (@from_user, @to_user, @appointment_id, @status::request_status, @created_at)
+                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, status, expire_at, created_at) 
+                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @status::request_status, @expire_at, @created_at)
                     RETURNING id;"
                 ;
 
                 createCmd.Parameters.Add(new NpgsqlParameter("@from_user", appointmentRequest.FromUser));
                 createCmd.Parameters.Add(new NpgsqlParameter("@to_user", appointmentRequest.ToUser));
-                createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.TablesAppointmentId));
+                createCmd.Parameters.Add(new NpgsqlParameter("@table_id", appointmentRequest.TableId));
+                createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId == null ? DBNull.Value : appointmentRequest.AppointmentId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
+                createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt));
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.UtcNow));
 
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
@@ -145,14 +133,26 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@to_user", appointmentRequest.ToUser));
                 }
 
-                if (appointmentRequest.TablesAppointmentId > 0)
+                if (appointmentRequest.TableId > 0)
                 {
-                    sql.Append("table_appointment_id = @appointment_id, ");
-                    parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.TablesAppointmentId));
+                    sql.Append("table_id = @table_id, ");
+                    parameters.Add(new NpgsqlParameter("@table_id", appointmentRequest.TableId));
+                }
+
+                if (appointmentRequest.AppointmentId > 0)
+                {
+                    sql.Append("appointment_id = @appointment_id, ");
+                    parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
                 }
 
                 sql.Append("status = @status::request_status, ");
                 parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
+
+                if (appointmentRequest.ExpireAt.HasValue)
+                {
+                    sql.Append("expire_at = @expire_at, ");
+                    parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt.Value));
+                }
 
                 if (appointmentRequest.CreatedAt.HasValue)
                 {
@@ -191,11 +191,11 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Appointmentrequest>> GetAppointmentRequestsOfUserByTableIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        public async Task<PagedList<Appointmentrequest>> GetAppointmentRequestsOfUserByTableIdAsync(AppointmentRequestParameters parameters, int tableId)
         {
             try
             {
-                var result = _context.AppointmentRequests.Where(ar => ar.TablesAppointment.AppointmentId == appointmentId).AsQueryable();
+                var result = _context.AppointmentRequests.Where(ar => ar.TableId == tableId).AsQueryable();
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -208,8 +208,29 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.AppointmentRequests.Where(ar => ar.TablesAppointment.AppointmentId == appointmentId && ar.TablesAppointment.TableId == tableId).AsQueryable();
+                var result = _context.AppointmentRequests.Where(ar => ar.AppointmentId == appointmentId && ar.TableId == tableId).AsQueryable();
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Appointmentrequest>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId)
+        {
+            try
+            {
+                var result = await _context.AppointmentRequests
+                                            .FromSqlRaw(@"
+                                                SELECT * FROM appointment_requests 
+                                                WHERE from_user = {0} AND table_id = {1} AND status NOT IN ('cancelled', 'rejected', 'expired')",
+                                                userId,
+                                                tableId)
+                                            .Include(ar => ar.ToUserNavigation)
+                                            .Include(ar => ar.Table)
+                                            .ToListAsync();
+                return result;
             }
             catch (Exception ex)
             {
@@ -221,10 +242,27 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                var tablesAppointment = await _context.TablesAppointments.FindAsync(tableAppointmentId)
+                                    ?? throw new Exception("Tables appointment with this ID does not exist.");
+
                 var result = await _context.AppointmentRequests
-                                            .Where(ar => ar.FromUser == userId && ar.TablesAppointment.Id == tableAppointmentId)
+                                            .Where(ar => ar.FromUser == userId && ar.TableId == tablesAppointment.TableId && ar.AppointmentId == tablesAppointment.AppointmentId)
                                             .Include(ar => ar.ToUserNavigation).ToListAsync();
                 return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        } 
+
+        public async Task<int> UpdateExpiredAppointmentRequests()
+        {
+            try
+            {
+                return await _context.Database.ExecuteSqlRawAsync(
+                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= CURRENT_TIMESTAMP;"
+                );
             }
             catch (Exception ex)
             {

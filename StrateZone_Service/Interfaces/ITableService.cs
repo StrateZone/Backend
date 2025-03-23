@@ -12,6 +12,8 @@ namespace StrateZone_Service.Implements
         Task<TableModel> CreateTableAsync(TableRequest request);
         Task<TableModel> DeleteTableAsync(int id);
         Task<PagedList<TableResponse>> GetAvailableTablesAsync(TableParameters parameters);
+        Task<List<TableResponse>> GetAllTablesAsync();
+        Task<List<TableResponse>> GetAllAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
         Task<PagedList<TableResponse>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType);
         Task<TableModel> GetTableByIdAsync(int id);
         Task<PagedList<TableModel>> GetTablesAsync(TableParameters parameters);

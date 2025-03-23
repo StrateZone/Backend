@@ -291,7 +291,6 @@ namespace StrateZone_Repository.Implements
                     .AsNoTracking()
                     .ToListAsync();
 
-                // Group tables by game type
                 var groupedTables = tables
                     .GroupBy(t => t.GameType.TypeName)
                     .ToDictionary(g => g.Key, g => g.ToList());
@@ -301,6 +300,46 @@ namespace StrateZone_Repository.Implements
             catch (Exception ex)
             {
                 throw new Exception($"Error fetching available tables: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<Table>> GetTablesAsync()
+        {
+            return await _context.Tables.ToListAsync();
+        }
+
+        public Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime)
+        {
+            try
+            {
+                var query = @"
+                            SELECT t.*
+                            FROM tables t
+                            JOIN rooms r ON t.room_id = r.room_id
+                            WHERE r.status = 'available'
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM tables_appointments ta
+                                JOIN appointments a ON ta.appointment_id = a.appointment_id
+                                WHERE ta.table_id = t.table_id
+                                AND a.schedule_time < @EndTime
+                                AND a.end_time > @StartTime
+                                AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                            )";
+
+                var tables = _context.Tables
+                    .FromSqlRaw(query,
+                        new NpgsqlParameter("@StartTime", StartTime),
+                        new NpgsqlParameter("@EndTime", EndTime))
+                    .Include(t => t.GameType)
+                    .Include(t => t.Room)
+                    .ToListAsync();
+
+                return tables;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
     }

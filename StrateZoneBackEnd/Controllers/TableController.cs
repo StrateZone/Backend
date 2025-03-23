@@ -5,6 +5,7 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_APIs.Controllers
@@ -41,6 +42,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var tables = await _tableService.GetAvailableTablesAsync(parameters);
                 return Ok(tables);
             }
@@ -83,6 +87,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var tables = await _tableService.GetAvailableTablesByGameTypeAsync(parameters, gameType);
                 return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype.");
             }
@@ -100,6 +107,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, true, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var tables = await _tableService.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
                 return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
             }
@@ -117,6 +127,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var tables = await _tableService.GetAvailableTablesForEachGameTypeInTimeRangeAsync(parameters, tableCount);
                 return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
             }

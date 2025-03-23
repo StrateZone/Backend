@@ -326,7 +326,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<User>> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate)
+        public async Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate)
         {
             try
             {
@@ -339,7 +339,7 @@ namespace StrateZone_Repository.Implements
                 _context.Users.RemoveRange(accounts);
                 await _context.SaveChangesAsync();
 
-                return accounts;
+                return accounts.Count;
             }
             catch
             {

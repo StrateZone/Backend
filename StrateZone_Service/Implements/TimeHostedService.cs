@@ -15,9 +15,11 @@ namespace StrateZone_Service.Implements
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<TimedHostedService> _logger;
         private Timer? _userServiceTimer = null;
+        private Timer? _appointmentRequestsServiceTimer = null;
         private Timer? _timer = null;
 
         private static readonly TimeSpan _userCleanupInterval = TimeSpan.FromHours(12);
+        private static readonly TimeSpan _appointmentRequestsCleanupInterval = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan _generalWorkInterval = TimeSpan.FromSeconds(15);
 
         public TimedHostedService(IServiceScopeFactory serviceScopeFactory, ILogger<TimedHostedService> logger)
@@ -31,6 +33,7 @@ namespace StrateZone_Service.Implements
             _logger.LogInformation("Timed Hosted Service running.");
 
             _userServiceTimer = new Timer(DeleteUnactivatedAccounts, null, TimeSpan.Zero, _userCleanupInterval);
+            _appointmentRequestsServiceTimer = new Timer(UpdateExpiredAppointmentRequestStatus, null, TimeSpan.Zero, _appointmentRequestsCleanupInterval);
             _timer = new Timer(DoWork, null, TimeSpan.Zero, _generalWorkInterval);
 
             return Task.CompletedTask;
@@ -42,13 +45,15 @@ namespace StrateZone_Service.Implements
             {
                 try
                 {
+                    int count = 0;
+
                     using (var scope = _serviceScopeFactory.CreateScope())
                     {
                         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-                        await userService.DeleteUnactivatedAccountsAsync(3);
+                        count = await userService.DeleteUnactivatedAccountsAsync(3);
                     }
 
-                    _logger.LogInformation("IUserService cleanup executed.");
+                    _logger.LogInformation($"IUserService cleanup executed: Deleted {count} unactivated account(s).");
                 }
                 catch (Exception ex)
                 {
@@ -59,19 +64,34 @@ namespace StrateZone_Service.Implements
 
         private void SendAppointmentNotifications(object? state)
         {
-            try
-            {
 
-            }
-            catch
+        }
+
+        private void UpdateExpiredAppointmentRequestStatus(object? data)
+        {
+            Task.Run(async () =>
             {
-                throw;
-            }
+                try
+                {
+                    int count = 0;
+
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        var appointmentRequestsService = scope.ServiceProvider.GetRequiredService<IAppointmentrequestService>();
+                        count = await appointmentRequestsService.UpdateExpiredAppointmentRequests();
+                    }
+                    
+                    _logger.LogInformation($"IAppointmentrequestService cleanup executed: Changed status for {count} expired request(s).");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while updating expired appointment requests status.");
+                }
+            });
         }
 
         private void DoWork(object? state)
         {
-            _logger.LogInformation("Timed Hosted Service is executing.");
         }
 
         public async Task StopAsync(CancellationToken stoppingToken)
@@ -79,11 +99,17 @@ namespace StrateZone_Service.Implements
             _logger.LogInformation("Timed Hosted Service is stopping.");
 
             _userServiceTimer?.Change(Timeout.Infinite, 0);
+            _appointmentRequestsServiceTimer?.Change(Timeout.Infinite, 0);
             _timer?.Change(Timeout.Infinite, 0);
 
             if (_userServiceTimer != null)
             {
                 await _userServiceTimer.DisposeAsync();
+            }
+
+            if (_appointmentRequestsServiceTimer != null)
+            {
+                await _appointmentRequestsServiceTimer.DisposeAsync();
             }
 
             if (_timer != null)
@@ -95,6 +121,7 @@ namespace StrateZone_Service.Implements
         public void Dispose()
         {
             _userServiceTimer?.Dispose();
+            _appointmentRequestsServiceTimer?.Dispose();
             _timer?.Dispose();
         }
     }

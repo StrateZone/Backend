@@ -20,6 +20,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                if (await _context.Wallets.AnyAsync(w => w.UserId == wallet.UserId))
+                    throw new Exception("Wallet for this user ID already exists.");
+
                 var connection = _context.Database.GetDbConnection();
                 await connection.OpenAsync();
 

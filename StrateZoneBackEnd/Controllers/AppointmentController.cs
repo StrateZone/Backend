@@ -3,6 +3,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -67,6 +68,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(request, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var result = await _appointmentService.CheckAppointmentAvailability(request);
                 return result.Count > 0
                     ?
@@ -85,6 +89,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(request, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var appointment = await _appointmentService.CreateAppointmentAsync(request);
                 return Created("Appointment created", appointment);
             }
@@ -99,6 +106,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(appointmentModel, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var appointment = await _appointmentService.UpdateAppointmentAsync(appointmentModel, id);
                 return Ok("Appointment updated:\n" + appointment);
             }

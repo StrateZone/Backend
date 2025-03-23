@@ -1,5 +1,6 @@
 ﻿using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
+using StrateZone_Service.BusinessModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,8 +48,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public DateTime? UpdatedAt { get; set; }
 
-        public virtual ICollection<Friendlist> FriendlistUsers { get; set; } = new List<Friendlist>();
+        public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
 
-        public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
+        public virtual WalletModel? Wallet { get; set; }
     }
 }

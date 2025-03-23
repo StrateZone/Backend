@@ -22,8 +22,5 @@ namespace StrateZone_Service.CustomModels.RequestModels
         [Required]
         [MinLength(1)]
         public List<int> TableIds { get; set; } = new List<int>();
-
-        [Required]
-        public decimal TotalPrice { get; set; }
     }
 }

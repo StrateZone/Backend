@@ -18,4 +18,6 @@ public partial class Table
     public virtual Room? Room { get; set; }
 
     public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
+
+    public virtual ICollection<Appointmentrequest> Appointmentrequests { get; set; } = new List<Appointmentrequest>();
 }
