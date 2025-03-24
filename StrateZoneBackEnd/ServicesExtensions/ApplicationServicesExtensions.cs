@@ -40,6 +40,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IAppointmentrequestRepository, AppointmentrequestRepository>();
             services.AddScoped<IFriendrequestRepository, FriendrequestRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IWalletRepository, WalletRepository>();
 
             return services;
         }
@@ -61,6 +64,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IAppointmentrequestService, AppointmentrequestService>();
             services.AddScoped<IFriendrequestService, FriendrequestService>();
             services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IZaloPayService, ZaloPayService>();
 
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();

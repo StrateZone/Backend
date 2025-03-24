@@ -52,6 +52,9 @@ builder.Services.AddSwaggerGen();
 // Add dbcontext
 builder.Services.AddDbContext<StrateZoneDbContext>();
 
+//Http Context Accessor
+builder.Services.AddHttpContextAccessor();
+
 // Auto Mapper
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 

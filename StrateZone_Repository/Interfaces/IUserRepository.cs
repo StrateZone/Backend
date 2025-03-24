@@ -9,6 +9,7 @@ namespace StrateZone_Repository.Interfaces
         Task<User> CreateUserAsync(User user);
         Task<User> DeleteUserAsync(int id);
         Task<User> GetUserByEmailAsync(string email);
+        Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByIdAsync(int id);
         Task<User> GetUserByPhoneNumberAsync(string phoneNumber);
         Task<PagedList<User>> GetUsersByUsernameAsync(UserListParameters parameters, string username);

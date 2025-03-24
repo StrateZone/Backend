@@ -36,8 +36,8 @@ namespace StrateZone_Service.Implements
             };
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: _config["JwtSettings:Issuer"],
+                audience: _config["JwtSettings:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["Jwt:AccessTokenExpirationMinutes"])),
                 signingCredentials: credentials

@@ -346,5 +346,17 @@ namespace StrateZone_Repository.Implements
                 throw;
             }
         }
+
+        public async Task<User> GetUserByUsernameAsync(string username)
+        {
+            try
+            {
+                return await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Username == username);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
