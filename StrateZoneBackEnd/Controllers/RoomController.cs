@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -26,7 +28,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _roomService.GetRoomsAsync(parameters);
-                return Ok(result);
+
+                var response = new PagedListResponse<RoomResponse>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No room was found.");
             }
             catch (Exception ex)
             {
@@ -40,7 +45,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _roomService.GetRoomsByRoomTypeAsync(parameters, roomType);
-                return Ok(result);
+
+                var response = new PagedListResponse<RoomResponse>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No room of this type was found.");
             }
             catch (Exception ex)
             {

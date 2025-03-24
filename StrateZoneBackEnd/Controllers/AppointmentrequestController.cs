@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 
@@ -42,6 +43,23 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _appointmentrequestService.GetAppointmentRequestsFromUserByUserIdAsync(parameters, userId);
+                
+                var response = new PagedListResponse<AppointmentrequestModel>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No appointment request from this user was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("users/{userId}/tables_appointments/{tableAppointmentId}")]
+        public async Task<IActionResult> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tableAppointmentId)
+        {
+            try
+            {
+                var result = await _appointmentrequestService.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(userId, tableAppointmentId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -50,12 +68,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-appointment/{appointmentId}")]
-        public async Task<IActionResult> GetAppointmentRequestsByAppointmentIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        [HttpGet("users/{userId}/tables/{tableId}")]
+        public async Task<IActionResult> GetCurrentAppointmentRequestsFromUserByUserAndTablesIdAsync(int userId, int tableId)
         {
             try
             {
-                var result = await _appointmentrequestService.GetAppointmentRequestsByAppointmnetIdAsync(parameters, appointmentId);
+                var result = await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -70,7 +88,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _appointmentrequestService.GetAppointmentRequestsOfUserByUserIdAsync(parameters, userId);
-                return Ok(result);
+                
+                var response = new PagedListResponse<AppointmentrequestModel>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No appointment request of this user was found.");
             }
             catch (Exception ex)
             {

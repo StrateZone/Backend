@@ -46,7 +46,7 @@ namespace StrateZone_Service.Implements
                     }
                 }
 
-                return new PagedList<RoomResponse>(rooms, rooms.Count, rooms.CurrentPage, rooms.PageSize);
+                return new PagedList<RoomResponse>(rooms, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -73,7 +73,7 @@ namespace StrateZone_Service.Implements
                     }
                 }
 
-                return new PagedList<RoomResponse>(rooms, rooms.Count, rooms.CurrentPage, rooms.PageSize);
+                return new PagedList<RoomResponse>(rooms, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

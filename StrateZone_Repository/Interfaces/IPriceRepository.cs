@@ -10,10 +10,11 @@ namespace StrateZone_Repository.Interfaces
         Task<Price> GetMembershipPriceAsync();
         Task<Price> GetPriceOfGameTypeAsync(GameTypeEnum gameType);
         Task<Price> GetPriceOfRoomTypeAsync(RoomType roomType);
-        Task<Price> GetPriceOfAppointmentAsync(int appointmentId);
+        Task<decimal> GetPriceOfAppointmentAsync(int appointmentId);
         Task<Price> GetPriceOfCourseAsync(int courseId);
         Task<Price> GetProductPriceByIdAsync(int productId);
-        Task<decimal> GetTotalOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime);
+        Task<decimal> GetPriceOfAppointmentTablesFromTimeRangeAsync(int[] tableId, DateTime FromTime, DateTime ToTime);
+        Task<List<decimal>> GetDetailedPriceOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime);
         Task<PagedList<Price>> GetServicePrices(PriceParameters parameters);
         Task<Price> GetTeachingSalaryAsync();
         Task<Price> UpdatePriceAsync(Price price, int id);

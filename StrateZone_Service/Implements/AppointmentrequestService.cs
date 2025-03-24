@@ -28,9 +28,11 @@ namespace StrateZone_Service.Implements
                 {
                     FromUser = request.FromUser,
                     ToUser = request.ToUser,
+                    TableId = request.TableId,
                     AppointmentId = request.AppointmentId,
                     Status = PostgreEnums.RequestStatus.pending,
-                    CreatedAt = DateTime.UtcNow,
+                    ExpireAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).AddHours(3),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 };
 
                 var appointmentRequest = _mapper.Map<Appointmentrequest>(model);
@@ -72,14 +74,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsByAppointmnetIdAsync(AppointmentRequestParameters parameters, int appointmentId)
+        public async Task<List<AppointmentrequestModel>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tablesAppointmentId)
         {
             try
             {
-                var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByAppointmentIdAsync(parameters, appointmentId);
-                var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
+                var result = await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(userId, tablesAppointmentId);
+                var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
 
-                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
+                return appointmentRequestModels;
             }
             catch (Exception ex)
             {
@@ -94,7 +96,9 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
-                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
+                return new PagedList<AppointmentrequestModel>(
+                    appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize
+                    );
             }
             catch (Exception ex)
             {
@@ -109,7 +113,22 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
-                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
+                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<AppointmentrequestModel>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId);
+                var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
+
+                return appointmentRequestModels;
             }
             catch (Exception ex)
             {
@@ -130,6 +149,57 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<int> UpdateExpiredAppointmentRequests()
+        {
+            try
+            {
+                return await _appointmentRequestRepository.UpdateExpiredAppointmentRequests();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<AppointmentrequestModel>> LinkAppointmentrequestsToAppointmentAsync(AppointmentModel appointmentModel)
+        {
+            try
+            {
+                AppointmentRequestParameters parameters = new()
+                {
+                    PageNumber = 1,
+                    PageSize = int.MaxValue,
+                };
+
+                var tableIds = appointmentModel.TablesAppointments.Select(t => t.TableId).ToArray();
+
+                var user_requests = (await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, appointmentModel.UserId))
+                                .Where(ar => 
+                                    tableIds.Contains(ar.TableId) 
+                                    &&
+                                    (ar.Status == PostgreEnums.RequestStatus.pending || ar.Status == PostgreEnums.RequestStatus.accepted)
+                                )
+                                .ToList();
+
+                foreach (var request in user_requests)
+                {
+                    request.AppointmentId = appointmentModel.AppointmentId;
+                    await _appointmentRequestRepository.UpdateAppointmentRequestAsync(request, request.Id);
+                }
+
+                return _mapper.Map<List<AppointmentrequestModel>>(user_requests);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public Task<AppointmentrequestModel> GetAppointmentrequestFromUserToUserInTableAsync(int fromUserId, int toUserId, int tableId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

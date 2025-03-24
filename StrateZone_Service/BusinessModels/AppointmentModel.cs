@@ -17,10 +17,14 @@ namespace StrateZone_Service.BusinessModels
 
         public DateTime EndTime { get; set; }
 
+        public decimal TotalPrice { get; set; }
+
         public DateTime? CreatedAt { get; set; }
 
         public UserModel? User { get; set; }
 
         public virtual ICollection<TablesAppointmentModel> TablesAppointments { get; set; } = [];
+    
+        public virtual ICollection<AppointmentrequestModel>? AppointmentrequestModels { get; set; } = [];
     }
 }

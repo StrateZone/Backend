@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,18 +21,22 @@ namespace StrateZone_Service.Implements
     public class AppointmentService : IAppointmentService
     {
         private readonly IAppointmentRepository _appointmentRepository;
+        private readonly IAppointmentrequestService _appointmentrequestService;
         private readonly IUserService _userService;
         private readonly ITableService _tableService;
         private readonly ITablesAppointmentService _tablesAppointmentService;
+        private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IMapper mapper)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
             _mapper = mapper;
             _tableService = tableService;
+            _priceService = priceService;
             _tablesAppointmentService = tablesAppointmentService;
+            _appointmentrequestService = appointmentrequestService;
         }
 
         public async Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -38,7 +46,7 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRepository.GetAppointmentsAsync(parameters);
                 var appointments = _mapper.Map<PagedList<AppointmentModel>>(result);
 
-                return new PagedList<AppointmentModel>(appointments, appointments.TotalCount, appointments.CurrentPage, appointments.PageSize);
+                return new PagedList<AppointmentModel>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -53,7 +61,7 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(parameters, userId);
                 var appointments = _mapper.Map<PagedList<AppointmentModel>>(result);
 
-                return new PagedList<AppointmentModel>(appointments, appointments.TotalCount, appointments.CurrentPage, appointments.PageSize);
+                return new PagedList<AppointmentModel>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -74,25 +82,26 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<int>> CheckAppointmentAvailability(AppointmentRequest request)
+        {
+            List<TableResponse> Tables = await _tableService.GetAllTablesAsync();
+            List<TableResponse> AvailableTables = await _tableService.GetAllAvailableTablesAsync(request.ScheduleTime, request.EndTime);
+
+            var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
+            var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));
+
+            var unavailableTables = request.TableIds
+                                        .Where(t => !tableIds.Contains(t) || !availableTableIds.Contains(t))
+                                        .ToList();
+
+            return unavailableTables;
+        }
+
         public async Task<AppointmentModel> CreateAppointmentAsync(CustomModels.RequestModels.AppointmentRequest request)
         {
             try
             {
-                TableParameters tableParameters = new()
-                {
-                    StartTime = request.ScheduleTime,
-                    EndTime = request.EndTime,
-                };
-
-                List<TableModel> Tables = await _tableService.GetTablesAsync(tableParameters);
-                List<TableModel> AvailableTables = await _tableService.GetAvailableTablesAsync(tableParameters);
-
-                var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
-                var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));
-
-                var unavailableTables = request.TableIds
-                    .Where(t => tableIds.Contains(t) && !availableTableIds.Contains(t))
-                    .ToList();
+                List<int> unavailableTables = await CheckAppointmentAvailability(request);
 
                 if (unavailableTables.Count > 0)
                 {
@@ -104,7 +113,8 @@ namespace StrateZone_Service.Implements
                     UserId = request.UserId,
                     ScheduleTime = request.ScheduleTime,
                     EndTime = request.EndTime,
-                    CreatedAt = DateTime.UtcNow,
+                    TotalPrice = await _priceService.GetPriceOfAppointmentFromAppointmentRequestAsync(request.TableIds.ToArray(), request.ScheduleTime, request.EndTime),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 };
 
                 var mappedAppointment = _mapper.Map<Appointment>(appointmentModel);
@@ -124,6 +134,9 @@ namespace StrateZone_Service.Implements
 
                 var tablesAppointment = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
                 result.TablesAppointments = tablesAppointment;
+
+                var requests = await _appointmentrequestService.LinkAppointmentrequestsToAppointmentAsync(result);
+                result.AppointmentrequestModels = requests;
 
                 return result;
             }

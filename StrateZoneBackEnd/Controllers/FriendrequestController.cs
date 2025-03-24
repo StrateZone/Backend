@@ -4,6 +4,7 @@ using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 
@@ -29,7 +30,9 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _friendrequestService.GetFriendrequestsOfUserIdAsync(parameters, id);
-                return Ok(result);
+                var response = new PagedListResponse<FriendrequestModel>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No friend request to this user was found.");
             }
             catch (Exception ex)
             {

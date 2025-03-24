@@ -3,6 +3,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Service.Hubs;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 
 namespace StrateZone_APIs.ServiceExtensions
 {
@@ -67,6 +68,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IZaloPayService, ZaloPayService>();
+            services.AddScoped<IWalletService, WalletService>();
 
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();

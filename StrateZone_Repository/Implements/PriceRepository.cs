@@ -1,10 +1,12 @@
 ﻿using MealHunt_Repositories.Pagination;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
+using System.Linq;
 using System.Text;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -193,14 +195,86 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Price> GetPriceOfAppointmentAsync(int appointmentId)
+        public async Task<decimal> GetPriceOfAppointmentAsync(int appointmentId)
         {
             try
             {
-                //var appointment = await _context.Appointments.FindAsync(appointmentId) ?? throw new Exception("sasa");
-                //double appointmentDurationInHours = appointment.EndTime.Subtract(appointment.ScheduleTime).TotalHours;
+                var appointment = await _context.Appointments
+                    .Include(a => a.TablesAppointments)
+                        .ThenInclude(ta => ta.Table)
+                            .ThenInclude(t => t.Room)
+                    .Include(a => a.TablesAppointments)
+                        .ThenInclude(ta => ta.Table)
+                            .ThenInclude(t => t.GameType)
+                    .SingleOrDefaultAsync(a => a.AppointmentId == appointmentId)
+                    ?? throw new KeyNotFoundException("Appointment with this ID was not found");
 
-                throw new NotImplementedException();
+                if (appointment.TotalPrice > 0) return appointment.TotalPrice;
+
+                decimal appointmentDurationInHours = (decimal)(appointment.EndTime - appointment.ScheduleTime).TotalHours;
+
+                decimal totalPrice = 0;
+
+                Dictionary<RoomType, decimal> RoomTypePrices = new();
+                Dictionary<GameTypeEnum, decimal> GameTypePrices = new();
+                foreach (var table_appointment in appointment.TablesAppointments)
+                {
+                    RoomType rt = table_appointment.Table.Room.Type;
+                    if (!RoomTypePrices.ContainsKey(rt))
+                        RoomTypePrices.Add(rt, (decimal) (await GetPriceOfRoomTypeAsync(rt)).Price1);
+
+                    GameTypeEnum gt = table_appointment.Table.GameType.TypeName;
+                    if (!GameTypePrices.ContainsKey(gt))
+                        GameTypePrices.Add(gt, (decimal)(await GetPriceOfGameTypeAsync(gt)).Price1);
+
+                    totalPrice += (RoomTypePrices[rt] + GameTypePrices[gt]) * appointmentDurationInHours;
+                }
+
+                appointment.TotalPrice = totalPrice;
+                await _context.SaveChangesAsync();
+
+                return appointment.TotalPrice;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error calculating appointment price: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<decimal> GetPriceOfAppointmentTablesFromTimeRangeAsync(int[] tableIds, DateTime FromTime, DateTime ToTime)
+        {
+            try
+            {
+                if (FromTime > ToTime) (FromTime, ToTime) = (ToTime, FromTime);
+
+                decimal DurationInHours = (decimal)ToTime.Subtract(FromTime).TotalHours;
+
+                var tables = await _context.Tables
+                                           .Where(t => tableIds.Contains(t.TableId))
+                                           .Include(t => t.GameType)
+                                           .Include(t => t.Room)
+                                           .ToListAsync();
+
+                if (tables.Count <= 0) throw new KeyNotFoundException("No tables found with the provided IDs.");
+
+                decimal totalPrice = 0;
+
+                Dictionary<RoomType, decimal> RoomTypePrices = new();
+                Dictionary<GameTypeEnum, decimal> GameTypePrices = new();
+                foreach (var table in tables)
+                {
+                    RoomType rt = table.Room.Type;
+                    if (!RoomTypePrices.ContainsKey(rt))
+                        RoomTypePrices.Add(rt, (decimal) (await GetPriceOfRoomTypeAsync(rt)).Price1);
+
+                    GameTypeEnum gt = table.GameType.TypeName;
+                    if (!GameTypePrices.ContainsKey(gt))
+                        GameTypePrices.Add(gt, (decimal)(await GetPriceOfGameTypeAsync(gt)).Price1);
+
+                    totalPrice += (RoomTypePrices[rt] + GameTypePrices[gt]) * DurationInHours;
+                }
+
+                return totalPrice;
             }
             catch
             {
@@ -208,16 +282,30 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public Task<decimal> GetTotalOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime)
+        public async Task<List<decimal>> GetDetailedPriceOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime)
         {
             try
             {
                 if (FromTime > ToTime) (FromTime, ToTime) = (ToTime, FromTime);
 
-                double DurationInHours = ToTime.Subtract(FromTime).TotalHours;
-                
-                throw new NotImplementedException();
-            }                                 
+                decimal DurationInHours = (decimal) ToTime.Subtract(FromTime).TotalHours;
+
+                var table = await _context.Tables
+                                        .Include(t => t.GameType)
+                                        .Include(t => t.Room)
+                                        .SingleOrDefaultAsync(t => t.TableId == tableId)
+                        ?? throw new KeyNotFoundException("Table with this ID does not exist");
+
+                var roomPrice = await GetPriceOfRoomTypeAsync(table.Room.Type);
+                var gamePrice = await GetPriceOfGameTypeAsync(table.GameType.TypeName);
+
+                return [
+                    (decimal)(gamePrice.Price1),
+                    (decimal)(roomPrice.Price1),
+                    DurationInHours,
+                    (decimal) ((roomPrice.Price1 + gamePrice.Price1) * DurationInHours)
+                ];
+            }
             catch
             {
                 throw;

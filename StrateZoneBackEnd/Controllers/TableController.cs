@@ -1,10 +1,15 @@
-﻿using Azure.Core;
+﻿using Azure;
+using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -27,7 +32,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var tables = await _tableService.GetTablesAsync(parameters);
-                return Ok(tables);
+
+                var response = new PagedListResponse<TableModel>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No table was found.");
             }
             catch (Exception ex)
             {
@@ -35,13 +43,19 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("all/available")]
+        [HttpGet("available/all")]
         public async Task<IActionResult> GetAvailableTables([FromQuery] TableParameters parameters)
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var tables = await _tableService.GetAvailableTablesAsync(parameters);
-                return Ok(tables);
+
+                var response = new PagedListResponse<TableResponse>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No available table was found.");
             }
             catch (Exception ex)
             {
@@ -63,13 +77,16 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-game-type")]
+        [HttpGet("gametype")]
         public async Task<IActionResult> GetTablesByGameType([FromQuery] TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
                 var tables = await _tableService.GetTablesByGameTypeAsync(parameters, gameType);
-                return tables.Count > 0 ? Ok(tables) : Ok("No table was found for this gametype.");
+
+                var response = new PagedListResponse<TableModel>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No table was found for this gametype.");
             }
             catch (Exception ex)
             {
@@ -77,13 +94,62 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-game-type/available")]
+        [HttpGet("available/gametype")]
         public async Task<IActionResult> GetAvailableTablesByGameType([FromQuery] TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var tables = await _tableService.GetAvailableTablesByGameTypeAsync(parameters, gameType);
-                return tables.Count > 0 ? Ok(tables) : Ok("No table available was found for this gametype.");
+
+                var response = new PagedListResponse<TableResponse>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No available table was found for this gametype.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get available tables within a time range, filtered by gametypes and roomtypes.
+        /// </summary>
+        [HttpGet("available/filter")]
+        public async Task<IActionResult> GetAvailableTablesByGameTypeAndRoomType([FromQuery] TableParameters parameters, [FromQuery] GameTypeEnum[] gameTypes, [FromQuery] RoomType[] roomTypes)
+        {
+            try
+            {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
+                var tables = await _tableService.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
+
+                var response = new PagedListResponse<TableResponse>(tables);
+
+                return response.TotalCount  > 0 ? Ok(response) : Ok("No available table was found for this gametype and roomtype.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get X available tables for each game type, where X is the value of <param name="tableCount">tableCount</param>.
+        /// </summary>
+        [HttpGet("available/each")]
+        public async Task<IActionResult> GetAvailableTablesForEachGameType([FromQuery] TableParameters parameters, [FromQuery] int tableCount)
+        {
+            try
+            {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
+                    return BadRequest(new { message = msg });
+
+                var tables = await _tableService.GetAvailableTablesForEachGameTypeInTimeRangeAsync(parameters, tableCount);
+                return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
             }
             catch (Exception ex)
             {

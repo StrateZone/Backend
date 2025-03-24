@@ -18,6 +18,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public int ToUser { get; set; }
 
         [Required]
-        public int AppointmentId { get; set; }
+        public int TableId { get; set; }
+
+        public int? AppointmentId { get; set; } = null;
     }
 }

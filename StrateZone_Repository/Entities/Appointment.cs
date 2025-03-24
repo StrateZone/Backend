@@ -16,11 +16,13 @@ public partial class Appointment
 
     public AppointmentStatus Status { get; set; }
 
+    public decimal TotalPrice { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
 
-    public virtual ICollection<Appointmentrequest> AppointmentRequests { get; set; } = new List<Appointmentrequest>();
+    public virtual ICollection<Appointmentrequest> Appointmentrequests { get; set; } = new List<Appointmentrequest>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 

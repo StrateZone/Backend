@@ -17,6 +17,6 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<User>> GetUsersByRanking(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down);
         Task<User> UpdateUserAsync(User user, int id);
         Task<User> GetByRefreshTokenAsync(string refreshToken);
-        Task<List<User>> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
+        Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
     }
 }

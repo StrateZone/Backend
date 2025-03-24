@@ -2,6 +2,7 @@
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -26,7 +27,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var user = await _userService.GetUsersAsync(parameters);
-                return Ok(user);
+
+                var response = new PagedListResponse<UserResponse>(user);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No user was found.");
             }
             catch (Exception ex)
             {
@@ -48,13 +52,16 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("username")]
+        [HttpGet("username/search")]
         public async Task<IActionResult> GetByUsername([FromQuery] UserListParameters parameters, string username)
         {
             try
             {
                 var user = await _userService.GetUsersByUsernameAsync(parameters, username);
-                return user.Count > 0 ? Ok(user) : Ok("No user with this username was found");
+
+                var response = new PagedListResponse<UserResponse>(user);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No user with this username was found.");
             }
             catch (Exception ex)
             {

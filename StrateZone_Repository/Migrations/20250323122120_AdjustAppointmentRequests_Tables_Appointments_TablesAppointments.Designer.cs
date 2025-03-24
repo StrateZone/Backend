@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
@@ -11,9 +12,11 @@ using StrateZone_Repository.Data;
 namespace StrateZone_Repository.Migrations
 {
     [DbContext(typeof(StrateZoneDbContext))]
-    partial class StrateZoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250323122120_AdjustAppointmentRequests_Tables_Appointments_TablesAppointments")]
+    partial class AdjustAppointmentRequests_Tables_Appointments_TablesAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,7 +38,7 @@ namespace StrateZone_Repository.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment_type", new[] { "order", "appointment", "course", "membership" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "product_status", new[] { "available", "out_of_stock", "discontinued" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ranking", new[] { "basic", "silver", "gold", "platinum" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "request_status", new[] { "pending", "accepted", "rejected", "cancelled", "expired" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "request_status", new[] { "pending", "accepted", "rejected", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "room_status", new[] { "available", "unavailable", "closed" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "room_type", new[] { "study", "premium", "basic", "openspaced" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "skill_level", new[] { "beginner", "intermediate", "advanced" });
@@ -81,6 +84,9 @@ namespace StrateZone_Repository.Migrations
                     b.Property<int>("TableId")
                         .HasColumnType("integer")
                         .HasColumnName("table_id");
+
+                    b.Property<int?>("TablesAppointmentId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("ToUser")
                         .HasColumnType("integer")

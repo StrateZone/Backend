@@ -11,8 +11,6 @@ public partial class TablesAppointment
 
     public int? AppointmentId { get; set; }
 
-    public int? GameExtensionId { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public virtual Appointment? Appointment { get; set; }

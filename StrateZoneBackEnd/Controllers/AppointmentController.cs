@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -25,7 +29,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var appointments = await _appointmentService.GetAppointmentsAsync(parameters);
-                return appointments.Count > 0 ? Ok(appointments) : Ok("No appointment.");
+
+                var response = new PagedListResponse<AppointmentModel>(appointments);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No appointment was found.");
             }
             catch (Exception ex)
             {
@@ -53,8 +60,11 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var appointment = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
-                return appointment != null ? Ok(appointment) : NotFound("No appointment was found for this user.");
+                var appointments = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
+
+                var response = new PagedListResponse<AppointmentModel>(appointments);
+
+                return response != null ? Ok(response) : NotFound("No appointment was found for this user.");
             }
             catch (Exception ex)
             {
@@ -62,11 +72,35 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("check-availability")]
+        public async Task<IActionResult> CheckAppointmentAvailability([FromBody] AppointmentRequest request)
+        {
+            try
+            {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(request, out string msg))
+                    return BadRequest(new { message = msg });
+
+                var result = await _appointmentService.CheckAppointmentAvailability(request);
+                return result.Count > 0
+                    ?
+                    StatusCode(500, $"The following tables are not available: {string.Join(", ", result)}")
+                    :
+                    Ok("All requested tables for this appointment are available.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("")]
         public async Task<IActionResult> CreateAppointment([FromBody] StrateZone_Service.CustomModels.RequestModels.AppointmentRequest request)
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(request, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var appointment = await _appointmentService.CreateAppointmentAsync(request);
                 return Created("Appointment created", appointment);
             }
@@ -81,6 +115,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(appointmentModel, out string msg))
+                    return BadRequest(new { message = msg });
+
                 var appointment = await _appointmentService.UpdateAppointmentAsync(appointmentModel, id);
                 return Ok("Appointment updated:\n" + appointment);
             }
