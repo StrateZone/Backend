@@ -32,7 +32,7 @@ namespace StrateZone_Service.Implements
                 var result = await _priceRepository.GetServicePrices(parameters);
                 var prices = _mapper.Map<PagedList<PriceModel>>(result);
 
-                return new PagedList<PriceModel>(prices, prices.Count, prices.CurrentPage, prices.PageSize);
+                return new PagedList<PriceModel>(prices, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

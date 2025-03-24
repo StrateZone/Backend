@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
 
@@ -26,7 +29,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var appointments = await _appointmentService.GetAppointmentsAsync(parameters);
-                return appointments.Count > 0 ? Ok(appointments) : Ok("No appointment.");
+
+                var response = new PagedListResponse<AppointmentModel>(appointments);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No appointment was found.");
             }
             catch (Exception ex)
             {
@@ -54,8 +60,11 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var appointment = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
-                return appointment != null ? Ok(appointment) : NotFound("No appointment was found for this user.");
+                var appointments = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
+
+                var response = new PagedListResponse<AppointmentModel>(appointments);
+
+                return response != null ? Ok(response) : NotFound("No appointment was found for this user.");
             }
             catch (Exception ex)
             {

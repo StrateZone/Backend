@@ -3,6 +3,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Service.Hubs;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 
 namespace StrateZone_APIs.ServiceExtensions
 {

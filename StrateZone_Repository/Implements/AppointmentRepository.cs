@@ -102,7 +102,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@user_id", appointment.UserId));
                 cmd.Parameters.Add(new NpgsqlParameter("@total_price", appointment.TotalPrice));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", appointment.Status.ToString()));
-                cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.UtcNow));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
 
                 var newAppointmentId = await cmd.ExecuteScalarAsync();
                 int appointmentId = Convert.ToInt32(newAppointmentId);

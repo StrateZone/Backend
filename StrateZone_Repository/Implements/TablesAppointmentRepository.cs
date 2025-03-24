@@ -66,7 +66,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.TablesAppointments
-                                    .Where(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.Appointment.EndTime < DateTime.Now)
+                                    .Where(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.Appointment.EndTime < DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc))
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.GameType)
                                     .FirstOrDefaultAsync();

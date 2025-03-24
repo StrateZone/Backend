@@ -20,7 +20,7 @@ namespace StrateZone_Service.BusinessModels
 
         public MessageStatus Status { get; set; }
 
-        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedAt { get; set; } = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
         public virtual UserModel? Receiver { get; set; }
 

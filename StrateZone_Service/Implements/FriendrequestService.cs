@@ -29,7 +29,7 @@ namespace StrateZone_Service.Implements
                     FromUser = request.FromUser,
                     ToUser = request.ToUser,
                     Status = PostgreEnums.RequestStatus.pending,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
                 };
 
                 var friendrequest = _mapper.Map<Friendrequest>(model);
@@ -78,7 +78,7 @@ namespace StrateZone_Service.Implements
                 var result = await _friendRequestRepository.GetFriendrequestsOfUserIdAsync(parameters, id);
                 var friendrequests = _mapper.Map<PagedList<FriendrequestModel>>(result);
 
-                return new PagedList<FriendrequestModel>(friendrequests, friendrequests.Count, friendrequests.CurrentPage, friendrequests.PageSize);
+                return new PagedList<FriendrequestModel>(friendrequests, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch
             {

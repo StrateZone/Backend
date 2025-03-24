@@ -89,7 +89,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@receiver_id", message.ReceiverId));
                 cmd.Parameters.Add(new NpgsqlParameter("@content", message.Content));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", message.Status.ToString()));
-                cmd.Parameters.Add(new NpgsqlParameter("@created_at", message.CreatedAt ?? DateTime.UtcNow));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", message.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
 
                 var newMessageId = await cmd.ExecuteScalarAsync();
                 message.MessageId = Convert.ToInt32(newMessageId);

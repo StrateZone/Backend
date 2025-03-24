@@ -132,7 +132,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status));
-                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.UtcNow));
+                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
 
                 var newUserId = await cmd.ExecuteScalarAsync();
                 user.UserId = Convert.ToInt32(newUserId);
@@ -233,7 +233,7 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@points", updatedUser.Points.Value));
                 }
 
-                updatedUser.UpdatedAt = DateTime.UtcNow;
+                updatedUser.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 sql.Append("updated_at = @updatedAt, ");
                 parameters.Add(new NpgsqlParameter("@updatedAt", updatedUser.UpdatedAt));
 

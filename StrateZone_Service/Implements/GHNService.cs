@@ -46,7 +46,9 @@ namespace StrateZone_Service.Implements
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                return await response.Content.ReadAsStringAsync();
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                return FormatJson(responseString);
             }
             catch (HttpRequestException ex)
             {
@@ -95,6 +97,19 @@ namespace StrateZone_Service.Implements
         public Task<string> CalculaExpectedDeliveryTime()
         {
             throw new NotImplementedException();
+        }
+
+        private string FormatJson(string json)
+        {
+            try
+            {
+                var parsedJson = JsonConvert.DeserializeObject(json);
+                return JsonConvert.SerializeObject(parsedJson, Formatting.Indented); // Pretty-print JSON
+            }
+            catch (Exception)
+            {
+                return json; // Return raw JSON if formatting fails
+            }
         }
     }
 }

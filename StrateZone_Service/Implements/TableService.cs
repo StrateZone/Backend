@@ -33,7 +33,7 @@ namespace StrateZone_Service.Implements
                 var result = await _tableRepository.GetTablesAsync(parameters);
                 var tables = _mapper.Map<PagedList<TableModel>>(result);
 
-                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                return new PagedList<TableModel>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace StrateZone_Service.Implements
                     table.TotalPrice = prices.ElementAt(3);
                 }
 
-                return new PagedList<TableResponse>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                return new PagedList<TableResponse>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -76,7 +76,7 @@ namespace StrateZone_Service.Implements
                 var result = await _tableRepository.GetTablesByGameTypeAsync(parameters, gameType);
                 var tables = _mapper.Map<PagedList<TableModel>>(result);
 
-                return new PagedList<TableModel>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                return new PagedList<TableModel>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace StrateZone_Service.Implements
                     table.TotalPrice = prices.ElementAt(3);
                 }
 
-                return new PagedList<TableResponse>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                return new PagedList<TableResponse>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -116,9 +116,6 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
-                    throw new Exception(msg);
-
                 var result = await _tableRepository.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
                 var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
@@ -135,7 +132,7 @@ namespace StrateZone_Service.Implements
                     table.TotalPrice = prices.ElementAt(3);
                 }
 
-                return new PagedList<TableResponse>(tables, tables.Count, tables.CurrentPage, tables.PageSize);
+                return new PagedList<TableResponse>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

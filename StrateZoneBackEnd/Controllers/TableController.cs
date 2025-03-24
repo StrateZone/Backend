@@ -1,8 +1,11 @@
-﻿using Azure.Core;
+﻿using Azure;
+using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
@@ -29,7 +32,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var tables = await _tableService.GetTablesAsync(parameters);
-                return Ok(tables);
+
+                var response = new PagedListResponse<TableModel>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No table was found.");
             }
             catch (Exception ex)
             {
@@ -46,7 +52,10 @@ namespace StrateZone_APIs.Controllers
                     return BadRequest(new { message = msg });
 
                 var tables = await _tableService.GetAvailableTablesAsync(parameters);
-                return Ok(tables);
+
+                var response = new PagedListResponse<TableResponse>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No available table was found.");
             }
             catch (Exception ex)
             {
@@ -74,7 +83,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var tables = await _tableService.GetTablesByGameTypeAsync(parameters, gameType);
-                return tables.Count > 0 ? Ok(tables) : Ok("No table was found for this gametype.");
+
+                var response = new PagedListResponse<TableModel>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No table was found for this gametype.");
             }
             catch (Exception ex)
             {
@@ -91,7 +103,10 @@ namespace StrateZone_APIs.Controllers
                     return BadRequest(new { message = msg });
 
                 var tables = await _tableService.GetAvailableTablesByGameTypeAsync(parameters, gameType);
-                return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype.");
+
+                var response = new PagedListResponse<TableResponse>(tables);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No available table was found for this gametype.");
             }
             catch (Exception ex)
             {
@@ -107,11 +122,14 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, true, out string msg))
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
                     return BadRequest(new { message = msg });
 
                 var tables = await _tableService.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
-                return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
+
+                var response = new PagedListResponse<TableResponse>(tables);
+
+                return response.TotalCount  > 0 ? Ok(response) : Ok("No available table was found for this gametype and roomtype.");
             }
             catch (Exception ex)
             {

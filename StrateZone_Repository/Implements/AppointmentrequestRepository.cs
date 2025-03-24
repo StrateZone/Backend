@@ -74,6 +74,8 @@ namespace StrateZone_Repository.Implements
                                                     ar.FromUser == appointmentRequest.FromUser 
                                                     && ar.ToUser == appointmentRequest.ToUser 
                                                     && ar.TableId == appointmentRequest.TableId
+                                                    && (ar.AppointmentId == appointmentRequest.AppointmentId ||
+                                                    (ar.AppointmentId == null && appointmentRequest.AppointmentId == null))
                                                 )
                                                 .ToListAsync();
 
@@ -96,7 +98,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId == null ? DBNull.Value : appointmentRequest.AppointmentId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
                 createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt));
-                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.UtcNow));
+                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
 
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
                 appointmentRequest.Id = Convert.ToInt32(newAppointmentId);
@@ -261,7 +263,8 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= CURRENT_TIMESTAMP;"
+                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= {0};",
+                    DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
                 );
             }
             catch (Exception ex)

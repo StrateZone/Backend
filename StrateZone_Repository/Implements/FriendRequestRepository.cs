@@ -42,7 +42,7 @@ namespace StrateZone_Repository.Implements
                     cmd.Parameters.AddWithValue("@from_user", friendrequest.FromUser);
                     cmd.Parameters.AddWithValue("@to_user", friendrequest.ToUser);
                     cmd.Parameters.AddWithValue("@status", friendrequest.Status.ToString());
-                    cmd.Parameters.AddWithValue("@createdAt", friendrequest.CreatedAt ?? DateTime.UtcNow);
+                    cmd.Parameters.AddWithValue("@createdAt", friendrequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc));
 
                     var newUserId = await cmd.ExecuteScalarAsync();
                     friendrequest.Id = Convert.ToInt32(newUserId);

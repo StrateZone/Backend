@@ -46,7 +46,7 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRepository.GetAppointmentsAsync(parameters);
                 var appointments = _mapper.Map<PagedList<AppointmentModel>>(result);
 
-                return new PagedList<AppointmentModel>(appointments, appointments.TotalCount, appointments.CurrentPage, appointments.PageSize);
+                return new PagedList<AppointmentModel>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(parameters, userId);
                 var appointments = _mapper.Map<PagedList<AppointmentModel>>(result);
 
-                return new PagedList<AppointmentModel>(appointments, appointments.TotalCount, appointments.CurrentPage, appointments.PageSize);
+                return new PagedList<AppointmentModel>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -114,7 +114,7 @@ namespace StrateZone_Service.Implements
                     ScheduleTime = request.ScheduleTime,
                     EndTime = request.EndTime,
                     TotalPrice = await _priceService.GetPriceOfAppointmentFromAppointmentRequestAsync(request.TableIds.ToArray(), request.ScheduleTime, request.EndTime),
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 };
 
                 var mappedAppointment = _mapper.Map<Appointment>(appointmentModel);

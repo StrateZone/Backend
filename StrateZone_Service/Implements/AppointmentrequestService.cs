@@ -31,8 +31,8 @@ namespace StrateZone_Service.Implements
                     TableId = request.TableId,
                     AppointmentId = request.AppointmentId,
                     Status = PostgreEnums.RequestStatus.pending,
-                    ExpireAt = DateTime.UtcNow.AddHours(3),
-                    CreatedAt = DateTime.UtcNow,
+                    ExpireAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).AddHours(3),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 };
 
                 var appointmentRequest = _mapper.Map<Appointmentrequest>(model);
@@ -96,7 +96,9 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
-                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
+                return new PagedList<AppointmentrequestModel>(
+                    appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize
+                    );
             }
             catch (Exception ex)
             {
@@ -111,7 +113,7 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
-                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, appointmentRequestModels.Count, appointmentRequestModels.CurrentPage, appointmentRequestModels.PageSize);
+                return new PagedList<AppointmentrequestModel>(appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -171,8 +173,14 @@ namespace StrateZone_Service.Implements
                     PageSize = int.MaxValue,
                 };
 
+                var tableIds = appointmentModel.TablesAppointments.Select(t => t.TableId).ToArray();
+
                 var user_requests = (await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, appointmentModel.UserId))
-                                .Where(ar => ar.Status == PostgreEnums.RequestStatus.pending || ar.Status == PostgreEnums.RequestStatus.accepted)
+                                .Where(ar => 
+                                    tableIds.Contains(ar.TableId) 
+                                    &&
+                                    (ar.Status == PostgreEnums.RequestStatus.pending || ar.Status == PostgreEnums.RequestStatus.accepted)
+                                )
                                 .ToList();
 
                 foreach (var request in user_requests)
@@ -187,6 +195,11 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public Task<AppointmentrequestModel> GetAppointmentrequestFromUserToUserInTableAsync(int fromUserId, int toUserId, int tableId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

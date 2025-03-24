@@ -2,6 +2,7 @@
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
@@ -30,7 +31,10 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _priceService.GetServicePricesAsync(parameters);
-                return Ok(result);
+
+                var response = new PagedListResponse<PriceModel>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No price was found.");
             }
             catch (Exception ex)
             {
