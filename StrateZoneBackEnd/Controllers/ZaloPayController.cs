@@ -40,48 +40,17 @@ namespace StrateZone_APIs.Controllers
 
         
         [HttpPost("callback")]
-        public IActionResult HandleCallback([FromBody] dynamic cbdata)
+        public async Task<IActionResult> HandleCallback([FromBody] dynamic cbdata)
         {
-            var result = new Dictionary<string, object>();
-            var key2 = _configuration["ZaloPay:Key2"];
-
-            Console.WriteLine($"Callback Received: {JsonConvert.SerializeObject(cbdata)}");
-
             try
             {
-                var dataStr = Convert.ToString(cbdata["data"]);
-                var reqMac = Convert.ToString(cbdata["mac"]);
-
-                var mac = HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key2, dataStr);
-
-                Console.WriteLine("mac = {0}", mac);
-
-                // kiểm tra callback hợp lệ (đến từ ZaloPay server)
-                if (!reqMac.Equals(mac))
-                {
-                    // callback không hợp lệ
-                    result["return_code"] = -1;
-                    result["return_message"] = "mac not equal";
-                }
-                else
-                {
-                    // thanh toán thành công
-                    // merchant cập nhật trạng thái cho đơn hàng
-                    var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
-                    Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
-
-                    result["return_code"] = 1;
-                    result["return_message"] = "success";
-                }
+                var response = await _zaloPayService.HandleCallbackAsync(cbdata);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                result["return_code"] = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
-                result["return_message"] = ex.Message;
+                return BadRequest(new { message = ex.Message });
             }
-
-            // thông báo kết quả cho ZaloPay server
-            return Ok(result);
         }
     }
 }

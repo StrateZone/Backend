@@ -22,6 +22,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using ZaloPay.Helper.Crypto;
 using ZaloPay.Helper;
 using Azure;
+using System.Xml.Linq;
+using StrateZone_Service.BusinessModels;
 
 namespace StrateZone_Service.Implements
 {
@@ -62,7 +64,13 @@ namespace StrateZone_Service.Implements
 
             var embedData = JsonConvert.SerializeObject(new { redirectUrl = zaloPayRequest.ReturnUrl }, Formatting.None);
 
-            var items = "[]";
+            var items = new List<ZaloPayItem>
+            {
+                new ZaloPayItem { ItemId = "Depo", ItemName = "Deposite " + zaloPayRequest.Amount, ItemPrice = zaloPayRequest.Amount, ItemQuantity = 1 }
+            };
+
+            // Chuyển đổi sang JSON
+            string itemJson = JsonConvert.SerializeObject(items);
 
             var requestData = new Dictionary<string, string>();
 
@@ -72,7 +80,7 @@ namespace StrateZone_Service.Implements
             requestData.Add("amount", zaloPayRequest.Amount.ToString());
             requestData.Add("app_trans_id", transId);
             requestData.Add("embed_data", embedData);
-            requestData.Add("item", items);
+            requestData.Add("item", itemJson);
             requestData.Add("description", zaloPayRequest.Description);
             //requestData.Add("bank_code", "zalopayapp");
 
@@ -107,39 +115,90 @@ namespace StrateZone_Service.Implements
         }
 
 
-        //public async Task<bool> HandleCallbackAsync(ZaloPayCallbackModel callbackData)
-        //{
-        //    if (callbackData.ReturnCode != 1)
-        //    {
-        //        return false;
-        //    }
+        public async Task<Dictionary<string, object>> HandleCallbackAsync(dynamic callbackData)
+        {
+            var result = new Dictionary<string, object>();
+            var key2 = _configuration["ZaloPay:Key2"];
 
-        //    var user = await _userRepository.GetUserByUsernameAsync(callbackData.AppUser);
-        //    if (user == null)
-        //    {
-        //        return false;
-        //    }
+            Console.WriteLine($"Callback Received: {JsonConvert.SerializeObject(callbackData)}");
 
-        //    var transaction = new Transaction
-        //    {
-        //        OfUser = user.UserId,
-        //        ReferenceId = callbackData.AppTransId,
-        //        Content = "Balance changed",
-        //        Amount = callbackData.Amount,
-        //        TransactionType = TransactionType.deposit,
-        //        CreatedAt = DateTime.UtcNow
-        //    };
-        //    await _transactionRepository.SaveTransaction(transaction);
+            try
+            {
+                var dataStr = Convert.ToString(callbackData["data"]);
+                var reqMac = Convert.ToString(callbackData["mac"]);
 
-        //    var userWallet = await _walletRepository.GetByUserIdAsync(user.UserId);
-        //    if (userWallet == null) return false;
+                var mac = HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key2, dataStr);
 
-        //    userWallet.Balance += callbackData.Amount;
+                Console.WriteLine("mac = {0}", mac);
 
-        //    await _walletRepository.UpdateAsync(userWallet);
+                // kiểm tra callback hợp lệ (đến từ ZaloPay server)
+                if (!reqMac.Equals(mac))
+                {
+                    // callback không hợp lệ
+                    result["return_code"] = -1;
+                    result["return_message"] = "mac not equal";
+                }
+                else
+                {
+                    // thanh toán thành công
+                    // merchant cập nhật trạng thái cho đơn hàng
+                    var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
+                    Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
+                    
+                    var rawItemJson = dataJson.GetProperty("item").GetString(); // "item" là chuỗi JSON
 
-        //    return true;
-        //}
+                    // Giải mã "item" từ chuỗi JSON thành danh sách object
+                    var items = JsonConvert.DeserializeObject<List<ZaloPayItem>>(rawItemJson);
+
+                    // Lấy danh sách item name
+                    var itemName = items.FirstOrDefault()?.ItemName;
+                    var userId = dataJson["app_user"];
+                    var amount = dataJson["amount"];
+
+                    await _transactionRepository.SaveTransaction(new Transaction
+                    {
+                        OfUser = userId,
+                        Amount = amount,
+                        ReferenceId = dataJson["zp_trans_id"],
+                        Content = "Transaction for: " + itemName,
+                        CreatedAt = DateTime.UtcNow,
+                    });
+
+                    Wallet checkWallet = await _walletRepository.GetWalletByUserIdAsync(userId);
+                    if (checkWallet != null)
+                    {
+                        checkWallet.Balance += amount;
+                        await _walletRepository.UpdateWalletAsync(checkWallet, userId);
+                    }
+                    else
+                    {
+                        var newWallet = new Wallet
+                        {
+                            UserId = userId,
+                            Balance = amount,
+                            Status = WalletStatus.active
+                        };
+
+                        await _walletRepository.CreateWalletAsync(newWallet);
+                    }
+
+                    result["return_code"] = 1;
+                    result["return_message"] = "success";
+                }
+            }
+            catch (Exception ex)
+            {
+                result["return_code"] = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
+                result["return_message"] = ex.Message;
+            }
+
+            // thông báo kết quả cho ZaloPay server
+            return result;
+        }
+
+
+
+
         //private string ComputeHmacSHA256(string data, string key)
         //{
         //    using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
