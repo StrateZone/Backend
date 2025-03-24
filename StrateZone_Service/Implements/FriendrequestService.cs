@@ -29,7 +29,7 @@ namespace StrateZone_Service.Implements
                     FromUser = request.FromUser,
                     ToUser = request.ToUser,
                     Status = PostgreEnums.RequestStatus.pending,
-                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)
                 };
 
                 var friendrequest = _mapper.Map<Friendrequest>(model);

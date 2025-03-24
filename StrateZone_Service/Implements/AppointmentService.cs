@@ -114,7 +114,7 @@ namespace StrateZone_Service.Implements
                     ScheduleTime = request.ScheduleTime,
                     EndTime = request.EndTime,
                     TotalPrice = await _priceService.GetPriceOfAppointmentFromAppointmentRequestAsync(request.TableIds.ToArray(), request.ScheduleTime, request.EndTime),
-                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                 };
 
                 var mappedAppointment = _mapper.Map<Appointment>(appointmentModel);
@@ -136,7 +136,7 @@ namespace StrateZone_Service.Implements
                 result.TablesAppointments = tablesAppointment;
 
                 var requests = await _appointmentrequestService.LinkAppointmentrequestsToAppointmentAsync(result);
-                result.AppointmentrequestModels = requests;
+                result.Appointmentrequests = requests;
 
                 return result;
             }

@@ -64,7 +64,7 @@ namespace StrateZone_Repository.Implements
                 var users = _context.Users
                                     .Where(u => u.Username.ToLower().Contains(username.ToLower()))
                                     .AsQueryable();
-                
+
                 return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -132,7 +132,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status));
-                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
+                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)));
 
                 var newUserId = await cmd.ExecuteScalarAsync();
                 user.UserId = Convert.ToInt32(newUserId);
@@ -233,7 +233,7 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@points", updatedUser.Points.Value));
                 }
 
-                updatedUser.UpdatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+                updatedUser.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc);
                 sql.Append("updated_at = @updatedAt, ");
                 parameters.Add(new NpgsqlParameter("@updatedAt", updatedUser.UpdatedAt));
 
@@ -314,7 +314,7 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
-            public async Task<User> GetUserByPhoneNumberAsync(string phoneNumber)
+        public async Task<User> GetUserByPhoneNumberAsync(string phoneNumber)
         {
             try
             {
@@ -330,9 +330,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var currentDay = DateTime.Now;
-                var accounts = await _context.Users.Where(a => 
-                        a.Status == "Unactivated" 
+                var currentDay = DateTime.UtcNow.AddHours(7);
+                var accounts = await _context.Users.Where(a =>
+                        a.Status == "Unactivated"
                         && (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
                     .ToListAsync();
 

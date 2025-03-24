@@ -31,7 +31,7 @@ namespace StrateZone_Service.Implements
 
                 ImageModel imageModel = new ImageModel()
                 {
-                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                     Url = imgUrl
                 };
 

@@ -31,8 +31,8 @@ namespace StrateZone_Service.Implements
                     TableId = request.TableId,
                     AppointmentId = request.AppointmentId,
                     Status = PostgreEnums.RequestStatus.pending,
-                    ExpireAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).AddHours(3),
-                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                    ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(3),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                 };
 
                 var appointmentRequest = _mapper.Map<Appointmentrequest>(model);

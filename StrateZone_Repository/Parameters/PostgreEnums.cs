@@ -22,6 +22,7 @@
         public enum ThreadStatus { published, rejected, pending, deleted }
         public enum TicketType { withdrawal, feedback, other }
         public enum TransactionType { deposit, withdrawal, refund }
+        public enum PaymentStatus { unpaid, paid }
         public enum PaymentType { order, appointment, course, membership }
         public enum UserCourseResult { passed, failed }
         public enum UserRole { RegisteredUser, Member, Instructor, Staff, Admin }

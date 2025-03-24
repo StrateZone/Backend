@@ -98,7 +98,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId == null ? DBNull.Value : appointmentRequest.AppointmentId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
                 createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt));
-                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
+                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)));
 
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
                 appointmentRequest.Id = Convert.ToInt32(newAppointmentId);
@@ -264,7 +264,7 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Database.ExecuteSqlRawAsync(
                     "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= {0};",
-                    DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)
+                    DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)
                 );
             }
             catch (Exception ex)

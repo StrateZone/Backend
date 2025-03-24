@@ -7,16 +7,16 @@ namespace StrateZone_Repository.Interfaces
     public interface IUserRepository
     {
         Task<User> CreateUserAsync(User user);
+        Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
         Task<User> DeleteUserAsync(int id);
+        Task<User> GetByRefreshTokenAsync(string refreshToken);
         Task<User> GetUserByEmailAsync(string email);
-        Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByIdAsync(int id);
         Task<User> GetUserByPhoneNumberAsync(string phoneNumber);
-        Task<PagedList<User>> GetUsersByUsernameAsync(UserListParameters parameters, string username);
+        Task<User> GetUserByUsernameAsync(string username);
         Task<PagedList<User>> GetUsersAsync(UserListParameters parameters);
         Task<PagedList<User>> GetUsersByRanking(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down);
-        Task<User> UpdateUserAsync(User user, int id);
-        Task<User> GetByRefreshTokenAsync(string refreshToken);
-        Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
+        Task<PagedList<User>> GetUsersByUsernameAsync(UserListParameters parameters, string username);
+        Task<User> UpdateUserAsync(User updatedUser, int id);
     }
 }

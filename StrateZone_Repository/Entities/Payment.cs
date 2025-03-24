@@ -12,6 +12,8 @@ public partial class Payment
 
     public PaymentType PaymentType { get; set; } 
 
+    public PaymentStatus PaymentStatus { get; set; }
+
     public int? OrderId { get; set; }
 
     public int? AppointmentId { get; set; }

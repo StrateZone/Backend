@@ -44,7 +44,7 @@ namespace StrateZone_Service.Utils
 
             if (endTime.Subtract(scheduleTime).TotalHours < 0.5)
             {
-                errorMessage = "The minium duration between start and end time is 30 minutes.";
+                errorMessage = "The minimum duration between start and end time is 30 minutes.";
                 return false;
             }
 

@@ -102,7 +102,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@user_id", appointment.UserId));
                 cmd.Parameters.Add(new NpgsqlParameter("@total_price", appointment.TotalPrice));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", appointment.Status.ToString()));
-                cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc)));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)));
 
                 var newAppointmentId = await cmd.ExecuteScalarAsync();
                 int appointmentId = Convert.ToInt32(newAppointmentId);
@@ -116,7 +116,6 @@ namespace StrateZone_Repository.Implements
                 throw new Exception($"Error creating appointment: {ex.Message}");
             }
         }
-
 
         public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment, int id)
         {

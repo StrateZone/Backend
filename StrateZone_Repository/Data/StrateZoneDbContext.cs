@@ -104,6 +104,7 @@ public partial class StrateZoneDbContext : DbContext
                         dataSourceBuilder.MapEnum<GameTypeEnum>("game_type");
                         dataSourceBuilder.MapEnum<Gender>("gender");
                         dataSourceBuilder.MapEnum<MessageStatus>("message_status");
+                        dataSourceBuilder.MapEnum<PaymentStatus>("payment_status");
                         dataSourceBuilder.MapEnum<OrderStatus>("order_status");
                         dataSourceBuilder.MapEnum<PaymentType>("payment_type");
                         dataSourceBuilder.MapEnum<ParticipantStatus>("participant_status");
@@ -144,6 +145,7 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<MessageStatus>();
         modelBuilder.HasPostgresEnum<OrderStatus>();
         modelBuilder.HasPostgresEnum<ParticipantStatus>();
+        modelBuilder.HasPostgresEnum<PaymentStatus>();
         modelBuilder.HasPostgresEnum<PaymentType>();
         modelBuilder.HasPostgresEnum<ProductStatus>();
         modelBuilder.HasPostgresEnum<Ranking>();
@@ -665,6 +667,11 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.PaymentType).HasColumnName("payment_type").HasConversion(
                     v => v.ToString(),
                     v => (PaymentType) Enum.Parse(typeof(PaymentType), v)
+                );
+
+            entity.Property(e => e.PaymentStatus).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (PaymentStatus)Enum.Parse(typeof(PaymentStatus), v)
                 );
 
             entity.Property(e => e.UserId).HasColumnName("user_id");

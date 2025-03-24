@@ -15,7 +15,6 @@ using static StrateZone_Repository.Parameters.PostgreEnums;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using StrateZone_Repository.Interfaces;
-using StrateZone_Repository.Implements;
 using StrateZone_Repository.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -58,7 +57,7 @@ namespace StrateZone_Service.Implements
             var endpoint = _configuration["ZaloPay:CreateOrderUrl"];
             var random = new Random();
 
-            var transId = DateTime.Now.ToString("yyMMdd") + "_" + random.Next(1000000);
+            var transId = DateTime.UtcNow.AddHours(7).ToString("yyMMdd") + "_" + random.Next(1000000);
 
             var appUser = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "guest_user";
 

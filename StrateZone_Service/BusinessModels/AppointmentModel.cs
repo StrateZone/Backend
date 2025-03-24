@@ -25,6 +25,6 @@ namespace StrateZone_Service.BusinessModels
 
         public virtual ICollection<TablesAppointmentModel> TablesAppointments { get; set; } = [];
     
-        public virtual ICollection<AppointmentrequestModel>? AppointmentrequestModels { get; set; } = [];
+        public virtual ICollection<AppointmentrequestModel>? Appointmentrequests { get; set; } = [];
     }
 }

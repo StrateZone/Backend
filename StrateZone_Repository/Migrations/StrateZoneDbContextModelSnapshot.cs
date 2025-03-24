@@ -32,6 +32,7 @@ namespace StrateZone_Repository.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "message_status", new[] { "read", "unread" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "order_status", new[] { "pending", "shipped", "delivered", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "participant_status", new[] { "enrolled", "drop_out", "in_progress", "completed" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment_status", new[] { "unpaid", "paid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment_type", new[] { "order", "appointment", "course", "membership" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "product_status", new[] { "available", "out_of_stock", "discontinued" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ranking", new[] { "basic", "silver", "gold", "platinum" });
@@ -750,6 +751,11 @@ namespace StrateZone_Repository.Migrations
                     b.Property<int?>("OrderId")
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payment_type");
 
                     b.Property<string>("PaymentType")
                         .IsRequired()

@@ -31,7 +31,7 @@ namespace StrateZone_Service.Implements
                     ReceiverId = request.ReceiverId,
                     Content = request.Content,
                     Status = StrateZone_Repository.Parameters.PostgreEnums.MessageStatus.unread,
-                    CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                 };
 
                 var message = _mapper.Map<Message>(model);

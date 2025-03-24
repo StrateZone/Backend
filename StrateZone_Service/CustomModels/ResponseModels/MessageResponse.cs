@@ -28,6 +28,6 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public MessageStatus Status { get; set; }
 
-        public DateTime? CreatedAt { get; set; } = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+        public DateTime? CreatedAt { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc);
     }
 }
