@@ -68,7 +68,7 @@ namespace StrateZone_Service.Implements
 
             requestData.Add("app_id", appId);
             requestData.Add("app_user", appUser);
-            requestData.Add("app_time", Utils.GetTimeStamp().ToString());
+            requestData.Add("app_time", ZaloPay.Helper.Utils.GetTimeStamp().ToString());
             requestData.Add("amount", zaloPayRequest.Amount.ToString());
             requestData.Add("app_trans_id", transId);
             requestData.Add("embed_data", embedData);
