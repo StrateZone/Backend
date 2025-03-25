@@ -4,6 +4,7 @@ using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace StrateZone_Repository.Implements
@@ -170,6 +171,89 @@ namespace StrateZone_Repository.Implements
 
                 var updatedAppointmentRequest = await _context.AppointmentRequests.FindAsync(id);
                 return updatedAppointmentRequest;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Appointmentrequest> AcceptAppointmentrequestAsync(int id)
+        {
+            try
+            {
+                var toAccept = await _context.AppointmentRequests.FindAsync(id)
+                            ?? throw new Exception("Appointment request with this ID does not exist");
+
+                if (toAccept.Status != PostgreEnums.RequestStatus.pending)
+                {
+                    throw new Exception($"This request is already {toAccept.Status}.");
+                }
+
+                toAccept.Id = id;
+                var parameters = new List<NpgsqlParameter>();
+                var sql = new StringBuilder(
+                    "UPDATE appointment_requests " +
+                        "SET status = " +
+                        "CASE " +
+                            "WHEN id = @id THEN 'accepted' " +
+                            "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
+                                "AND table_id = @table_id AND appointment_id = @appointment_id THEN 'rejected' " +
+                            "ELSE status " +
+                    "END;");
+                parameters.Add(new NpgsqlParameter("@id", id));
+                parameters.Add(new NpgsqlParameter("@user_id", toAccept.FromUser));
+                parameters.Add(new NpgsqlParameter("@table_id", toAccept.TableId));
+                parameters.Add(new NpgsqlParameter("@appointment_id", toAccept.AppointmentId != null ? toAccept.AppointmentId : DBNull.Value));
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
+                return await _context.AppointmentRequests.FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Appointmentrequest> RejectAppointmentrequestAsync(int id)
+        {
+            try
+            {
+                var toReject = await _context.AppointmentRequests.FindAsync(id)
+                            ?? throw new Exception("Appointment request with this ID does not exist");
+
+                if (toReject.Status != PostgreEnums.RequestStatus.pending)
+                {
+                    throw new Exception($"This request is already {toReject.Status}.");
+                }
+
+                toReject.Id = id;
+                var sql = new StringBuilder("UPDATE appointment_requests SET status = 'rejected' WHERE id = @id;");
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), new NpgsqlParameter("@id", id));
+
+                return await _context.AppointmentRequests.FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Appointmentrequest>> CancelAllSentRequestFromUserAsync(int userId)
+        {
+            try
+            {
+                var updatedRequests = await _context.AppointmentRequests
+                    .FromSqlRaw(
+                        "UPDATE appointment_requests " +
+                        "SET status = 'cancelled' " +
+                        "WHERE from_user = {0} AND status != 'expired' AND appointment_id IS NULL " +
+                        "RETURNING *;", userId)
+                    .ToListAsync();
+
+                return updatedRequests;
             }
             catch (Exception ex)
             {

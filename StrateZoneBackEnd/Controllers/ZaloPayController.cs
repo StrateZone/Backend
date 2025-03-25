@@ -44,6 +44,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                Console.WriteLine(cbdata.ToString());
                 var response = await _zaloPayService.HandleCallbackAsync(cbdata);
                 return Ok(response);
             }

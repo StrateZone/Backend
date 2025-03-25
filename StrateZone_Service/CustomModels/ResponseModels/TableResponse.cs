@@ -14,6 +14,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? RoomType { get; set; }
 
+        public string? RoomDescription { get; set; }
+
         public int? GameTypeId { get; set; }
 
         public virtual GameTypeModel? GameType { get; set; }

@@ -1,29 +1,20 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using StrateZone_Repository.Entities;
+using StrateZone_Repository.Interfaces;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using StrateZone_Repository.Interfaces;
-using StrateZone_Repository.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using ZaloPay.Helper.Crypto;
 using ZaloPay.Helper;
 using Azure;
 using System.Xml.Linq;
 using StrateZone_Service.BusinessModels;
 using Microsoft.AspNetCore.Http.Features;
+using ZaloPay.Helper.Crypto;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -59,8 +50,14 @@ namespace StrateZone_Service.Implements
 
             Random rnd = new Random();
             var app_time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-            var embed_data = new { };
-            var items = new[] { new { } };
+            var embed_data = new
+            {
+                redirecturl = zaloPayRequest.ReturnUrl
+            };
+            var items = new List<ZaloPayItem>
+            {
+                new ZaloPayItem { ItemId = "DEPO", ItemName = "Deposite: " + zaloPayRequest.Amount, ItemPrice = zaloPayRequest.Amount, ItemQuantity = 1 }
+            };
             var app_trans_id = rnd.Next(1000000); // Generate a random order's ID.
             var param = new Dictionary<string, string>();
 

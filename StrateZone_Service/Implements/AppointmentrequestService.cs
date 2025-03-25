@@ -151,6 +151,45 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<AppointmentrequestModel> AcceptAppointmentrequestAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.AcceptAppointmentrequestAsync(id);
+                return _mapper.Map<AppointmentrequestModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<AppointmentrequestModel> RejectAppointmentrequestAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.RejectAppointmentrequestAsync(id);
+                return _mapper.Map<AppointmentrequestModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<AppointmentrequestModel>> CancelAllSentRequestFromUserAsync(int userId)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.CancelAllSentRequestFromUserAsync(userId);
+                return _mapper.Map<List<AppointmentrequestModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<int> UpdateExpiredAppointmentRequests()
         {
             try
