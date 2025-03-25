@@ -90,6 +90,8 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Wallet> Wallets { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder
@@ -735,6 +737,30 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.Product).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("prices_product_id_fkey");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("notifications_pkey");
+
+            entity.ToTable("Notifications");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Title).HasColumnName("title");
+            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.ToUser).HasColumnName("to_user");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (MessageStatus)Enum.Parse(typeof(MessageStatus), v)
+                    );
+
+            entity.HasOne(d => d.ToUserNavigation).WithMany(p => p.NotificationsToUserNavifations)
+                .HasForeignKey(d => d.ToUser)
+                .HasConstraintName("notifications_user_id_fkey");
         });
 
         modelBuilder.Entity<Product>(entity =>

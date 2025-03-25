@@ -1,28 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using StrateZone_Repository.Entities;
+using StrateZone_Repository.Interfaces;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using StrateZone_Repository.Interfaces;
-using StrateZone_Repository.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using ZaloPay.Helper.Crypto;
 using ZaloPay.Helper;
-using Azure;
-using System.Xml.Linq;
-using StrateZone_Service.BusinessModels;
+using ZaloPay.Helper.Crypto;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -89,7 +77,7 @@ namespace StrateZone_Service.Implements
                 + requestData["app_time"] + "|" + requestData["embed_data"] + "|" + requestData["item"];
 
             Console.WriteLine("Data string for MAC: " + data);
-            
+
 
             requestData.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key1, data));
 
@@ -143,7 +131,7 @@ namespace StrateZone_Service.Implements
                     // merchant cập nhật trạng thái cho đơn hàng
                     var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
                     Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
-                    
+
                     var rawItemJson = dataJson.GetProperty("item").GetString(); // "item" là chuỗi JSON
 
                     // Giải mã "item" từ chuỗi JSON thành danh sách object

@@ -36,6 +36,13 @@ namespace StrateZone_Service.Utils
         {
             errorMessage = string.Empty;
 
+            if (scheduleTime <= DateTime.UtcNow.AddHours(7)
+                || endTime <= DateTime.UtcNow.AddHours(7))
+            {
+                errorMessage = "Can not select time in the past.";
+                return false;
+            }
+
             if (scheduleTime > endTime)
             {
                 errorMessage = "Start time must be earlier than End time.";

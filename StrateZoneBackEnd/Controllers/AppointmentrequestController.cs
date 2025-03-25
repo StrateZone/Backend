@@ -127,6 +127,48 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("accept/{id}")]
+        public async Task<IActionResult> AcceptAppointmentRequestAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentrequestService.AcceptAppointmentrequestAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("reject/{id}")]
+        public async Task<IActionResult> RejectAppointmentRequestAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentrequestService.RejectAppointmentrequestAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("cancel-all/users/{id}")]
+        public async Task<IActionResult> CancelAllAppointmentRequestAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentrequestService.CancelAllSentRequestFromUserAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointmentRequestAsync(int id)
         {

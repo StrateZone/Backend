@@ -26,9 +26,10 @@ namespace StrateZone_Service.Implements
         private readonly ITableService _tableService;
         private readonly ITablesAppointmentService _tablesAppointmentService;
         private readonly IPriceService _priceService;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IEmailService emailService)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
@@ -37,6 +38,7 @@ namespace StrateZone_Service.Implements
             _priceService = priceService;
             _tablesAppointmentService = tablesAppointmentService;
             _appointmentrequestService = appointmentrequestService;
+            _emailService = emailService;
         }
 
         public async Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -173,5 +175,6 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
     }
 }

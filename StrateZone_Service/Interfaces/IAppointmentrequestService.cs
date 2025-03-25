@@ -18,5 +18,8 @@ namespace StrateZone_Service.Interfaces
         Task<int> UpdateExpiredAppointmentRequests();
         Task<AppointmentrequestModel> GetAppointmentrequestFromUserToUserInTableAsync(int fromUserId, int toUserId, int tableId);
         Task<List<AppointmentrequestModel>> LinkAppointmentrequestsToAppointmentAsync(AppointmentModel appointmentModel);
+        Task<AppointmentrequestModel> AcceptAppointmentrequestAsync(int id);
+        Task<AppointmentrequestModel> RejectAppointmentrequestAsync(int id);
+        Task<List<AppointmentrequestModel>> CancelAllSentRequestFromUserAsync(int userId);
     }
 }
