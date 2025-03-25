@@ -132,7 +132,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status));
-                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)));
+                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
                 var newUserId = await cmd.ExecuteScalarAsync();
                 user.UserId = Convert.ToInt32(newUserId);
@@ -330,7 +330,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var currentDay = DateTime.UtcNow.AddHours(7);
+                var currentDay = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
                 var accounts = await _context.Users.Where(a =>
                         a.Status == "Unactivated"
                         && (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
