@@ -81,7 +81,7 @@ namespace StrateZone_Repository.Implements
 
                 wallet.WalletId = id;
                 var parameters = new List<NpgsqlParameter>();
-                var sql = new StringBuilder("UPDATE wallets SET ");
+                var sql = new StringBuilder("UPDATE wallet SET ");
 
                 if (wallet.Balance.HasValue)
                 {

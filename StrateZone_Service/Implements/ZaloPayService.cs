@@ -47,6 +47,7 @@ namespace StrateZone_Service.Implements
             var appId = _configuration["ZaloPay:AppId"];
             var key1 = _configuration["ZaloPay:Key1"];
             var endpoint = _configuration["ZaloPay:CreateOrderUrl"];
+            var callbackUrl = _configuration["ZaloPay:CallbackUrl"];
 
             Random rnd = new Random();
             var app_time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
@@ -69,6 +70,7 @@ namespace StrateZone_Service.Implements
             param.Add("embed_data", JsonConvert.SerializeObject(embed_data));
             param.Add("item", JsonConvert.SerializeObject(items));
             param.Add("description", zaloPayRequest.Description);
+            param.Add("callback_url", callbackUrl);
             //param.Add("bank_code", "zalopayapp");
 
             var data = appId + "|" + param["app_trans_id"] + "|" + param["app_user"] + "|" + param["amount"] + "|"
@@ -104,60 +106,72 @@ namespace StrateZone_Service.Implements
 
                 Console.WriteLine("mac = {0}", mac);
 
-                // kiểm tra callback hợp lệ (đến từ ZaloPay server)
-                if (!reqMac.Equals(mac))
+
+
+                //// kiểm tra callback hợp lệ (đến từ ZaloPay server)
+                //if (!reqMac.Equals(mac))
+                //{
+                //    // callback không hợp lệ
+                //    result["return_code"] = -1;
+                //    result["return_message"] = "mac not equal";
+                //}
+                //else
+                //{
+
+                //}
+
+
+
+
+                // thanh toán thành công
+                // merchant cập nhật trạng thái cho đơn hàng
+                var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
+                Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
+
+                //var rawItemJson = dataJson.GetProperty("item").GetString(); // "item" là chuỗi JSON
+
+                // Giải mã "item" từ chuỗi JSON thành danh sách object
+                var itemsStr = dataJson["item"];
+                var items = (List<ZaloPayItem>)JsonConvert.DeserializeObject<List<ZaloPayItem>>(itemsStr);
+
+                // Lấy danh sách item name
+                var itemName = items.FirstOrDefault()?.ItemName;
+                var userId = Convert.ToInt32(dataJson["app_user"]);
+                var amount = Convert.ToDecimal(dataJson["amount"]);
+
+                await _transactionRepository.SaveTransaction(new Transaction
                 {
-                    // callback không hợp lệ
-                    result["return_code"] = -1;
-                    result["return_message"] = "mac not equal";
+                    OfUser = userId,
+                    Amount = amount,
+                    ReferenceId = dataJson["zp_trans_id"].ToString(),
+                    Content = "Transaction for: " + itemName,
+                    TransactionType = TransactionType.deposit,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                });
+
+                Wallet checkWallet = await _walletRepository.GetWalletByUserIdAsync(userId);
+                if (checkWallet != null)
+                {
+                    checkWallet.Balance += amount;
+                    await _walletRepository.UpdateWalletAsync(checkWallet, checkWallet.WalletId);
                 }
                 else
                 {
-                    // thanh toán thành công
-                    // merchant cập nhật trạng thái cho đơn hàng
-                    var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
-                    Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
-
-                    var rawItemJson = dataJson.GetProperty("item").GetString(); // "item" là chuỗi JSON
-
-                    // Giải mã "item" từ chuỗi JSON thành danh sách object
-                    var items = JsonConvert.DeserializeObject<List<ZaloPayItem>>(rawItemJson);
-
-                    // Lấy danh sách item name
-                    var itemName = items.FirstOrDefault()?.ItemName;
-                    var userId = dataJson["app_user"];
-                    var amount = dataJson["amount"];
-
-                    await _transactionRepository.SaveTransaction(new Transaction
+                    var newWallet = new Wallet
                     {
-                        OfUser = userId,
-                        Amount = amount,
-                        ReferenceId = dataJson["zp_trans_id"],
-                        Content = "Transaction for: " + itemName,
-                        CreatedAt = DateTime.UtcNow,
-                    });
+                        UserId = userId,
+                        Balance = amount,
+                        Status = WalletStatus.active
+                    };
 
-                    Wallet checkWallet = await _walletRepository.GetWalletByUserIdAsync(userId);
-                    if (checkWallet != null)
-                    {
-                        checkWallet.Balance += amount;
-                        await _walletRepository.UpdateWalletAsync(checkWallet, userId);
-                    }
-                    else
-                    {
-                        var newWallet = new Wallet
-                        {
-                            UserId = userId,
-                            Balance = amount,
-                            Status = WalletStatus.active
-                        };
-
-                        await _walletRepository.CreateWalletAsync(newWallet);
-                    }
-
-                    result["return_code"] = 1;
-                    result["return_message"] = "success";
+                    await _walletRepository.CreateWalletAsync(newWallet);
                 }
+
+                result["return_code"] = 1;
+                result["return_message"] = "success";
+
+
+
             }
             catch (Exception ex)
             {

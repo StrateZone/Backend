@@ -27,7 +27,7 @@ namespace StrateZone_Repository.Implements
                 var existingTransaction = await _context.Transactions
                     .Where(t => t.OfUser == transaction.OfUser && t.ReferenceId == transaction.ReferenceId)
                     .FirstOrDefaultAsync();
-                if (existingTransaction == null)
+                if (existingTransaction != null)
                 {
                     throw new Exception("Existed Transaction");
                 }
