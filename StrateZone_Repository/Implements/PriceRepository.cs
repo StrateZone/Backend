@@ -241,6 +241,36 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<decimal> GetPriceOfTablesAppointmentAsync(TablesAppointment tablesAppointment)
+        {
+            try
+            {
+                Appointment appointment = await _context.Appointments.FindAsync(tablesAppointment.AppointmentId)
+                    ?? throw new Exception($"Appointment with ID {tablesAppointment.AppointmentId} does not exist");
+
+                decimal DurationInHours = (decimal)appointment.EndTime.Subtract(appointment.ScheduleTime).TotalHours;
+
+                var table = await _context.Tables
+                                           .Where(t => t.TableId == tablesAppointment.TableId)
+                                           .Include(t => t.GameType)
+                                           .Include(t => t.Room)
+                                           .FirstOrDefaultAsync();
+
+                if (table == null) throw new KeyNotFoundException("No tables found with the provided IDs.");
+
+                decimal totalPrice = 0;
+
+                var roomPrice = await GetPriceOfRoomTypeAsync(table.Room.Type);
+                var gamePrice = await GetPriceOfGameTypeAsync(table.GameType.TypeName);
+
+                return (decimal)((roomPrice.Price1 + gamePrice.Price1) * DurationInHours);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<decimal> GetPriceOfAppointmentTablesFromTimeRangeAsync(int[] tableIds, DateTime FromTime, DateTime ToTime)
         {
             try

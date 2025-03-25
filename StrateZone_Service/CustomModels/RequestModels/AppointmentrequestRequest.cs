@@ -20,6 +20,13 @@ namespace StrateZone_Service.CustomModels.RequestModels
         [Required]
         public int TableId { get; set; }
 
+        [Required]
+        public DateTime StartTime { get; set; }
+
+        [Required]
+        public DateTime EndTime { get; set; }
+
+
         public int? AppointmentId { get; set; } = null;
     }
 }

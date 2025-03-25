@@ -267,7 +267,7 @@ namespace StrateZone_Repository.Implements
                                 SELECT t.*, 
                                         ROW_NUMBER() OVER (PARTITION BY t.""gameType_id"" ORDER BY t.table_id) AS row_num
                                 FROM tables t
-                                JOIN rooms r ON t.room_id = r.room_id
+                                JOIN rooms r ON t.room_id = r.room_id AND r.room_type != 'study'
                                 WHERE r.status = 'available'
                                 AND NOT EXISTS (
                                     SELECT 1

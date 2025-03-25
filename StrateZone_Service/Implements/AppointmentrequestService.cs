@@ -24,6 +24,18 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                DateTime currentTime = DateTime.UtcNow.AddHours(7);
+                DateTime appointmentTime = request.StartTime;
+
+                double timeUntilRequestExpiration = 
+                    Math.Max(    
+                        Math.Min(
+                            24 * 2, 
+                            appointmentTime.Subtract(currentTime).TotalHours * 0.5f
+                            )
+                        , 0.5f
+                        );
+
                 AppointmentrequestModel model = new()
                 {
                     FromUser = request.FromUser,
@@ -31,7 +43,7 @@ namespace StrateZone_Service.Implements
                     TableId = request.TableId,
                     AppointmentId = request.AppointmentId,
                     Status = PostgreEnums.RequestStatus.pending,
-                    ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(3),
+                    ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(timeUntilRequestExpiration),
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                 };
 
