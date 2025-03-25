@@ -8,7 +8,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
 {
     public class ZaloPayRequest
     {
-        public decimal Amount { get; set; }
+        public int UserId { get; set; }
+        public long Amount { get; set; }
         public string Description { get; set; }
         public string ReturnUrl { get; set; }
     }

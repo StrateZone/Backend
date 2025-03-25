@@ -10,7 +10,7 @@ namespace StrateZone_Service.Interfaces
 {
     public interface IZaloPayService
     {
-        Task<ZaloPayResponse> CreatePaymentRequestAsync(ZaloPayRequest zaloPayRequest);
+        Task<Dictionary<string, object>> CreatePaymentRequestAsync(ZaloPayRequest zaloPayRequest);
         Task<Dictionary<string, object>> HandleCallbackAsync(dynamic callbackData);
     }
 }

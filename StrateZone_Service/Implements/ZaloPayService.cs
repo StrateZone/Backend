@@ -23,6 +23,7 @@ using ZaloPay.Helper;
 using Azure;
 using System.Xml.Linq;
 using StrateZone_Service.BusinessModels;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace StrateZone_Service.Implements
 {
@@ -50,68 +51,44 @@ namespace StrateZone_Service.Implements
             _walletRepository = walletRepository;
         }
 
-        public async Task<ZaloPayResponse> CreatePaymentRequestAsync(ZaloPayRequest zaloPayRequest)
+        public async Task<Dictionary<string, object>> CreatePaymentRequestAsync(ZaloPayRequest zaloPayRequest)
         {
             var appId = _configuration["ZaloPay:AppId"];
             var key1 = _configuration["ZaloPay:Key1"];
             var endpoint = _configuration["ZaloPay:CreateOrderUrl"];
-            var random = new Random();
 
-            var transId = DateTime.UtcNow.AddHours(7).ToString("yyMMdd") + "_" + random.Next(1000000);
+            Random rnd = new Random();
+            var app_time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            var embed_data = new { };
+            var items = new[] { new { } };
+            var app_trans_id = rnd.Next(1000000); // Generate a random order's ID.
+            var param = new Dictionary<string, string>();
 
-            var appUser = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "guest_user";
+            param.Add("app_id", appId);
+            param.Add("app_user", zaloPayRequest.UserId.ToString());
+            param.Add("app_time", app_time);
+            param.Add("amount", zaloPayRequest.Amount.ToString());
+            param.Add("app_trans_id", DateTime.Now.ToString("yyMMdd") + "_" + app_trans_id); // mã giao dich có định dạng yyMMdd_xxxx
+            param.Add("embed_data", JsonConvert.SerializeObject(embed_data));
+            param.Add("item", JsonConvert.SerializeObject(items));
+            param.Add("description", zaloPayRequest.Description);
+            //param.Add("bank_code", "zalopayapp");
 
-            var embedData = JsonConvert.SerializeObject(new { redirectUrl = zaloPayRequest.ReturnUrl }, Formatting.None);
+            var data = appId + "|" + param["app_trans_id"] + "|" + param["app_user"] + "|" + param["amount"] + "|"
+                + param["app_time"] + "|" + param["embed_data"] + "|" + param["item"];
+            param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key1, data));
 
-            var items = new List<ZaloPayItem>
+            var result = await HttpHelper.PostFormAsync(endpoint, param);
+
+            foreach (var entry in result)
             {
-                new ZaloPayItem { ItemId = "Depo", ItemName = "Deposite " + zaloPayRequest.Amount, ItemPrice = zaloPayRequest.Amount, ItemQuantity = 1 }
-            };
+                Console.WriteLine("{0} = {1}", entry.Key, entry.Value);
+            }
 
-            // Chuyển đổi sang JSON
-            string itemJson = JsonConvert.SerializeObject(items);
-
-            var requestData = new Dictionary<string, string>();
-
-            requestData.Add("app_id", appId);
-            requestData.Add("app_user", appUser);
-            requestData.Add("app_time", ZaloPay.Helper.Utils.GetTimeStamp().ToString());
-            requestData.Add("amount", zaloPayRequest.Amount.ToString());
-            requestData.Add("app_trans_id", transId);
-            requestData.Add("embed_data", embedData);
-            requestData.Add("item", itemJson);
-            requestData.Add("description", zaloPayRequest.Description);
-            //requestData.Add("bank_code", "zalopayapp");
-
-            Console.WriteLine(JsonConvert.SerializeObject(requestData, Formatting.Indented));
-
-            var data = appId + "|" + requestData["app_trans_id"] + "|" + requestData["app_user"] + "|" + requestData["amount"] + "|"
-                + requestData["app_time"] + "|" + requestData["embed_data"] + "|" + requestData["item"];
-
-            Console.WriteLine("Data string for MAC: " + data);
-            
-
-            requestData.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, key1, data));
-
-            Console.WriteLine("Generated MAC: " + requestData["mac"]);
-
-            Console.WriteLine("Request Data: " + JsonConvert.SerializeObject(requestData, Formatting.Indented));
-
-            var response = await HttpHelper.PostFormAsync(endpoint, requestData);
-
-            Console.WriteLine("ZaloPay Response: " + JsonConvert.SerializeObject(response, Formatting.Indented));
-
-
-            //foreach (var entry in response)
-            //{
-            //    Console.WriteLine("{0} = {1}", entry.Key, entry.Value);
-            //}
-
-            var jsonResponse = JsonConvert.SerializeObject(response);
-            var zaloPayResponse = JsonConvert.DeserializeObject<ZaloPayResponse>(jsonResponse);
-
-            return zaloPayResponse;
+            return result;
         }
+
+
 
 
         public async Task<Dictionary<string, object>> HandleCallbackAsync(dynamic callbackData)
@@ -143,7 +120,7 @@ namespace StrateZone_Service.Implements
                     // merchant cập nhật trạng thái cho đơn hàng
                     var dataJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataStr);
                     Console.WriteLine("update order's status = success where app_trans_id = {0}", dataJson["app_trans_id"]);
-                    
+
                     var rawItemJson = dataJson.GetProperty("item").GetString(); // "item" là chuỗi JSON
 
                     // Giải mã "item" từ chuỗi JSON thành danh sách object

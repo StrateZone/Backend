@@ -23,7 +23,7 @@ namespace StrateZone_APIs.Controllers
             _configuration = configuration;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("create-payment")]
         public async Task<IActionResult> CreatePayment([FromBody] ZaloPayRequest request)
         {
@@ -38,7 +38,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        
+
         [HttpPost("callback")]
         public async Task<IActionResult> HandleCallback([FromBody] dynamic cbdata)
         {
