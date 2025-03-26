@@ -63,10 +63,10 @@ namespace StrateZone_Service.Utils
                 return false;
             }
 
-            if (scheduleTime.Hour < 8 || endTime.Hour > 21 ||
-                (endTime.Hour == 21 && endTime.Minute > 0))
+            if (scheduleTime.Hour < 8 || endTime.Hour > 22 ||
+                (endTime.Hour == 22 && endTime.Minute > 0))
             {
-                errorMessage = "Appointment must be scheduled between 8AM and 9PM.";
+                errorMessage = "Appointment must be scheduled between 8AM and 10PM.";
                 return false;
             }
 
