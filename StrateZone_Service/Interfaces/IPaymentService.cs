@@ -1,4 +1,7 @@
-﻿using System;
+﻿using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +11,6 @@ namespace StrateZone_Service.Interfaces
 {
     public interface IPaymentService
     {
+        Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment);
     }
 }

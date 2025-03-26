@@ -45,5 +45,20 @@ namespace StrateZone_Repository.Implements
 
             return payment;
         }
+
+        public Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Payment>> GetPaymentsByUserIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Payment> UpdatePaymentAsync(Payment payment, int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

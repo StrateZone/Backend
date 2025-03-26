@@ -21,7 +21,7 @@
         public enum SkillLevel { beginner, intermediate, advanced }
         public enum ThreadStatus { published, rejected, pending, deleted }
         public enum TicketType { withdrawal, feedback, other }
-        public enum TransactionType { deposit, withdrawal, refund }
+        public enum TransactionType { deposit, withdrawal, refund, payment }
         public enum PaymentStatus { unpaid, paid }
         public enum PaymentType { order, appointment, course, membership }
         public enum UserCourseResult { passed, failed }
