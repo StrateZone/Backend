@@ -69,6 +69,17 @@ namespace StrateZone_Service.Implements
                     await _paymentRepository.UpdatePaymentAsync(updatingPayment, updatingPayment.Id);
                 }
 
+                var newTransaction = new Transaction
+                {
+                    OfUser = appointment.UserId,
+                    Amount = appointment.TotalPrice,
+                    Content = "Paid booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    TransactionType = PostgreEnums.TransactionType.payment
+                };
+
+                await _transactionRepository.SaveTransaction(newTransaction);
+
                 var result = new ApiResponse<AppointmentModel>
                 {
                     Success = true,

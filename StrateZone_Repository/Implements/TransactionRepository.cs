@@ -1,5 +1,6 @@
 ﻿using MealHunt_Repositories.Pagination;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
@@ -24,16 +25,25 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingTransaction = await _context.Transactions
-                    .Where(t => t.OfUser == transaction.OfUser && t.ReferenceId == transaction.ReferenceId)
-                    .FirstOrDefaultAsync();
-                if (existingTransaction != null)
-                {
-                    throw new Exception("Existed Transaction");
-                }
-                var savedTrans = await _context.Transactions.AddAsync(transaction);
-                await _context.SaveChangesAsync();
-                return savedTrans.Entity;
+                var connection = _context.Database.GetDbConnection();
+
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    INSERT INTO transactions (of_user, reference_id, content, amount, type, created_at) 
+                    VALUES (@of_user, @reference_id, @content, @amount, @transaction_type::transaction_type, @created_at)
+                    RETURNING id;";
+
+                cmd.Parameters.Add(new NpgsqlParameter("@of_user", transaction.OfUser));
+                cmd.Parameters.Add(new NpgsqlParameter("@reference_id", transaction.ReferenceId != null ? transaction.ReferenceId : DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@content", transaction.Content != null ? transaction.Content : DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@amount", transaction.Amount));
+                cmd.Parameters.Add(new NpgsqlParameter("@transaction_type", transaction.TransactionType.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
+
+                var newPaymentId = await cmd.ExecuteScalarAsync();
+                transaction.Id = Convert.ToInt32(newPaymentId);
+
+                return transaction;
             }
             catch (Exception ex)
             {
