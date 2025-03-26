@@ -47,6 +47,7 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Tables.Where(t => t.TableId == id)
                                     .Include(t => t.GameType)
+                                    .Include(t => t.Room)
                                     .FirstOrDefaultAsync() ?? throw new Exception("No table with this ID was found");
             }
             catch (Exception ex)

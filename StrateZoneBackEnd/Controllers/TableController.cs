@@ -64,11 +64,14 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetTableById(int id)
+        public async Task<IActionResult> GetTableById([FromQuery] DateTime StartTime, [FromQuery] DateTime EndTime, int id)
         {
             try
             {
-                var table = await _tableService.GetTableByIdAsync(id);
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(StartTime, EndTime, false, out string msg))
+                    return BadRequest(new { message = msg });
+
+                var table = await _tableService.GetTableByIdAsync(StartTime, EndTime, id);
                 return table != null ? Ok(table) : NotFound("No table was found with this ID.");
             }
             catch (Exception ex)
