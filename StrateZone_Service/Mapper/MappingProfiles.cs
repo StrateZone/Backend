@@ -62,6 +62,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<Price, PriceModel>().ReverseMap();
             CreateMap<Appointmentrequest, AppointmentrequestModel>().ReverseMap();
             CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
+            CreateMap<Payment, PaymentModel>().ReverseMap();
             CreateMap<Wallet, WalletModel>().ReverseMap();
             // add other mappings here
         }

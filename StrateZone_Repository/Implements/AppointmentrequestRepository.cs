@@ -99,7 +99,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId == null ? DBNull.Value : appointmentRequest.AppointmentId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
                 createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt));
-                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)));
+                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
                 appointmentRequest.Id = Convert.ToInt32(newAppointmentId);

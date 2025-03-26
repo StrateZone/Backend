@@ -173,12 +173,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
-            entity.Property(e => e.ScheduleTime)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("schedule_time");
-            entity.Property(e => e.EndTime)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("end_time");
+
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.Property(e => e.TotalPrice).HasColumnName("total_price");
@@ -678,7 +673,7 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
-            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.TablesAppointmentId).HasColumnName("appointment_id");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Payments)
@@ -693,9 +688,9 @@ public partial class StrateZoneDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("payments_course_id_fkey");
 
-            entity.HasOne(d => d.Appointment).WithMany(p => p.Payments)
+            entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("payments_appointment_id_fkey");
+                .HasConstraintName("payments_tables_appointment_id_fkey");
         });
 
         modelBuilder.Entity<Price>(entity =>
@@ -869,6 +864,14 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.TableId).HasColumnName("table_id");
+            entity.Property(e => e.Price).HasColumnName("price");
+
+            entity.Property(e => e.ScheduleTime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("schedule_time");
+            entity.Property(e => e.EndTime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("end_time");
 
             entity.HasOne(d => d.Appointment).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.AppointmentId)

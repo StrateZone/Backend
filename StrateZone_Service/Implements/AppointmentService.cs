@@ -27,9 +27,10 @@ namespace StrateZone_Service.Implements
         private readonly ITablesAppointmentService _tablesAppointmentService;
         private readonly IPriceService _priceService;
         private readonly IEmailService _emailService;
+        private readonly IPaymentService _paymentService;
         private readonly IMapper _mapper;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IEmailService emailService)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IEmailService emailService, IPaymentService paymentService)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
@@ -39,6 +40,7 @@ namespace StrateZone_Service.Implements
             _tablesAppointmentService = tablesAppointmentService;
             _appointmentrequestService = appointmentrequestService;
             _emailService = emailService;
+            _paymentService = paymentService;
         }
 
         public async Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -86,17 +88,23 @@ namespace StrateZone_Service.Implements
 
         public async Task<List<int>> CheckAppointmentAvailability(AppointmentRequest request)
         {
-            List<TableResponse> Tables = await _tableService.GetAllTablesAsync();
-            List<TableResponse> AvailableTables = await _tableService.GetAllAvailableTablesAsync(request.ScheduleTime, request.EndTime);
+            HashSet<int> requestedTableIds = request.TablesAppointmentRequests
+                                                    .Select(t => t.TableId)
+                                                    .ToHashSet();
 
-            var tableIds = new HashSet<int>(Tables.Select(t => t.TableId));
-            var availableTableIds = new HashSet<int>(AvailableTables.Select(t => t.TableId));
+            List<int> unavailableTables = new();
 
-            var unavailableTables = request.TableIds
-                                        .Where(t => !tableIds.Contains(t) || !availableTableIds.Contains(t))
-                                        .ToList();
+            foreach (var tablesAppointment in request.TablesAppointmentRequests)
+            {
+                List<int> availableTableIds = (await _tableService.GetAllAvailableTablesAsync(
+                                                            tablesAppointment.ScheduleTime, tablesAppointment.EndTime))
+                                              .Select(t => t.TableId)
+                                              .ToList();
 
-            return unavailableTables;
+                unavailableTables.AddRange(requestedTableIds.Except(availableTableIds));
+            }
+
+            return unavailableTables.Distinct().ToList();
         }
 
         public async Task<AppointmentModel> CreateAppointmentAsync(CustomModels.RequestModels.AppointmentRequest request)
@@ -113,32 +121,48 @@ namespace StrateZone_Service.Implements
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {
                     UserId = request.UserId,
-                    ScheduleTime = request.ScheduleTime,
-                    EndTime = request.EndTime,
-                    TotalPrice = await _priceService.GetPriceOfAppointmentFromAppointmentRequestAsync(request.TableIds.ToArray(), request.ScheduleTime, request.EndTime),
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Local),
+                    TotalPrice = request.TotalPrice,
                 };
 
                 var mappedAppointment = _mapper.Map<Appointment>(appointmentModel);
                 var appointment = await _appointmentRepository.CreateAppointmentAsync(mappedAppointment);
                 var result = _mapper.Map<AppointmentModel>(appointment);
 
-                foreach (var tableId in request.TableIds)
+                foreach (var tablesAppointmentRequest in request.TablesAppointmentRequests)
                 {
-                    TablesAppointmentModel tablesAppointmentModel = new TablesAppointmentModel()
+                    TablesAppointmentModel tablesAppointmentModel = new()
                     {
-                        TableId = tableId,
-                        AppointmentId = result.AppointmentId
+                        AppointmentId = appointment.AppointmentId,
+                        TableId = tablesAppointmentRequest.TableId,
+                        ScheduleTime = DateTime.SpecifyKind(tablesAppointmentRequest.ScheduleTime, DateTimeKind.Unspecified),
+                        EndTime = DateTime.SpecifyKind(tablesAppointmentRequest.EndTime, DateTimeKind.Unspecified),
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        Price = tablesAppointmentRequest.Price
                     };
 
                     result.TablesAppointments.Add(tablesAppointmentModel);
                 }
 
-                var tablesAppointment = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
-                result.TablesAppointments = tablesAppointment;
+                var tablesAppointments = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
+                result.TablesAppointments = tablesAppointments;
 
                 var requests = await _appointmentrequestService.LinkAppointmentrequestsToAppointmentAsync(result);
                 result.Appointmentrequests = requests;
+
+                foreach (var tablesAppointment in tablesAppointments)
+                {
+                    PaymentModel paymentModel = new()
+                    {
+                        UserId = appointment.UserId,
+                        TablesAppointmentId = tablesAppointment.Id,
+                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
+                        Description = $"Payment for tables appointment {tablesAppointment.Id}",
+                        PaymentType = PostgreEnums.PaymentType.appointment
+                    };
+
+                    await _paymentService.CreatePaymentAsync(paymentModel);
+                }
 
                 return result;
             }

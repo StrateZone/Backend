@@ -1,4 +1,5 @@
 ﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -19,5 +20,6 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, Ranking ranking, int up, int down);
         Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);
         Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
+        Task<UserResponse> FindUserInvitedToTablesAppointment(TablesAppointmentModel tablesAppointment);
     }
 }

@@ -32,6 +32,6 @@ namespace StrateZone_Service.BusinessModels
 
         public virtual TableModel Table { get; set; } = null!;
 
-        public virtual AppointmentModel? Appointment { get; set; }
+        public virtual TablesAppointmentModel? Appointment { get; set; }
     }
 }

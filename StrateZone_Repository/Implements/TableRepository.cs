@@ -283,14 +283,14 @@ namespace StrateZone_Repository.Implements
                             SELECT * FROM RankedTables WHERE row_num <= @TableCount";
 
                 var tables = await _context.Tables
-                    .FromSqlRaw(query,
-                        new NpgsqlParameter("@StartTime", parameters.StartTime),
-                        new NpgsqlParameter("@EndTime", parameters.EndTime),
-                        new NpgsqlParameter("@TableCount", tableCount))
-                    .Include(t => t.GameType)
-                    .Include(t => t.Room)
-                    .AsNoTracking()
-                    .ToListAsync();
+                        .FromSqlRaw(query,
+                            new NpgsqlParameter("@StartTime", parameters.StartTime),
+                            new NpgsqlParameter("@EndTime", parameters.EndTime),
+                            new NpgsqlParameter("@TableCount", tableCount))
+                        .Include(t => t.GameType)
+                        .Include(t => t.Room)
+                        .AsNoTracking()
+                        .ToListAsync();
 
                 var groupedTables = tables
                     .GroupBy(t => t.GameType.TypeName)

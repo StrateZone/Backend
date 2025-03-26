@@ -13,10 +13,6 @@ namespace StrateZone_Service.BusinessModels
 
         public int UserId { get; set; }
 
-        public DateTime ScheduleTime { get; set; }
-
-        public DateTime EndTime { get; set; }
-
         public decimal TotalPrice { get; set; }
 
         public DateTime? CreatedAt { get; set; }

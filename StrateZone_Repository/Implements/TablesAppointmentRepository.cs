@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.OpenApi.Any;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
@@ -66,7 +67,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.TablesAppointments
-                                    .Where(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.Appointment.EndTime < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc))
+                                    .Where(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.EndTime < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc))
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.GameType)
                                     .FirstOrDefaultAsync();
@@ -103,6 +104,26 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return tablesAppointments;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<TablesAppointment> UpdateTablesAppointmentAsync(TablesAppointment tablesAppointment, int id)
+        {
+            try
+            {
+                if (!await _context.TablesAppointments.AnyAsync(ta => ta.Id == id))
+                    throw new Exception("Table appointment with this ID does not exist");
+
+                tablesAppointment.Id = id;
+
+                _context.TablesAppointments.Update(tablesAppointment);
+                await _context.SaveChangesAsync();
+
+                return tablesAppointment;
             }
             catch (Exception ex)
             {

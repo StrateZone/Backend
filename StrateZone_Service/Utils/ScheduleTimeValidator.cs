@@ -22,12 +22,7 @@ namespace StrateZone_Service.Utils
             return IsScheduleTimeValid(request.StartTime, request.EndTime, false, out errorMessage);
         }
 
-        public static bool IsScheduleTimeValid(AppointmentRequest request, out string errorMessage)
-        {
-            return IsScheduleTimeValid(request.ScheduleTime, request.EndTime, false, out errorMessage);
-        }
-
-        public static bool IsScheduleTimeValid(AppointmentModel request, out string errorMessage)
+        public static bool IsScheduleTimeValid(TablesAppointmentModel request, out string errorMessage)
         {
             return IsScheduleTimeValid(request.ScheduleTime, request.EndTime, false, out errorMessage);
         }
@@ -79,5 +74,4 @@ namespace StrateZone_Service.Utils
             return true;
         }
     }
-
 }

@@ -113,8 +113,6 @@ namespace StrateZone_Repository.Implements
             {
                 var existingFriendrequest = await _context.Friendrequests.FindAsync(id) ?? throw new Exception("Friend request with this ID does not exist");
 
-                _context.Entry(existingFriendrequest).State = EntityState.Detached;
-
                 friendrequest.Id = id;
                 var parameters = new List<NpgsqlParameter>();
                 var sql = new StringBuilder("UPDATE friendrequests SET ");
