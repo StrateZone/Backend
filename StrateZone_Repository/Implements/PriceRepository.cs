@@ -15,10 +15,13 @@ namespace StrateZone_Repository.Implements
     public class PriceRepository : IPriceRepository
     {
         private readonly StrateZoneDbContext _context;
-
-        public PriceRepository(StrateZoneDbContext context)
+        private readonly IUserRepository _userRepository;
+        private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
+        public PriceRepository(StrateZoneDbContext context, IUserRepository userRepository, ITablesAppointmentRepository tablesAppointmentRepository)
         {
             _context = context;
+            _userRepository = userRepository;
+            _tablesAppointmentRepository = tablesAppointmentRepository;
         }
 
         public async Task<PagedList<Price>> GetServicePrices(PriceParameters parameters)
@@ -209,31 +212,22 @@ namespace StrateZone_Repository.Implements
                     .SingleOrDefaultAsync(a => a.AppointmentId == appointmentId)
                     ?? throw new KeyNotFoundException("Appointment with this ID was not found");
 
-                if (appointment.TotalPrice > 0) return appointment.TotalPrice;
+                var tablesAppointments = await _context.TablesAppointments
+                    .Where(ta => ta.AppointmentId == appointment.AppointmentId)
+                    .ToListAsync();
 
-                decimal appointmentDurationInHours = (decimal)(appointment.EndTime - appointment.ScheduleTime).TotalHours;
+                if (!tablesAppointments.Any())
+                    throw new Exception($"No tables found for Appointment ID {appointment.AppointmentId}");
 
-                decimal totalPrice = 0;
+                decimal totalAppointmentPrice = 0;
 
-                Dictionary<RoomType, decimal> RoomTypePrices = new();
-                Dictionary<GameTypeEnum, decimal> GameTypePrices = new();
-                foreach (var table_appointment in appointment.TablesAppointments)
+                foreach (var tablesAppointment in tablesAppointments)
                 {
-                    RoomType rt = table_appointment.Table.Room.Type;
-                    if (!RoomTypePrices.ContainsKey(rt))
-                        RoomTypePrices.Add(rt, (decimal) (await GetPriceOfRoomTypeAsync(rt)).Price1);
-
-                    GameTypeEnum gt = table_appointment.Table.GameType.TypeName;
-                    if (!GameTypePrices.ContainsKey(gt))
-                        GameTypePrices.Add(gt, (decimal)(await GetPriceOfGameTypeAsync(gt)).Price1);
-
-                    totalPrice += (RoomTypePrices[rt] + GameTypePrices[gt]) * appointmentDurationInHours;
+                    decimal tableAppointmentPrice = await GetPriceOfTablesAppointmentAsync(tablesAppointment);
+                    totalAppointmentPrice += tableAppointmentPrice;
                 }
 
-                appointment.TotalPrice = totalPrice;
-                await _context.SaveChangesAsync();
-
-                return appointment.TotalPrice;
+                return totalAppointmentPrice;
             }
             catch (Exception ex)
             {
@@ -245,25 +239,63 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                Console.WriteLine("HELLO CHAT");
+
                 Appointment appointment = await _context.Appointments.FindAsync(tablesAppointment.AppointmentId)
                     ?? throw new Exception($"Appointment with ID {tablesAppointment.AppointmentId} does not exist");
 
-                decimal DurationInHours = (decimal)appointment.EndTime.Subtract(appointment.ScheduleTime).TotalHours;
+                if (tablesAppointment.Price != null) return (decimal) tablesAppointment.Price;
+
+                decimal DurationInHours = (decimal)tablesAppointment.EndTime.Subtract(tablesAppointment.ScheduleTime).TotalHours;
 
                 var table = await _context.Tables
                                            .Where(t => t.TableId == tablesAppointment.TableId)
+                                           .AsNoTracking()
                                            .Include(t => t.GameType)
                                            .Include(t => t.Room)
-                                           .FirstOrDefaultAsync();
-
-                if (table == null) throw new KeyNotFoundException("No tables found with the provided IDs.");
-
-                decimal totalPrice = 0;
+                                           .FirstOrDefaultAsync()
+                            ?? throw new KeyNotFoundException("No tables found with the provided IDs.");
 
                 var roomPrice = await GetPriceOfRoomTypeAsync(table.Room.Type);
                 var gamePrice = await GetPriceOfGameTypeAsync(table.GameType.TypeName);
 
-                return (decimal)((roomPrice.Price1 + gamePrice.Price1) * DurationInHours);
+                tablesAppointment.Price = (decimal)((roomPrice.Price1 + gamePrice.Price1) * DurationInHours);
+
+                decimal totalPrice = (decimal)tablesAppointment.Price;
+
+                if (await _userRepository.FindUserInvitedToTablesAppointment(tablesAppointment) != null) totalPrice /= 2;
+
+                return totalPrice;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<decimal> GetPriceOfAppointmentAsync(Appointment appointment)
+        {
+            try
+            {
+                if (appointment == null)
+                    throw new ArgumentNullException(nameof(appointment), "Appointment cannot be null");
+
+                var tablesAppointments = await _context.TablesAppointments
+                    .Where(ta => ta.AppointmentId == appointment.AppointmentId)
+                    .ToListAsync();
+
+                if (!tablesAppointments.Any())
+                    throw new Exception($"No tables found for Appointment ID {appointment.AppointmentId}");
+
+                decimal totalAppointmentPrice = 0;
+
+                foreach (var tablesAppointment in tablesAppointments)
+                {
+                    decimal tableAppointmentPrice = await GetPriceOfTablesAppointmentAsync(tablesAppointment);
+                    totalAppointmentPrice += tableAppointmentPrice;
+                }
+
+                return totalAppointmentPrice;
             }
             catch
             {
@@ -275,36 +307,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                if (FromTime > ToTime) (FromTime, ToTime) = (ToTime, FromTime);
-
-                decimal DurationInHours = (decimal)ToTime.Subtract(FromTime).TotalHours;
-
-                var tables = await _context.Tables
-                                           .Where(t => tableIds.Contains(t.TableId))
-                                           .Include(t => t.GameType)
-                                           .Include(t => t.Room)
-                                           .ToListAsync();
-
-                if (tables.Count <= 0) throw new KeyNotFoundException("No tables found with the provided IDs.");
-
-                decimal totalPrice = 0;
-
-                Dictionary<RoomType, decimal> RoomTypePrices = new();
-                Dictionary<GameTypeEnum, decimal> GameTypePrices = new();
-                foreach (var table in tables)
-                {
-                    RoomType rt = table.Room.Type;
-                    if (!RoomTypePrices.ContainsKey(rt))
-                        RoomTypePrices.Add(rt, (decimal) (await GetPriceOfRoomTypeAsync(rt)).Price1);
-
-                    GameTypeEnum gt = table.GameType.TypeName;
-                    if (!GameTypePrices.ContainsKey(gt))
-                        GameTypePrices.Add(gt, (decimal)(await GetPriceOfGameTypeAsync(gt)).Price1);
-
-                    totalPrice += (RoomTypePrices[rt] + GameTypePrices[gt]) * DurationInHours;
-                }
-
-                return totalPrice;
+                throw new NotImplementedException();
             }
             catch
             {

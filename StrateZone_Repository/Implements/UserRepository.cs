@@ -358,5 +358,31 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<User> FindUserInvitedToTablesAppointment(TablesAppointment tablesAppointment)
+        {
+            try
+            {
+                var appointmentRequest =
+                        await _context.AppointmentRequests
+                                    .FromSqlRaw(
+                                        "SELECT * FROM appointment_requests " +
+                                        "WHERE table_id = {0} AND appointment_id = {1} " +
+                                        "AND (status = 'accepted' OR status = 'pending') " +
+                                        "LIMIT 1",
+                                        tablesAppointment.TableId, 
+                                        tablesAppointment.AppointmentId)
+                                    .FirstOrDefaultAsync()
+                                ?? null;
+
+                if (appointmentRequest == null) return null;
+
+                return await _context.Users.SingleOrDefaultAsync(u => u.UserId == appointmentRequest.ToUser);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

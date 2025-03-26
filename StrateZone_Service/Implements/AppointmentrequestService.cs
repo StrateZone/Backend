@@ -226,6 +226,8 @@ namespace StrateZone_Service.Implements
 
                 var tableIds = appointmentModel.TablesAppointments.Select(t => t.TableId).ToArray();
 
+                var tablesAppointment = appointmentModel.TablesAppointments;
+
                 var user_requests = (await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, appointmentModel.UserId))
                                 .Where(ar => 
                                     tableIds.Contains(ar.TableId) 

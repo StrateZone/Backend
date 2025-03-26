@@ -16,7 +16,7 @@ public partial class Payment
 
     public int? OrderId { get; set; }
 
-    public int? AppointmentId { get; set; }
+    public int? TablesAppointmentId { get; set; }
 
     public int? CourseId { get; set; }
 
@@ -28,7 +28,7 @@ public partial class Payment
 
     public virtual Order? Order { get; set; }
 
-    public virtual Appointment? Appointment { get; set; }
+    public virtual TablesAppointment? TablesAppointment { get; set; }
 
     public virtual Course? Course { get; set; }
 }

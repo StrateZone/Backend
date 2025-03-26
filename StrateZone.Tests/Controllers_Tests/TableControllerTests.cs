@@ -58,7 +58,7 @@ namespace StrateZone.Tests.Controllers_Tests
         }
 
         [Theory]
-        [InlineData("2025-06-25T07:30:00", "2025-06-25T12:00:00", "Appointment must be scheduled between 8AM and 9PM.")]
+        [InlineData("2025-06-25T07:30:00", "2025-06-25T12:00:00", "Appointment must be scheduled between 8AM and 10PM.")]
         [InlineData("2025-06-25T08:30:00", "2025-06-25T08:30:00", "The minimum duration between start and end time is 30 minutes.")]
         [InlineData("2025-06-25T10:30:00", "2025-06-26T12:00:00", "Start time and End time must be within the same day.")]
         [InlineData("2025-06-25T10:30:00", "2025-06-25T09:00:00", "Start time must be earlier than End time.")]
@@ -117,7 +117,7 @@ namespace StrateZone.Tests.Controllers_Tests
         }
 
         [Theory]
-        [InlineData("2025-06-25T07:30:00", "2025-06-25T12:00:00", "Appointment must be scheduled between 8AM and 9PM.")]
+        [InlineData("2025-06-25T07:30:00", "2025-06-25T12:00:00", "Appointment must be scheduled between 8AM and 10PM.")]
         [InlineData("2025-06-25T08:30:00", "2025-06-25T08:30:00", "The minimum duration between start and end time is 30 minutes.")]
         [InlineData("2025-06-25T10:30:00", "2025-06-26T12:00:00", "Start time and End time must be within the same day.")]
         [InlineData("2025-06-25T10:30:00", "2025-06-25T09:00:00", "Start time must be earlier than End time.")]

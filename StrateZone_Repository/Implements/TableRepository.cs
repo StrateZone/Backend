@@ -47,6 +47,7 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Tables.Where(t => t.TableId == id)
                                     .Include(t => t.GameType)
+                                    .Include(t => t.Room)
                                     .FirstOrDefaultAsync() ?? throw new Exception("No table with this ID was found");
             }
             catch (Exception ex)
@@ -100,8 +101,8 @@ namespace StrateZone_Repository.Implements
                                 FROM tables_appointments ta
                                 JOIN appointments a ON ta.appointment_id = a.appointment_id
                                 WHERE ta.table_id = t.table_id
-                                AND a.schedule_time < @EndTime
-                                AND a.end_time > @StartTime
+                                AND ta.schedule_time < @EndTime
+                                AND ta.end_time > @StartTime
                                 AND a.status NOT IN ('cancelled', 'completed', 'expired')
                             )";
 
@@ -136,8 +137,8 @@ namespace StrateZone_Repository.Implements
                                 FROM tables_appointments ta
                                 JOIN appointments a ON ta.appointment_id = a.appointment_id
                                 WHERE ta.table_id = t.table_id
-                                AND a.schedule_time < @EndTime
-                                AND a.end_time > @StartTime
+                                AND ta.schedule_time < @EndTime
+                                AND ta.end_time > @StartTime
                                 AND a.status NOT IN ('cancelled', 'completed', 'expired')
                             )";
 
@@ -227,8 +228,8 @@ namespace StrateZone_Repository.Implements
                         FROM tables_appointments ta
                         JOIN appointments a ON ta.appointment_id = a.appointment_id
                         WHERE ta.table_id = t.table_id
-                        AND a.schedule_time < @EndTime
-                        AND a.end_time > @StartTime
+                        AND ta.schedule_time < @EndTime
+                        AND ta.end_time > @StartTime
                         AND a.status NOT IN ('cancelled', 'completed', 'expired')
                     )";
 
@@ -274,22 +275,22 @@ namespace StrateZone_Repository.Implements
                                     FROM tables_appointments ta
                                     JOIN appointments a ON ta.appointment_id = a.appointment_id
                                     WHERE ta.table_id = t.table_id
-                                    AND a.schedule_time < @EndTime
-                                    AND a.end_time > @StartTime
+                                    AND ta.schedule_time < @EndTime
+                                    AND ta.end_time > @StartTime
                                     AND a.status NOT IN ('cancelled', 'completed', 'expired')
                                 )
                             )
                             SELECT * FROM RankedTables WHERE row_num <= @TableCount";
 
                 var tables = await _context.Tables
-                    .FromSqlRaw(query,
-                        new NpgsqlParameter("@StartTime", parameters.StartTime),
-                        new NpgsqlParameter("@EndTime", parameters.EndTime),
-                        new NpgsqlParameter("@TableCount", tableCount))
-                    .Include(t => t.GameType)
-                    .Include(t => t.Room)
-                    .AsNoTracking()
-                    .ToListAsync();
+                        .FromSqlRaw(query,
+                            new NpgsqlParameter("@StartTime", parameters.StartTime),
+                            new NpgsqlParameter("@EndTime", parameters.EndTime),
+                            new NpgsqlParameter("@TableCount", tableCount))
+                        .Include(t => t.GameType)
+                        .Include(t => t.Room)
+                        .AsNoTracking()
+                        .ToListAsync();
 
                 var groupedTables = tables
                     .GroupBy(t => t.GameType.TypeName)
@@ -322,8 +323,8 @@ namespace StrateZone_Repository.Implements
                                 FROM tables_appointments ta
                                 JOIN appointments a ON ta.appointment_id = a.appointment_id
                                 WHERE ta.table_id = t.table_id
-                                AND a.schedule_time < @EndTime
-                                AND a.end_time > @StartTime
+                                AND ta.schedule_time < @EndTime
+                                AND ta.end_time > @StartTime
                                 AND a.status NOT IN ('cancelled', 'completed', 'expired')
                             )";
 

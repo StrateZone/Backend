@@ -171,12 +171,23 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<TableModel> GetTableByIdAsync(int id)
+        public async Task<TableResponse> GetTableByIdAsync(DateTime StartTime, DateTime EndTime, int id)
         {
             try
             {
                 var result = await _tableRepository.GetTableByIdAsync(id);
-                return _mapper.Map<TableModel>(result);
+                var table = _mapper.Map<TableResponse>(result);
+            
+                List<decimal> prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(id, StartTime, EndTime);
+
+                table.StartDate = StartTime;
+                table.EndDate = EndTime;
+                table.GameTypePrice = prices.ElementAt(0);
+                table.RoomTypePrice = prices.ElementAt(1);
+                table.DurationInHours = (float?)prices.ElementAt(2);
+                table.TotalPrice = prices.ElementAt(3);
+
+                return table;
             }
             catch (Exception ex)
             {

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Repository.Implements
 {
-    public class PaymentRepository: IPaymentRepository
+    public class PaymentRepository : IPaymentRepository
     {
         private readonly StrateZoneDbContext _context;
 
@@ -19,46 +19,121 @@ namespace StrateZone_Repository.Implements
         {
             _context = context;
         }
-    
+
         public async Task<Payment> CreatePaymentAsync(Payment payment)
         {
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
+            try
+            {
+                var connection = _context.Database.GetDbConnection();
 
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"
-                    INSERT INTO payments (user_id, order_id, appointment_id, course_id, description, payment_type, status, created_at) 
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    INSERT INTO payments (user_id, order_id, tables_appointment_id, course_id, description, payment_type, status, created_at) 
                     VALUES (@user_id, @order_id, @appointment_id, @course_id, @description, @payment_type, @status::payment_status, @created_at)
-                    RETURNING room_id;";
+                    RETURNING id;";
 
-            cmd.Parameters.Add(new NpgsqlParameter("@user_id", payment.UserId));
-            cmd.Parameters.Add(new NpgsqlParameter("@order_id", payment.OrderId != null ? payment.OrderId : DBNull.Value));
-            cmd.Parameters.Add(new NpgsqlParameter("@appointment_id", payment.AppointmentId != null ? payment.AppointmentId : DBNull.Value));
-            cmd.Parameters.Add(new NpgsqlParameter("@course_id", payment.CourseId != null ? payment.CourseId : DBNull.Value));
-            cmd.Parameters.Add(new NpgsqlParameter("@description", payment.Description));
-            cmd.Parameters.Add(new NpgsqlParameter("@payment_type", payment.PaymentType.ToString()));
-            cmd.Parameters.Add(new NpgsqlParameter("@status", payment.PaymentStatus.ToString()));
-            cmd.Parameters.Add(new NpgsqlParameter("@created_at", DateTime.UtcNow.AddHours(7)));
+                cmd.Parameters.Add(new NpgsqlParameter("@user_id", payment.UserId));
+                cmd.Parameters.Add(new NpgsqlParameter("@order_id", payment.OrderId != null ? payment.OrderId : DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@appointment_id", payment.TablesAppointmentId != null ? payment.TablesAppointmentId : DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@course_id", payment.CourseId != null ? payment.CourseId : DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@description", payment.Description != null ? payment.Description : DBNull.Value));
+                cmd.Parameters.Add(new NpgsqlParameter("@payment_type", payment.PaymentType.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", payment.PaymentStatus.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@created_at", DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
-            var newPaymentId = await cmd.ExecuteScalarAsync();
-            payment.Id = Convert.ToInt32(newPaymentId);
+                var newPaymentId = await cmd.ExecuteScalarAsync();
+                payment.Id = Convert.ToInt32(newPaymentId);
 
-            return payment;
+                return payment;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id)
+        public async Task<Payment> UpdatePaymentAsync(Payment payment, int id)
         {
-            throw new NotImplementedException();
+            var existingPayment = await _context.Payments.FindAsync(id) ?? throw new Exception("Appointment request with this ID does not exist");
+            existingPayment.Id = id;
+
+            var parameters = new List<NpgsqlParameter>();
+            var sql = new StringBuilder("UPDATE payments SET ");
+
+            if (payment.UserId.HasValue)
+            {
+                sql.Append("user_id = @user_id, ");
+                parameters.Add(new NpgsqlParameter("@user_id", payment.UserId.Value));
+            }
+
+            if (payment.OrderId.HasValue)
+            {
+                sql.Append("order_id = @order_id, ");
+                parameters.Add(new NpgsqlParameter("@order_id", payment.OrderId.Value));
+            }
+
+            if (payment.TablesAppointmentId.HasValue)
+            {
+                sql.Append("tables_appointment_id = @tables_appointment_id, ");
+                parameters.Add(new NpgsqlParameter("@tables_appointment_id", payment.TablesAppointmentId.Value));
+            }
+
+            if (payment.CourseId.HasValue)
+            {
+                sql.Append("course_id = @course_id, ");
+                parameters.Add(new NpgsqlParameter("@course_id", payment.CourseId.Value));
+            }
+
+            sql.Append("status = @status::payment_status, ");
+            parameters.Add(new NpgsqlParameter("@status", payment.PaymentStatus.ToString()));
+
+            if (!string.IsNullOrEmpty(payment.Description))
+            {
+                sql.Append("description = @description, ");
+                parameters.Add(new NpgsqlParameter("@description", payment.Description));
+            }
+
+            if (payment.CreatedAt.HasValue)
+            {
+                sql.Append("created_at = @created_at, ");
+                parameters.Add(new NpgsqlParameter("@created_at", payment.CreatedAt.Value));
+            }
+
+            sql.Append("payment_type = @type, ");
+            parameters.Add(new NpgsqlParameter("@type", payment.PaymentType.ToString()));
+
+            sql.Remove(sql.Length - 2, 2);
+            sql.Append(" WHERE id = @id");
+            parameters.Add(new NpgsqlParameter("@id", id));
+
+            await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
+            var updatedPayment = await _context.Payments.FindAsync(id);
+            return updatedPayment;
         }
 
-        public Task<List<Payment>> GetPaymentsByUserIdAsync(int id)
+        public async Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Payments.Where(p => p.TablesAppointmentId == id).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public Task<Payment> UpdatePaymentAsync(Payment payment, int id)
+        public async Task<List<Payment>> GetPaymentsByUserIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _context.Payments.Where(p => p.UserId == id).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

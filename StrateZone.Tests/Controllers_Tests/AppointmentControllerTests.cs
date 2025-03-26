@@ -71,12 +71,30 @@ namespace StrateZone.Tests.Controllers_Tests
         [Fact]
         public async Task CreateAppointment_ReturnsCreated_WhenSuccessful()
         {
-            var request = new AppointmentRequest() 
+            var request = new AppointmentRequest()
             {
                 UserId = 1,
-                ScheduleTime = DateTime.Parse("2025-04-27T11:30:00"),
-                EndTime = DateTime.Parse("2025-04-27T15:00:00"),
-                TableIds = [1, 2, 3, 4]
+                TablesAppointmentRequests = new()
+                {
+                    new TablesAppointmentRequest()
+                    { 
+                        ScheduleTime = DateTime.Parse("2025-04-27T11:30:00"),
+                        EndTime = DateTime.Parse("2025-04-27T15:00:00"),
+                        TableId = 1 
+                    },
+                    new TablesAppointmentRequest()
+                    {
+                        ScheduleTime = DateTime.Parse("2025-04-27T14:30:00"),
+                        EndTime = DateTime.Parse("2025-04-27T16:00:00"),
+                        TableId = 2
+                    },
+                    new TablesAppointmentRequest()
+                    {
+                        ScheduleTime = DateTime.Parse("2025-04-27T15:00:00"),
+                        EndTime = DateTime.Parse("2025-04-27T18:30:00"),
+                        TableId = 3
+                    },
+                }
             };
             var appointment = new AppointmentModel() { };
             _appointmentServiceMock.Setup(s => s.CreateAppointmentAsync(request)).ReturnsAsync(appointment);
@@ -102,8 +120,6 @@ namespace StrateZone.Tests.Controllers_Tests
             { 
                 AppointmentId = 1,
                 UserId = 1,
-                ScheduleTime = DateTime.Parse("2025-04-27T11:30:00"),
-                EndTime = DateTime.Parse("2025-04-27T15:00:00"),
             };
             _appointmentServiceMock.Setup(s => s.UpdateAppointmentAsync(appointmentModel, 1)).ReturnsAsync(appointmentModel);
             var result = await _controller.UpdateAppointment(appointmentModel, 1);

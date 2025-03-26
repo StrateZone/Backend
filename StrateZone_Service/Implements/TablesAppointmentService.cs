@@ -9,12 +9,14 @@ namespace StrateZone_Service.Implements
     public class TablesAppointmentService : ITablesAppointmentService
     {
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
+        private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
+            _priceService = priceService;
         }
 
         public async Task<List<TablesAppointmentModel>> GetAllTablesAppointmentsAsync()
@@ -73,7 +75,9 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                tablesAppointmentModel.Price = await _priceService.GetPriceOfTablesAppointmentAsync(tablesAppointmentModel);
                 var tablesAppointment = _mapper.Map<TablesAppointment>(tablesAppointmentModel);
+
                 var result = await _tablesAppointmentRepository.CreateTablesAppointmentAsync(tablesAppointment);
                 return _mapper.Map<TablesAppointmentModel>(result);
             }
@@ -89,7 +93,10 @@ namespace StrateZone_Service.Implements
             {
                 var appointment = _mapper.Map<Appointment>(appointmentModel);
                 var result = await _tablesAppointmentRepository.CreateTablesAppointmentsFromAppointmentAsync(appointment);
-                return _mapper.Map<List<TablesAppointmentModel>>(result);
+
+                var mappedResult = _mapper.Map<List<TablesAppointmentModel>>(result);
+
+                return mappedResult;
             }
             catch (Exception ex)
             {

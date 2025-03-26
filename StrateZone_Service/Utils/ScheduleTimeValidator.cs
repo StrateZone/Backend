@@ -22,12 +22,7 @@ namespace StrateZone_Service.Utils
             return IsScheduleTimeValid(request.StartTime, request.EndTime, false, out errorMessage);
         }
 
-        public static bool IsScheduleTimeValid(AppointmentRequest request, out string errorMessage)
-        {
-            return IsScheduleTimeValid(request.ScheduleTime, request.EndTime, false, out errorMessage);
-        }
-
-        public static bool IsScheduleTimeValid(AppointmentModel request, out string errorMessage)
+        public static bool IsScheduleTimeValid(TablesAppointmentModel request, out string errorMessage)
         {
             return IsScheduleTimeValid(request.ScheduleTime, request.EndTime, false, out errorMessage);
         }
@@ -63,10 +58,10 @@ namespace StrateZone_Service.Utils
                 return false;
             }
 
-            if (scheduleTime.Hour < 8 || endTime.Hour > 21 ||
-                (endTime.Hour == 21 && endTime.Minute > 0))
+            if (scheduleTime.Hour < 8 || endTime.Hour > 22 ||
+                (endTime.Hour == 22 && endTime.Minute > 0))
             {
-                errorMessage = "Appointment must be scheduled between 8AM and 9PM.";
+                errorMessage = "Appointment must be scheduled between 8AM and 10PM.";
                 return false;
             }
 
@@ -79,5 +74,4 @@ namespace StrateZone_Service.Utils
             return true;
         }
     }
-
 }

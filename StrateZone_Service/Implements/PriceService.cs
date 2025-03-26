@@ -167,5 +167,31 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<decimal> GetPriceOfTablesAppointmentAsync(TablesAppointmentModel tablesAppointmentModel)
+        {
+            try
+            {
+                var tablesAppointment = _mapper.Map<TablesAppointment>(tablesAppointmentModel);
+                return await _priceRepository.GetPriceOfTablesAppointmentAsync(tablesAppointment);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<decimal> GetPriceOfAppointmentAsync(AppointmentModel appointmentModel)
+        {
+            try
+            {
+                var appointment = _mapper.Map<Appointment>(appointmentModel);
+                return await _priceRepository.GetPriceOfAppointmentAsync(appointment);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

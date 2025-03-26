@@ -6,6 +6,7 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<TablesAppointment> CreateTablesAppointmentAsync(TablesAppointment tablesAppointment);
         Task<List<TablesAppointment>> CreateTablesAppointmentsFromAppointmentAsync(Appointment appointment);
+        Task<TablesAppointment> UpdateTablesAppointmentAsync(TablesAppointment tablesAppointment, int id);
         Task<TablesAppointment> DeleteTablesAppointmentAsync(int id);
         Task<List<TablesAppointment>> GetAllTablesAppointmentAsync();
         Task<List<TablesAppointment>> GetAllTablesAppointmentByTableIdAsync(int id);

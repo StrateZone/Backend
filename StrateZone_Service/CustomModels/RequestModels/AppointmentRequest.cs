@@ -1,10 +1,6 @@
 ﻿using StrateZone_Repository.Entities;
-using System;
-using System.Collections.Generic;
+using StrateZone_Service.BusinessModels;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StrateZone_Service.CustomModels.RequestModels
 {
@@ -14,13 +10,9 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public int UserId { get; set; }
 
         [Required]
-        public DateTime ScheduleTime { get; set; }
+        public List<TablesAppointmentRequest> TablesAppointmentRequests { get; set; } = new List<TablesAppointmentRequest>();
 
         [Required]
-        public DateTime EndTime { get; set; }
-
-        [Required]
-        [MinLength(1)]
-        public List<int> TableIds { get; set; } = new List<int>();
+        public decimal TotalPrice { get; set; }
     }
 }

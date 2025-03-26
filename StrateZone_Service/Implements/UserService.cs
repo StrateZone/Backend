@@ -185,5 +185,20 @@ namespace StrateZone_Service.Implements
                 throw;
             }
         }
+
+        public async Task<UserResponse> FindUserInvitedToTablesAppointment(TablesAppointmentModel tablesAppointmentModel)
+        {
+            try
+            {
+                var tablesAppointment = _mapper.Map<TablesAppointment>(tablesAppointmentModel);
+                var user = await _userRepository.FindUserInvitedToTablesAppointment(tablesAppointment);
+
+                return user == null ? null : _mapper.Map<UserResponse>(user);
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

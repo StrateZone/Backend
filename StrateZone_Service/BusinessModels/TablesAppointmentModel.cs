@@ -15,6 +15,12 @@ namespace StrateZone_Service.BusinessModels
 
         public int? AppointmentId { get; set; }
 
+        public DateTime ScheduleTime { get; set; }
+
+        public DateTime EndTime { get; set; }
+
+        public decimal? Price { get; set; }
+
         public DateTime? CreatedAt { get; set; }
 
         public virtual TableModel? Table { get; set; }

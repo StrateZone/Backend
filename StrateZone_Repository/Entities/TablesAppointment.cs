@@ -11,9 +11,17 @@ public partial class TablesAppointment
 
     public int? AppointmentId { get; set; }
 
+    public decimal? Price { get; set; }
+
+    public DateTime ScheduleTime { get; set; }
+
+    public DateTime EndTime { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual Appointment? Appointment { get; set; }
 
     public virtual Table? Table { get; set; }
+
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }
