@@ -45,7 +45,7 @@ namespace StrateZone_Service.Implements
                     FromUser = request.FromUser,
                     ToUser = request.ToUser,
                     TableId = request.TableId,
-                    AppointmentId = request.AppointmentId,
+                    AppointmentId = null,
                     Status = PostgreEnums.RequestStatus.pending.ToString(),
                     ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(timeUntilRequestExpiration),
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),

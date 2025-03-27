@@ -16,12 +16,14 @@ namespace StrateZone_APIs.Controllers
         private readonly IPaymentService _paymentService;
         private readonly ILogger<PaymentController> _logger;
         private readonly IAppointmentService _appointmentService;
-    
-        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger, IAppointmentService appointmentService)
+        private readonly IWalletService _walletService;
+
+        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger, IAppointmentService appointmentService, IWalletService walletService)
         {
             _paymentService = paymentService;
             _logger = logger;
             _appointmentService = appointmentService;
+            _walletService = walletService;
         }
 
         [HttpPost("booking-payment")]
@@ -29,6 +31,17 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                var userWallet = await _walletService.GetWalletByUserIdAsync(request.UserId);
+                if(userWallet.Balance < request.TotalPrice )
+                {
+                    return new ApiResponse<AppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = "Balance is not enough",
+                        Data = null
+                    };
+                }
                 var createdAppointment = await _appointmentService.CreateAppointmentAsync(request);
                 var result = await _paymentService.CreatePaymentBooking(createdAppointment);
                 return result;

@@ -315,7 +315,7 @@ namespace StrateZone_Repository.Implements
                 var result = await _context.AppointmentRequests
                                             .FromSqlRaw(@"
                                                 SELECT * FROM appointment_requests 
-                                                WHERE from_user = {0} AND table_id = {1} AND status NOT IN ('cancelled', 'rejected', 'expired')",
+                                                WHERE from_user = {0} AND table_id = {1} AND status NOT IN ('cancelled', 'rejected', 'expired') AND appointment_id IS NULL",
                                                 userId,
                                                 tableId)
                                             .Include(ar => ar.ToUserNavigation)

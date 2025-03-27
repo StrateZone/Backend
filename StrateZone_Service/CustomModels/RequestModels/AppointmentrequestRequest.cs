@@ -25,8 +25,5 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public DateTime EndTime { get; set; }
-
-
-        public int? AppointmentId { get; set; } = null;
     }
 }
