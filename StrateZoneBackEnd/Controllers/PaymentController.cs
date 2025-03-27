@@ -52,6 +52,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPost("booking-request-payment")]
+        public async Task<ApiResponse<AppointmentrequestModel>> ConfirmBookingRequestPayment(TableAppointmentPaymentRequest request)
+        {
+            try
+            {
+                var result = await _paymentService.CreateAppointmentRequestPaymentBooking(request);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] PaymentModel payment)
         {

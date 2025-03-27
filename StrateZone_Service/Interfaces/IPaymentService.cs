@@ -12,6 +12,7 @@ namespace StrateZone_Service.Interfaces
     public interface IPaymentService
     {
         Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment);
+        Task<ApiResponse<AppointmentrequestModel>> CreateAppointmentRequestPaymentBooking(TableAppointmentPaymentRequest appointmentrequestModel);
         Task<PaymentModel> CreatePaymentAsync(PaymentModel payment);
         Task<List<PaymentModel>> GetPaymentsByTablesAppointmentIdAsync(int id);
         Task<List<PaymentModel>> GetPaymentsByUserIdAsync(int id);

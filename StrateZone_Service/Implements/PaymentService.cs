@@ -193,7 +193,45 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        
+        public async Task<ApiResponse<AppointmentrequestModel>> CreateAppointmentRequestPaymentBooking(TableAppointmentPaymentRequest appointmentrequestModel)
+        {
+            try
+            {
+                var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
+
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(appointmentrequestModel.ToUser);
+
+                if(userWallet.Balance < tableAppointment.Price)
+                {
+                    return new ApiResponse<AppointmentrequestModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = "Balance is not enough",
+                        Data = null
+                    };
+                }
+
+                await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
+
+                var payment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id)).SingleOrDefault(p => p.UserId == appointmentrequestModel.ToUser);
+                payment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
+                await _paymentRepository.UpdatePaymentAsync(payment, payment.Id);
+
+                return new ApiResponse<AppointmentrequestModel>
+                {
+                    Success = true,
+                    StatusCode = 201,
+                    Message = "Payment success",
+                    Data = null
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
 
         public async Task<PaymentModel> CreatePaymentAsync(PaymentModel paymentModel)
         {
@@ -248,5 +286,7 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        
     }
 }
