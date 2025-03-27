@@ -263,7 +263,7 @@ namespace StrateZone_Repository.Implements
 
                 decimal totalPrice = (decimal)tablesAppointment.Price;
 
-                if (await _userRepository.FindUserInvitedToTablesAppointment(tablesAppointment) != null) totalPrice /= 2;
+                if (await _userRepository.FindUserAcceptedToJoinTablesAppointment(tablesAppointment) != null) totalPrice /= 2;
 
                 return totalPrice;
             }

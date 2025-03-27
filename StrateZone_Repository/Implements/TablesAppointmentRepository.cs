@@ -30,6 +30,21 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<TablesAppointment> GetByIdAsync(int id)
+        {
+            try
+            {
+                return await _context.TablesAppointments
+                                    .Include(ta => ta.Table)
+                                    .SingleOrDefaultAsync(ta => ta.Id == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
         public async Task<List<TablesAppointment>> GetAllTablesAppointmentByTableIdAsync(int id)
         {
             try
@@ -67,10 +82,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.TablesAppointments
-                                    .Where(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.EndTime < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc))
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.GameType)
-                                    .FirstOrDefaultAsync();
+                                    .SingleOrDefaultAsync(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId);
                                     
             }
             catch (Exception ex)

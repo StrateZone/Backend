@@ -74,24 +74,28 @@ namespace StrateZone.Tests.Controllers_Tests
             var request = new AppointmentRequest()
             {
                 UserId = 1,
+                TotalPrice = 156_000,
                 TablesAppointmentRequests = new()
                 {
                     new TablesAppointmentRequest()
                     { 
                         ScheduleTime = DateTime.Parse("2025-04-27T11:30:00"),
                         EndTime = DateTime.Parse("2025-04-27T15:00:00"),
+                        Price = 74_000,
                         TableId = 1 
                     },
                     new TablesAppointmentRequest()
                     {
                         ScheduleTime = DateTime.Parse("2025-04-27T14:30:00"),
                         EndTime = DateTime.Parse("2025-04-27T16:00:00"),
+                        Price = 52_000,
                         TableId = 2
                     },
                     new TablesAppointmentRequest()
                     {
                         ScheduleTime = DateTime.Parse("2025-04-27T15:00:00"),
                         EndTime = DateTime.Parse("2025-04-27T18:30:00"),
+                        Price = 66_000,
                         TableId = 3
                     },
                 }

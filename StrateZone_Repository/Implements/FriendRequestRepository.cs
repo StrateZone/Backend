@@ -32,7 +32,8 @@ namespace StrateZone_Repository.Implements
 
                 using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
                 {
-                    await connection.OpenAsync();
+
+                    if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
                     using var cmd = new NpgsqlCommand(@"
                             INSERT INTO friendrequests (from_user, to_user, status, created_at) 

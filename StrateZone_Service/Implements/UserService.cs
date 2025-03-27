@@ -186,12 +186,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<UserResponse> FindUserInvitedToTablesAppointment(TablesAppointmentModel tablesAppointmentModel)
+        public async Task<UserResponse> FindUserAcceptedToJoinTablesAppointment(TablesAppointmentModel tablesAppointmentModel)
         {
             try
             {
                 var tablesAppointment = _mapper.Map<TablesAppointment>(tablesAppointmentModel);
-                var user = await _userRepository.FindUserInvitedToTablesAppointment(tablesAppointment);
+                var user = await _userRepository.FindUserAcceptedToJoinTablesAppointment(tablesAppointment);
 
                 return user == null ? null : _mapper.Map<UserResponse>(user);
             }

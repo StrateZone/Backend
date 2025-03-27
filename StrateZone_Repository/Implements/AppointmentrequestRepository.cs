@@ -84,7 +84,8 @@ namespace StrateZone_Repository.Implements
                     throw new Exception($"Appointment invitation to this user already been sent.");
 
                 var connection = _context.Database.GetDbConnection();
-                await connection.OpenAsync();
+
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
                 await using var createCmd = connection.CreateCommand();
                 createCmd.CommandText = @"
@@ -198,7 +199,7 @@ namespace StrateZone_Repository.Implements
                         "CASE " +
                             "WHEN id = @id THEN 'accepted' " +
                             "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
-                                "AND table_id = @table_id AND appointment_id = @appointment_id THEN 'rejected' " +
+                                "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'rejected' " +
                             "ELSE status " +
                     "END;");
                 parameters.Add(new NpgsqlParameter("@id", id));

@@ -12,12 +12,16 @@ namespace StrateZone_Service.Implements
     public class AppointmentrequestService : IAppointmentrequestService
     {
         private readonly IAppointmentrequestRepository _appointmentRequestRepository;
+        private readonly ITablesAppointmentService _tablesAppointmentService;
+        private readonly IPaymentService _paymentService;
         private readonly IMapper _mapper;
 
-        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper)
+        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService)
         {
             _appointmentRequestRepository = appointmentRequestRepository;
             _mapper = mapper;
+            _tablesAppointmentService = appointmentService;
+            _paymentService = paymentService;
         }
 
         public async Task<AppointmentrequestModel> CreateAppointmentRequestAsync(AppointmentrequestRequest request)
@@ -168,6 +172,35 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRequestRepository.AcceptAppointmentrequestAsync(id);
+
+                // in case the request is accepted AFTER the appointment is booked, create a payment for the invited user
+                // otherwise, the payment will be automatically created in CreateAppointmentAsync()
+                if (result.AppointmentId != null)
+                {
+                    var tablesAppointment = await _tablesAppointmentService
+                            .GetTablesAppointmentByTableIdAndAppointmentIdAsync(result.TableId, (int) result.AppointmentId);
+
+                    await _paymentService.CreatePaymentAsync(new PaymentModel()
+                    {
+                        UserId = result.ToUser,
+                        TablesAppointmentId = tablesAppointment.Id,
+                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
+                        PaymentType = PostgreEnums.PaymentType.appointment,
+                        Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {result.FromUser})",
+                    });
+
+                    var paymentOfTablesAppointmentOwner = (await _paymentService.GetPaymentsByUserIdAsync(result.FromUser))
+                                                        .FirstOrDefault(p => p.TablesAppointmentId == tablesAppointment.Id);
+
+                    PaymentModel updatedPayment = new()
+                    {
+                        Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {result.ToUser})",
+                        PaymentStatus = paymentOfTablesAppointmentOwner.PaymentStatus,
+                        PaymentType = paymentOfTablesAppointmentOwner.PaymentType,
+                    };
+                    await _paymentService.UpdatePaymentAsync(updatedPayment, paymentOfTablesAppointmentOwner.Id);
+                }
+
                 return _mapper.Map<AppointmentrequestModel>(result);
             }
             catch (Exception ex)

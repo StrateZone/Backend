@@ -152,16 +152,33 @@ namespace StrateZone_Service.Implements
 
                 foreach (var tablesAppointment in tablesAppointments)
                 {
+                    var acceptedUser = await _userService.FindUserAcceptedToJoinTablesAppointment(tablesAppointment);
+
                     PaymentModel paymentModel = new()
                     {
                         UserId = appointment.UserId,
                         TablesAppointmentId = tablesAppointment.Id,
                         PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
-                        Description = $"Payment for tables appointment {tablesAppointment.Id}",
+                        Description = $"Payment for tables appointment {tablesAppointment.Id}" 
+                                + (acceptedUser != null ? $"(shared with user {acceptedUser.UserId})" : ""),
                         PaymentType = PostgreEnums.PaymentType.appointment
                     };
 
                     await _paymentService.CreatePaymentAsync(paymentModel);
+
+                    if (acceptedUser != null)
+                    {
+                        PaymentModel paymentModel2 = new()
+                        {
+                            UserId = acceptedUser.UserId,
+                            TablesAppointmentId = tablesAppointment.Id,
+                            PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
+                            Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {appointment.UserId})",
+                            PaymentType = PostgreEnums.PaymentType.appointment
+                        };
+
+                        await _paymentService.CreatePaymentAsync(paymentModel2);
+                    }
                 }
 
                 return result;

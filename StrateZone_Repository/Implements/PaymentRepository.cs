@@ -26,6 +26,8 @@ namespace StrateZone_Repository.Implements
             {
                 var connection = _context.Database.GetDbConnection();
 
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
                     INSERT INTO payments (user_id, order_id, tables_appointment_id, course_id, description, payment_type, status, created_at) 

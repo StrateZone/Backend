@@ -24,7 +24,8 @@ namespace StrateZone_Repository.Implements
                     throw new Exception("Wallet for this user ID already exists.");
 
                 var connection = _context.Database.GetDbConnection();
-                await connection.OpenAsync();
+
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"

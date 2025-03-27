@@ -115,7 +115,7 @@ namespace StrateZone_Repository.Implements
 
                 var connection = _context.Database.GetDbConnection();
 
-                await connection.OpenAsync();
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
@@ -359,7 +359,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<User> FindUserInvitedToTablesAppointment(TablesAppointment tablesAppointment)
+        public async Task<User> FindUserAcceptedToJoinTablesAppointment(TablesAppointment tablesAppointment)
         {
             try
             {
@@ -368,7 +368,7 @@ namespace StrateZone_Repository.Implements
                                     .FromSqlRaw(
                                         "SELECT * FROM appointment_requests " +
                                         "WHERE table_id = {0} AND appointment_id = {1} " +
-                                        "AND (status = 'accepted' OR status = 'pending') " +
+                                        "AND status = 'accepted' " +
                                         "LIMIT 1",
                                         tablesAppointment.TableId, 
                                         tablesAppointment.AppointmentId)
