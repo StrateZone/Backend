@@ -106,6 +106,7 @@ namespace StrateZone_Repository.Implements
                                             @"SELECT * FROM rooms WHERE room_type = @room_type::room_type",
                                         new NpgsqlParameter("@room_type", roomType.ToString())
                                     )
+                                    .Include(r => r.Tables)
                                     .AsQueryable();
 
                 return await PagedList<Room>.ToPagedList(rooms, parameters.PageNumber, parameters.PageSize);

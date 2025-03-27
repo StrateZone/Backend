@@ -15,6 +15,8 @@ namespace StrateZone_Service.BusinessModels
 
         public int? AppointmentId { get; set; }
 
+        public string Status { get; set; }
+
         public DateTime ScheduleTime { get; set; }
 
         public DateTime EndTime { get; set; }

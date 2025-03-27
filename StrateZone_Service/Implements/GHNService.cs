@@ -104,7 +104,7 @@ namespace StrateZone_Service.Implements
             try
             {
                 var parsedJson = JsonConvert.DeserializeObject(json);
-                return JsonConvert.SerializeObject(parsedJson, Formatting.Indented); // Pretty-print JSON
+                return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
             }
             catch (Exception)
             {

@@ -41,6 +41,7 @@ namespace StrateZone_Repository.Implements
                 var result = _context.AppointmentRequests
                                     .Where(ar => ar.FromUser == userId)
                                     .Include(ar => ar.FromUserNavigation)
+                                    .Include(ar => ar.ToUserNavigation)
                                     .AsQueryable();
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
@@ -88,6 +89,7 @@ namespace StrateZone_Repository.Implements
                 if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
                 await using var createCmd = connection.CreateCommand();
+
                 createCmd.CommandText = @"
                     INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, status, expire_at, created_at) 
                     VALUES (@from_user, @to_user, @table_id, @appointment_id, @status::request_status, @expire_at, @created_at)
@@ -208,6 +210,7 @@ namespace StrateZone_Repository.Implements
                 parameters.Add(new NpgsqlParameter("@appointment_id", toAccept.AppointmentId != null ? toAccept.AppointmentId : DBNull.Value));
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+                _context.Entry(toAccept).State = EntityState.Detached;
 
                 return await _context.AppointmentRequests.FindAsync(id);
             }
@@ -233,6 +236,7 @@ namespace StrateZone_Repository.Implements
                 var sql = new StringBuilder("UPDATE appointment_requests SET status = 'rejected' WHERE id = @id;");
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), new NpgsqlParameter("@id", id));
+                _context.Entry(toReject).State = EntityState.Detached;
 
                 return await _context.AppointmentRequests.FindAsync(id);
             }

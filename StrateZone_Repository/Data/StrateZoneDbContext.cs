@@ -873,6 +873,11 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("end_time");
 
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), v)
+                );
+
             entity.HasOne(d => d.Appointment).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.AppointmentId)
                 .HasConstraintName("tables_appointments_appointment_id_fkey");
@@ -921,7 +926,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (ThreadStatus)Enum.Parse(typeof(ThreadStatus), v)
-                    ); ;
+                    );
         });
 
         modelBuilder.Entity<ThreadsTag>(entity =>

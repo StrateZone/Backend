@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StrateZone_Repository.Data;
+using StrateZone_Repository.Entities;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 #nullable disable
 
@@ -1027,6 +1029,18 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("end_time");
+
+                    b.Property<DateTime>("ScheduleTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("schedule_time");
+
+                    b.Property<AppointmentStatus>("Status")
+                        .HasColumnType("appointment_status")
+                        .HasColumnName("status");
 
                     b.Property<int?>("GameExtensionExtensionId")
                         .HasColumnType("integer");

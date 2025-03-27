@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.OpenApi.Any;
+using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using System.Text;
 
 namespace StrateZone_Repository.Implements
 {
@@ -97,8 +99,28 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                await _context.TablesAppointments.AddAsync(tablesAppointment);
-                await _context.SaveChangesAsync();
+                var connection = _context.Database.GetDbConnection();
+
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+                await using var createCmd = connection.CreateCommand();
+
+                createCmd.CommandText = @"
+                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at) 
+                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at)
+                    RETURNING id;"
+                ;
+
+                createCmd.Parameters.Add(new NpgsqlParameter("@table_id", tablesAppointment.TableId));
+                createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", tablesAppointment.AppointmentId));
+                createCmd.Parameters.Add(new NpgsqlParameter("@schedule_time", tablesAppointment.ScheduleTime));
+                createCmd.Parameters.Add(new NpgsqlParameter("@end_time", tablesAppointment.EndTime));
+                createCmd.Parameters.Add(new NpgsqlParameter("@price", tablesAppointment.Price));
+                createCmd.Parameters.Add(new NpgsqlParameter("@status", tablesAppointment.Status.ToString()));
+                createCmd.Parameters.Add(new NpgsqlParameter("@created_at", tablesAppointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
+
+                var newTablesAppointmentId = await createCmd.ExecuteScalarAsync();
+                tablesAppointment.Id = Convert.ToInt32(newTablesAppointmentId);
 
                 return tablesAppointment;
             }
@@ -113,11 +135,14 @@ namespace StrateZone_Repository.Implements
             try
             {
                 List<TablesAppointment> tablesAppointments = [.. appointment.TablesAppointments];
+                List<TablesAppointment> createdList = new();
 
-                await _context.TablesAppointments.AddRangeAsync(tablesAppointments);
-                await _context.SaveChangesAsync();
+                foreach (var ta in tablesAppointments)
+                {
+                    createdList.Add (await CreateTablesAppointmentAsync(ta));
+                }
 
-                return tablesAppointments;
+                return createdList;
             }
             catch (Exception ex)
             {
@@ -129,15 +154,60 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                if (!await _context.TablesAppointments.AnyAsync(ta => ta.Id == id))
-                    throw new Exception("Table appointment with this ID does not exist");
+                var existingAppointmentrequest = await _context.TablesAppointments.FindAsync(id) 
+                    ?? throw new Exception("Tables appointment with this ID does not exist");
 
                 tablesAppointment.Id = id;
+                var parameters = new List<NpgsqlParameter>();
+                var sql = new StringBuilder("UPDATE tables_appointments SET ");
 
-                _context.TablesAppointments.Update(tablesAppointment);
-                await _context.SaveChangesAsync();
+                if (tablesAppointment.TableId.HasValue)
+                {
+                    sql.Append("table_id = @table_id, ");
+                    parameters.Add(new NpgsqlParameter("@table_id", tablesAppointment.TableId));
+                }
 
-                return tablesAppointment;
+                if (tablesAppointment.AppointmentId.HasValue)
+                {
+                    sql.Append("appointment_id = @appointment_id, ");
+                    parameters.Add(new NpgsqlParameter("@appointment_id", tablesAppointment.AppointmentId));
+                }
+
+                if (tablesAppointment.ScheduleTime != null)
+                {
+                    sql.Append("schedule_time = @schedule_time, ");
+                    parameters.Add(new NpgsqlParameter("@schedule_time", tablesAppointment.ScheduleTime));
+                }
+
+                if (tablesAppointment.EndTime != null)
+                {
+                    sql.Append("end_time = @end_time, ");
+                    parameters.Add(new NpgsqlParameter("@end_time", tablesAppointment.EndTime));
+                }
+
+                if (tablesAppointment.Price.HasValue)
+                {
+                    sql.Append("price = @price, ");
+                    parameters.Add(new NpgsqlParameter("@price", tablesAppointment.Price));
+                }
+
+                if (tablesAppointment.CreatedAt.HasValue)
+                {
+                    sql.Append("created_at = @created_at, ");
+                    parameters.Add(new NpgsqlParameter("@created_at", tablesAppointment.CreatedAt));
+                }
+
+                sql.Append("status = @status::appointment_status, ");
+                parameters.Add(new NpgsqlParameter("@status", tablesAppointment.Status.ToString()));
+
+                sql.Remove(sql.Length - 2, 2);
+                sql.Append(" WHERE id = @id");
+                parameters.Add(new NpgsqlParameter("@id", id));
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
+                var updatedAppointmentRequest = await _context.TablesAppointments.FindAsync(id);
+                return updatedAppointmentRequest;
             }
             catch (Exception ex)
             {

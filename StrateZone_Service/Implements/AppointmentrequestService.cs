@@ -46,7 +46,7 @@ namespace StrateZone_Service.Implements
                     ToUser = request.ToUser,
                     TableId = request.TableId,
                     AppointmentId = request.AppointmentId,
-                    Status = PostgreEnums.RequestStatus.pending,
+                    Status = PostgreEnums.RequestStatus.pending.ToString(),
                     ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(timeUntilRequestExpiration),
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                 };
@@ -264,6 +264,8 @@ namespace StrateZone_Service.Implements
                 var user_requests = (await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, appointmentModel.UserId))
                                 .Where(ar => 
                                     tableIds.Contains(ar.TableId) 
+                                    &&
+                                    ar.AppointmentId == null
                                     &&
                                     (ar.Status == PostgreEnums.RequestStatus.pending || ar.Status == PostgreEnums.RequestStatus.accepted)
                                 )

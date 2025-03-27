@@ -20,7 +20,7 @@ namespace StrateZone_Service.BusinessModels
 
         public int? AppointmentId { get; set; } = null;
 
-        public RequestStatus Status { get; set; }
+        public string Status { get; set; }
 
         public DateTime? ExpireAt { get; set; }
 

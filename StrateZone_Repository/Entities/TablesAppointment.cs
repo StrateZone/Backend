@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -16,6 +17,8 @@ public partial class TablesAppointment
     public DateTime ScheduleTime { get; set; }
 
     public DateTime EndTime { get; set; }
+
+    public AppointmentStatus Status { get; set; } 
 
     public DateTime? CreatedAt { get; set; }
 
