@@ -158,8 +158,8 @@ namespace StrateZone_Repository.Implements
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
 
-                var updatedRoom = await _context.Rooms.FindAsync(id);
-                return updatedRoom;
+                var updatedTournament = await _context.Tournaments.FindAsync(id);
+                return updatedTournament;
             }
             catch(Exception ex)
             {

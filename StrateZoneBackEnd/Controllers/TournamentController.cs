@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
+using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -18,7 +19,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost("create-tournament")]
-        public async Task<TournamentModel> CreateTournament([FromBody] CreateTournamentRequest createTounamentRequest, [FromForm] IFormFile imageRequest)
+        public async Task<TournamentModel> CreateTournament([FromBody] CreateTournamentRequest createTounamentRequest, [FromForm] ImageRequest imageRequest /*temp cuz IFormFile doesnt work*/) 
         {
             try
             {

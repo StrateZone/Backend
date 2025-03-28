@@ -1,5 +1,7 @@
-﻿using StrateZone_Service.BusinessModels;
+﻿using StrateZone_Repository.Interfaces;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +12,11 @@ namespace StrateZone_Service.Implements
 {
     public class TournamentService : ITournamentService
     {
-        private readonly ITournamentService _tournamentService;
+        private readonly ITournamentRepository _tournamentRepository;
 
-        public TournamentService(ITournamentService tournamentService)
+        public TournamentService(ITournamentRepository tournamentRepository)
         {
-            _tournamentService = tournamentService;
+            _tournamentRepository = tournamentRepository;
         }
 
 

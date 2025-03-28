@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StrateZone_Service.Implements
+namespace StrateZone_Service.Interfaces
 {
     public interface ITournamentService
     {
