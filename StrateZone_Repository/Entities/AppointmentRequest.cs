@@ -20,6 +20,10 @@ public partial class Appointmentrequest
 
     public RequestStatus Status { get; set; }
 
+    public DateTime? StartTime { get; set; }
+
+    public  DateTime? EndTime { get; set; }
+
     public DateTime? ExpireAt { get; set; }
 
     public DateTime? CreatedAt { get; set; }

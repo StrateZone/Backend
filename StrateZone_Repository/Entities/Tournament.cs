@@ -24,7 +24,7 @@ public class Tournament
 
     public DateOnly? EndDate { get; set; }
 
-    public EventStatus Status { get; set; }
+    public TournamentStatus Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

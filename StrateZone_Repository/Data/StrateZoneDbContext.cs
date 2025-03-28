@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StrateZone_Repository.Entities;
+using System.Reflection.Emit;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using GameExtensionEnum = StrateZone_Repository.Parameters.PostgreEnums.GameExtensionEnum;
 
@@ -123,6 +124,7 @@ public partial class StrateZoneDbContext : DbContext
                         dataSourceBuilder.MapEnum<UserRole>("user_role");
                         dataSourceBuilder.MapEnum<VoucherStatus>("voucher_status");
                         dataSourceBuilder.MapEnum<WalletStatus>("wallet_status");
+                        dataSourceBuilder.MapEnum<TournamentStatus>("tournament_status");
                     })
                 .LogTo(Console.WriteLine, LogLevel.Information, DbContextLoggerOptions.DefaultWithLocalTime);
 
@@ -162,6 +164,7 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<UserRole>();
         modelBuilder.HasPostgresEnum<VoucherStatus>();
         modelBuilder.HasPostgresEnum<WalletStatus>();
+        modelBuilder.HasPostgresEnum<TournamentStatus>();
 
         modelBuilder.Entity<Appointment>(entity =>
         {
@@ -428,6 +431,12 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.ExpireAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("expire_at");
+            entity.Property(e => e.StartTime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("start_time");
+            entity.Property(e => e.EndTime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("end_time");
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
             entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
@@ -1002,7 +1011,7 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
-                    v => (EventStatus) Enum.Parse(typeof(EventStatus), v)
+                    v => (TournamentStatus) Enum.Parse(typeof(TournamentStatus), v)
                     );
 
             entity.HasOne(d => d.User).WithMany(p => p.Tournaments)

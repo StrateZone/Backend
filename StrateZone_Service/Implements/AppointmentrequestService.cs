@@ -6,6 +6,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
+using StrateZone_Service.Utils;
 
 namespace StrateZone_Service.Implements
 {
@@ -28,6 +29,14 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(request.StartTime, request.EndTime, false, out string errorMessage))
+                {
+                    throw new Exception(errorMessage);
+                }
+
+                if (request.ToUser == request.FromUser)
+                    throw new Exception("Can not invite self.");
+
                 DateTime currentTime = DateTime.UtcNow.AddHours(7);
                 DateTime appointmentTime = request.StartTime;
 
@@ -47,6 +56,8 @@ namespace StrateZone_Service.Implements
                     TableId = request.TableId,
                     AppointmentId = null,
                     Status = PostgreEnums.RequestStatus.pending.ToString(),
+                    StartTime = request.StartTime,
+                    EndTime = request.EndTime,
                     ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(timeUntilRequestExpiration),
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
                 };
@@ -288,6 +299,19 @@ namespace StrateZone_Service.Implements
         public Task<AppointmentrequestModel> GetAppointmentrequestFromUserToUserInTableAsync(int fromUserId, int toUserId, int tableId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.CancelAllAppointmentRequestsFromUserOnTableAsync(userId, tableId);
+                return _mapper.Map<List<AppointmentrequestModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

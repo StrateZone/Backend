@@ -88,6 +88,12 @@ namespace StrateZone_Service.Implements
 
         public async Task<List<int>> CheckAppointmentAvailability(AppointmentRequest request)
         {
+            foreach (var ta in request.TablesAppointmentRequests)
+            {
+                if (!ScheduleTimeValidator.IsScheduleTimeValid(ta.ScheduleTime, ta.EndTime, false, out string err))
+                    throw new Exception(err);
+            }
+
             HashSet<int> requestedTableIds = request.TablesAppointmentRequests
                                                     .Select(t => t.TableId)
                                                     .ToHashSet();

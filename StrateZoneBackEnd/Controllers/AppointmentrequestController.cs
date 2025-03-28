@@ -169,6 +169,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("cancel-all/users/{userId}/tables/{tableId}")]
+        public async Task<IActionResult> CancelAllAppointmentRequestAsync(int userId, int tableId)
+        {
+            try
+            {
+                var result = await _appointmentrequestService.CancelAllAppointmentRequestsFromUserOnTableAsync(userId, tableId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointmentRequestAsync(int id)
         {

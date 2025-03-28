@@ -91,8 +91,8 @@ namespace StrateZone_Repository.Implements
                 await using var createCmd = connection.CreateCommand();
 
                 createCmd.CommandText = @"
-                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, status, expire_at, created_at) 
-                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @status::request_status, @expire_at, @created_at)
+                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, status, start_time, end_time, expire_at, created_at) 
+                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @status::request_status, @start_time, @end_time, @expire_at, @created_at)
                     RETURNING id;"
                 ;
 
@@ -101,6 +101,8 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@table_id", appointmentRequest.TableId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId == null ? DBNull.Value : appointmentRequest.AppointmentId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
+                createCmd.Parameters.Add(new NpgsqlParameter("@start_time", appointmentRequest.StartTime));
+                createCmd.Parameters.Add(new NpgsqlParameter("@end_time", appointmentRequest.EndTime));
                 createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt));
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
@@ -153,6 +155,24 @@ namespace StrateZone_Repository.Implements
 
                 sql.Append("status = @status::request_status, ");
                 parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
+
+                if (appointmentRequest.StartTime.HasValue)
+                {
+                    sql.Append("start_time = @start_time, ");
+                    parameters.Add(new NpgsqlParameter("@start_time", appointmentRequest.StartTime.Value));
+                }
+
+                if (appointmentRequest.EndTime.HasValue)
+                {
+                    sql.Append("end_time = @end_time, ");
+                    parameters.Add(new NpgsqlParameter("@end_time", appointmentRequest.EndTime.Value));
+                }
+
+                if (appointmentRequest.ExpireAt.HasValue)
+                {
+                    sql.Append("expire_at = @expire_at, ");
+                    parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt.Value));
+                }
 
                 if (appointmentRequest.ExpireAt.HasValue)
                 {
@@ -355,6 +375,28 @@ namespace StrateZone_Repository.Implements
                     "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= {0};",
                     DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)
                 );
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Appointmentrequest>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId)
+        {
+            try
+            {
+                var updatedRequests = await _context.AppointmentRequests
+                    .FromSqlRaw(
+                        "UPDATE appointment_requests " +
+                        "SET status = 'cancelled' " +
+                        "WHERE from_user = {0} AND table_id = {1} AND status != 'expired' AND appointment_id IS NULL " +
+                        "RETURNING *;", 
+                        userId,
+                        tableId)
+                    .ToListAsync();
+
+                return updatedRequests;
             }
             catch (Exception ex)
             {

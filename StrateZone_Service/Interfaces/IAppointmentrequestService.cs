@@ -21,5 +21,6 @@ namespace StrateZone_Service.Interfaces
         Task<AppointmentrequestModel> AcceptAppointmentrequestAsync(int id);
         Task<AppointmentrequestModel> RejectAppointmentrequestAsync(int id);
         Task<List<AppointmentrequestModel>> CancelAllSentRequestFromUserAsync(int userId);
+        Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId);
     }
 }

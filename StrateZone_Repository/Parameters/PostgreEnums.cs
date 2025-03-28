@@ -6,6 +6,7 @@
         public enum CourseSlotStatus { upcoming, in_progress, completed, cancelled }
         public enum CourseStatus { open, closed, in_progress, completed, cancelled }
         public enum EventStatus { upcoming, ongoing, completed, cancelled }
+        public enum TournamentStatus { upcoming, enrolling, ongoing, completed, cancelled }
         public enum EventType { tournament, promotion }
         public enum GameExtensionEnum { bullet, lightning, flip, traditional }
         public enum GameTypeEnum { chess, xiangqi, go }
