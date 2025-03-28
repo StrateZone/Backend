@@ -24,7 +24,9 @@ public partial class Price
     public decimal? Price1 { get; set; }
 
     public string? Unit { get; set; }
-    
+
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual Course? Course { get; set; }
 
     public virtual GameType? GameType { get; set; }

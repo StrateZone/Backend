@@ -10,23 +10,25 @@ public class Tournament
 {
     public int TournamentId { get; set; }
 
-    public int? UserId { get; set; }
+    public int? UserId { get; set; }  
 
-    public string? Name { get; set; }
+    public string? Name { get; set; }  
 
-    public string? Description { get; set; }
+    public string? Description { get; set; }  
 
     public Ranking TargetedRanking { get; set; } 
 
-    public int? MaxParticipants {  get; set; }
+    public int? MaxParticipants {  get; set; }  
 
-    public DateOnly? StartDate { get; set; }
+    public DateOnly? StartDate { get; set; }  
 
-    public DateOnly? EndDate { get; set; }
+    public DateOnly? EndDate { get; set; } 
 
-    public TournamentStatus Status { get; set; }
+    public TournamentStatus Status { get; set; } 
 
     public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; } 
 
     public virtual Image? Image { get; set; }
 

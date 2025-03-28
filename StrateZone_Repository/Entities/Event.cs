@@ -22,6 +22,8 @@ public partial class Event
 
     public DateTime? CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual Image? Image { get; set; }
 
     public virtual User? User { get; set; }

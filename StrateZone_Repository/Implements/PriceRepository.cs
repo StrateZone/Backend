@@ -171,6 +171,12 @@ namespace StrateZone_Repository.Implements
                 sql.Append("unit = @unit, ");
                 parameters.Add(new NpgsqlParameter("@unit", price.Unit));
 
+                if (price.UpdatedAt.HasValue)
+                {
+                    sql.Append("updated_at = @updated_at::updated_at, ");
+                    parameters.Add(new NpgsqlParameter("@updated_at", price.UpdatedAt));
+                }
+
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(" WHERE id = @id");
                 parameters.Add(new NpgsqlParameter("@id", id));

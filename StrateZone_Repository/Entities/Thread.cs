@@ -22,6 +22,8 @@ public partial class Thread
 
     public DateTime? CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual User? CreatedByNavigation { get; set; }
