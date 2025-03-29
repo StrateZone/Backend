@@ -40,6 +40,8 @@ namespace StrateZone_Service.Mapper
 
             CreateMap<Room, RoomModel>().ReverseMap();
 
+            CreateMap<Image, ImageModel>().ReverseMap();
+
             CreateMap<Room, RoomResponse>()
                 .ForMember(r => r.Type, rs => rs.MapFrom(src => src.Type.ToString()))
                 .ForMember(r => r.Status, rs => rs.MapFrom(src => src.Status.ToString()));

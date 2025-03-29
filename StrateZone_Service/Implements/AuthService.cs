@@ -24,13 +24,15 @@ namespace StrateZone_Service.Implements
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
+        private readonly IWalletRepository _walletRepository;
 
-        public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService, IMapper mapper)
+        public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService, IMapper mapper, IWalletRepository walletRepository)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
             _mapper = mapper;
+            _walletRepository = walletRepository;
         }
         public async Task<ApiResponse<MailMessage>> SendOTP(string email)
         {
@@ -158,6 +160,14 @@ namespace StrateZone_Service.Implements
 
                 var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(user.UserId);
+
+                var walletResponse = new WalletResponse {
+                    UserId = userWallet.UserId,
+                    Balance = userWallet.Balance,
+                    Status = userWallet.Status.ToString(),
+                };
+
                 return new ApiResponse<LoginResponse>
                 {
                     Success = true,
@@ -166,6 +176,16 @@ namespace StrateZone_Service.Implements
                     Data = new LoginResponse
                     {
                         UserId = updatedUser.UserId,
+                        UserRole = updatedUser.UserRole.ToString(),
+                        Status = updatedUser.Status,
+                        Gender = updatedUser.Gender.ToString(),
+                        SkillLevel = updatedUser.SkillLevel.ToString(),
+                        Ranking = updatedUser.Ranking.ToString(),
+                        FullName = updatedUser.FullName,
+                        Address = updatedUser.Address,
+                        Bio = updatedUser.Bio,
+                        ImageUrl = updatedUser.Image?.Url,
+                        Wallet = walletResponse,
                         Username = updatedUser.Username,
                         Email = updatedUser.Email,
                         Phone = updatedUser.Phone,

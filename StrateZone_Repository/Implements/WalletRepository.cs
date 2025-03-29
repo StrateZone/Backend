@@ -63,7 +63,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Wallets.SingleOrDefaultAsync(w => w.UserId == userId) ?? throw new Exception("No wallet for this user was found.");
+                return await _context.Wallets.Include(u => u.User).SingleOrDefaultAsync(w => w.UserId == userId) ?? throw new Exception("No wallet for this user was found.");
             }
             catch (Exception ex)
             {
