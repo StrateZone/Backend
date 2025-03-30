@@ -18,6 +18,6 @@ namespace StrateZone_Service.BusinessModels
 
         public WalletStatus Status { get; set; }
 
-        public virtual UserModel? User { get; set; }
+       // public virtual UserModel? User { get; set; }
     }
 }
