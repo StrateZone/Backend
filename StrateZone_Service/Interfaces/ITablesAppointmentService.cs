@@ -5,13 +5,16 @@ namespace StrateZone_Service.Interfaces
 {
     public interface ITablesAppointmentService
     {
-        Task<TablesAppointmentModel> CreateTablesAppointment(TablesAppointmentModel tablesAppointmentModel);
+        Task<TablesAppointmentModel> CreateTablesAppointmentAsync(TablesAppointmentModel tablesAppointmentModel);
         Task<List<TablesAppointmentModel>> CreateTablesAppointmentsFromAppointmentAsync(AppointmentModel appointmentModel);
+        Task<TablesAppointmentModel> UpdateTablesAppointmentAsync(TablesAppointmentModel appointmentModel, int id);
         Task<TablesAppointmentModel> DeleteTablesAppointmentAsync(int id);
         Task<List<TablesAppointmentModel>> GetAllTablesAppointmentByTableIdAsync(int id);
         Task<List<TablesAppointmentModel>> GetAllTablesAppointmentByAppointmentIdAsync(int id);
         Task<List<TablesAppointmentModel>> GetAllTablesAppointmentsAsync();
         Task<TablesAppointmentModel> GetByIdAsync(int id);
         Task<TablesAppointmentModel> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId);
+        Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId);
+        Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId);
     }
 }

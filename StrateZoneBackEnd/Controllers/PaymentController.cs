@@ -27,42 +27,37 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost("booking-payment")]
-        public async Task<ApiResponse<AppointmentModel>> ConfirmBookingPayment(AppointmentRequest request)
+        public async Task<IActionResult> ConfirmBookingPayment(AppointmentRequest request)
         {
             try
             {
                 var userWallet = await _walletService.GetWalletByUserIdAsync(request.UserId);
                 if(userWallet.Balance < request.TotalPrice )
                 {
-                    return new ApiResponse<AppointmentModel>
-                    {
-                        Success = false,
-                        StatusCode = 500,
-                        Message = "Balance is not enough",
-                        Data = null
-                    };
+                    return StatusCode(500, "Balance is not enough");
                 }
+
                 var createdAppointment = await _appointmentService.CreateAppointmentAsync(request);
                 var result = await _paymentService.CreatePaymentBooking(createdAppointment);
-                return result;
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return StatusCode(500, new { message = ex.Message });
             }
         }
 
         [HttpPost("booking-request-payment")]
-        public async Task<ApiResponse<AppointmentrequestModel>> ConfirmBookingRequestPayment(TableAppointmentPaymentRequest request)
+        public async Task<IActionResult> ConfirmBookingRequestPayment(TableAppointmentPaymentRequest request)
         {
             try
             {
                 var result = await _paymentService.CreateAppointmentRequestPaymentBooking(request);
-                return result;
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return StatusCode(500, new { message = ex.Message });
             }
         }
 

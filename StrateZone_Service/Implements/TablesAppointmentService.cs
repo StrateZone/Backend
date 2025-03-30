@@ -3,20 +3,23 @@ using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
     public class TablesAppointmentService : ITablesAppointmentService
     {
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
+        private readonly IPaymentService _paymentService;
         private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
             _priceService = priceService;
+            _paymentService = paymentService;
         }
 
         public async Task<List<TablesAppointmentModel>> GetAllTablesAppointmentsAsync()
@@ -71,7 +74,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<TablesAppointmentModel> CreateTablesAppointment(TablesAppointmentModel tablesAppointmentModel)
+        public async Task<TablesAppointmentModel> CreateTablesAppointmentAsync(TablesAppointmentModel tablesAppointmentModel)
         {
             try
             {
@@ -123,6 +126,64 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _tablesAppointmentRepository.GetByIdAsync(id);
                 return _mapper.Map<TablesAppointmentModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var tablesAppointment = await GetByIdAsync(tablesAppointmentId);
+
+                var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId))
+                            .SingleOrDefault(p => p.UserId == userId) 
+                            ?? throw new Exception("No payment was found for this tables appointment.");
+
+                if (payment.PaymentStatus == PaymentStatus.unpaid)
+                    throw new Exception($"Check-in failed: Unpaid appointment. Please proceed with the payment first!");
+
+                string errorMessage = (AppointmentStatus) Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status) switch
+                {
+                    AppointmentStatus.pending => "This appointment hasn't been confirmed.",
+                    AppointmentStatus.cancelled => "This appointment has been cancelled.",
+                    AppointmentStatus.expired => "This appointment is expired.",
+                    AppointmentStatus.completed => "This appointment is already completed.",
+                    _ => string.Empty,
+                };
+
+                if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Check-in failed: {errorMessage}");
+
+                tablesAppointment.Status = AppointmentStatus.completed.ToString();
+
+                var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<TablesAppointmentModel> UpdateTablesAppointmentAsync(TablesAppointmentModel appointmentModel, int id)
+        {
+            try
+            {
+                var tablesAppointment = _mapper.Map<TablesAppointment>(appointmentModel);
+                var result = await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(tablesAppointment, id);
+
+                var mappedResult = _mapper.Map<TablesAppointmentModel>(result);
+
+                return mappedResult;
             }
             catch (Exception ex)
             {

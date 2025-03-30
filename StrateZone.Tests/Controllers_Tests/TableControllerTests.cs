@@ -89,7 +89,18 @@ namespace StrateZone.Tests.Controllers_Tests
         public async Task GetAvailableTablesByGameTypeAndRoomType_ShouldReturnOkResult_WithTables()
         {
             // Arrange
-            var tables = new List<TableResponse> { new TableResponse { TableId = 1 } };
+            var tables = new List<TableResponse> 
+            { 
+                new TableResponse ()
+                { 
+                    TableId = 1,
+                    RoomId = 1,
+                    RoomName = "BA001",
+                    RoomDescription = "- Giá cả phải chăng.\\n- Nhiều bàn.",
+                    RoomType = "basic",
+                    GameTypeId = 1,
+                },
+            };
             var pagedResponse = new PagedListResponse<TableResponse>(new PagedList<TableResponse>(tables, tables.Count, 1, 10));
 
             _tableServiceMock.Setup(s => s.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(
@@ -100,8 +111,8 @@ namespace StrateZone.Tests.Controllers_Tests
             var result = await _controller.GetAvailableTablesByGameTypeAndRoomType(
                 new TableParameters()
                 {
-                    StartTime = DateTime.Parse("2025-06-25T08:00:00"),
-                    EndTime = DateTime.Parse("2025-06-25T12:00:00"),
+                    StartTime = DateTime.Parse("2035-06-25T08:00:00"),
+                    EndTime = DateTime.Parse("2035-06-25T12:00:00"),
                 },
                 new[] { GameTypeEnum.chess, GameTypeEnum.xiangqi },
                 new[] { RoomType.premium, RoomType.basic, RoomType.openspaced }

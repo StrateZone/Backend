@@ -79,7 +79,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var result = await _services.CreateTablesAppointment(model);
+                var result = await _services.CreateTablesAppointmentAsync(model);
                 return Created("tables_appointment created", result);
             }
             catch (Exception ex)
@@ -95,6 +95,48 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _services.CreateTablesAppointmentsFromAppointmentAsync(model);
                 return Created("tables_appointment created", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTablesAppointment([FromBody] TablesAppointmentModel model, int id)
+        {
+            try
+            {
+                var result = await _services.UpdateTablesAppointmentAsync(model, id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("check-in/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CheckinTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var result = await _services.CheckInTablesAppointment(tablesAppointmentId, userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("cancel/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CancelTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var result = await _services.CancelTablesAppointment(tablesAppointmentId, userId);
+                return Ok(result);
             }
             catch (Exception ex)
             {

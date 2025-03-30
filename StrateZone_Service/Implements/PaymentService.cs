@@ -22,7 +22,6 @@ namespace StrateZone_Service.Implements
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IAppointmentRepository _appointmentRepository;
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
         private readonly IAppointmentrequestRepository _appointmentrequestRepository;
         private readonly IPaymentRepository _paymentRepository;
@@ -32,7 +31,7 @@ namespace StrateZone_Service.Implements
         private readonly IEmailService _emailService;
         private readonly IUserRepository _userRepository;
 
-        public PaymentService(IAppointmentRepository appointmentRepository,
+        public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
             IAppointmentrequestRepository appointmentrequestRepository,
             IPaymentRepository paymentRepository,
@@ -42,7 +41,6 @@ namespace StrateZone_Service.Implements
             IEmailService emailService,
             IUserRepository userRepository)
         {
-            _appointmentRepository = appointmentRepository;
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
             _paymentRepository = paymentRepository;
@@ -67,6 +65,7 @@ namespace StrateZone_Service.Implements
                         Data = null
                     };
                 }
+
                 userWallet.Balance -= appointment.TotalPrice;
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
                 foreach (var tablesAppointment in appointment.TablesAppointments)
@@ -286,7 +285,5 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
-
-        
     }
 }

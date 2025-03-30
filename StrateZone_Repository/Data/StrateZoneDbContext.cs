@@ -735,6 +735,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Unit)
                 .HasMaxLength(50)
                 .HasColumnName("unit");
+
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
