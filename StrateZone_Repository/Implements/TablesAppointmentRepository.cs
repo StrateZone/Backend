@@ -5,6 +5,7 @@ using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using System.Linq;
 using System.Text;
 
 namespace StrateZone_Repository.Implements
@@ -225,6 +226,25 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return toDelete;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TablesAppointment>> GetAllTablesAppointmentsInvitedToUserByUserId(int userId)
+        {
+            try
+            {
+                List<List<int>> requests = await _context.AppointmentRequests
+                                        .Where(a => a.ToUser == userId)
+                                        .Select(a => new List<int> { a.TableId, (int) a.AppointmentId })
+                                        .ToListAsync();
+
+                return await _context.TablesAppointments
+                                    .Where(ta => requests.Contains(new List<int>() { (int) ta.TableId, (int) ta.AppointmentId }))
+                                    .ToListAsync(); 
             }
             catch (Exception ex)
             {

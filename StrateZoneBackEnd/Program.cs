@@ -1,23 +1,14 @@
 ﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
-using Npgsql;
 using StrateZone_APIs.ServiceExtensions;
 using StrateZone_Repository.Data;
-using StrateZone_Repository.Entities;
 using StrateZone_Service.Hubs;
-using StrateZone_Service.Implements;
-using StrateZone_Service.Interfaces;
 using StrateZone_Service.Mapper;
-using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 
 var MyAllowSpecificOrigins = "myAllowSpecificOrigins";
 

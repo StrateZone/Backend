@@ -20,5 +20,10 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public DateTime EndTime { get; set; }
+
+        public override string ToString()
+        {
+            return $"TableId: {TableId}, ScheduleTime: {ScheduleTime}, EndTime: {EndTime}.";
+        }
     }
 }

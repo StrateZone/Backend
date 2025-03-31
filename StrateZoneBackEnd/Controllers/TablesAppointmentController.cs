@@ -74,6 +74,22 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("joined-by/users/{userId}")]
+        public async Task<IActionResult> GetTablesAppointmentInvitedToUserByUserId(int userId)
+        {
+            try
+            {
+                // var result = await _services.GetTablesAppointmentByTableIdAndAppointmentIdAsync();
+                // return result != null ? Ok(result) : Ok("No tables_appointment for this table ID was found.");
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPost("")]
         public async Task<IActionResult> CreateTablesAppointment([FromBody] TablesAppointmentModel model)
         {

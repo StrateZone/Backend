@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using MealHunt_Repositories.Pagination;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
@@ -94,7 +96,7 @@ namespace StrateZone_Service.Implements
                     throw new Exception(err);
             }
 
-            List<int> requestedTableIds = request.TablesAppointmentRequests.Select(ta => ta.TableId).ToList();
+            HashSet<int> requestedTableIds = request.TablesAppointmentRequests.Select(ta => ta.TableId).ToHashSet();
             List<TablesAppointmentRequest> unavailableTables = new();
 
             foreach (var tablesAppointment in request.TablesAppointmentRequests)
@@ -107,6 +109,8 @@ namespace StrateZone_Service.Implements
                 var unavailableTableIds = requestedTableIds.Except(availableTableIds);
                 foreach (var unavailableTableId in unavailableTableIds)
                 {
+                    if (tablesAppointment.TableId != unavailableTableId) continue;
+
                     unavailableTables.Add(
                         new()
                         {
@@ -119,23 +123,16 @@ namespace StrateZone_Service.Implements
                 }
             }
 
-            return unavailableTables.Distinct().ToList();
+            return unavailableTables
+                    .GroupBy(t => new { t.TableId, t.ScheduleTime, t.EndTime })
+                    .Select(g => g.First())
+                    .ToList();
         }
 
         public async Task<AppointmentModel> CreateAppointmentAsync(CustomModels.RequestModels.AppointmentRequest request)
         {
             try
             {
-                List<TablesAppointmentRequest> unavailableTables = await CheckAppointmentAvailability(request);
-                if (unavailableTables.Count > 0)
-                {
-                    var tableInfo = unavailableTables
-                        .Select(t => $"TableId: {t.TableId}, ScheduleTime: {t.ScheduleTime}, EndTime: {t.EndTime}")
-                        .ToList();
-
-                    throw new InvalidOperationException($"The following tables are not available:\n{string.Join("\n", tableInfo)}");
-                }
-
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {
                     UserId = request.UserId,

@@ -87,11 +87,25 @@ namespace StrateZone_APIs.Controllers
 
                 if (result.Count > 0)
                 {
-                    var tableInfo = result
-                        .Select(t => $"TableId: {t.TableId}, ScheduleTime: {t.ScheduleTime}, EndTime: {t.EndTime}")
-                        .ToList();
+                    var errorResponse = new
+                    {
+                        error = new
+                        {
+                            code = "TABLE_NOT_AVAILABLE",
+                            message = "Some tables are not available",
+                            unavailable_tables = result.Select(t => new
+                            {
+                                table_id = t.TableId,
+                                start_time = t.ScheduleTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                                end_time = t.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
+                            })
+                        }
+                    };
 
-                    return StatusCode(500, $"The following tables are not available:\n{string.Join("\n", tableInfo)}");
+                    return new JsonResult(errorResponse)
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                    };
                 }
 
                 return Ok("All requested tables for this appointment are available.");
@@ -111,6 +125,31 @@ namespace StrateZone_APIs.Controllers
                 {
                     if (!ScheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false, out string msg))
                         return BadRequest(new { message = msg });
+                }
+
+                var result = await _appointmentService.CheckAppointmentAvailability(request);
+
+                if (result.Count > 0)
+                {
+                    var errorResponse = new
+                    {
+                        error = new
+                        {
+                            code = "TABLE_NOT_AVAILABLE",
+                            message = "Some tables are not available",
+                            unavailable_tables = result.Select(t => new
+                            {
+                                table_id = t.TableId,
+                                start_time = t.ScheduleTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+                                end_time = t.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
+                            })
+                        }
+                    };
+
+                    return new JsonResult(errorResponse)
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                    };
                 }
 
                 var appointment = await _appointmentService.CreateAppointmentAsync(request);

@@ -20,7 +20,7 @@ namespace StrateZone_Service.BusinessModels
 
         public DateTime? CreatedAt { get; set; }
 
-        public UserModel? User { get; set; }
+        //public UserModel? User { get; set; }
 
         public virtual ICollection<TablesAppointmentModel> TablesAppointments { get; set; } = [];
     
