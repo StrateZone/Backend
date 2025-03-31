@@ -1,11 +1,8 @@
-﻿using StrateZone_Service.BusinessModels;
+﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Parameters;
+using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StrateZone_Service.Interfaces
 {
@@ -15,7 +12,8 @@ namespace StrateZone_Service.Interfaces
         Task<ApiResponse<AppointmentrequestModel>> CreateAppointmentRequestPaymentBooking(TableAppointmentPaymentRequest appointmentrequestModel);
         Task<PaymentModel> CreatePaymentAsync(PaymentModel payment);
         Task<List<PaymentModel>> GetPaymentsByTablesAppointmentIdAsync(int id);
-        Task<List<PaymentModel>> GetPaymentsByUserIdAsync(int id);
+        Task<PagedList<PaymentModel>> GetPaymentsAsync(StrateZone_Repository.Parameters.PaymentParameters parameters);
+        Task<PagedList<PaymentModel>> GetPaymentsByUserIdAsync(int id, StrateZone_Repository.Parameters.PaymentParameters parameters);
         Task<PaymentModel> UpdatePaymentAsync(PaymentModel payment, int id);
     }
 }

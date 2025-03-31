@@ -69,11 +69,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("users/{userId}/tables/{tableId}")]
-        public async Task<IActionResult> GetCurrentAppointmentRequestsFromUserByUserAndTablesIdAsync(int userId, int tableId)
+        public async Task<IActionResult> GetCurrentAppointmentRequestsFromUserByUserAndTablesIdAsync(int userId, int tableId, int startTime, int endTime)
         {
             try
             {
-                var result = await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId);
+                var result = await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId, startTime, endTime);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -170,11 +170,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("cancel-all/users/{userId}/tables/{tableId}")]
-        public async Task<IActionResult> CancelAllAppointmentRequestAsync(int userId, int tableId)
+        public async Task<IActionResult> CancelAllAppointmentRequestAsync(int userId, int tableId, int startTime, int endTime)
         {
             try
             {
-                var result = await _appointmentrequestService.CancelAllAppointmentRequestsFromUserOnTableAsync(userId, tableId);
+                var result = await _appointmentrequestService.CancelAllAppointmentRequestsFromUserOnTableAsync(userId, tableId, startTime, endTime);
                 return Ok(result);
             }
             catch (Exception ex)

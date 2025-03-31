@@ -76,13 +76,14 @@ namespace StrateZone_Repository.Implements
                                                     ar.FromUser == appointmentRequest.FromUser 
                                                     && ar.ToUser == appointmentRequest.ToUser 
                                                     && ar.TableId == appointmentRequest.TableId
+                                                    && ar.StartTime == appointmentRequest.StartTime && ar.EndTime == appointmentRequest.EndTime
                                                     && (ar.AppointmentId == appointmentRequest.AppointmentId ||
                                                     (ar.AppointmentId == null && appointmentRequest.AppointmentId == null))
                                                 )
                                                 .ToListAsync();
 
                 if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
-                    throw new Exception($"Appointment invitation to this user already been sent.");
+                    throw new Exception($"Invitation to this user already been sent.");
 
                 var connection = _context.Database.GetDbConnection();
 
@@ -328,16 +329,20 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Appointmentrequest>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId)
+        public async Task<List<Appointmentrequest>> GetCurrentAppointmentRequestsFromUserByUserAndTableAsync(int userId, int tableId, int startTime, int endTime)
         {
             try
             {
                 var result = await _context.AppointmentRequests
                                             .FromSqlRaw(@"
                                                 SELECT * FROM appointment_requests 
-                                                WHERE from_user = {0} AND table_id = {1} AND status NOT IN ('cancelled', 'rejected', 'expired') AND appointment_id IS NULL",
+                                                WHERE from_user = {0} AND table_id = {1} 
+                                                AND start_time = {2} AND end_time = {3}
+                                                AND status NOT IN ('cancelled', 'rejected', 'expired') AND appointment_id IS NULL",
                                                 userId,
-                                                tableId)
+                                                tableId,
+                                                startTime,
+                                                endTime)
                                             .Include(ar => ar.ToUserNavigation)
                                             .Include(ar => ar.Table)
                                             .ToListAsync();
@@ -382,7 +387,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Appointmentrequest>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId)
+        public async Task<List<Appointmentrequest>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, int startTime, int endTime)
         {
             try
             {
@@ -390,10 +395,13 @@ namespace StrateZone_Repository.Implements
                     .FromSqlRaw(
                         "UPDATE appointment_requests " +
                         "SET status = 'cancelled' " +
-                        "WHERE from_user = {0} AND table_id = {1} AND status != 'expired' AND appointment_id IS NULL " +
+                        "WHERE from_user = {0} AND table_id = {1} " +
+                        "AND start_time = {2} AND end_time = {3} AND status != 'expired' AND appointment_id IS NULL " +
                         "RETURNING *;", 
                         userId,
-                        tableId)
+                        tableId,
+                        startTime,
+                        endTime)
                     .ToListAsync();
 
                 return updatedRequests;

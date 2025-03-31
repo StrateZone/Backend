@@ -14,9 +14,9 @@ namespace StrateZone_Service.BusinessModels
 
         public int? UserId { get; set; }
 
-        public PaymentType PaymentType { get; set; }
+        public string PaymentType { get; set; }
 
-        public PaymentStatus PaymentStatus { get; set; }
+        public string PaymentStatus { get; set; }
 
         public int? OrderId { get; set; }
 

@@ -4,6 +4,7 @@ using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,46 @@ namespace StrateZone_Repository.Implements
         public TransactionRepository(StrateZoneDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<PagedList<Transaction>> GetAllTransactionsAsync(TablesAppointmentParameters parameters)
+        {
+            try
+            {
+                var result = _context.Transactions.AsQueryable();
+
+                return await PagedList<Transaction>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Transaction> GetByIdAsync(int id)
+        {
+            try
+            {
+                return await _context.Transactions.FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Transaction>> GetUsersTransactionsAsync(int id, TablesAppointmentParameters parameters)
+        {
+            try
+            {
+                var result = _context.Transactions.Where(t => t.OfUser == id).AsQueryable();
+
+                return await PagedList<Transaction>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<Transaction> SaveTransaction(Transaction transaction)

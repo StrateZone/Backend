@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
@@ -19,12 +21,31 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetTablesAppointments()
+        public async Task<IActionResult> GetTablesAppointments(TablesAppointmentParameters parameters)
         {
             try
             {
-                var result = await _services.GetAllTablesAppointmentsAsync();
-                return result.Count > 0 ? Ok(result) : Ok("No tables_appointment was found.");
+                var result = await _services.GetAllTablesAppointmentsAsync(parameters);
+
+                var response = new PagedListResponse<TablesAppointmentModel>(result);
+
+                return response != null ? Ok(response) : NotFound("No tables_appointment was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("users/{id}")]
+        public async Task<IActionResult> GetTablesAppointmentsByUserId(int id, TablesAppointmentParameters parameters)
+        {
+            try
+            {
+                var result = await _services.GetAllTablesAppointmentByTableIdAsync(id, parameters);
+                var response = new PagedListResponse<TablesAppointmentModel>(result);
+
+                return response != null ? Ok(response) : NotFound("No tables_appointment for this user ID was found.");
             }
             catch (Exception ex)
             {
@@ -33,12 +54,15 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("tables/{id}")]
-        public async Task<IActionResult> GetTablesAppointmentsByTableId(int id)
+        public async Task<IActionResult> GetTablesAppointmentsByTableId(int id, TablesAppointmentParameters parameters)
         {
             try
             {
-                var result = await _services.GetAllTablesAppointmentByTableIdAsync(id);
-                return result.Count > 0 ? Ok(result) : Ok("No tables_appointment for this table ID was found.");
+                var result = await _services.GetAllTablesAppointmentByTableIdAsync(id, parameters);
+
+                var response = new PagedListResponse<TablesAppointmentModel>(result);
+
+                return response != null ? Ok(response) : NotFound("No tables_appointment for this table ID was found.");
             }
             catch (Exception ex)
             {
@@ -75,14 +99,14 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("joined-by/users/{userId}")]
-        public async Task<IActionResult> GetTablesAppointmentInvitedToUserByUserId(int userId)
+        public async Task<IActionResult> GetTablesAppointmentInvitedToUserByUserId(int userId, TablesAppointmentParameters parameters)
         {
             try
             {
-                // var result = await _services.GetTablesAppointmentByTableIdAndAppointmentIdAsync();
-                // return result != null ? Ok(result) : Ok("No tables_appointment for this table ID was found.");
+                var result = await _services.GetAllTablesAppointmentsJoinedByUserId(userId, parameters);
+                var response = new PagedListResponse<TablesAppointmentModel>(result);
 
-                return Ok();
+                return response != null ? Ok(response) : NotFound("No tables_appointment joined by this user ID was found.");
             }
             catch (Exception ex)
             {

@@ -288,8 +288,14 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                User toRemove = await _context.Users.FindAsync(id) ?? throw new Exception("User with this ID does not exist");
+                User toRemove = await _context.Users
+                                    .Include(a => a.Wallet)
+                                    .Include(a => a.Cart)
+                                    .SingleOrDefaultAsync(a => a.UserId == id) 
+                                    ?? throw new Exception("User with this ID does not exist");
 
+                if (toRemove.Wallet != null) _context.Wallets.Remove(toRemove.Wallet);
+                if (toRemove.Cart != null) _context.Carts.Remove(toRemove.Cart);
                 _context.Users.Remove(toRemove);
                 await _context.SaveChangesAsync();
 
@@ -331,14 +337,26 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var currentDay = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
-                var accounts = await _context.Users.Where(a =>
-                        a.Status == "Unactivated"
-                        && (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
+                var accounts = await _context.Users
+                    .Where(a =>
+                        a.Status == "Unactivated" &&
+                        (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
+                    .Include(a => a.Wallet)
+                    .Include(a => a.Cart)
                     .ToListAsync();
 
-                _context.Users.RemoveRange(accounts);
-                await _context.SaveChangesAsync();
+                var wallets = accounts.Select(a => a.Wallet).Where(w => w != null).ToList();
+                if (wallets.Count > 0)
+                    _context.Wallets.RemoveRange(wallets);
 
+                var carts = accounts.Select(a => a.Cart).Where(c => c != null).ToList();
+                if (carts.Count > 0)
+                    _context.Carts.RemoveRange(carts);
+
+                if (accounts.Count > 0)
+                    _context.Users.RemoveRange(accounts);
+
+                await _context.SaveChangesAsync();
                 return accounts.Count;
             }
             catch

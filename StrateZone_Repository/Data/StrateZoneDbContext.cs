@@ -1166,9 +1166,11 @@ public partial class StrateZoneDbContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("username");
 
-            entity.HasOne(d => d.Cart).WithMany(p => p.Users)
-                .HasForeignKey(d => d.CartId)
-                .HasConstraintName("users_cart_id_fkey");
+            entity.HasOne(d => d.Cart).WithOne(p => p.User)
+                .HasForeignKey<Cart>(d => d.CartId)
+                .HasConstraintName("users_cart_id_fkey")
+                .OnDelete(DeleteBehavior.Cascade);
+
         });
 
         modelBuilder.Entity<UsersCourse>(entity =>
@@ -1243,9 +1245,11 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (WalletStatus)Enum.Parse(typeof(WalletStatus), v)
                     );
+
             entity.HasOne(d => d.User).WithOne(p => p.Wallet)
                 .HasForeignKey<User>(d => d.UserId)
-                .HasConstraintName("wallet_user_id_fkey");
+                .HasConstraintName("wallet_user_id_fkey")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -70,8 +70,14 @@ namespace StrateZone_Service.Mapper
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
             CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
-            CreateMap<Payment, PaymentModel>().ReverseMap();
+
+            CreateMap<Payment, PaymentModel>()
+                .ForMember(mr => mr.PaymentStatus, u => u.MapFrom(src => src.PaymentStatus.ToString()))
+                .ForMember(mr => mr.PaymentType, u => u.MapFrom(src => src.PaymentType.ToString()))
+                .ReverseMap();
+
             CreateMap<Wallet, WalletModel>().ReverseMap();
+            CreateMap<Transaction, TransactionModel>().ReverseMap();
             // add other mappings here
         }
     }

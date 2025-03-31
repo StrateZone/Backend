@@ -26,5 +26,7 @@ namespace StrateZone_Service.BusinessModels
         public DateTime? CreatedAt { get; set; }
 
         public virtual TableModel? Table { get; set; }
+
+        // public virtual AppointmentModel? Appointment { get; set; }
     }
 }
