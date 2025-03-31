@@ -55,6 +55,9 @@ namespace StrateZone_Service.Mapper
             CreateMap<Appointment, AppointmentModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
+            CreateMap<Appointment, AppointmentResponse>()
+                .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                .ReverseMap();
             CreateMap<TablesAppointment, TablesAppointmentModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();

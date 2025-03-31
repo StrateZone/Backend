@@ -40,6 +40,23 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("all/admin")]
+        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentParameters parameters)
+        {
+            try
+            {
+                var appointments = await _appointmentService.GetAllAppointmentsAsync(parameters);
+
+                var response = new PagedListResponse<AppointmentResponse>(appointments);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No appointment was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAppointmentById(int id)

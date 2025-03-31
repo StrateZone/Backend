@@ -1,0 +1,28 @@
+﻿using StrateZone_Service.BusinessModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace StrateZone_Service.CustomModels.ResponseModels
+{
+    public class AppointmentResponse
+    {
+        public int AppointmentId { get; set; }
+
+        public int UserId { get; set; }
+
+        public decimal TotalPrice { get; set; }
+
+        public string Status { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
+
+        public UserModel? User { get; set; }
+
+        public virtual ICollection<TablesAppointmentModel> TablesAppointments { get; set; } = [];
+
+        public virtual ICollection<AppointmentrequestModel>? Appointmentrequests { get; set; } = [];
+    }
+}
