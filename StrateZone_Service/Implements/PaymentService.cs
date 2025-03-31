@@ -1,22 +1,13 @@
 using StrateZone_Repository.Entities;
-using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Repository.Parameters;
 ﻿using AutoMapper;
-using StrateZone_Repository.Entities;
-using StrateZone_Repository.Interfaces;
-using StrateZone_Service.BusinessModels;
-using StrateZone_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using StrateZone_Service.BusinessModels;
 using System.Globalization;
+using MealHunt_Repositories.Pagination;
 
 namespace StrateZone_Service.Implements
 {
@@ -259,12 +250,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<PaymentModel>> GetPaymentsByUserIdAsync(int id)
+        public async Task<PagedList<PaymentModel>> GetPaymentsByUserIdAsync(int id, PaymentParameters parameters)
         {
             try
             {
-                var result = await _paymentRepository.GetPaymentsByUserIdAsync(id);
-                return _mapper.Map<List<PaymentModel>>(result);
+                var result = await _paymentRepository.GetPaymentsByUserIdAsync(id, parameters);
+                var mapped = _mapper.Map<PagedList<PaymentModel>>(result);
+            
+                return new PagedList<PaymentModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -279,6 +272,21 @@ namespace StrateZone_Service.Implements
                 var payment = _mapper.Map<Payment>(paymentModel);
                 var result = await _paymentRepository.UpdatePaymentAsync(payment, id);
                 return _mapper.Map<PaymentModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<PaymentModel>> GetPaymentsAsync(PaymentParameters parameters)
+        {
+            try
+            {
+                var result = await _paymentRepository.GetPaymentsAsync(parameters);
+                var mapped = _mapper.Map<PagedList<PaymentModel>>(result);
+
+                return new PagedList<PaymentModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

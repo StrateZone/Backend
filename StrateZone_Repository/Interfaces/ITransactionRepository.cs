@@ -1,4 +1,6 @@
-﻿using StrateZone_Repository.Entities;
+﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Entities;
+using StrateZone_Repository.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +12,8 @@ namespace StrateZone_Repository.Interfaces
     public interface ITransactionRepository
     {
         Task<Transaction> SaveTransaction(Transaction transaction);
+        Task<Transaction> GetByIdAsync(int id);
+        Task<PagedList<Transaction>> GetAllTransactionsAsync(TablesAppointmentParameters parameters);
+        Task<PagedList<Transaction>> GetUsersTransactionsAsync(int id, TablesAppointmentParameters parameters);
     }
 }

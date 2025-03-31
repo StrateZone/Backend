@@ -188,10 +188,10 @@ namespace StrateZone_Service.Implements
                     {
                         UserId = appointment.UserId,
                         TablesAppointmentId = tablesAppointment.Id,
-                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
+                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
                         Description = $"Payment for tables appointment {tablesAppointment.Id}" 
                                 + (acceptedUser != null ? $"(shared with user {acceptedUser.UserId})" : ""),
-                        PaymentType = PostgreEnums.PaymentType.appointment
+                        PaymentType = PostgreEnums.PaymentType.appointment.ToString()
                     };
 
                     await _paymentService.CreatePaymentAsync(paymentModel);
@@ -202,9 +202,9 @@ namespace StrateZone_Service.Implements
                         {
                             UserId = acceptedUser.UserId,
                             TablesAppointmentId = tablesAppointment.Id,
-                            PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
+                            PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
                             Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {appointment.UserId})",
-                            PaymentType = PostgreEnums.PaymentType.appointment
+                            PaymentType = PostgreEnums.PaymentType.appointment.ToString()
                         };
 
                         await _paymentService.CreatePaymentAsync(paymentModel2);

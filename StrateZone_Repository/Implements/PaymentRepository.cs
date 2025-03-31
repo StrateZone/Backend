@@ -1,13 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet.Actions;
+using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using NpgsqlTypes;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -126,11 +131,56 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Payment>> GetPaymentsByUserIdAsync(int id)
+        public async Task<PagedList<Payment>> GetPaymentsByUserIdAsync(int id, PaymentParameters parameters)
         {
             try
             {
-                return await _context.Payments.Where(p => p.UserId == id).ToListAsync();
+                var result = _context.Payments
+                                .FromSqlRaw(@"SELECT *  
+                                    FROM payments
+                                    WHERE user_id = @UserId
+                                        AND status = ANY(@PaymentStatuses::public.payment_status[])
+                                        AND payment_type = ANY(@PaymentTypes)
+                                    ORDER BY created_at DESC",
+
+                                    new NpgsqlParameter("@UserId", id),
+
+                                    new NpgsqlParameter("@PaymentStatuses", NpgsqlDbType.Array | NpgsqlDbType.Text)
+                                    { Value = parameters.PaymentStatuses.Select(rt => rt.ToString()).ToArray() ?? (object)DBNull.Value },
+
+                                    new NpgsqlParameter("@PaymentTypes", NpgsqlDbType.Array | NpgsqlDbType.Text)
+                                    { Value = parameters.PaymentTypes.Select(rt => rt.ToString()).ToArray() ?? (object)DBNull.Value }
+                                )
+                                .AsQueryable();
+
+                return await PagedList<Payment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Payment>> GetPaymentsAsync(PaymentParameters parameters)
+        {
+            try
+            {
+                var result = _context.Payments
+                                .FromSqlRaw(@"SELECT *  
+                                    FROM payments
+                                    WHERE status = ANY(@PaymentStatuses::public.payment_status[])
+                                        AND payment_type = ANY(@PaymentTypes)
+                                    ORDER BY created_at DESC",
+
+                                    new NpgsqlParameter("@PaymentStatuses", NpgsqlDbType.Array | NpgsqlDbType.Text)
+                                    { Value = parameters.PaymentStatuses.Select(rt => rt.ToString()).ToArray() ?? (object)DBNull.Value },
+
+                                    new NpgsqlParameter("@PaymentTypes", NpgsqlDbType.Array | NpgsqlDbType.Text)
+                                    { Value = parameters.PaymentTypes.Select(rt => rt.ToString()).ToArray() ?? (object)DBNull.Value }
+                                )
+                                .AsQueryable();
+
+                return await PagedList<Payment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {

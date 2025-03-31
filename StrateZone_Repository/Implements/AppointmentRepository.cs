@@ -65,6 +65,7 @@ namespace StrateZone_Repository.Implements
             {
                 var result = _context.Appointments
                                     .Where(a => a.UserId == id)
+                                    .OrderByDescending(a => a.CreatedAt)
                                     .Include(a => a.User)
                                     .Include(a => a.TablesAppointments)
                                         .ThenInclude(ta => ta.Table)

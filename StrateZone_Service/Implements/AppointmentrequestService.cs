@@ -148,11 +148,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<AppointmentrequestModel>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId)
+        public async Task<List<AppointmentrequestModel>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId, int startTime, int endTime)
         {
             try
             {
-                var result = await _appointmentRequestRepository.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(userId, tableId);
+                var result = await _appointmentRequestRepository.GetCurrentAppointmentRequestsFromUserByUserAndTableAsync(userId, tableId, startTime, endTime);
                 var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
 
                 return appointmentRequestModels;
@@ -195,12 +195,18 @@ namespace StrateZone_Service.Implements
                     {
                         UserId = result.ToUser,
                         TablesAppointmentId = tablesAppointment.Id,
-                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid,
-                        PaymentType = PostgreEnums.PaymentType.appointment,
+                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
+                        PaymentType = PostgreEnums.PaymentType.appointment.ToString(),
                         Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {result.FromUser})",
                     });
 
-                    var paymentOfTablesAppointmentOwner = (await _paymentService.GetPaymentsByUserIdAsync(result.FromUser))
+                    PaymentParameters parameters = new PaymentParameters()
+                    {
+                        PageSize = 100_000,
+                        PageNumber = 1,
+                    };
+
+                    var paymentOfTablesAppointmentOwner = (await _paymentService.GetPaymentsByUserIdAsync(result.FromUser, parameters))
                                                         .FirstOrDefault(p => p.TablesAppointmentId == tablesAppointment.Id);
 
                     PaymentModel updatedPayment = new()
@@ -301,11 +307,11 @@ namespace StrateZone_Service.Implements
             throw new NotImplementedException();
         }
 
-        public async Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId)
+        public async Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, int startTime, int endTime)
         {
             try
             {
-                var result = await _appointmentRequestRepository.CancelAllAppointmentRequestsFromUserOnTableAsync(userId, tableId);
+                var result = await _appointmentRequestRepository.CancelAllAppointmentRequestsFromUserOnTableAsync(userId, tableId, startTime, endTime);
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }
             catch (Exception ex)

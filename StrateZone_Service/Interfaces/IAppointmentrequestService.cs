@@ -13,7 +13,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsFromUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
         Task<PagedList<AppointmentrequestModel>> GetAppointmentRequestsOfUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
         Task<List<AppointmentrequestModel>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tableAppointmentId);
-        Task<List<AppointmentrequestModel>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId);
+        Task<List<AppointmentrequestModel>> GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(int userId, int tableId, int startTime, int endTime);
         Task<AppointmentrequestModel> UpdateAppointmentRequestAsync(AppointmentrequestModel appointmentRequestModel, int id);
         Task<int> UpdateExpiredAppointmentRequests();
         Task<AppointmentrequestModel> GetAppointmentrequestFromUserToUserInTableAsync(int fromUserId, int toUserId, int tableId);
@@ -21,6 +21,6 @@ namespace StrateZone_Service.Interfaces
         Task<AppointmentrequestModel> AcceptAppointmentrequestAsync(int id);
         Task<AppointmentrequestModel> RejectAppointmentrequestAsync(int id);
         Task<List<AppointmentrequestModel>> CancelAllSentRequestFromUserAsync(int userId);
-        Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId);
+        Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, int startTime, int endTime);
     }
 }

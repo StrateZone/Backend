@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.OpenApi.Any;
 using Npgsql;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using System.Linq;
 using System.Text;
 
@@ -19,13 +22,15 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<List<TablesAppointment>> GetAllTablesAppointmentAsync()
+        public async Task<PagedList<TablesAppointment>> GetAllTablesAppointmentAsync(TablesAppointmentParameters parameters)
         {
             try
             {
-                return await _context.TablesAppointments
+                var result = _context.TablesAppointments
                                     .Include(ta => ta.Table)
-                                    .ToListAsync();
+                                    .AsQueryable();
+
+                return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -48,14 +53,16 @@ namespace StrateZone_Repository.Implements
         }
 
 
-        public async Task<List<TablesAppointment>> GetAllTablesAppointmentByTableIdAsync(int id)
+        public async Task<PagedList<TablesAppointment>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters)
         {
             try
             {
-                return await _context.TablesAppointments
+                var result = _context.TablesAppointments
                                     .Where(ta => ta.TableId == id)
                                     .Include(ta => ta.Table)
-                                    .ToListAsync();
+                                    .AsQueryable();
+
+                return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -233,18 +240,35 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<TablesAppointment>> GetAllTablesAppointmentsInvitedToUserByUserId(int userId)
+        public async Task<PagedList<TablesAppointment>> GetAllTablesAppointmentsInvitedToUserByUserId(int userId, TablesAppointmentParameters parameters)
         {
             try
             {
-                List<List<int>> requests = await _context.AppointmentRequests
-                                        .Where(a => a.ToUser == userId)
-                                        .Select(a => new List<int> { a.TableId, (int) a.AppointmentId })
-                                        .ToListAsync();
+                var result = from ta in _context.TablesAppointments
+                             join ar in _context.AppointmentRequests
+                             on new { ta.TableId, ta.AppointmentId } equals new { TableId = (int?) ar.TableId, AppointmentId = ar.AppointmentId }
+                             where ar.ToUser == userId && ar.Status == PostgreEnums.RequestStatus.accepted
+                             orderby ta.ScheduleTime descending
+                             select ta;
 
-                return await _context.TablesAppointments
-                                    .Where(ta => requests.Contains(new List<int>() { (int) ta.TableId, (int) ta.AppointmentId }))
-                                    .ToListAsync(); 
+                return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<TablesAppointment>> GetAllTablesAppointmentsFromUserByUserId(int userId, TablesAppointmentParameters parameters)
+        {
+            try
+            {
+                var result = _context.TablesAppointments
+                        .Where(ta => ta.Appointment.UserId == userId)
+                        .OrderByDescending(ta => ta.ScheduleTime)
+                        .AsQueryable();
+
+                return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {

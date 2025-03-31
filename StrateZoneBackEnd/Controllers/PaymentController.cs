@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
@@ -107,6 +108,23 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll(PaymentParameters parameters)
+        {
+            try
+            {
+                var payments = await _paymentService.GetPaymentsAsync(parameters);
+
+                var response = new PagedListResponse<PaymentModel>(payments);
+
+                return response != null ? Ok(response) : NotFound("No payment was found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("tables-appointment/{id}")]
         public async Task<IActionResult> GetByTablesAppointment(int id)
         {
@@ -122,12 +140,15 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("users/{id}")]
-        public async Task<IActionResult> GetByUser(int id)
+        public async Task<IActionResult> GetByUser(int id, PaymentParameters parameters)
         {
             try
             {
-                var payments = await _paymentService.GetPaymentsByUserIdAsync(id);
-                return Ok(payments);
+                var payments = await _paymentService.GetPaymentsByUserIdAsync(id, parameters);
+
+                var response = new PagedListResponse<PaymentModel>(payments);
+
+                return response != null ? Ok(response) : NotFound("No payment of this user was found");
             }
             catch (Exception ex)
             {

@@ -1,9 +1,6 @@
-﻿using StrateZone_Repository.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Entities;
+using StrateZone_Repository.Parameters;
 
 namespace StrateZone_Repository.Interfaces
 {
@@ -11,7 +8,8 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<Payment> CreatePaymentAsync(Payment payment);
         Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id);
-        Task<List<Payment>> GetPaymentsByUserIdAsync(int id);
+        Task<PagedList<Payment>> GetPaymentsAsync(PaymentParameters parameters);
+        Task<PagedList<Payment>> GetPaymentsByUserIdAsync(int id, PaymentParameters parameters);
         Task<Payment> UpdatePaymentAsync(Payment payment, int id);
     }
 }
