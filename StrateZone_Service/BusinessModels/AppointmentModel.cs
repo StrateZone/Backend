@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.BusinessModels
 {
@@ -14,6 +15,8 @@ namespace StrateZone_Service.BusinessModels
         public int UserId { get; set; }
 
         public decimal TotalPrice { get; set; }
+
+        public string Status { get; set; }
 
         public DateTime? CreatedAt { get; set; }
 

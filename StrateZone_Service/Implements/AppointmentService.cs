@@ -86,7 +86,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<int>> CheckAppointmentAvailability(AppointmentRequest request)
+        public async Task<List<TablesAppointmentRequest>> CheckAppointmentAvailability(AppointmentRequest request)
         {
             foreach (var ta in request.TablesAppointmentRequests)
             {
@@ -94,11 +94,8 @@ namespace StrateZone_Service.Implements
                     throw new Exception(err);
             }
 
-            HashSet<int> requestedTableIds = request.TablesAppointmentRequests
-                                                    .Select(t => t.TableId)
-                                                    .ToHashSet();
-
-            List<int> unavailableTables = new();
+            List<int> requestedTableIds = request.TablesAppointmentRequests.Select(ta => ta.TableId).ToList();
+            List<TablesAppointmentRequest> unavailableTables = new();
 
             foreach (var tablesAppointment in request.TablesAppointmentRequests)
             {
@@ -107,7 +104,19 @@ namespace StrateZone_Service.Implements
                                               .Select(t => t.TableId)
                                               .ToList();
 
-                unavailableTables.AddRange(requestedTableIds.Except(availableTableIds));
+                var unavailableTableIds = requestedTableIds.Except(availableTableIds);
+                foreach (var unavailableTableId in unavailableTableIds)
+                {
+                    unavailableTables.Add(
+                        new()
+                        {
+                            Price = 0,
+                            TableId = unavailableTableId,
+                            ScheduleTime = tablesAppointment.ScheduleTime,
+                            EndTime = tablesAppointment.EndTime,
+                        }
+                    );
+                }
             }
 
             return unavailableTables.Distinct().ToList();
@@ -117,11 +126,14 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                List<int> unavailableTables = await CheckAppointmentAvailability(request);
-
+                List<TablesAppointmentRequest> unavailableTables = await CheckAppointmentAvailability(request);
                 if (unavailableTables.Count > 0)
                 {
-                    throw new InvalidOperationException($"The following tables are not available: {string.Join(", ", unavailableTables)}");
+                    var tableInfo = unavailableTables
+                        .Select(t => $"TableId: {t.TableId}, ScheduleTime: {t.ScheduleTime}, EndTime: {t.EndTime}")
+                        .ToList();
+
+                    throw new InvalidOperationException($"The following tables are not available:\n{string.Join("\n", tableInfo)}");
                 }
 
                 AppointmentModel appointmentModel = new AppointmentModel()

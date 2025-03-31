@@ -7,7 +7,7 @@ namespace StrateZone_Service.Interfaces
 {
     public interface IAppointmentService
     {
-        Task<List<int>> CheckAppointmentAvailability(AppointmentRequest request);
+        Task<List<TablesAppointmentRequest>> CheckAppointmentAvailability(AppointmentRequest request);
         Task<AppointmentModel> CreateAppointmentAsync(AppointmentRequest request);
         Task<AppointmentModel> DeleteAppointmentAsync(int id);
         Task<AppointmentModel> GetAppointmentByIdAsync(int id);

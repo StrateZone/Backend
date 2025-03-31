@@ -84,11 +84,17 @@ namespace StrateZone_APIs.Controllers
                 }
 
                 var result = await _appointmentService.CheckAppointmentAvailability(request);
-                return result.Count > 0
-                    ?
-                    StatusCode(500, $"The following tables are not available: {string.Join(", ", result)}")
-                    :
-                    Ok("All requested tables for this appointment are available.");
+
+                if (result.Count > 0)
+                {
+                    var tableInfo = result
+                        .Select(t => $"TableId: {t.TableId}, ScheduleTime: {t.ScheduleTime}, EndTime: {t.EndTime}")
+                        .ToList();
+
+                    return StatusCode(500, $"The following tables are not available:\n{string.Join("\n", tableInfo)}");
+                }
+
+                return Ok("All requested tables for this appointment are available.");
             }
             catch (Exception ex)
             {
