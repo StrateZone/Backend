@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -60,11 +61,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters)
+        public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters, AppointmentStatus? appointmentStatus)
         {
             try
             {
-                var result = await _appointmentRepository.GetAppointmentsAsync(parameters);
+                var result = await _appointmentRepository.GetAllAppointmentsAsync(parameters, appointmentStatus);
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);

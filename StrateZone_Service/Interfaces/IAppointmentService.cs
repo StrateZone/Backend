@@ -3,6 +3,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Interfaces
 {
@@ -13,7 +14,7 @@ namespace StrateZone_Service.Interfaces
         Task<AppointmentModel> DeleteAppointmentAsync(int id);
         Task<AppointmentModel> GetAppointmentByIdAsync(int id);
         Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters);
-        Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters);
+        Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters, AppointmentStatus? appointmentStatus);
         Task<PagedList<AppointmentModel>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int id);
         Task<AppointmentModel> UpdateAppointmentAsync(AppointmentModel appointmentModel, int id);
     }

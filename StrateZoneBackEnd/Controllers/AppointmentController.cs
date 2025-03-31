@@ -7,6 +7,7 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -41,11 +42,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all/admin")]
-        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentParameters parameters)
+        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentParameters parameters, AppointmentStatus? appointmentStatus)
         {
             try
             {
-                var appointments = await _appointmentService.GetAllAppointmentsAsync(parameters);
+                var appointments = await _appointmentService.GetAllAppointmentsAsync(parameters, appointmentStatus);
 
                 var response = new PagedListResponse<AppointmentResponse>(appointments);
 

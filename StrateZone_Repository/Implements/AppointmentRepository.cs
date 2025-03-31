@@ -1,11 +1,15 @@
 ﻿using MealHunt_Repositories.Pagination;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using NpgsqlTypes;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Data;
+using System.Linq;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -31,6 +35,36 @@ namespace StrateZone_Repository.Implements
                                         .ThenInclude(ta => ta.Table)
                                             .ThenInclude(t => t.Room)
                                     .AsQueryable();
+                return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Appointment>> GetAllAppointmentsAsync(AppointmentParameters parameters, AppointmentStatus? appointmentStatus)
+        {
+            try
+            {
+                var statusParam = appointmentStatus.HasValue 
+                    ? new NpgsqlParameter("@st", appointmentStatus.Value.ToString()) { NpgsqlDbType = NpgsqlDbType.Text } 
+                    : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
+                var result = _context.Appointments
+                                    .FromSqlRaw(
+                                        @"SELECT a.*
+                                            FROM appointments a
+                                            WHERE (@st IS NULL OR a.status = @st::appointment_status)",
+                                        statusParam
+                                        ).Include(a => a.User)
+                                        .Include(a => a.TablesAppointments)
+                                            .ThenInclude(ta => ta.Table)
+                                                .ThenInclude(t => t.GameType)
+                                        .Include(a => a.TablesAppointments)
+                                            .ThenInclude(ta => ta.Table)
+                                                .ThenInclude(t => t.Room)
+                                        .AsQueryable();
+
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -65,7 +99,6 @@ namespace StrateZone_Repository.Implements
             {
                 var result = _context.Appointments
                                     .Where(a => a.UserId == id)
-                                    .OrderByDescending(a => a.CreatedAt)
                                     .Include(a => a.User)
                                     .Include(a => a.TablesAppointments)
                                         .ThenInclude(ta => ta.Table)
