@@ -291,5 +291,26 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public Task<TablesAppointment> UpdateStatusForExpiredTablesAppointments()
+        {
+            try
+            {
+                throw new NotImplementedException();
+
+                DateTime CurrentTime = DateTime.UtcNow.AddHours(7);
+
+                var result = _context.TablesAppointments
+                                .FromSqlRaw("UPDATE tables_appointments SET status = 'expired' " +
+                                "WHERE status NOT IN ('confirmed', 'completed', ) AND schedule_time ")
+                                .Include(ta => ta.Appointment)
+                                    .ThenInclude(a => a.User)
+                                .ToListAsync();
+            }
+            catch
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
