@@ -42,11 +42,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all/admin")]
-        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentParameters parameters, AppointmentStatus? appointmentStatus)
+        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentParameters parameters)
         {
             try
             {
-                var appointments = await _appointmentService.GetAllAppointmentsAsync(parameters, appointmentStatus);
+                var appointments = await _appointmentService.GetAllAppointmentsAsync(parameters);
 
                 var response = new PagedListResponse<AppointmentResponse>(appointments);
 

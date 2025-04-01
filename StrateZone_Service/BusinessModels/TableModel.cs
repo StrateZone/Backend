@@ -18,8 +18,6 @@ namespace StrateZone_Service.BusinessModels
 
         public int? GameTypeId { get; set; }
 
-        public AppointmentStatus Status { get; set; }
-
         public virtual GameTypeModel? GameType { get; set; }
     }
 }

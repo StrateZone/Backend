@@ -14,7 +14,7 @@ namespace StrateZone_Service.Interfaces
         Task<AppointmentModel> DeleteAppointmentAsync(int id);
         Task<AppointmentModel> GetAppointmentByIdAsync(int id);
         Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters);
-        Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters, AppointmentStatus? appointmentStatus);
+        Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters);
         Task<PagedList<AppointmentModel>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int id);
         Task<AppointmentModel> UpdateAppointmentAsync(AppointmentModel appointmentModel, int id);
     }
