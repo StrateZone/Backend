@@ -64,7 +64,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var appointment = await _appointmentService.RefundAppointment100Async(appointmentId);
-                return Ok("Appointment updated:\n" + appointment);
+                return Ok(new {message = "Appointment refunded: ", data = appointment});
             }
             catch (Exception ex)
             {
