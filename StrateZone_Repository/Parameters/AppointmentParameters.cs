@@ -5,6 +5,6 @@ namespace StrateZone_Repository.Parameters
 {
     public class AppointmentParameters : PagedListParameters
     {
-        public AppointmentStatus? Status { get; set; } = AppointmentStatus.pending;
+        public AppointmentStatus? Status { get; set; }
     }
 }

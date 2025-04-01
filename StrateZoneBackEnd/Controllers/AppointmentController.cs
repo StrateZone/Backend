@@ -31,7 +31,7 @@ namespace StrateZone_APIs.Controllers
             {
                 var appointments = await _appointmentService.GetAppointmentsAsync(parameters);
 
-                var response = new PagedListResponse<AppointmentModel>(appointments);
+                var response = new PagedListResponse<AppointmentResponse>(appointments);
 
                 return response.TotalCount > 0 ? Ok(response) : Ok("No appointment was found.");
             }
@@ -94,7 +94,7 @@ namespace StrateZone_APIs.Controllers
             {
                 var appointments = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
 
-                var response = new PagedListResponse<AppointmentModel>(appointments);
+                var response = new PagedListResponse<AppointmentResponse>(appointments);
 
                 return response != null ? Ok(response) : NotFound("No appointment was found for this user.");
             }

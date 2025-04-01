@@ -21,6 +21,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public DateTime EndTime { get; set; }
 
+        public double DurationInHours => EndTime.Subtract(ScheduleTime).TotalHours;
+
         public decimal? Price { get; set; }
 
         public DateTime? CreatedAt { get; set; }

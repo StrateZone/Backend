@@ -296,16 +296,19 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                throw new NotImplementedException();
-
                 DateTime CurrentTime = DateTime.UtcNow.AddHours(7);
 
                 var result = _context.TablesAppointments
-                                .FromSqlRaw("UPDATE tables_appointments SET status = 'expired' " +
-                                "WHERE status NOT IN ('confirmed', 'completed', ) AND schedule_time ")
+                                .FromSqlRaw(
+                                    "UPDATE tables_appointments SET status = 'expired' " +
+                                    "WHERE status NOT IN ('confirmed', 'cancelled', 'completed', 'refunded') AND schedule_time < {0}",
+                                    CurrentTime
+                                    )
                                 .Include(ta => ta.Appointment)
                                     .ThenInclude(a => a.User)
                                 .ToListAsync();
+
+                return result;
             }
             catch (Exception ex)
             {

@@ -27,8 +27,14 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.Appointments
-                                    .Include(a => a.User)
+                var statusParam = parameters.Status.HasValue
+                ? new NpgsqlParameter("@st", parameters.Status.Value.ToString()) { NpgsqlDbType = NpgsqlDbType.Text }
+                : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
+
+                IQueryable<Appointment> result = _context.Appointments
+                                    .FromSqlRaw(
+                                        "SELECT * FROM appointments WHERE (@st IS NULL OR status = @st::appointment_status)",
+                                        statusParam)
                                     .Include(a => a.TablesAppointments)
                                         .ThenInclude(ta => ta.Table)
                                             .ThenInclude(t => t.GameType)
@@ -36,6 +42,18 @@ namespace StrateZone_Repository.Implements
                                         .ThenInclude(ta => ta.Table)
                                             .ThenInclude(t => t.Room)
                                     .AsQueryable();
+
+                result = parameters.OrderBy switch
+                {
+                    "created-at" => result.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                    "total-price" => result.OrderBy(a => a.TotalPrice),
+                    "total-price-desc" => result.OrderByDescending(a => a.TotalPrice),
+                    "tables-count" => result.OrderBy(a => a.TablesAppointments.Count),
+                    "tables-count-desc" => result.OrderByDescending(a => a.TablesAppointments.Count),
+                    _ => result
+                };
+
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -53,6 +71,7 @@ namespace StrateZone_Repository.Implements
                 var statusParam = status.HasValue 
                     ? new NpgsqlParameter("@st", status.Value.ToString()) { NpgsqlDbType = NpgsqlDbType.Text } 
                     : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
+
                 var result = _context.Appointments
                                     .FromSqlRaw(
                                         @"SELECT a.*
@@ -67,6 +86,17 @@ namespace StrateZone_Repository.Implements
                                             .ThenInclude(ta => ta.Table)
                                                 .ThenInclude(t => t.Room)
                                         .AsQueryable();
+                
+                result = parameters.OrderBy switch
+                {
+                    "created-at" => result.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                    "total-price" => result.OrderBy(a => a.TotalPrice),
+                    "total-price-desc" => result.OrderByDescending(a => a.TotalPrice),
+                    "tables-count" => result.OrderBy(a => a.TablesAppointments.Count),
+                    "tables-count-desc" => result.OrderByDescending(a => a.TablesAppointments.Count),
+                    _ => result
+                };
 
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
@@ -100,12 +130,21 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                AppointmentStatus? status = parameters.Status;
+
+                var statusParam = status.HasValue
+                    ? new NpgsqlParameter("@st", status.Value.ToString()) { NpgsqlDbType = NpgsqlDbType.Text }
+                    : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
+
+                var userId = new NpgsqlParameter("@id", id);
+
                 IQueryable<Appointment> result = _context.Appointments
                                     .FromSqlRaw(
-                                        "SELECT * FROM appointments WHERE user_id = {1} AND ({0} IS NULL OR status = {0}::appointment_status)", 
-                                        parameters.Status.HasValue ? parameters.Status.ToString() : DBNull.Value,
-                                        id)
-                                    .Include(a => a.User)
+                                        "SELECT * FROM appointments " +
+                                        "WHERE user_id = @id " +
+                                        "AND (@st IS NULL OR status = @st::appointment_status)", 
+                                        statusParam,
+                                        userId)
                                     .Include(a => a.TablesAppointments)
                                         .ThenInclude(ta => ta.Table)
                                             .ThenInclude(t => t.GameType)
