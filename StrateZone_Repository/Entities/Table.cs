@@ -9,8 +9,6 @@ public partial class Table
 
     public int? RoomId { get; set; }
 
-    public decimal? Fee { get; set; }
-
     public int? GameTypeId { get; set; }
 
     public virtual GameType? GameType { get; set; }

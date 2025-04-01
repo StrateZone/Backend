@@ -14,8 +14,6 @@ namespace StrateZone_Service.BusinessModels
 
         public int? RoomId { get; set; }
 
-        public decimal? Fee { get; set; }
-
         public int? GameTypeId { get; set; }
 
         public virtual GameTypeModel? GameType { get; set; }

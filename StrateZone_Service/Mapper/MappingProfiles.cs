@@ -67,6 +67,7 @@ namespace StrateZone_Service.Mapper
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()));
 
             CreateMap<TablesAppointmentModel, TablesAppointmentResponse>().ReverseMap();
+
             CreateMap<TableModel, TableResponse>().ReverseMap();
 
             CreateMap<Message, MessageModel>().ReverseMap();

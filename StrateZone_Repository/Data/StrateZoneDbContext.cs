@@ -855,9 +855,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.ToTable("tables");
 
             entity.Property(e => e.TableId).HasColumnName("table_id");
-            entity.Property(e => e.Fee)
-                .HasPrecision(10, 2)
-                .HasColumnName("fee");
+
             entity.Property(e => e.GameTypeId).HasColumnName("gameType_id");
             entity.Property(e => e.RoomId).HasColumnName("room_id");
 

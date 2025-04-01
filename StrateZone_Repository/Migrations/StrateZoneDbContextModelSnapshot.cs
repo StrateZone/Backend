@@ -988,11 +988,6 @@ namespace StrateZone_Repository.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TableId"));
 
-                    b.Property<decimal?>("Fee")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)")
-                        .HasColumnName("fee");
-
                     b.Property<int?>("GameTypeId")
                         .HasColumnType("integer")
                         .HasColumnName("gameType_id");

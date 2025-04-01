@@ -178,7 +178,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                if (await _context.Tables.FindAsync(id) == null) throw new Exception("Table with this ID does not exist");
+                if (await _context.Tables.AsNoTracking().FirstOrDefaultAsync(t => t.TableId == id) == null) throw new Exception("Table with this ID does not exist");
+
+                table.TableId = id;
 
                 _context.Tables.Update(table);
                 await _context.SaveChangesAsync();
