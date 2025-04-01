@@ -185,7 +185,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var appointment = await _appointmentService.UpdateAppointmentAsync(appointmentModel, id);
-                return Ok("Appointment updated:\n" + appointment);
+                return Ok(appointment);
             }
             catch (Exception ex)
             {

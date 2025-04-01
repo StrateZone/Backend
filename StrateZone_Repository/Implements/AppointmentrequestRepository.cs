@@ -175,12 +175,6 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt.Value));
                 }
 
-                if (appointmentRequest.ExpireAt.HasValue)
-                {
-                    sql.Append("expire_at = @expire_at, ");
-                    parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt.Value));
-                }
-
                 if (appointmentRequest.CreatedAt.HasValue)
                 {
                     sql.Append("created_at = @created_at, ");
@@ -192,9 +186,9 @@ namespace StrateZone_Repository.Implements
                 parameters.Add(new NpgsqlParameter("@id", id));
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+                _context.Entry(appointmentRequest).State = EntityState.Detached;
 
-                var updatedAppointmentRequest = await _context.AppointmentRequests.FindAsync(id);
-                return updatedAppointmentRequest;
+                return await _context.AppointmentRequests.FindAsync(id);
             }
             catch (Exception ex)
             {
