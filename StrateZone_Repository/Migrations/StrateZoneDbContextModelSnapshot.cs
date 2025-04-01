@@ -22,7 +22,7 @@ namespace StrateZone_Repository.Migrations
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "appointment_status", new[] { "pending", "confirmed", "cancelled", "completed", "expired" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "appointment_status", new[] { "pending", "confirmed", "cancelled", "completed", "expired", "unpaid", "refunded" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "course_slot_status", new[] { "upcoming", "in_progress", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "course_status", new[] { "open", "closed", "in_progress", "completed", "cancelled" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "event_status", new[] { "upcoming", "ongoing", "completed", "cancelled" });

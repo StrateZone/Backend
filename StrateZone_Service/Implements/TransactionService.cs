@@ -44,7 +44,7 @@ namespace StrateZone_Service.Implements
                 var result = await _transactionRepository.GetAllTransactionsAsync(parameters);
                 var mapped = _mapper.Map<PagedList<TransactionModel>>(result);
             
-                return new PagedList<TransactionModel>(mapped, mapped.Count, mapped.CurrentPage, mapped.PageSize);
+                return new PagedList<TransactionModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -59,7 +59,7 @@ namespace StrateZone_Service.Implements
                 var result = await _transactionRepository.GetUsersTransactionsAsync(id, parameters);
                 var mapped = _mapper.Map<PagedList<TransactionModel>>(result);
 
-                return new PagedList<TransactionModel>(mapped, mapped.Count, mapped.CurrentPage, mapped.PageSize);
+                return new PagedList<TransactionModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

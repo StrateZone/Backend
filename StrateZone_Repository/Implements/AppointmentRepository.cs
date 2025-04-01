@@ -8,6 +8,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Data;
 using System.Linq;
+using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -152,12 +153,42 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                if (await _context.Appointments.FindAsync(id) == null) throw new Exception("Appointment with this ID does not exist");
+                var existingAppointment = await _context.Appointments.FindAsync(id) ?? throw new Exception("Appointment with this ID does not exist");
+                _context.Entry(existingAppointment).State = EntityState.Detached;
 
-                _context.Appointments.Update(appointment);
-                await _context.SaveChangesAsync();
+                appointment.AppointmentId = id;
+                var parameters = new List<NpgsqlParameter>();
+                var sql = new StringBuilder("UPDATE appointments SET ");
 
-                return appointment;
+                if (appointment.UserId > 0)
+                {
+                    sql.Append("user_id = @user_id, ");
+                    parameters.Add(new NpgsqlParameter("@user_id", appointment.UserId));
+                }
+
+                sql.Append("status = @status::appointment_status, ");
+                parameters.Add(new NpgsqlParameter("@status", appointment.Status.ToString()));
+
+                if (appointment.TotalPrice > 0)
+                {
+                    sql.Append("total_price = @total_price, ");
+                    parameters.Add(new NpgsqlParameter("@total_price", appointment.TotalPrice));
+                }
+
+                if (appointment.CreatedAt.HasValue)
+                {
+                    sql.Append("created_at = @created_at, ");
+                    parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt.Value));
+                }
+
+                sql.Remove(sql.Length - 2, 2);
+                sql.Append(" WHERE appointment_id = @id");
+                parameters.Add(new NpgsqlParameter("@id", id));
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+                _context.Entry(appointment).State = EntityState.Detached;
+
+                return await _context.Appointments.FindAsync(id);
             }
             catch (Exception ex)
             {
