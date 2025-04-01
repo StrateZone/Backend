@@ -58,6 +58,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("cancel/admin")]
+        public async Task<IActionResult> RefundAppointment100Async(int appointmentId)
+        {
+            try
+            {
+                var appointment = await _appointmentService.RefundAppointment100Async(appointmentId);
+                return Ok(new {message = "Appointment refunded: ", data = appointment});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAppointmentById(int id)
@@ -192,6 +206,7 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)

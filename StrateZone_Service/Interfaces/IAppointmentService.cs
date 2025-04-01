@@ -17,5 +17,6 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters);
         Task<PagedList<AppointmentModel>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int id);
         Task<AppointmentModel> UpdateAppointmentAsync(AppointmentModel appointmentModel, int id);
+        Task<AppointmentModel> RefundAppointment100Async(int id);
     }
 }

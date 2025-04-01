@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
+using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -31,9 +32,11 @@ namespace StrateZone_Service.Implements
         private readonly IPriceService _priceService;
         private readonly IEmailService _emailService;
         private readonly IPaymentService _paymentService;
+        private readonly IWalletService _walletService;
+        private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IEmailService emailService, IPaymentService paymentService)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IEmailService emailService, IPaymentService paymentService, IWalletService walletService, ITransactionRepository transactionRepository)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
@@ -44,6 +47,8 @@ namespace StrateZone_Service.Implements
             _appointmentrequestService = appointmentrequestService;
             _emailService = emailService;
             _paymentService = paymentService;
+            _walletService = walletService;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<PagedList<AppointmentModel>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -248,5 +253,42 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<AppointmentModel> RefundAppointment100Async(int id)
+        {
+            try
+            {
+                var appointment = await _appointmentRepository.GetAppointmentByIdAsync(id);
+                var userWallet = await _walletService.GetWalletByUserIdAsync(appointment.UserId);
+                var tableAppointments = appointment.TablesAppointments.ToList();
+
+                foreach (var tableAppointment in tableAppointments)
+                {
+                    tableAppointment.Status = AppointmentStatus.refunded;
+                    var model = _mapper.Map<TablesAppointmentModel>(tableAppointment);
+                    await _tablesAppointmentService.UpdateTablesAppointmentAsync(model, model.Id);
+                }
+
+                userWallet.Balance += appointment.TotalPrice;
+                await _walletService.UpdateWalletAsync(userWallet, userWallet.WalletId);
+
+                var newTransaction = new Transaction
+                {
+                    Amount = appointment.TotalPrice,
+                    Content = "Refund for booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    OfUser = appointment.UserId,
+                    TransactionType = TransactionType.refund,
+                };
+                await _transactionRepository.SaveTransaction(newTransaction);
+
+                appointment.Status = AppointmentStatus.refunded;
+                var updatedAppointment = await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);
+
+                return _mapper.Map<AppointmentModel>(updatedAppointment);
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
