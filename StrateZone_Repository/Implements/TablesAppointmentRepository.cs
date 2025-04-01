@@ -292,7 +292,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public Task<TablesAppointment> UpdateStatusForExpiredTablesAppointments()
+        public Task<List<TablesAppointment>> UpdateStatusForExpiredTablesAppointments()
         {
             try
             {
@@ -307,7 +307,7 @@ namespace StrateZone_Repository.Implements
                                     .ThenInclude(a => a.User)
                                 .ToListAsync();
             }
-            catch
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
