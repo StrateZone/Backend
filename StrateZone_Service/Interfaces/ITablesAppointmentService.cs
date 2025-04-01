@@ -2,6 +2,7 @@
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 
 namespace StrateZone_Service.Interfaces
 {
@@ -11,13 +12,13 @@ namespace StrateZone_Service.Interfaces
         Task<List<TablesAppointmentModel>> CreateTablesAppointmentsFromAppointmentAsync(AppointmentModel appointmentModel);
         Task<TablesAppointmentModel> UpdateTablesAppointmentAsync(TablesAppointmentModel appointmentModel, int id);
         Task<TablesAppointmentModel> DeleteTablesAppointmentAsync(int id);
-        Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters);
-        Task<List<TablesAppointmentModel>> GetAllTablesAppointmentByAppointmentIdAsync(int id);
-        Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentsByUserId(int id, TablesAppointmentParameters parameters);
-        Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentsJoinedByUserId(int id, TablesAppointmentParameters parameters);
-        Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters);
-        Task<TablesAppointmentModel> GetByIdAsync(int id);
-        Task<TablesAppointmentModel> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId);
+        Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters);
+        Task<List<TablesAppointmentResponse>> GetAllTablesAppointmentByAppointmentIdAsync(int id);
+        Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsByUserId(int id, TablesAppointmentParameters parameters);
+        Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsJoinedByUserId(int id, TablesAppointmentParameters parameters);
+        Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters);
+        Task<TablesAppointmentResponse> GetByIdAsync(int id);
+        Task<TablesAppointmentResponse> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId);
         Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId);
     }

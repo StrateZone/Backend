@@ -4,6 +4,7 @@ using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -24,14 +25,14 @@ namespace StrateZone_Service.Implements
             _paymentService = paymentService;
         }
 
-        public async Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllTablesAppointmentAsync(parameters);
-                var mapped = _mapper.Map<PagedList<TablesAppointmentModel>>(result);
+                var mapped = _mapper.Map<PagedList<TablesAppointmentResponse>>(result);
             
-                return new PagedList<TablesAppointmentModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
+                return new PagedList<TablesAppointmentResponse>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -39,14 +40,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters)
+        public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllTablesAppointmentByTableIdAsync(id, parameters);
-                var mapped = _mapper.Map<PagedList<TablesAppointmentModel>>(result);
+                var mapped = _mapper.Map<PagedList<TablesAppointmentResponse>>(result);
 
-                return new PagedList<TablesAppointmentModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
+                return new PagedList<TablesAppointmentResponse>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -54,12 +55,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<TablesAppointmentModel>> GetAllTablesAppointmentByAppointmentIdAsync(int id)
+        public async Task<List<TablesAppointmentResponse>> GetAllTablesAppointmentByAppointmentIdAsync(int id)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllTablesAppointmentByAppointmentIdAsync(id);
-                return _mapper.Map<List<TablesAppointmentModel>>(result);
+                return _mapper.Map<List<TablesAppointmentResponse>>(result);
             }
             catch (Exception ex)
             {
@@ -67,12 +68,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<TablesAppointmentModel> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId)
+        public async Task<TablesAppointmentResponse> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(tableId, appointmentId);
-                return _mapper.Map<TablesAppointmentModel>(result);
+                return _mapper.Map<TablesAppointmentResponse>(result);
             }
             catch (Exception ex)
             {
@@ -126,12 +127,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<TablesAppointmentModel> GetByIdAsync(int id)
+        public async Task<TablesAppointmentResponse> GetByIdAsync(int id)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetByIdAsync(id);
-                return _mapper.Map<TablesAppointmentModel>(result);
+                return _mapper.Map<TablesAppointmentResponse>(result);
             }
             catch (Exception ex)
             {
@@ -143,7 +144,8 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var tablesAppointment = await GetByIdAsync(tablesAppointmentId);
+                var tablesAppointmentResponse = await GetByIdAsync(tablesAppointmentId);
+                var tablesAppointment = _mapper.Map<TablesAppointmentModel>(tablesAppointmentResponse);
 
                 var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId))
                             .SingleOrDefault(p => p.UserId == userId) 
@@ -200,14 +202,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentsByUserId(int id, TablesAppointmentParameters parameters)
+        public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsByUserId(int id, TablesAppointmentParameters parameters)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllTablesAppointmentsFromUserByUserId(id, parameters);
-                var mapped = _mapper.Map<PagedList<TablesAppointmentModel>>(result);
+                var mapped = _mapper.Map<PagedList<TablesAppointmentResponse>>(result);
 
-                return new PagedList<TablesAppointmentModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
+                return new PagedList<TablesAppointmentResponse>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -215,14 +217,14 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TablesAppointmentModel>> GetAllTablesAppointmentsJoinedByUserId(int id, TablesAppointmentParameters parameters)
+        public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsJoinedByUserId(int id, TablesAppointmentParameters parameters)
         {
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllTablesAppointmentsInvitedToUserByUserId(id, parameters);
-                var mapped = _mapper.Map<PagedList<TablesAppointmentModel>>(result);
+                var mapped = _mapper.Map<PagedList<TablesAppointmentResponse>>(result);
 
-                return new PagedList<TablesAppointmentModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
+                return new PagedList<TablesAppointmentResponse>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

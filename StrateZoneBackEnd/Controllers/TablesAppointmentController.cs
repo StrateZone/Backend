@@ -27,7 +27,7 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _services.GetAllTablesAppointmentsAsync(parameters);
 
-                var response = new PagedListResponse<TablesAppointmentModel>(result);
+                var response = new PagedListResponse<TablesAppointmentResponse>(result);
 
                 return response != null ? Ok(response) : NotFound("No tables_appointment was found.");
             }
@@ -43,7 +43,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _services.GetAllTablesAppointmentByTableIdAsync(id, parameters);
-                var response = new PagedListResponse<TablesAppointmentModel>(result);
+                var response = new PagedListResponse<TablesAppointmentResponse>(result);
 
                 return response != null ? Ok(response) : NotFound("No tables_appointment for this user ID was found.");
             }
@@ -60,7 +60,7 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _services.GetAllTablesAppointmentByTableIdAsync(id, parameters);
 
-                var response = new PagedListResponse<TablesAppointmentModel>(result);
+                var response = new PagedListResponse<TablesAppointmentResponse>(result);
 
                 return response != null ? Ok(response) : NotFound("No tables_appointment for this table ID was found.");
             }
@@ -104,7 +104,7 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _services.GetAllTablesAppointmentsJoinedByUserId(userId, parameters);
-                var response = new PagedListResponse<TablesAppointmentModel>(result);
+                var response = new PagedListResponse<TablesAppointmentResponse>(result);
 
                 return response != null ? Ok(response) : NotFound("No tables_appointment joined by this user ID was found.");
             }

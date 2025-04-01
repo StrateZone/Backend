@@ -66,11 +66,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters, AppointmentStatus? appointmentStatus)
+        public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters)
         {
             try
             {
-                var result = await _appointmentRepository.GetAllAppointmentsAsync(parameters, appointmentStatus);
+                var result = await _appointmentRepository.GetAllAppointmentsAsync(parameters);
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);

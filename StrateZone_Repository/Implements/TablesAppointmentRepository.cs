@@ -27,7 +27,10 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.TablesAppointments
+                                     .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.Room)
                                     .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.GameType)
                                     .AsQueryable();
 
                 return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
@@ -60,6 +63,9 @@ namespace StrateZone_Repository.Implements
                 var result = _context.TablesAppointments
                                     .Where(ta => ta.TableId == id)
                                     .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.Room)
+                                    .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.GameType)
                                     .AsQueryable();
 
                 return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
@@ -77,6 +83,8 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.TablesAppointments
                                     .Where(ta => ta.AppointmentId == id)
+                                     .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.Room)
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.GameType)
                                     .ToListAsync();
@@ -244,12 +252,16 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = from ta in _context.TablesAppointments
+                var result = (from ta in _context.TablesAppointments
                              join ar in _context.AppointmentRequests
                              on new { ta.TableId, ta.AppointmentId } equals new { TableId = (int?) ar.TableId, AppointmentId = ar.AppointmentId }
                              where ar.ToUser == userId && ar.Status == PostgreEnums.RequestStatus.accepted
                              orderby ta.ScheduleTime descending
-                             select ta;
+                             select ta)
+                             .Include(ta => ta.Table)
+                                .ThenInclude(t => t.Room)
+                            .Include(ta => ta.Table)
+                                .ThenInclude(t => t.GameType);
 
                 return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
@@ -265,6 +277,10 @@ namespace StrateZone_Repository.Implements
             {
                 var result = _context.TablesAppointments
                         .Where(ta => ta.Appointment.UserId == userId)
+                        .Include(ta => ta.Table)
+                            .ThenInclude(t => t.Room)
+                        .Include(ta => ta.Table)
+                            .ThenInclude(t => t.GameType)
                         .OrderByDescending(ta => ta.ScheduleTime)
                         .AsQueryable();
 
