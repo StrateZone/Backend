@@ -317,7 +317,7 @@ namespace StrateZone_Service.Implements
                 };
             }
 
-            if (CreatedTime <= TimeGate_Refund50_OnCancellation)
+            if (CreatedTime >= TimeGate_Refund50_OnCancellation)
             {
                 double TimeDiff_CreatedTimeUntilCancellationBlockTime = TimeGate_BlockAppointmentCancellation.Subtract(CreatedTime).TotalHours;
 
