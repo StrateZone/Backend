@@ -170,10 +170,12 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingAppointmentrequest = await _context.TablesAppointments.FindAsync(id) 
+                var existingTablesAppointment = await _context.TablesAppointments.FindAsync(id) 
                     ?? throw new Exception("Tables appointment with this ID does not exist");
 
                 tablesAppointment.Id = id;
+                _context.Entry(existingTablesAppointment).State = EntityState.Detached;
+
                 var parameters = new List<NpgsqlParameter>();
                 var sql = new StringBuilder("UPDATE tables_appointments SET ");
 
@@ -221,6 +223,7 @@ namespace StrateZone_Repository.Implements
                 parameters.Add(new NpgsqlParameter("@id", id));
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+                _context.Entry(tablesAppointment).State = EntityState.Detached;
 
                 var updatedAppointmentRequest = await _context.TablesAppointments.FindAsync(id);
                 return updatedAppointmentRequest;
@@ -292,23 +295,26 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public Task<List<TablesAppointment>> UpdateStatusForExpiredTablesAppointments()
+        public async Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments()
         {
             try
             {
                 DateTime CurrentTime = DateTime.UtcNow.AddHours(7);
 
-                var result = _context.TablesAppointments
-                                .FromSqlRaw(
-                                    "UPDATE tables_appointments SET status = 'expired' " +
-                                    "WHERE status NOT IN ('confirmed', 'cancelled', 'completed', 'refunded') AND schedule_time < {0}",
-                                    CurrentTime
-                                    )
-                                .Include(ta => ta.Appointment)
-                                    .ThenInclude(a => a.User)
-                                .ToListAsync();
+                var result = await _context.Database.ExecuteSqlRawAsync(
+                    @"
+                        UPDATE tables_appointments
+                        SET status = CASE
+                            WHEN end_time < {0} AND status NOT IN ('checked_in', 'completed', 'cancelled', 'refunded') THEN 'expired'
+                            WHEN end_time < {0} AND status = 'checked_in' THEN 'completed'
+                            WHEN schedule_time <= {0} + INTERVAL '1.5 hours' AND schedule_time > {0} THEN 'incoming'
+                            ELSE status
+                        END;
+                        ",
+                    CurrentTime
+                );
 
-                return result;
+                return result; // Returns the number of rows affected
             }
             catch (Exception ex)
             {

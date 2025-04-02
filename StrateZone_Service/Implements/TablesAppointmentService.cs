@@ -175,7 +175,7 @@ namespace StrateZone_Service.Implements
                 if (tablesAppointment.ScheduleTime > DateTime.UtcNow.AddHours(7).AddMinutes(-5))
                     throw new Exception($"Check-in is not yet opened: Check-in only available 5 minutes prior to schedule time!");
 
-                tablesAppointment.Status = AppointmentStatus.completed.ToString();
+                tablesAppointment.Status = AppointmentStatus.checked_in.ToString();
 
                 var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
 
@@ -201,6 +201,7 @@ namespace StrateZone_Service.Implements
                     AppointmentStatus.checked_in => "This appointment has already been checked-in.",
                     AppointmentStatus.expired => "This appointment is expired.",
                     AppointmentStatus.completed => "This appointment is already completed.",
+                    AppointmentStatus.incoming => "Can not cancel incoming appointments.",
                     _ => string.Empty,
                 };
 
@@ -255,8 +256,7 @@ namespace StrateZone_Service.Implements
                     await _transactionService.SaveTransaction(newTransaction);
                 }
                 
-                tablesAppointment.Status = AppointmentStatus.refunded.ToString();
-
+                tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
                 return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
             }
             catch (Exception ex)
@@ -416,6 +416,18 @@ namespace StrateZone_Service.Implements
                 var mapped = _mapper.Map<PagedList<TablesAppointmentResponse>>(result);
 
                 return new PagedList<TablesAppointmentResponse>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments()
+        {
+            try
+            {
+                return await _tablesAppointmentRepository.UpdateStatusForExpiredAndIncomingTablesAppointments();
             }
             catch (Exception ex)
             {

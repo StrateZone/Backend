@@ -267,5 +267,30 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<Appointment>> UpdateStatusForAppointmentBasedOnTablesAppointments()
+        {
+            try
+            {
+                throw new NotImplementedException();
+
+                DateTime CurrentTime = DateTime.UtcNow.AddHours(7);
+
+                var result = _context.Appointments
+                                .FromSqlRaw(
+                                    "UPDATE tables_appointments SET status = 'expired' " +
+                                    "WHERE status = 'confirmed' OR status = 'pending' OR status = 'unpaid' AND schedule_time < {0}",
+                                    CurrentTime
+                                    )
+                                    .Include(a => a.User)
+                                    .Include(a => a.TablesAppointments)
+                                .ToListAsync();
+                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

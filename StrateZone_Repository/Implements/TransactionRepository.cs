@@ -26,7 +26,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.Transactions.AsQueryable();
+                var result = _context.Transactions.OrderByDescending(t => t.CreatedAt).AsQueryable();
 
                 return await PagedList<Transaction>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
@@ -52,7 +52,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.Transactions.Where(t => t.OfUser == id).AsQueryable();
+                var result = _context.Transactions.OrderByDescending(t => t.CreatedAt).Where(t => t.OfUser == id).AsQueryable();
 
                 return await PagedList<Transaction>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }

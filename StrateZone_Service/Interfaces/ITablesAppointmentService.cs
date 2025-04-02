@@ -22,5 +22,6 @@ namespace StrateZone_Service.Interfaces
         Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime);
+        Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments();
     }
 }

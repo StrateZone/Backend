@@ -29,23 +29,19 @@ namespace StrateZone_Service.Implements
         private readonly IUserService _userService;
         private readonly ITableService _tableService;
         private readonly ITablesAppointmentService _tablesAppointmentService;
-        private readonly IPriceService _priceService;
-        private readonly IEmailService _emailService;
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IPriceService priceService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IEmailService emailService, IPaymentService paymentService, IWalletService walletService, ITransactionRepository transactionRepository)
+        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IPaymentService paymentService, IWalletService walletService, ITransactionRepository transactionRepository)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
             _mapper = mapper;
             _tableService = tableService;
-            _priceService = priceService;
             _tablesAppointmentService = tablesAppointmentService;
             _appointmentrequestService = appointmentrequestService;
-            _emailService = emailService;
             _paymentService = paymentService;
             _walletService = walletService;
             _transactionRepository = transactionRepository;
@@ -96,12 +92,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<AppointmentModel> GetAppointmentByIdAsync(int id)
+        public async Task<AppointmentResponse> GetAppointmentByIdAsync(int id)
         {
             try
             {
                 var result = await _appointmentRepository.GetAppointmentByIdAsync(id);
-                return _mapper.Map<AppointmentModel>(result);
+                return _mapper.Map<AppointmentResponse>(result);
             }
             catch (Exception ex)
             {
