@@ -99,11 +99,10 @@ namespace StrateZone_Repository.Implements
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM tables_appointments ta
-                                JOIN appointments a ON ta.appointment_id = a.appointment_id
                                 WHERE ta.table_id = t.table_id
                                 AND ta.schedule_time < @EndTime
                                 AND ta.end_time > @StartTime
-                                AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                                AND ta.status NOT IN ('cancelled', 'completed', 'expired', 'refunded')
                             )";
 
                 var tables = _context.Tables
@@ -135,11 +134,10 @@ namespace StrateZone_Repository.Implements
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM tables_appointments ta
-                                JOIN appointments a ON ta.appointment_id = a.appointment_id
                                 WHERE ta.table_id = t.table_id
                                 AND ta.schedule_time < @EndTime
                                 AND ta.end_time > @StartTime
-                                AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                                AND ta.status NOT IN ('cancelled', 'completed', 'expired', 'refunded')
                             )";
 
                 var tables = _context.Tables
@@ -228,11 +226,10 @@ namespace StrateZone_Repository.Implements
                     AND NOT EXISTS (
                         SELECT 1
                         FROM tables_appointments ta
-                        JOIN appointments a ON ta.appointment_id = a.appointment_id
                         WHERE ta.table_id = t.table_id
                         AND ta.schedule_time < @EndTime
                         AND ta.end_time > @StartTime
-                        AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                        AND ta.status NOT IN ('cancelled', 'completed', 'expired', 'refunded')
                     )";
 
                 var gameTypeNames = gameTypes?.Select(gt => gt.ToString()).ToArray();
@@ -275,11 +272,10 @@ namespace StrateZone_Repository.Implements
                                 AND NOT EXISTS (
                                     SELECT 1
                                     FROM tables_appointments ta
-                                    JOIN appointments a ON ta.appointment_id = a.appointment_id
                                     WHERE ta.table_id = t.table_id
                                     AND ta.schedule_time < @EndTime
                                     AND ta.end_time > @StartTime
-                                    AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                                    AND ta.status NOT IN ('cancelled', 'completed', 'expired', 'refunded')
                                 )
                             )
                             SELECT * FROM RankedTables WHERE row_num <= @TableCount";
@@ -323,11 +319,10 @@ namespace StrateZone_Repository.Implements
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM tables_appointments ta
-                                JOIN appointments a ON ta.appointment_id = a.appointment_id
                                 WHERE ta.table_id = t.table_id
                                 AND ta.schedule_time < @EndTime
                                 AND ta.end_time > @StartTime
-                                AND a.status NOT IN ('cancelled', 'completed', 'expired')
+                                AND ta.status NOT IN ('cancelled', 'completed', 'expired', 'refunded')
                             )";
 
                 var tables = _context.Tables
