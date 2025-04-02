@@ -285,7 +285,8 @@ namespace StrateZone_Service.Implements
                 var updatedAppointment = await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);
 
                 return _mapper.Map<AppointmentModel>(updatedAppointment);
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
                 throw new Exception(ex.Message);
             }

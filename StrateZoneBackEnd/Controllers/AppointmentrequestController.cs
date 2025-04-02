@@ -69,7 +69,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("users/{userId}/tables/{tableId}")]
-        public async Task<IActionResult> GetCurrentAppointmentRequestsFromUserByUserAndTablesIdAsync(int userId, int tableId, int startTime, int endTime)
+        public async Task<IActionResult> GetCurrentAppointmentRequestsFromUserByUserAndTablesIdAsync(int userId, int tableId, DateTime startTime, DateTime endTime)
         {
             try
             {

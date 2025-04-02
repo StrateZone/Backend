@@ -323,7 +323,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Appointmentrequest>> GetCurrentAppointmentRequestsFromUserByUserAndTableAsync(int userId, int tableId, int startTime, int endTime)
+        public async Task<List<Appointmentrequest>> GetCurrentAppointmentRequestsFromUserByUserAndTableAsync(int userId, int tableId, DateTime startTime, DateTime endTime)
         {
             try
             {

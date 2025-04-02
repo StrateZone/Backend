@@ -15,5 +15,6 @@ namespace StrateZone_Service.Interfaces
         Task<TransactionModel> GetById(int id); 
         Task<PagedList<TransactionModel>> GetUserTransactionsAsync(int id, TablesAppointmentParameters parameters);
         Task<PagedList<TransactionModel>> GetTransactionsAsync(TablesAppointmentParameters parameters);
+        Task<TransactionModel> SaveTransaction(TransactionModel newTransaction);
     }
 }

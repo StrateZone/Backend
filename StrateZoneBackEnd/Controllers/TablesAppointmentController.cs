@@ -170,6 +170,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("cancel-check/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CancelTablesAppointment(int tablesAppointmentId, int userId, DateTime CancelTime)
+        {
+            try
+            {
+                var result = await _services.CalculateRefundAmountOnAppointmentCancellation(userId, tablesAppointmentId, CancelTime);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPut("cancel/{tablesAppointmentId}/users/{userId}")]
         public async Task<IActionResult> CancelTablesAppointment(int tablesAppointmentId, int userId)
         {

@@ -66,5 +66,20 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<TransactionModel> SaveTransaction(TransactionModel newTransaction)
+        {
+            try
+            {
+                var mapped = _mapper.Map<Transaction>(newTransaction);
+                var result = await _transactionRepository.SaveTransaction(mapped);
+
+                return _mapper.Map<TransactionModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }
