@@ -8,6 +8,8 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using System.Globalization;
 using MealHunt_Repositories.Pagination;
+using static StrateZone_Repository.Parameters.PostgreEnums;
+using StrateZone_Repository.Implements;
 
 namespace StrateZone_Service.Implements
 {
@@ -21,6 +23,7 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IUserRepository _userRepository;
+        private readonly IAppointmentRepository _appointmentRepository;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -30,7 +33,8 @@ namespace StrateZone_Service.Implements
             ITransactionRepository transactionRepository,
             IMapper mapper,
             IEmailService emailService,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IAppointmentRepository appointmentRepository)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -40,6 +44,7 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
             _emailService = emailService;
             _userRepository = userRepository;
+            _appointmentRepository = appointmentRepository;
         }
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
         {
@@ -61,6 +66,10 @@ namespace StrateZone_Service.Implements
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
                 foreach (var tablesAppointment in appointment.TablesAppointments)
                 {
+                    tablesAppointment.Status = AppointmentStatus.confirmed.ToString();
+                    var mappedTA = _mapper.Map<TablesAppointment>(tablesAppointment);
+                    await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(mappedTA, tablesAppointment.Id);
+
                     var updatingPayment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tablesAppointment.Id)).SingleOrDefault(p => p.UserId == appointment.UserId);
                     updatingPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
                     await _paymentRepository.UpdatePaymentAsync(updatingPayment, updatingPayment.Id);
@@ -76,6 +85,10 @@ namespace StrateZone_Service.Implements
                 };
 
                 await _transactionRepository.SaveTransaction(newTransaction);
+
+                appointment.Status = AppointmentStatus.confirmed.ToString();
+                var mapped = _mapper.Map<Appointment>(appointment);
+                await _appointmentRepository.UpdateAppointmentAsync(mapped, appointment.AppointmentId);
 
                 var user = await _userRepository.GetUserByIdAsync(appointment.UserId);
 
