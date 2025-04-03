@@ -305,9 +305,10 @@ namespace StrateZone_Repository.Implements
                     @"
                         UPDATE tables_appointments
                         SET status = CASE
+                            WHEN status IN ('expired', 'completed', 'cancelled', 'refunded') THEN status
                             WHEN end_time < {0} AND status NOT IN ('checked_in', 'completed', 'cancelled', 'refunded') THEN 'expired'
                             WHEN end_time < {0} AND status = 'checked_in' THEN 'completed'
-                            WHEN schedule_time <= {0} + INTERVAL '1.5 hours' AND schedule_time > {0} THEN 'incoming'
+                            WHEN schedule_time <= {0} + INTERVAL '1.5 hours' AND status NOT IN ('checked_in', 'completed', 'cancelled', 'refunded') AND schedule_time > {0} THEN 'incoming'
                             ELSE status
                         END;
                         ",

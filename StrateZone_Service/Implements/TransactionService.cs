@@ -16,6 +16,7 @@ namespace StrateZone_Service.Implements
     public class TransactionService : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository;
+        private readonly ITablesAppointmentService _tablesAppointmentService;
         private readonly IMapper _mapper;
 
         public TransactionService(ITransactionRepository transactionRepository, IMapper mapper)
@@ -44,7 +45,7 @@ namespace StrateZone_Service.Implements
                 var result = await _transactionRepository.GetAllTransactionsAsync(parameters);
                 var mapped = _mapper.Map<PagedList<TransactionModel>>(result);
             
-                return new PagedList<TransactionModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
+                return new PagedList<TransactionModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -59,7 +60,7 @@ namespace StrateZone_Service.Implements
                 var result = await _transactionRepository.GetUsersTransactionsAsync(id, parameters);
                 var mapped = _mapper.Map<PagedList<TransactionModel>>(result);
 
-                return new PagedList<TransactionModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
+                return new PagedList<TransactionModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

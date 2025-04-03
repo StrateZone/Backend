@@ -270,7 +270,7 @@ namespace StrateZone_Service.Implements
                 var result = await _paymentRepository.GetPaymentsByUserIdAsync(id, parameters);
                 var mapped = _mapper.Map<PagedList<PaymentModel>>(result);
             
-                return new PagedList<PaymentModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
+                return new PagedList<PaymentModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -299,7 +299,7 @@ namespace StrateZone_Service.Implements
                 var result = await _paymentRepository.GetPaymentsAsync(parameters);
                 var mapped = _mapper.Map<PagedList<PaymentModel>>(result);
 
-                return new PagedList<PaymentModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
+                return new PagedList<PaymentModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

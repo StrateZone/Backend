@@ -228,7 +228,10 @@ namespace StrateZone_Service.Implements
                     {
                         Amount = refundAmount,
                         Content =
-                            $"Refund on booking cancellation. Tables appointment id {tablesAppointment.Id}: {refundAmount} VND.",
+                            $"Refund on booking cancellation. / " +
+                            $"Table Id: {tablesAppointment.TableId}. / " +
+                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
+                            $"Amount: {refundAmount} VND.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
@@ -248,7 +251,10 @@ namespace StrateZone_Service.Implements
                     {
                         Amount = refundAmount,
                         Content =
-                            $"Refund on shared booking cancellation. Tables appointment id {tablesAppointment.Id}: {refundAmount} VND.",
+                            $"Refund on shared booking cancellation / " +
+                            $"Table Id: {tablesAppointment.TableId}. / " +
+                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
+                            $"Amount: {refundAmount} VND.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = paymentForInvitedUser.UserId,
                         TransactionType = TransactionType.refund,
