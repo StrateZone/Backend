@@ -72,6 +72,14 @@ namespace StrateZone_Repository.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("expire_at");
 
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("start_time");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("end_time");
+
                     b.Property<int>("FromUser")
                         .HasColumnType("integer")
                         .HasColumnName("from_user");

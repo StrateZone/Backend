@@ -13,14 +13,16 @@ namespace StrateZone_Service.Implements
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IAppointmentrequestService _appointmentrequestService;
         private readonly IWalletService _walletService;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IWalletService walletService, IMapper mapper)
+        public UserService(IUserRepository userRepository, IWalletService walletService, IMapper mapper, IAppointmentrequestService appointmentrequestService)
         {
             _userRepository = userRepository;
             _walletService = walletService;
             _mapper = mapper;
+            _appointmentrequestService = appointmentrequestService;
         }
 
         public async Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters)
@@ -198,6 +200,36 @@ namespace StrateZone_Service.Implements
             catch
             {
                 throw;
+            }
+        }
+
+        public async Task<SearchedOpponentsResponse> GetRandomUsersByRankingAsync(HashSet<int> excludedIds, int tableId, DateTime StartTime, DateTime EndTime, PostgreEnums.Ranking ranking, int up, int down)
+        {
+            try
+            {
+                var requestedUserId = excludedIds.ElementAt(0);
+
+                var results = await _userRepository.GetRandomUsersByRanking(excludedIds, ranking, up, down);
+                var users = _mapper.Map<List<UserResponse>>(results);
+                var opponents = _mapper.Map<List<OpponentResponse>>(users);
+
+                var appointmentRequestsToUsers = (await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(requestedUserId, tableId, StartTime, EndTime))
+                                            .Select(ar => ar.ToUser).ToArray();
+
+                foreach (var opponent in opponents)
+                {
+                    opponent.IsInvited = appointmentRequestsToUsers.Contains(opponent.UserId);
+                };
+
+                return new SearchedOpponentsResponse()
+                {
+                    ExcludedIds = [.. excludedIds, .. opponents.Select(o => o.UserId).ToArray()],
+                    MatchingOpponents = opponents,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
             }
         }
     }

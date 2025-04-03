@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -75,7 +76,23 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var user = await _userService.GetUsersByRankingAsync(parameters, ranking, up, down);
-                return user.Count > 0 ? Ok(user) : Ok("No user of this ranking was found");
+                var response = new PagedListResponse<UserResponse>(user);
+                return response != null ? Ok(response) : Ok("No user of this ranking was found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("by-ranking/random/{userId}/table/{tableId}")]
+        public async Task<IActionResult> GetRandomByRanking(int userId, int tableId, [FromQuery] HashSet<int> excludedIds, [FromQuery] DateTime StartTime, DateTime EndTime, Ranking ranking, int up, int down)
+        {
+            try
+            {
+                if (!excludedIds.Contains(userId)) excludedIds = excludedIds.Prepend(userId).ToHashSet();
+                var opponenents = await _userService.GetRandomUsersByRankingAsync(excludedIds, tableId, StartTime, EndTime, ranking, up, down);
+                return opponenents.MatchingOpponents.Count > 0 ? Ok(opponenents) : NotFound("No user of this ranking was found");
             }
             catch (Exception ex)
             {

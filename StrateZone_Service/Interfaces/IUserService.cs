@@ -18,6 +18,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<UserResponse>> GetUsersByUsernameAsync(UserListParameters parameters, string username);
         Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters);
         Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, Ranking ranking, int up, int down);
+        Task<SearchedOpponentsResponse> GetRandomUsersByRankingAsync(HashSet<int> exludedIds, int tableId, DateTime startTime, DateTime endTime, Ranking ranking, int up, int down);
         Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);
         Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
         Task<UserResponse> FindUserAcceptedToJoinTablesAppointment(TablesAppointmentModel tablesAppointment);

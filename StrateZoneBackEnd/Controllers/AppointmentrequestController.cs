@@ -170,7 +170,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("cancel-all/users/{userId}/tables/{tableId}")]
-        public async Task<IActionResult> CancelAllAppointmentRequestAsync(int userId, int tableId, int startTime, int endTime)
+        public async Task<IActionResult> CancelAllAppointmentRequestAsync(int userId, int tableId, DateTime startTime, DateTime endTime)
         {
             try
             {

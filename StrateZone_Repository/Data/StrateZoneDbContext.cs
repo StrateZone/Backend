@@ -134,7 +134,7 @@ public partial class StrateZoneDbContext : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();
         string connection = configuration["ConnectionStrings:DB"];
-        return "Host=switchyard.proxy.rlwy.net;Port=35707;Database=railway;Username=postgres;Password=fqLsUMeFmmCJNzTcjKiqGPVswmwmjIOj;SslMode=Disable";
+        return connection;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -434,15 +434,19 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
+
             entity.Property(e => e.ExpireAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("expire_at");
+
             entity.Property(e => e.StartTime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("start_time");
+
             entity.Property(e => e.EndTime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("end_time");
+
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
             entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");

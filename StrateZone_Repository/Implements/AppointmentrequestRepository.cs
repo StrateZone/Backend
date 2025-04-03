@@ -330,13 +330,13 @@ namespace StrateZone_Repository.Implements
                 var result = await _context.AppointmentRequests
                                             .FromSqlRaw(@"
                                                 SELECT * FROM appointment_requests 
-                                                WHERE from_user = {0} AND table_id = {1} 
-                                                AND start_time = {2} AND end_time = {3}
+                                                WHERE from_user = @userId AND table_id = @tableId 
+                                                AND start_time = @start_time AND end_time = @end_time
                                                 AND status NOT IN ('cancelled', 'rejected', 'expired') AND appointment_id IS NULL",
-                                                userId,
-                                                tableId,
-                                                startTime,
-                                                endTime)
+                                                new NpgsqlParameter("@userId", userId),
+                                                new NpgsqlParameter("@tableId", tableId),
+                                                new NpgsqlParameter("@start_time", DateTime.SpecifyKind(startTime, DateTimeKind.Unspecified)),
+                                                new NpgsqlParameter("@end_time", DateTime.SpecifyKind(endTime, DateTimeKind.Unspecified)))
                                             .Include(ar => ar.ToUserNavigation)
                                             .Include(ar => ar.Table)
                                             .ToListAsync();
@@ -371,8 +371,8 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= {0};",
-                    DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc)
+                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= @now;",
+                    new NpgsqlParameter("@now", DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
                 );
             }
             catch (Exception ex)
@@ -381,7 +381,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Appointmentrequest>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, int startTime, int endTime)
+        public async Task<List<Appointmentrequest>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, DateTime startTime, DateTime endTime)
         {
             try
             {
@@ -389,13 +389,13 @@ namespace StrateZone_Repository.Implements
                     .FromSqlRaw(
                         "UPDATE appointment_requests " +
                         "SET status = 'cancelled' " +
-                        "WHERE from_user = {0} AND table_id = {1} " +
-                        "AND start_time = {2} AND end_time = {3} AND status != 'expired' AND appointment_id IS NULL " +
-                        "RETURNING *;", 
-                        userId,
-                        tableId,
-                        startTime,
-                        endTime)
+                        "WHERE from_user = @userId AND table_id = @tableId " +
+                        "AND start_time = @start_time AND end_time = @end_time AND status != 'expired' AND appointment_id IS NULL " +
+                        "RETURNING *;",
+                        new NpgsqlParameter("@userId", userId),
+                        new NpgsqlParameter("@tableId", tableId),
+                        new NpgsqlParameter("@start_time", DateTime.SpecifyKind(startTime, DateTimeKind.Unspecified)),
+                        new NpgsqlParameter("@end_time", DateTime.SpecifyKind(endTime, DateTimeKind.Unspecified)))
                     .ToListAsync();
 
                 return updatedRequests;

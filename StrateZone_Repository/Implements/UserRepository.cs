@@ -402,5 +402,39 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<User>> GetRandomUsersByRanking(HashSet<int> excludedIds, Ranking ranking, int up, int down)
+        {
+            try
+            {
+                Ranking minRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Min();
+                Ranking maxRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Max();
+
+                Ranking upperBound = (Ranking)Math.Clamp((int)ranking + up, (int)minRanking, (int)maxRanking);
+                Ranking lowerBound = (Ranking)Math.Clamp((int)ranking - down, (int)minRanking, (int)maxRanking);
+
+                var users = await _context.Users
+                                    .FromSqlRaw(
+                                        @"
+                                            SELECT * FROM users 
+                                            WHERE user_id <> ALL(@ids) 
+                                            AND ranking >= @r1::ranking 
+                                            AND ranking <= @r2::ranking 
+                                            ORDER BY RANDOM()
+                                            LIMIT 6
+                                        ",
+                                        new NpgsqlParameter("@ids", excludedIds.ToArray()),
+                                        new NpgsqlParameter("@r1", lowerBound.ToString()),
+                                        new NpgsqlParameter("@r2", upperBound.ToString()))
+                                    .Include(u => u.AppointmentRequestsToUserNavigations)
+                                    .ToListAsync();
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

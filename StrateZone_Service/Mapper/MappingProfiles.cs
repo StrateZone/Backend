@@ -23,6 +23,8 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
                     .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserAvatarResolver>());
 
+            CreateMap<UserResponse, OpponentResponse>();
+
             CreateMap<UserModel, UserResponse>()
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))

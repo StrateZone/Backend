@@ -56,10 +56,10 @@ namespace StrateZone_Service.Implements
                     TableId = request.TableId,
                     AppointmentId = null,
                     Status = PostgreEnums.RequestStatus.pending.ToString(),
-                    StartTime = request.StartTime,
-                    EndTime = request.EndTime,
-                    ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc).AddHours(timeUntilRequestExpiration),
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc),
+                    StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Unspecified),
+                    EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
+                    ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddHours(timeUntilRequestExpiration),
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                 };
 
                 var appointmentRequest = _mapper.Map<Appointmentrequest>(model);
@@ -152,6 +152,9 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                startTime = DateTime.SpecifyKind(startTime, DateTimeKind.Unspecified);
+                endTime = DateTime.SpecifyKind(endTime, DateTimeKind.Unspecified);
+
                 var result = await _appointmentRequestRepository.GetCurrentAppointmentRequestsFromUserByUserAndTableAsync(userId, tableId, startTime, endTime);
                 var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
 
@@ -307,7 +310,7 @@ namespace StrateZone_Service.Implements
             throw new NotImplementedException();
         }
 
-        public async Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, int startTime, int endTime)
+        public async Task<List<AppointmentrequestModel>> CancelAllAppointmentRequestsFromUserOnTableAsync(int userId, int tableId, DateTime startTime, DateTime endTime)
         {
             try
             {
