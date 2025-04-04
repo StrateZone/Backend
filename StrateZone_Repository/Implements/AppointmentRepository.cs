@@ -62,7 +62,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Appointment>> GetAllAppointmentsAsync(AppointmentParameters parameters)
+        public async Task<PagedList<Appointment>> GetAllAppointmentsAsync(AppointmentAdminParameters parameters)
         {
             try
             {
@@ -97,6 +97,15 @@ namespace StrateZone_Repository.Implements
                     "tables-count-desc" => result.OrderByDescending(a => a.TablesAppointments.Count),
                     _ => result
                 };
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
+                {
+                    string search = parameters.SearchValue.Trim().ToLower();
+
+                    result = result.Where(a =>
+                        a.AppointmentId.ToString().ToLower().Contains(search) ||
+                        a.User.Email.ToLower().Contains(search));
+                }
 
                 return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }

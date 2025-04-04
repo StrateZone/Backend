@@ -41,7 +41,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all/admin")]
-        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentParameters parameters)
+        public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentAdminParameters parameters)
         {
             try
             {

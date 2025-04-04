@@ -73,7 +73,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentParameters parameters)
+        public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsAsync(AppointmentAdminParameters parameters)
         {
             try
             {
