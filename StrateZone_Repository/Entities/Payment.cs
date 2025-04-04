@@ -20,6 +20,8 @@ public partial class Payment
 
     public int? CourseId { get; set; }
 
+    public int? VoucherId { get; set; }
+
     public string? Description { get; set; }
 
     public DateTime? CreatedAt { get; set; }
@@ -31,4 +33,6 @@ public partial class Payment
     public virtual TablesAppointment? TablesAppointment { get; set; }
 
     public virtual Course? Course { get; set; }
+
+    public virtual Voucher? Voucher { get; set; }
 }

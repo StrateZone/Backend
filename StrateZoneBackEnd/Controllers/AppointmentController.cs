@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_APIs.Controllers
 {

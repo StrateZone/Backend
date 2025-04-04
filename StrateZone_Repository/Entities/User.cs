@@ -107,4 +107,8 @@ public partial class User
     public virtual ICollection<TournamentsParticipants> TournamentsParticipants { get; set; } = new List<TournamentsParticipants>();
 
     public virtual ICollection<Notification> NotificationsToUserNavifations { get; set; } = new List<Notification>();
+
+    public virtual ICollection<System> Systems { get; set; } = new List<System>();
+
+    public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 }

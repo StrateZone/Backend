@@ -10,6 +10,8 @@ public partial class Voucher
 
     public string? VoucherName { get; set; }
 
+    public int Value { get; set; }
+
     public string? Description { get; set; }
 
     public decimal? MinPriceCondition { get; set; }
@@ -20,5 +22,5 @@ public partial class Voucher
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

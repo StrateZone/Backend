@@ -19,7 +19,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Images.FirstOrDefaultAsync(i => i.UserId == userId);
+                return await _context.Images.AsNoTracking().FirstOrDefaultAsync(i => i.UserId == userId);
             }
             catch (Exception ex)
             {
@@ -31,7 +31,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Images.FirstOrDefaultAsync(i => i.EventId == eventId);
+                return await _context.Images.AsNoTracking().FirstOrDefaultAsync(i => i.EventId == eventId);
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Images.FirstOrDefaultAsync(i => i.TournamentId == tournamentId);
+                return await _context.Images.AsNoTracking().FirstOrDefaultAsync(i => i.TournamentId == tournamentId);
             }
             catch (Exception ex)
             {
@@ -71,6 +71,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Images
+                                    .AsNoTracking()
                                     .Where(i => i.ThreadId == threadId)
                                     .OrderBy(i => i.CreatedAt)
                                     .ToListAsync();
@@ -85,7 +86,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Images.FirstOrDefaultAsync(i => i.GameTypeId == gametypeId);
+                return await _context.Images.AsNoTracking().FirstOrDefaultAsync(i => i.GameTypeId == gametypeId);
             }
             catch (Exception ex)
             {

@@ -13,6 +13,6 @@ namespace StrateZone_Service.Interfaces
         Task<ImageModel> GetGametypeThumbnail(int gametypeId);
         Task<ImageModel> GetTournamentThumbnailAsync(int tournamentId);
         Task<ImageModel> GetUserAvatarAsync(int userId);
-        Task<ImageModel> UpdateImageAsync(ImageRequest image, int id);
+        Task<ImageModel> UpdateImageAsync(ImageModel image, int id);
     }
 }

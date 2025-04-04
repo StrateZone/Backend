@@ -39,6 +39,13 @@ namespace StrateZone_Service.Implements
                 {
                     case ImageType.avatar:
                         imageModel.UserId = imageRequest.EntityId;
+
+                        ImageModel exsitingUserAvar = await GetUserAvatarAsync((int) imageModel.UserId); 
+                        if (exsitingUserAvar != null)
+                        {
+                            return await UpdateImageAsync(imageModel, exsitingUserAvar.ImageId);
+                        }
+
                         break;
                     case ImageType.game_type:
                         imageModel.GameTypeId = imageRequest.EntityId;
@@ -159,9 +166,19 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ImageModel> UpdateImageAsync(ImageRequest image, int id)
+        public async Task<ImageModel> UpdateImageAsync(ImageModel imageModel, int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var image = _mapper.Map<Image>(imageModel);
+
+                var result = await _imageRepository.UpdateImageAsync(image, id);
+                return _mapper.Map<ImageModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

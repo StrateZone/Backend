@@ -193,6 +193,42 @@ public partial class StrateZoneDbContext : DbContext
                 .HasConstraintName("appointments_user_id_fkey");
         });
 
+        modelBuilder.Entity<AbnormalDay>(entity =>
+        {
+            entity.ToTable("abnormal_days");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                  .HasColumnName("id");
+
+            entity.Property(e => e.SystemId)
+                  .HasColumnName("system_id")
+                  .IsRequired();
+
+            entity.Property(e => e.Date)
+                  .HasColumnName("date")
+                  .HasColumnType("date");
+
+            entity.Property(e => e.OpenTime)
+                  .HasColumnName("open_time")
+                  .HasColumnType("time");
+
+            entity.Property(e => e.CloseTime)
+                  .HasColumnName("close_time")
+                  .HasColumnType("time");
+
+            entity.Property(e => e.CreatedAt)
+                  .HasColumnName("created_at")
+                  .HasColumnType("timestamp")
+                  .IsRequired();
+
+            entity.HasOne(e => e.System)
+                  .WithMany(s => s.AbnormalDays)
+                  .HasForeignKey(e => e.SystemId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<Cart>(entity =>
         {
             entity.HasKey(e => e.CartId).HasName("carts_pkey");
@@ -627,15 +663,11 @@ public partial class StrateZoneDbContext : DbContext
                 .HasDefaultValueSql("NULL::character varying")
                 .HasColumnName("tracking_number");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.VoucherId).HasColumnName("voucher_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("orders_user_id_fkey");
 
-            entity.HasOne(d => d.Voucher).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.VoucherId)
-                .HasConstraintName("orders_voucher_id_fkey");
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
@@ -695,8 +727,8 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TablesAppointmentId).HasColumnName("tables_appointment_id");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
 
-            entity.HasOne(d => d.Order).WithMany(p => p.Payments)
-                .HasForeignKey(d => d.OrderId)
+            entity.HasOne(d => d.Order).WithOne(p => p.Payment)
+                .HasForeignKey<Order>(d => d.OrderId)
                 .HasConstraintName("payments_order_id_fkey");
 
             entity.HasOne(d => d.User).WithMany(p => p.Payments)
@@ -710,6 +742,10 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("payments_tables_appointment_id_fkey");
+
+            entity.HasOne(d => d.Voucher).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.VoucherId)
+                .HasConstraintName("payment_voucher_id_fkey");
         });
 
         modelBuilder.Entity<Price>(entity =>
@@ -850,6 +886,36 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (RoomStatus)Enum.Parse(typeof(RoomStatus), v)
                     );
+        });
+
+        modelBuilder.Entity<Entities.System>(entity =>
+        {
+            entity.ToTable("systems");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                  .HasColumnName("id");
+
+            entity.Property(e => e.AdminId)
+                  .HasColumnName("admin_id")
+                  .IsRequired();
+
+            entity.Property(e => e.OpenTime)
+                  .HasColumnName("open_time")
+                  .HasColumnType("time");
+
+            entity.Property(e => e.CloseTime)
+                  .HasColumnName("close_time")
+                  .HasColumnType("time");
+
+            entity.Property(e => e.Status)
+                  .HasColumnName("status")
+                  .HasDefaultValue("active");
+
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.Systems)
+                  .HasForeignKey(e => e.AdminId);
         });
 
         modelBuilder.Entity<Table>(entity =>
@@ -1214,6 +1280,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
+
+            entity.Property(e => e.Value).HasColumnName("value");
+
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
                 .HasColumnName("description");
