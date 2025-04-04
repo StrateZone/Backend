@@ -732,6 +732,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.TablesAppointmentId).HasColumnName("tables_appointment_id");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.VoucherId).HasColumnName("voucher_id");
 
             entity.HasOne(d => d.Order).WithOne(p => p.Payment)
                 .HasForeignKey<Order>(d => d.OrderId)

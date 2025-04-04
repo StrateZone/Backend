@@ -92,6 +92,9 @@ namespace StrateZone_Repository.Implements
                 if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
                     throw new Exception($"Invitation to this user already been sent.");
 
+                if (requestsList.Count(r => r.Status != PostgreEnums.RequestStatus.cancelled || r.Status != PostgreEnums.RequestStatus.expired) > 6)
+                    throw new Exception($"You can only invite up to 6 users to this table.");
+
                 var connection = _context.Database.GetDbConnection();
 
                 if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();

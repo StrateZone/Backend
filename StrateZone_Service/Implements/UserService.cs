@@ -232,5 +232,25 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<bool> CheckUserNotification(int id)
+        {
+            try
+            {
+                return false;
+
+                AppointmentRequestParameters requestParameters = new AppointmentRequestParameters()
+                { 
+                    PageNumber = 1,
+                    PageSize = 100_000
+                };
+                
+                await _appointmentrequestService.GetAppointmentRequestsOfUserByUserIdAsync(requestParameters, id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

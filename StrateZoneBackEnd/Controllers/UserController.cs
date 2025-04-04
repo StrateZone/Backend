@@ -169,5 +169,19 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpGet("check-notification/{id}")]
+        public async Task<IActionResult> CheckUserNotification(int id)
+        {
+            try
+            {
+                var result = await _userService.CheckUserNotification(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

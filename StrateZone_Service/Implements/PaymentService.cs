@@ -204,7 +204,7 @@ namespace StrateZone_Service.Implements
 
                 var userWallet = await _walletRepository.GetWalletByUserIdAsync(appointmentrequestModel.ToUser);
 
-                if(userWallet.Balance < tableAppointment.Price)
+                if (userWallet.Balance < tableAppointment.Price)
                 {
                     return new ApiResponse<AppointmentrequestModel>
                     {
