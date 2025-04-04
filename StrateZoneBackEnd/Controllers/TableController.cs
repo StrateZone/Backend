@@ -19,11 +19,13 @@ namespace StrateZone_APIs.Controllers
     {
         private readonly ITableService _tableService;
         private readonly ILogger<TableController> _logger;
+        private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
-        public TableController(ITableService tableService, ILogger<TableController> logger)
+        public TableController(ITableService tableService, ILogger<TableController> logger, ScheduleTimeValidator scheduleTimeValidator)
         {
             _tableService = tableService;
             _logger = logger;
+            _scheduleTimeValidator = scheduleTimeValidator;
         }
 
         [HttpGet("all")]
@@ -48,8 +50,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
-                    return BadRequest(new { message = msg });
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(parameters, false);
+                if (!isValid) return BadRequest(new { message = errorMessage });
 
                 var tables = await _tableService.GetAvailableTablesAsync(parameters);
 
@@ -68,8 +70,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(StartTime, EndTime, false, out string msg))
-                    return BadRequest(new { message = msg });
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(StartTime, EndTime, false);
+                if (!isValid) return BadRequest(new { message = errorMessage });
 
                 var table = await _tableService.GetTableByIdAsync(StartTime, EndTime, id);
                 return table != null ? Ok(table) : NotFound("No table was found with this ID.");
@@ -102,8 +104,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
-                    return BadRequest(new { message = msg });
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(parameters, false);
+                if (!isValid) return BadRequest(new { message = errorMessage });
 
                 var tables = await _tableService.GetAvailableTablesByGameTypeAsync(parameters, gameType);
 
@@ -125,8 +127,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
-                    return BadRequest(new { message = msg });
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(parameters, false);
+                if (!isValid) return BadRequest(new { message = errorMessage });
 
                 var tables = await _tableService.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
 
@@ -148,8 +150,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(parameters, out string msg))
-                    return BadRequest(new { message = msg });
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(parameters, false);
+                if (!isValid) return BadRequest(new { message = errorMessage });
 
                 var tables = await _tableService.GetAvailableTablesForEachGameTypeInTimeRangeAsync(parameters, tableCount);
                 return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");

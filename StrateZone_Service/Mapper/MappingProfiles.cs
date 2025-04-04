@@ -11,7 +11,6 @@ namespace StrateZone_Service.Mapper
 {
     public class MappingProfiles : Profile
     {
-
         public MappingProfiles()
         {   
             CreateMap<User, UserModel>().ReverseMap();
@@ -92,6 +91,8 @@ namespace StrateZone_Service.Mapper
             CreateMap<Voucher, VoucherModel>().ReverseMap();
             CreateMap<Wallet, WalletModel>().ReverseMap();
             CreateMap<Transaction, TransactionModel>().ReverseMap();
+            CreateMap<StrateZone_Repository.Entities.System, SystemModel>().ReverseMap();
+            CreateMap<AbnormalDay, AbnormalDayModel>().ReverseMap();
             // add other mappings here
         }
     }

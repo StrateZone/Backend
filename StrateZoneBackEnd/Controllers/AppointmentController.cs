@@ -14,11 +14,13 @@ namespace StrateZone_APIs.Controllers
     {
         private readonly IAppointmentService _appointmentService;
         private readonly ILogger<AppointmentController> _logger;
+        private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
-        public AppointmentController(IAppointmentService appointmentService, ILogger<AppointmentController> logger)
+        public AppointmentController(IAppointmentService appointmentService, ILogger<AppointmentController> logger, ScheduleTimeValidator scheduleTimeValidator)
         {
             _appointmentService = appointmentService;
             _logger = logger;
+            _scheduleTimeValidator = scheduleTimeValidator;
         }
 
         [HttpGet("all")]
@@ -108,8 +110,8 @@ namespace StrateZone_APIs.Controllers
             {
                 foreach (var tb in request.TablesAppointmentRequests)
                 {
-                    if (!ScheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false, out string msg))
-                        return BadRequest(new { message = msg });
+                    var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false);
+                    if (!isValid) return BadRequest(new { message = errorMessage });
                 }
 
                 var result = await _appointmentService.CheckAppointmentAvailability(request);
@@ -152,8 +154,8 @@ namespace StrateZone_APIs.Controllers
             {
                 foreach (var tb in request.TablesAppointmentRequests)
                 {
-                    if (!ScheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false, out string msg))
-                        return BadRequest(new { message = msg });
+                    var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false);
+                    if (!isValid) return BadRequest(new { message = errorMessage });
                 }
 
                 var result = await _appointmentService.CheckAppointmentAvailability(request);

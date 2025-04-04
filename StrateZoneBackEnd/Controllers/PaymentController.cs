@@ -19,13 +19,15 @@ namespace StrateZone_APIs.Controllers
         private readonly ILogger<PaymentController> _logger;
         private readonly IAppointmentService _appointmentService;
         private readonly IWalletService _walletService;
+        private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
-        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger, IAppointmentService appointmentService, IWalletService walletService)
+        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger, IAppointmentService appointmentService, IWalletService walletService, ScheduleTimeValidator scheduleTimeValidator)
         {
             _paymentService = paymentService;
             _logger = logger;
             _appointmentService = appointmentService;
             _walletService = walletService;
+            _scheduleTimeValidator = scheduleTimeValidator;
         }
 
         [HttpPost("booking-payment")]
@@ -41,8 +43,8 @@ namespace StrateZone_APIs.Controllers
 
                 foreach (var tb in request.TablesAppointmentRequests)
                 {
-                    if (!ScheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false, out string msg))
-                        return BadRequest(new { message = msg });
+                    var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false);
+                    if (!isValid) return BadRequest(new { message = errorMessage });
                 }
 
                 var unavailableTables = await _appointmentService.CheckAppointmentAvailability(request);

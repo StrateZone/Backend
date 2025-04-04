@@ -2,6 +2,8 @@
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Parameters;
 
+using Thread = StrateZone_Repository.Entities.Thread;
+
 namespace StrateZone_Repository.Implements
 {
     public class ThreadRepository
@@ -13,7 +15,7 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<Entities.Thread> CreateThreadAsync(Entities.Thread thread)
+        public async Task<Thread> CreateThreadAsync(Thread thread)
         {
             try
             {
@@ -28,7 +30,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Entities.Thread> UpdateThreadAsync(Entities.Thread thread, int id)
+        public async Task<Thread> UpdateThreadAsync(Thread thread, int id)
         {
             try
             {
@@ -43,7 +45,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Entities.Thread> DeleteThreadAsync(int id)
+        public async Task<Thread> DeleteThreadAsync(int id)
         {
             try
             {
@@ -60,7 +62,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Entities.Thread>> GetAllThreadsAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<Thread>> GetAllThreadsAsync(TablesAppointmentParameters parameters)
         {
             try
             {
@@ -73,7 +75,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Entities.Thread> GetThreadByIdAsync(int id)
+        public async Task<Thread> GetThreadByIdAsync(int id)
         {
             try
             {

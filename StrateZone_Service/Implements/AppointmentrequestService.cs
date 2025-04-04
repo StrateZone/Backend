@@ -16,20 +16,23 @@ namespace StrateZone_Service.Implements
         private readonly ITablesAppointmentService _tablesAppointmentService;
         private readonly IPaymentService _paymentService;
         private readonly IMapper _mapper;
+        private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
-        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService)
+        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService, ScheduleTimeValidator scheduleTimeValidator)
         {
             _appointmentRequestRepository = appointmentRequestRepository;
             _mapper = mapper;
             _tablesAppointmentService = appointmentService;
             _paymentService = paymentService;
+            _scheduleTimeValidator = scheduleTimeValidator;
         }
 
         public async Task<AppointmentrequestModel> CreateAppointmentRequestAsync(AppointmentrequestRequest request)
         {
             try
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(request.StartTime, request.EndTime, false, out string errorMessage))
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(request.StartTime, request.EndTime, false);
+                if (!isValid)
                 {
                     throw new Exception(errorMessage);
                 }

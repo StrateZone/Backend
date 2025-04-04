@@ -33,8 +33,18 @@ namespace StrateZone_Service.Implements
         private readonly IWalletService _walletService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
+        private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
-        public AppointmentService(IAppointmentRepository appointmentRepository, IUserService userService, ITableService tableService, ITablesAppointmentService tablesAppointmentService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IPaymentService paymentService, IWalletService walletService, ITransactionRepository transactionRepository)
+        public AppointmentService(IAppointmentRepository appointmentRepository, 
+            IUserService userService, 
+            ITableService tableService, 
+            ITablesAppointmentService tablesAppointmentService, 
+            IMapper mapper, 
+            IAppointmentrequestService appointmentrequestService, 
+            IPaymentService paymentService, 
+            IWalletService walletService, 
+            ITransactionRepository transactionRepository, 
+            ScheduleTimeValidator scheduleTimeValidator)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
@@ -45,6 +55,7 @@ namespace StrateZone_Service.Implements
             _paymentService = paymentService;
             _walletService = walletService;
             _transactionRepository = transactionRepository;
+            _scheduleTimeValidator = scheduleTimeValidator;
         }
 
         public async Task<PagedList<AppointmentResponse>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -109,8 +120,8 @@ namespace StrateZone_Service.Implements
         {
             foreach (var ta in request.TablesAppointmentRequests)
             {
-                if (!ScheduleTimeValidator.IsScheduleTimeValid(ta.ScheduleTime, ta.EndTime, false, out string err))
-                    throw new Exception(err);
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(ta.ScheduleTime, ta.EndTime, false);
+                if (!isValid) throw new Exception(errorMessage);
             }
 
             HashSet<int> requestedTableIds = request.TablesAppointmentRequests.Select(ta => ta.TableId).ToHashSet();
