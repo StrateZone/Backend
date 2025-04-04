@@ -7,6 +7,7 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -14,15 +15,17 @@ namespace StrateZone_Service.Implements
     {
         private readonly IUserRepository _userRepository;
         private readonly IAppointmentrequestService _appointmentrequestService;
+        private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IWalletService walletService, IMapper mapper, IAppointmentrequestService appointmentrequestService)
+        public UserService(IUserRepository userRepository, IWalletService walletService, IMapper mapper, IAppointmentrequestService appointmentrequestService, IPaymentService paymentService)
         {
             _userRepository = userRepository;
             _walletService = walletService;
             _mapper = mapper;
             _appointmentrequestService = appointmentrequestService;
+            _paymentService = paymentService;
         }
 
         public async Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters)
@@ -237,7 +240,16 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                return false;
+                PaymentParameters paymentParams = new PaymentParameters()
+                {
+                    PageNumber = 1,
+                    PaymentStatuses = [ PaymentStatus.unpaid ],
+                    PaymentTypes = [ PaymentType.appointment ],
+                    PageSize = 100_000
+                };
+
+                var pendingPayments = await _paymentService.GetPaymentsByUserIdAsync(id, paymentParams);
+                if (pendingPayments.Count > 0) return true;
 
                 AppointmentRequestParameters requestParameters = new AppointmentRequestParameters()
                 { 
@@ -245,7 +257,9 @@ namespace StrateZone_Service.Implements
                     PageSize = 100_000
                 };
                 
-                await _appointmentrequestService.GetAppointmentRequestsOfUserByUserIdAsync(requestParameters, id);
+                var requests = await _appointmentrequestService.GetAppointmentRequestsOfUserByUserIdAsync(requestParameters, id);
+
+                return requests.Any(r => r.Status == "pending");
             }
             catch (Exception ex)
             {

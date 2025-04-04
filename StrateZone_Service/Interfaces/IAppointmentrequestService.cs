@@ -2,6 +2,7 @@
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 
 namespace StrateZone_Service.Interfaces
 {

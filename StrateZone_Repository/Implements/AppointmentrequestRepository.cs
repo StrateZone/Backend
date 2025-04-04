@@ -25,6 +25,8 @@ namespace StrateZone_Repository.Implements
                 var result = _context.AppointmentRequests           
                                     .Where(ar => ar.ToUser == userId)
                                     .Include(ar => ar.FromUserNavigation)
+                                    .Include(ar => ar.Table)
+                                    .ThenInclude(t => t.Room)
                                     .AsQueryable();
 
                 result = parameters.OrderBy switch
@@ -311,7 +313,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.AppointmentRequests.Where(ar => ar.TableId == tableId).AsQueryable();
+                var result = _context.AppointmentRequests
+                                    .Where(ar => ar.TableId == tableId)
+                                    .AsQueryable();
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -324,7 +328,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.AppointmentRequests.Where(ar => ar.AppointmentId == appointmentId && ar.TableId == tableId).AsQueryable();
+                var result = _context.AppointmentRequests
+                                    .Where(ar => ar.AppointmentId == appointmentId && ar.TableId == tableId)
+                                    .AsQueryable();
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)

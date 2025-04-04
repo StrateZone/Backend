@@ -5,6 +5,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
 
@@ -142,6 +143,22 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
+
+                foreach (var appointmentRequestModel in appointmentRequestModels)
+                {
+                    if (appointmentRequestModel.AppointmentId == null) continue;
+
+                    var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
+
+                    appointmentRequestModel.TablesAppointmentId = ta.Id;
+                    appointmentRequestModel.TotalPrice = ta.Price;
+
+                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).SingleOrDefault(p => p.UserId == userId);
+                    if (appointmentRequestModel.Status == "accepted" && payment?.PaymentStatus == "unpaid")
+                    {
+                        appointmentRequestModel.Status = "payment_required";
+                    }
+                }
 
                 return new PagedList<AppointmentrequestModel>(appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize);
             }

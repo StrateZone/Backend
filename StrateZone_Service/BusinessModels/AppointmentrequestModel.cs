@@ -1,4 +1,5 @@
 ﻿using StrateZone_Repository.Entities;
+using StrateZone_Service.CustomModels.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,11 @@ namespace StrateZone_Service.BusinessModels
         public int? AppointmentId { get; set; } = null;
 
         public string Status { get; set; }
-        
+
+        public int? TablesAppointmentId { get; set; } = null;
+
+        public decimal? TotalPrice { get; set; }
+
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }
@@ -34,7 +39,7 @@ namespace StrateZone_Service.BusinessModels
 
         public virtual UserModel ToUserNavigation { get; set; } = null!;
 
-        public virtual TableModel Table { get; set; } = null!;
+        public virtual TableResponse? Table { get; set; } = null!;
 
         public virtual TablesAppointmentModel? Appointment { get; set; }
     }

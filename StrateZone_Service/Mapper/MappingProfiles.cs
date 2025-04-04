@@ -58,6 +58,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<Appointment, AppointmentModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
+
             CreateMap<Appointment, AppointmentResponse>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
@@ -80,9 +81,11 @@ namespace StrateZone_Service.Mapper
 
             CreateMap<Image, ImageModel>().ReverseMap();    
             CreateMap<Price, PriceModel>().ReverseMap();
+
             CreateMap<Appointmentrequest, AppointmentrequestModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
+
             CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
 
             CreateMap<Payment, PaymentModel>()
