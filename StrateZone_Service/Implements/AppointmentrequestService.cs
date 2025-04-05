@@ -8,6 +8,7 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -146,7 +147,12 @@ namespace StrateZone_Service.Implements
 
                 foreach (var appointmentRequestModel in appointmentRequestModels)
                 {
-                    if (appointmentRequestModel.AppointmentId == null) continue;
+                    if (appointmentRequestModel.AppointmentId == null)
+                    {
+                        if (appointmentRequestModel.Status == RequestStatus.accepted.ToString()) 
+                            appointmentRequestModel.Status = RequestStatus.await_appointment_creation.ToString();
+                        continue;
+                    }
 
                     var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
 
@@ -154,9 +160,9 @@ namespace StrateZone_Service.Implements
                     appointmentRequestModel.TotalPrice = ta.Price;
 
                     var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).SingleOrDefault(p => p.UserId == userId);
-                    if (appointmentRequestModel.Status == "accepted" && payment?.PaymentStatus == "unpaid")
+                    if (appointmentRequestModel.Status == RequestStatus.accepted.ToString() && payment?.PaymentStatus == "unpaid")
                     {
-                        appointmentRequestModel.Status = "payment_required";
+                        appointmentRequestModel.Status = RequestStatus.payment_required.ToString();
                     }
                 }
 
