@@ -35,4 +35,6 @@ public class Tournament
     public virtual User? User { get; set; }
 
     public virtual ICollection<TournamentsParticipants> TournamentsParticipants { get; set; } = new List<TournamentsParticipants>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

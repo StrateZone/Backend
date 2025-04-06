@@ -2,10 +2,10 @@
 using System.Runtime.Serialization;
 using System.Text.Json;
 
-namespace StrateZone_Service.Implements
+namespace StrateZone_Service.CustomModels.Exceptions
 {
     [Serializable]
-    internal class TablesNotAvailableException : Exception
+    public class TablesNotAvailableException : Exception
     {
         public object ErrorResponse { get; }
 

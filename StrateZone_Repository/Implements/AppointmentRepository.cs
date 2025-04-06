@@ -277,24 +277,25 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Appointment>> UpdateStatusForAppointmentBasedOnTablesAppointments()
+        public async Task<int> UpdateStatusForAppointmentBasedOnTablesAppointments()
         {
             try
             {
-                throw new NotImplementedException();
+                var result = await _context.Database
+                                .ExecuteSqlRawAsync(
+                                    "UPDATE appointments a " +
+                                    "SET status = CASE " +
+                                        "WHEN NOT EXISTS (" +
+                                                "SELECT 1 FROM tables_appointments ta " +
+                                                "WHERE ta.appointment_id = a.appointment_id " +
+                                                "AND ta.status IN ('pending', 'confirmed', 'incoming')" +
+                                            ") THEN 'completed'::appointment_status " +
+                                        "ELSE 'incompleted'::appointment_status " +
+                                    "END " +
+                                    "RETURNING *;"
+                                    );
 
-                DateTime CurrentTime = DateTime.UtcNow.AddHours(7);
-
-                var result = _context.Appointments
-                                .FromSqlRaw(
-                                    "UPDATE tables_appointments SET status = 'expired' " +
-                                    "WHERE status = 'confirmed' OR status = 'pending' OR status = 'unpaid' AND schedule_time < {0}",
-                                    CurrentTime
-                                    )
-                                    .Include(a => a.User)
-                                    .Include(a => a.TablesAppointments)
-                                .ToListAsync();
-                
+                return result;
             }
             catch (Exception ex)
             {

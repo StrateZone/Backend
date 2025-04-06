@@ -17,10 +17,22 @@ namespace StrateZone_Repository.Entities
         
         public int ToUser { get; set; }
 
+        public int? TablesAppointmentId { get; set; }
+
+        public int? OrderId { get; set; }
+
+        public int? TournamentId { get; set; }
+
         public MessageStatus Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
-        public User ToUserNavigation { get;set; }
+        public virtual User? ToUserNavigation { get;set; }
+
+        public virtual Order? Order { get; set; }
+
+        public virtual TablesAppointment? TablesAppointment { get; set; }
+
+        public virtual Tournament? Tournament {  get; set; }
     }
 }

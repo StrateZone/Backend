@@ -27,4 +27,6 @@ public partial class TablesAppointment
     public virtual Table? Table { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

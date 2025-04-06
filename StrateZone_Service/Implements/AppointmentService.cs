@@ -298,5 +298,17 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<int> UpdateStatusForAppointmentBasedOnTablesAppointments()
+        {
+            try
+            {
+                return await _appointmentRepository.UpdateStatusForAppointmentBasedOnTablesAppointments();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

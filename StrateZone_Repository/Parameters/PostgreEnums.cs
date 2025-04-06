@@ -2,7 +2,7 @@
 {
     public class PostgreEnums
     {
-        public enum AppointmentStatus { pending, confirmed, cancelled, completed, expired, unpaid, refunded, checked_in, incoming }
+        public enum AppointmentStatus { pending, confirmed, cancelled, completed, expired, unpaid, refunded, checked_in, imcompleted, incoming, incompleted }
         public enum CourseSlotStatus { upcoming, in_progress, completed, cancelled }
         public enum CourseStatus { open, closed, in_progress, completed, cancelled }
         public enum EventStatus { upcoming, ongoing, completed, cancelled }
