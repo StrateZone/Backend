@@ -27,4 +27,6 @@ public partial class Order
     public virtual User? User { get; set; }
 
     public virtual Voucher? Voucher { get; set; }
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

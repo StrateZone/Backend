@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Service.BusinessModels;
@@ -49,11 +50,13 @@ namespace StrateZone_Service.Mapper
                 .ForMember(r => r.Type, rs => rs.MapFrom(src => src.Type.ToString()))
                 .ForMember(r => r.Status, rs => rs.MapFrom(src => src.Status.ToString()));
 
-            CreateMap<Table, TableModel>().ReverseMap();
-            CreateMap<Table, TableResponse>()
+            CreateMap<StrateZone_Repository.Entities.Table, TableModel>().ReverseMap();
+
+            CreateMap<StrateZone_Repository.Entities.Table, TableResponse>()
                     .ForMember(tr => tr.RoomName, u => u.MapFrom(src => src.Room.RoomName))
                     .ForMember(tr => tr.RoomDescription, u => u.MapFrom(src => src.Room.Description))
-                    .ForMember(tr => tr.RoomType, u => u.MapFrom(src => src.Room.Type.ToString()));
+                    .ForMember(tr => tr.RoomType, u => u.MapFrom(src => src.Room.Type.ToString()))
+                    .ReverseMap();
 
             CreateMap<Appointment, AppointmentModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))

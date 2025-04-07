@@ -810,6 +810,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Title).HasColumnName("title");
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
+            entity.Property(e => e.TablesAppointmentId).HasColumnName("tables_appointment_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.TournamentId).HasColumnName("tournament_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
@@ -819,9 +822,21 @@ public partial class StrateZoneDbContext : DbContext
                     v => (MessageStatus)Enum.Parse(typeof(MessageStatus), v)
                     );
 
-            entity.HasOne(d => d.ToUserNavigation).WithMany(p => p.NotificationsToUserNavifations)
+            entity.HasOne(d => d.ToUserNavigation).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.ToUser)
                 .HasConstraintName("notifications_user_id_fkey");
+
+            entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.TablesAppointmentId)
+                .HasConstraintName("notifications_tables_appointment_id_fkey");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("notifications_order_id_fkey");
+
+            entity.HasOne(d => d.Tournament).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.TournamentId)
+                .HasConstraintName("notifications_tournament_id_fkey");
         });
 
         modelBuilder.Entity<Product>(entity =>

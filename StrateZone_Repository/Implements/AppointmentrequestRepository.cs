@@ -6,6 +6,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Reflection.Metadata;
 using System.Text;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -165,6 +166,9 @@ namespace StrateZone_Repository.Implements
                     sql.Append("appointment_id = @appointment_id, ");
                     parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
                 }
+
+                if (appointmentRequest.Status == RequestStatus.payment_required || appointmentRequest.Status == RequestStatus.await_appointment_creation)
+                    appointmentRequest.Status = RequestStatus.accepted;
 
                 sql.Append("status = @status::request_status, ");
                 parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
