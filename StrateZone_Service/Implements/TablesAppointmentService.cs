@@ -13,6 +13,7 @@ namespace StrateZone_Service.Implements
 {
     public class TablesAppointmentService : ITablesAppointmentService
     {
+        private readonly IAppointmentrequestRepository _requestRepository;
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
@@ -20,7 +21,7 @@ namespace StrateZone_Service.Implements
         private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -28,6 +29,7 @@ namespace StrateZone_Service.Implements
             _paymentService = paymentService;
             _walletService = walletService;
             _transactionService = transactionService;
+            _requestRepository = repository;
         }
 
         public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
@@ -263,6 +265,14 @@ namespace StrateZone_Service.Implements
                 }
                 
                 tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
+
+                var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
+                foreach (var req in requests)
+                {
+                    req.Status = RequestStatus.cancelled;
+                    await _requestRepository.UpdateAppointmentRequestAsync(req, req.Id);
+                }
+
                 return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
             }
             catch (Exception ex)
@@ -297,7 +307,7 @@ namespace StrateZone_Service.Implements
                 };
             }
 
-            if (bookingPayments.Any(p => p.UserId != userId))
+            if (bookingPayments.Any(p => p.UserId != userId && p.PaymentStatus == PaymentStatus.paid.ToString()))
             {
                 return new TablesAppointmentRefundResponse()
                 {
@@ -434,6 +444,20 @@ namespace StrateZone_Service.Implements
             try
             {
                 return await _tablesAppointmentRepository.UpdateStatusForExpiredAndIncomingTablesAppointments();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<TablesAppointmentModel>> GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests()
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.UpdateStatusForExpiredAndIncomingTablesAppointments();
+            
+                return _mapper.Map<List<TablesAppointmentModel>>(result);
             }
             catch (Exception ex)
             {

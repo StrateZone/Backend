@@ -489,6 +489,9 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("end_time");
 
+            entity.Property(e => e.TotalPrice)
+                .HasColumnName("estimated_price");
+
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
             entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");

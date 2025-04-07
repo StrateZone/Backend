@@ -84,7 +84,6 @@ namespace StrateZone_Repository.Implements
                 var requestsList = await _context.AppointmentRequests
                                                 .Where(ar => 
                                                     ar.FromUser == appointmentRequest.FromUser 
-                                                    && ar.ToUser == appointmentRequest.ToUser 
                                                     && ar.TableId == appointmentRequest.TableId
                                                     && ar.StartTime == appointmentRequest.StartTime && ar.EndTime == appointmentRequest.EndTime
                                                     && (ar.AppointmentId == appointmentRequest.AppointmentId ||
@@ -92,10 +91,10 @@ namespace StrateZone_Repository.Implements
                                                 )
                                                 .ToListAsync();
 
-                if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
+                if (requestsList.Any(r => r.ToUser == appointmentRequest.ToUser && r.Status == PostgreEnums.RequestStatus.pending))
                     throw new Exception($"Invitation to this user already been sent.");
 
-                if (requestsList.Count(r => r.Status != PostgreEnums.RequestStatus.cancelled || r.Status != PostgreEnums.RequestStatus.expired) > 6)
+                if (requestsList.Count(r => r.Status != PostgreEnums.RequestStatus.cancelled && r.Status != PostgreEnums.RequestStatus.expired) > 6)
                     throw new Exception($"You can only invite up to 6 users to this table.");
 
                 var connection = _context.Database.GetDbConnection();
@@ -105,8 +104,8 @@ namespace StrateZone_Repository.Implements
                 await using var createCmd = connection.CreateCommand();
 
                 createCmd.CommandText = @"
-                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, status, start_time, end_time, expire_at, created_at) 
-                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @status::request_status, @start_time, @end_time, @expire_at, @created_at)
+                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, estimated_price, status, start_time, end_time, expire_at, created_at) 
+                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @estimated_price, @status::request_status, @start_time, @end_time, @expire_at, @created_at)
                     RETURNING id;"
                 ;
 
@@ -114,6 +113,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@to_user", appointmentRequest.ToUser));
                 createCmd.Parameters.Add(new NpgsqlParameter("@table_id", appointmentRequest.TableId));
                 createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId == null ? DBNull.Value : appointmentRequest.AppointmentId));
+                createCmd.Parameters.Add(new NpgsqlParameter("@estimated_price", appointmentRequest.TotalPrice));
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
                 createCmd.Parameters.Add(new NpgsqlParameter("@start_time", appointmentRequest.StartTime));
                 createCmd.Parameters.Add(new NpgsqlParameter("@end_time", appointmentRequest.EndTime));
@@ -361,6 +361,22 @@ namespace StrateZone_Repository.Implements
                                             .Include(ar => ar.Table)
                                             .ToListAsync();
                 return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Appointmentrequest>> GetAppointmentRequestsByTablesAppointmentIdAsync(int tablesAppointmentId)
+        {
+            try
+            {
+                var ta = await _context.TablesAppointments.AsNoTracking().SingleOrDefaultAsync(ta => ta.Id == tablesAppointmentId);
+
+                return await _context.AppointmentRequests
+                                    .Where(ar => ar.TableId == ta.TableId && ar.AppointmentId == ar.AppointmentId)
+                                    .ToListAsync();
             }
             catch (Exception ex)
             {

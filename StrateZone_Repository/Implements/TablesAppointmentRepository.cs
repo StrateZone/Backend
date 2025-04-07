@@ -322,5 +322,31 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<TablesAppointment>> GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests()
+        {
+            try
+            {
+                var matchingTAs = await _context.TablesAppointments
+                            .FromSqlRaw(
+                                @"SELECT ta.*
+                                FROM tables_appointments ta
+                                WHERE ta.status IN ('confirmed', 'pending') 
+                                AND EXISTS (
+                                    SELECT 1
+                                    FROM appointment_requests ar
+                                    WHERE ar.appointment_id = ta.appointment_id
+                                      AND ar.table_id = ta.table_id
+                                      AND ar.status IN ('rejected', 'expired')
+                                );"
+                            ).ToListAsync();
+
+                return matchingTAs;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

@@ -7,13 +7,10 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Service.CustomModels.RequestModels
 {
-    public class TableAppointmentPaymentRequest
+    public class TablesAppointmentPaymentRequest
     {
         [Required]
-        public int FromUser { get; set; }
-
-        [Required]
-        public int ToUser { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         public int TableId { get; set; }

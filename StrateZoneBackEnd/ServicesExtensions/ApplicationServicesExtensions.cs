@@ -47,6 +47,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ITournamentRepository, TournamentRepository>();
             services.AddScoped<IVoucherRepository, VoucherRepository>();
             services.AddScoped<ISystemRepository, SystemRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             return services;
         }
 
@@ -75,6 +76,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IVoucherService, VoucherService>();
             services.AddScoped<ISystemService, SystemService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();

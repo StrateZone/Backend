@@ -11,6 +11,7 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<Appointmentrequest>> GetAppointmentRequestsFromUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
         Task<PagedList<Appointmentrequest>> GetAppointmentRequestsOfUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);
         Task<List<Appointmentrequest>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tablesAppointmentId);
+        Task<List<Appointmentrequest>> GetAppointmentRequestsByTablesAppointmentIdAsync(int tablesAppointmentId);
         Task<List<Appointmentrequest>> GetCurrentAppointmentRequestsFromUserByUserAndTableAsync(int userId, int tableId, DateTime startTime, DateTime endTime);
         Task<Appointmentrequest> UpdateAppointmentRequestAsync(Appointmentrequest appointmentRequest, int id);
         Task<int> UpdateExpiredAppointmentRequests();

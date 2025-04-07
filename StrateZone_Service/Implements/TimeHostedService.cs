@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,8 +22,8 @@ namespace StrateZone_Service.Implements
         private Timer? _appointmentServiceTimer = null;
 
         private static readonly TimeSpan _userCleanupInterval = TimeSpan.FromHours(12);
-        private static readonly TimeSpan _appointmentRequestsCleanupInterval = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan _tablesAppointmentsCleanupInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _appointmentRequestsCleanupInterval = TimeSpan.FromSeconds(120);
+        private static readonly TimeSpan _tablesAppointmentsCleanupInterval = TimeSpan.FromSeconds(60);
         private static readonly TimeSpan _appointmentsUpdateInterval = TimeSpan.FromSeconds(30);
 
         public TimedHostedService(IServiceScopeFactory serviceScopeFactory, ILogger<TimedHostedService> logger)
@@ -107,8 +108,38 @@ namespace StrateZone_Service.Implements
                         var appointmentRequestsService = scope.ServiceProvider.GetRequiredService<IAppointmentrequestService>();
                         count = await appointmentRequestsService.UpdateExpiredAppointmentRequests();
                     }
-                    
+
                     _logger.LogInformation($"IAppointmentrequestService cleanup executed: Changed status for {count} expired request(s).");
+
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        var tablesAppointmentService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
+                        var appointmentService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+                        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        var toBeCancelledTablesAppointments = await tablesAppointmentService.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
+                        foreach ( var table in toBeCancelledTablesAppointments )
+                        {
+                            var appointment = await appointmentService.GetAppointmentByIdAsync((int)table.AppointmentId);
+                            var userId = appointment.UserId;
+
+                            await tablesAppointmentService.CancelTablesAppointment(table.Id, userId);
+
+                            NotificationRequest notif = new()
+                            {
+                                ToUser = userId,
+                                Title = $"Your table has been automatically cancelled!",
+                                Content = $"Your appointment on table {table.TableId}, appointment ID {table.AppointmentId} has been automatically cancelled and refunded. " +
+                                $"Reason: All of the sent invitations to this table have been either rejected or cancelled.",
+                                TablesAppointmentId = table.Id,
+                            };
+
+                            await notificationService.CreateNotificationAsync(notif);
+                        }
+
+                        _logger.LogInformation($"ITablesAppointmentService executed: Cancelled and refunded for " +
+                            $"{toBeCancelledTablesAppointments.Count} tables on appointment(s).");
+                    }
                 }
                 catch (Exception ex)
                 {

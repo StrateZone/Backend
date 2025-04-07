@@ -83,11 +83,25 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost("booking-request-payment")]
-        public async Task<IActionResult> ConfirmBookingRequestPayment(TableAppointmentPaymentRequest request)
+        public async Task<IActionResult> ConfirmBookingRequestPayment(AppointmentrequestPaymentRequest request)
         {
             try
             {
                 var result = await _paymentService.CreateAppointmentRequestPaymentBooking(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("tables-appointment-payment")]
+        public async Task<IActionResult> ConfirmTablesAppointmentPayment(TablesAppointmentPaymentRequest request)
+        {
+            try
+            {
+                var result = await _paymentService.CreateTablesAppointmentPaymentBooking(request);
                 return Ok(result);
             }
             catch (Exception ex)

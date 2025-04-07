@@ -96,6 +96,7 @@ namespace StrateZone_Service.Mapper
                 .ForMember(mr => mr.PaymentType, u => u.MapFrom(src => src.PaymentType.ToString()))
                 .ReverseMap();
 
+            CreateMap<Notification, NotificationModel>().ReverseMap();
             CreateMap<Voucher, VoucherModel>().ReverseMap();
             CreateMap<Wallet, WalletModel>().ReverseMap();
             CreateMap<Transaction, TransactionModel>().ReverseMap();

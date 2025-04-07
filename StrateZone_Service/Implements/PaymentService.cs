@@ -196,11 +196,24 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ApiResponse<AppointmentrequestModel>> CreateAppointmentRequestPaymentBooking(TableAppointmentPaymentRequest appointmentrequestModel)
+        public async Task<ApiResponse<AppointmentrequestModel>> CreateAppointmentRequestPaymentBooking(AppointmentrequestPaymentRequest appointmentrequestModel)
         {
             try
             {
                 var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
+                var appointment_request = (await _appointmentrequestRepository.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(appointmentrequestModel.FromUser, tableAppointment.Id))
+                                            .SingleOrDefault(ar => ar.ToUser == appointmentrequestModel.ToUser);
+
+                if (appointment_request.Status == RequestStatus.expired || appointment_request.Status == RequestStatus.cancelled || appointment_request.Status == RequestStatus.rejected)
+                {
+                    return new ApiResponse<AppointmentrequestModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = $"This appointment invitation is already {appointment_request.Status}",
+                        Data = null
+                    };
+                }
 
                 var userWallet = await _walletRepository.GetWalletByUserIdAsync(appointmentrequestModel.ToUser);
 
@@ -235,6 +248,57 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        // method only used when the appointment owner chooses to pay the rest of the price
+        public async Task<ApiResponse<TablesAppointmentModel>> CreateTablesAppointmentPaymentBooking(TablesAppointmentPaymentRequest appointmentrequestModel)
+        {
+            try
+            {
+                var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
+
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(appointmentrequestModel.UserId);
+
+                if (userWallet.Balance < tableAppointment.Price)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = "Balance is not enough",
+                        Data = null
+                    };
+                }
+
+                await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
+
+                var payment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id)).SingleOrDefault(p => p.UserId == appointmentrequestModel.UserId && p.PaymentStatus == PaymentStatus.unpaid);
+                
+                if (payment == null)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = "No payment was found",
+                        Data = null
+                    };
+                }
+
+                payment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
+                await _paymentRepository.UpdatePaymentAsync(payment, payment.Id);
+
+                return new ApiResponse<TablesAppointmentModel>
+                {
+                    Success = true,
+                    StatusCode = 201,
+                    Message = "Payment success",
+                    Data = null
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         public async Task<PaymentModel> CreatePaymentAsync(PaymentModel paymentModel)
         {

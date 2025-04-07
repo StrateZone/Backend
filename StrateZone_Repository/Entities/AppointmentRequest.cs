@@ -18,6 +18,8 @@ public partial class Appointmentrequest
 
     public int? AppointmentId { get; set; }
 
+    public decimal? TotalPrice { get; set; }
+
     public RequestStatus Status { get; set; }
 
     public DateTime? StartTime { get; set; }

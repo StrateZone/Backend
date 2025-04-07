@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -60,6 +61,7 @@ namespace StrateZone_Service.Implements
                     ToUser = request.ToUser,
                     TableId = request.TableId,
                     AppointmentId = null,
+                    TotalPrice = request.TotalPrice,
                     Status = PostgreEnums.RequestStatus.pending.ToString(),
                     StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Unspecified),
                     EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
@@ -290,6 +292,36 @@ namespace StrateZone_Service.Implements
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string> GetTablesAppointmentStatus(int id)
+        {
+            try
+            {
+                var ta = await _tablesAppointmentService.GetByIdAsync(id);
+                
+                var requests = (await _appointmentRequestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(ta.Id))
+                                .Where(ar => ar.Status != RequestStatus.rejected && ar.Status != RequestStatus.rejected && ar.Status != RequestStatus.expired);
+
+                if (requests == null || requests.Any()) return ta.Status;
+
+                var acceptedRequest = requests.SingleOrDefault(r => r.Status == RequestStatus.accepted);
+                
+                if (acceptedRequest == null)
+                {
+                    return "awaiting_request_acceptance";
+                }
+
+                var payments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id);
+                var opponent_payment = payments.SingleOrDefault(p => p.UserId == acceptedRequest.ToUser);
+                if (opponent_payment == null) return "awaiting_table_creation";
+                else if (opponent_payment.PaymentStatus == PaymentStatus.unpaid.ToString()) return "awaiting_payment_from_opponent";
+                return ta.Status;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
             }
         }
 
