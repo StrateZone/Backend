@@ -807,7 +807,7 @@ public partial class StrateZoneDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("notifications_pkey");
 
-            entity.ToTable("Notifications");
+            entity.ToTable("notifications");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Title).HasColumnName("title");
