@@ -13,7 +13,7 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<Transaction> SaveTransaction(Transaction transaction);
         Task<Transaction> GetByIdAsync(int id);
-        Task<PagedList<Transaction>> GetAllTransactionsAsync(TablesAppointmentParameters parameters);
+        Task<PagedList<Transaction>> GetAllTransactionsAsync(TransactionParameters parameters);
         Task<PagedList<Transaction>> GetUsersTransactionsAsync(int id, TablesAppointmentParameters parameters);
     }
 }

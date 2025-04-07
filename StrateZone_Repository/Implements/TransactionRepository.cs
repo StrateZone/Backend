@@ -22,11 +22,11 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<PagedList<Transaction>> GetAllTransactionsAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<Transaction>> GetAllTransactionsAsync(TransactionParameters parameters)
         {
             try
             {
-                var result = _context.Transactions.OrderByDescending(t => t.CreatedAt).AsQueryable();
+                var result = _context.Transactions.Include(t => t.OfUserNavigation).OrderByDescending(t => t.CreatedAt).AsQueryable();
 
                 return await PagedList<Transaction>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }

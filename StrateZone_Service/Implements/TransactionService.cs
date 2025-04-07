@@ -38,7 +38,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TransactionModel>> GetTransactionsAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<TransactionModel>> GetTransactionsAsync(TransactionParameters parameters)
         {
             try
             {

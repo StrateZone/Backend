@@ -132,9 +132,17 @@ namespace StrateZone_Service.Implements
             throw new NotImplementedException();
         }
 
-        public Task<SystemModel> GetSystemsByIdAsync(int id)
+        public async Task<SystemModel> GetSystemsByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var system = await _systemRepository.GetSystemsByIdAsync(id);
+                return _mapper.Map<SystemModel>(system);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
         }
 
         public async Task<AbnormalDayModel> UpdateAbnormalDayAsync(AbnormalDayModel abnormalDayModel, int id)

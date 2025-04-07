@@ -278,15 +278,27 @@ namespace StrateZone_Service.Implements
                 userWallet.Balance += appointment.TotalPrice;
                 await _walletService.UpdateWalletAsync(userWallet, userWallet.WalletId);
 
-                var newTransaction = new Transaction
+                var newAdminTransaction = new Transaction
                 {
                     Amount = appointment.TotalPrice,
                     Content = "Refund for booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    //OfUser = appointment.UserId,
+                    TransactionType = TransactionType.refund,
+                };
+
+                await _transactionRepository.SaveTransaction(newAdminTransaction);
+
+                var newTransaction = new Transaction
+                {
+                    Amount = appointment.TotalPrice,
+                    Content = "Refunded for booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     OfUser = appointment.UserId,
                     TransactionType = TransactionType.refund,
                 };
-                await _transactionRepository.SaveTransaction(newTransaction);
+
+                await _transactionRepository.SaveTransaction(newAdminTransaction);
 
                 appointment.Status = AppointmentStatus.refunded;
                 var updatedAppointment = await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);
