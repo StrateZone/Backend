@@ -224,6 +224,7 @@ namespace StrateZone_Repository.Implements
                 var parameters = new List<NpgsqlParameter>();
                 var sql = new StringBuilder("UPDATE appointments SET ");
 
+
                 if (appointment.UserId > 0)
                 {
                     sql.Append("user_id = @user_id, ");

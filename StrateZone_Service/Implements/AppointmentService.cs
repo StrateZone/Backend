@@ -283,7 +283,7 @@ namespace StrateZone_Service.Implements
                     Amount = appointment.TotalPrice,
                     Content = "Refund for booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    //OfUser = appointment.UserId,
+                    OfUser = null,
                     TransactionType = TransactionType.refund,
                 };
 
@@ -298,7 +298,8 @@ namespace StrateZone_Service.Implements
                     TransactionType = TransactionType.refund,
                 };
 
-                await _transactionRepository.SaveTransaction(newAdminTransaction);
+                await _transactionRepository.SaveTransaction(newTransaction);
+
 
                 appointment.Status = AppointmentStatus.refunded;
                 var updatedAppointment = await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);

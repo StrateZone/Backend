@@ -26,9 +26,30 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.Transactions.Include(t => t.OfUserNavigation).OrderByDescending(t => t.CreatedAt).AsQueryable();
+                var query = _context.Transactions.Include(t => t.OfUserNavigation).AsQueryable();
 
-                return await PagedList<Transaction>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+                // filter type
+                if (parameters.Type == "user")
+                {
+                    query = query.Where(t => t.OfUser != null);
+                }
+                else if (parameters.Type == "system")
+                {
+                    query = query.Where(t => t.OfUser == null);
+                }
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
+                {
+                    string search = parameters.SearchValue.Trim().ToLower();
+
+                    query = query.Where(t =>
+                        t.Id.ToString().ToLower().Contains(search) ||
+                        t.OfUserNavigation.Email.ToLower().Contains(search));
+                }
+
+                query = query.OrderByDescending(t => t.CreatedAt);
+
+                return await PagedList<Transaction>.ToPagedList(query, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -76,7 +97,7 @@ namespace StrateZone_Repository.Implements
                     VALUES (@of_user, @reference_id, @content, @amount, @transaction_type::transaction_type, @created_at)
                     RETURNING id;";
 
-                cmd.Parameters.Add(new NpgsqlParameter("@of_user", transaction.OfUser));
+                cmd.Parameters.Add(new NpgsqlParameter("@of_user", transaction.OfUser != null ? transaction.OfUser : DBNull.Value));
                 cmd.Parameters.Add(new NpgsqlParameter("@reference_id", transaction.ReferenceId != null ? transaction.ReferenceId : DBNull.Value));
                 cmd.Parameters.Add(new NpgsqlParameter("@content", transaction.Content != null ? transaction.Content : DBNull.Value));
                 cmd.Parameters.Add(new NpgsqlParameter("@amount", transaction.Amount));
