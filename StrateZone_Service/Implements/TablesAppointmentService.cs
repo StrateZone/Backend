@@ -174,7 +174,7 @@ namespace StrateZone_Service.Implements
 
                 if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Check-in failed: {errorMessage}");
 
-                if (tablesAppointment.ScheduleTime > DateTime.UtcNow.AddHours(7).AddMinutes(-5))
+                if (DateTime.UtcNow.AddHours(7) < tablesAppointment.ScheduleTime.AddMinutes(-5))
                     throw new Exception($"Check-in is not yet opened: Check-in only available 5 minutes prior to schedule time!");
 
                 tablesAppointment.Status = AppointmentStatus.checked_in.ToString();
