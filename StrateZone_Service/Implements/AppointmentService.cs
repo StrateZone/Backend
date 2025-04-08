@@ -84,9 +84,12 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _appointmentRepository.GetAllAppointmentsAsync(parameters);
 
-                foreach (var a in result)
+                if (parameters.Status != null)
                 {
-                    a.TablesAppointments = a.TablesAppointments.Where(ta => ta.Status == parameters.Status).ToList();
+                    foreach (var a in result)
+                    {
+                        a.TablesAppointments = a.TablesAppointments.Where(ta => ta.Status == parameters.Status).ToList();
+                    }
                 }
 
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);

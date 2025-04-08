@@ -77,7 +77,8 @@ namespace StrateZone_Repository.Implements
                                                 SELECT a.* 
                                                 FROM appointments a 
                                                 JOIN tables_appointments ta 
-                                                ON ta.appointment_id = a.appointment_id AND ta.status = @st::appointment_status 
+                                                ON ta.appointment_id = a.appointment_id 
+                                                AND (@st IS NULL OR ta.status = @st::appointment_status) 
                                             ", statusParam)
                                             .AsNoTracking()
                                             .Include(a => a.User)
