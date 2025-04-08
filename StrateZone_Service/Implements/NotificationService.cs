@@ -89,7 +89,7 @@ namespace StrateZone_Service.Implements
                 var result = await _notificationRepository.GetUserNotificationsAsync(userId, parameters);
                 var mapped = _mapper.Map<PagedList<NotificationModel>>(result);
 
-                return new PagedList<NotificationModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
+                return new PagedList<NotificationModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

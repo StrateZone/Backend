@@ -66,7 +66,7 @@ namespace StrateZone_Service.Implements
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
                 foreach (var tablesAppointment in appointment.TablesAppointments)
                 {
-                    tablesAppointment.Status = AppointmentStatus.confirmed.ToString();
+                    tablesAppointment.Status = AppointmentStatus.incompleted.ToString();
                     var mappedTA = _mapper.Map<TablesAppointment>(tablesAppointment);
                     await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(mappedTA, tablesAppointment.Id);
 

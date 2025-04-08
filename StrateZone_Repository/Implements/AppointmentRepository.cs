@@ -73,20 +73,22 @@ namespace StrateZone_Repository.Implements
                     : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
 
                 var result = _context.Appointments
-                                    .FromSqlRaw(
-                                        @"SELECT a.*
-                                            FROM appointments a
-                                            WHERE (@st IS NULL OR a.status = @st::appointment_status)",
-                                        statusParam
-                                        ).Include(a => a.User)
-                                        .Include(a => a.TablesAppointments)
-                                            .ThenInclude(ta => ta.Table)
-                                                .ThenInclude(t => t.GameType)
-                                        .Include(a => a.TablesAppointments)
-                                            .ThenInclude(ta => ta.Table)
-                                                .ThenInclude(t => t.Room)
-                                        .AsQueryable();
-                
+                                            .FromSqlRaw(@"
+                                                SELECT a.* FROM appointments a 
+                                                JOIN tables_appointments ta 
+                                                ON ta.appointment_id = a.appointment_id AND ta.status = @st::appointment_status
+                                            ", statusParam)
+                                            .AsNoTracking()
+                                            .Include(a => a.User)
+                                            .Include(a => a.TablesAppointments)
+                                                .ThenInclude(ta => ta.Table)
+                                                    .ThenInclude(t => t.GameType)
+                                            .Include(a => a.TablesAppointments)
+                                                .ThenInclude(ta => ta.Table)
+                                                    .ThenInclude(t => t.Room)
+                                            .Where(r => r.TablesAppointments.Count > 0)
+                                            .AsQueryable();
+
                 result = parameters.OrderBy switch
                 {
                     "created-at" => result.OrderBy(a => a.CreatedAt),

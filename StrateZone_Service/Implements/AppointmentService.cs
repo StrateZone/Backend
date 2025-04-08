@@ -112,6 +112,7 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(parameters, userId);
+
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
