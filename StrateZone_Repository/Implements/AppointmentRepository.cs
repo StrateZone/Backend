@@ -127,7 +127,7 @@ namespace StrateZone_Repository.Implements
                 var statusParam = status.HasValue
                     ? new NpgsqlParameter("@st", status.Value.ToString()) { NpgsqlDbType = NpgsqlDbType.Text }
                     : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
-                var today = DateTime.Today;
+                var today = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7).Date, DateTimeKind.Unspecified);
                 var dateParam = new NpgsqlParameter("@today", today) { NpgsqlDbType = NpgsqlDbType.Timestamp };
 
                 var result = _context.Appointments
