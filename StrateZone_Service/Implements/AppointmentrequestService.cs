@@ -74,6 +74,16 @@ namespace StrateZone_Service.Implements
                 var appointmentRequest = _mapper.Map<Appointmentrequest>(model);
                 var result = await _appointmentRequestRepository.CreateAppointmentRequestAsync(appointmentRequest);
 
+                NotificationRequest notification = new()
+                {
+                    ToUser = result.ToUser,
+                    Title = $"Bạn có lời mời chơi cờ đến từ {result.FromUserNavigation.Username}!",
+                    Content = $"{result.FromUserNavigation.Username} đã gửi cho bạn 1 lời mời chơi cờ vào lúc {request.StartTime.TimeOfDay}, " +
+                    $"ngày {DateOnly.FromDateTime(request.StartTime)}. Bấm để xem tất cả lời mời của bạn.",
+                    Type = NotificationType.appointment_request_from
+                };
+                await _notificationService.CreateNotificationAsync(notification);
+
                 return _mapper.Map<AppointmentrequestModel>(result);
             }
             catch (Exception ex)
@@ -255,7 +265,8 @@ namespace StrateZone_Service.Implements
                 {
                     ToUser = result.FromUser,
                     Title = "Lời mời đã được chấp nhận!",
-                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận!"
+                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận! Bấm để xem chi tiết.",
+                    Type = NotificationType.appointment_request_to
                 };
                 await _notificationService.CreateNotificationAsync(notification);
 
@@ -277,7 +288,8 @@ namespace StrateZone_Service.Implements
                 {
                     ToUser = result.FromUser,
                     Title = "Lời mời đã bị từ chối!",
-                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã bị đối phương từ chối."
+                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã bị đối phương từ chối! Bấm để xem chi tiết.",
+                    Type = NotificationType.appointment_request_to
                 };
                 await _notificationService.CreateNotificationAsync(notification);
 

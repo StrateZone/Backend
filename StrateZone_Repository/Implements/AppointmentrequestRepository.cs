@@ -121,9 +121,11 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
-                appointmentRequest.Id = Convert.ToInt32(newAppointmentId);
+                await _context.SaveChangesAsync();
 
-                return appointmentRequest;
+                return await _context.AppointmentRequests.AsNoTracking()
+                    .Include(ar => ar.FromUserNavigation)
+                    .SingleOrDefaultAsync(ar => ar.Id == Convert.ToInt32(newAppointmentId));
             }
             catch (Exception ex)
             {

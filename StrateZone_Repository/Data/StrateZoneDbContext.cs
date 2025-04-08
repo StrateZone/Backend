@@ -825,6 +825,11 @@ public partial class StrateZoneDbContext : DbContext
                     v => (MessageStatus)Enum.Parse(typeof(MessageStatus), v)
                     );
 
+            entity.Property(e => e.Type).HasColumnName("type").HasConversion(
+                    v => v.ToString(),
+                    v => (NotificationType)Enum.Parse(typeof(NotificationType), v)
+                    );
+
             entity.HasOne(d => d.ToUserNavigation).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.ToUser)
                 .HasConstraintName("notifications_user_id_fkey");

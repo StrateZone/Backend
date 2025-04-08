@@ -26,6 +26,8 @@ namespace StrateZone_Service.BusinessModels
 
         public MessageStatus Status { get; set; }
 
+        public NotificationType Type { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public virtual UserModel? ToUserNavigation { get; set; }

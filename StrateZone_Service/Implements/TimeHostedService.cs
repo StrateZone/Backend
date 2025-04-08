@@ -135,6 +135,7 @@ namespace StrateZone_Service.Implements
                                 $"và tiến hành hoàn tiền dựa theo thời gian đặt bàn. " +
                                 $"Lí do: Toàn bộ lời mời bạn đã gửi đến những người chơi khác đều đã hết hạn hoặc bị từ chối.",
                                 TablesAppointmentId = table.Id,
+                                Type = StrateZone_Repository.Parameters.PostgreEnums.NotificationType.appointment
                             };
 
                             await notificationService.CreateNotificationAsync(notif);

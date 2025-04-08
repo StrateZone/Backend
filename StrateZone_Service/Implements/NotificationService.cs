@@ -39,6 +39,7 @@ namespace StrateZone_Service.Implements
                     Title = request.Title,
                     Content = request.Content,
                     Status = PostgreEnums.MessageStatus.unread,
+                    Type = request.Type,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)
                 };
 
