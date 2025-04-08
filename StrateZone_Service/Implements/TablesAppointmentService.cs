@@ -281,6 +281,93 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var refundCalculation = await CalculateRefundAmountOnAppointmentCancellation(userId, tablesAppointmentId, DateTime.UtcNow.AddHours(7));
+
+                var tablesAppointment = refundCalculation.TablesAppointmentModel;
+                string errorMessage = (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status) switch
+                {
+                    AppointmentStatus.cancelled => "This appointment has already been cancelled.",
+                    AppointmentStatus.refunded => "This appointment has already been cancelled and refunded.",
+                    AppointmentStatus.checked_in => "This appointment has already been checked-in.",
+                    AppointmentStatus.expired => "This appointment is expired.",
+                    AppointmentStatus.completed => "This appointment is already completed.",
+                    _ => string.Empty,
+                };
+
+                if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Cancellation failed: {errorMessage}");
+
+                if (refundCalculation.RefundStatus == RefundStatus.no_refund || refundCalculation.RefundStatus == RefundStatus.cancellation_fail)
+                {
+                    tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
+                    return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
+                }
+
+                if (refundCalculation.RefundStatus != RefundStatus.no_refund_while_refund_for_invited_user)
+                {
+                    var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
+                    var refundAmount = refundCalculation.RefundAmount;
+                    await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
+
+                    var newTransaction = new TransactionModel
+                    {
+                        Amount = refundAmount,
+                        Content =
+                            $"Refund on booking cancellation. / " +
+                            $"Table Id: {tablesAppointment.TableId}. / " +
+                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
+                            $"Amount: {refundAmount} VND.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = userId,
+                        TransactionType = TransactionType.refund,
+                    };
+                    await _transactionService.SaveTransaction(newTransaction);
+                }
+                else
+                {
+                    var refundAmount = refundCalculation.RefundAmount;
+                    var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
+                    var paymentForInvitedUser = bookingPayments.SingleOrDefault(p => p.UserId != userId);
+                    var invitedUserWallet = await _walletService.GetWalletByUserIdAsync((int)paymentForInvitedUser.UserId);
+
+                    await _walletService.DepositWalletAsync((int)tablesAppointment.Price, invitedUserWallet.WalletId);
+
+                    var newTransaction = new TransactionModel
+                    {
+                        Amount = refundAmount,
+                        Content =
+                            $"Refund on shared booking cancellation / " +
+                            $"Table Id: {tablesAppointment.TableId}. / " +
+                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
+                            $"Amount: {refundAmount} VND.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = paymentForInvitedUser.UserId,
+                        TransactionType = TransactionType.refund,
+                    };
+                    await _transactionService.SaveTransaction(newTransaction);
+                }
+
+                tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
+
+                var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
+                foreach (var req in requests)
+                {
+                    req.Status = RequestStatus.cancelled;
+                    await _requestRepository.UpdateAppointmentRequestAsync(req, req.Id);
+                }
+
+                return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+
         public async Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime)
         {
             var tablesAppointment = await _tablesAppointmentRepository.GetByIdAsync(tablesAppointmentId)
@@ -455,7 +542,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var result = await _tablesAppointmentRepository.UpdateStatusForExpiredAndIncomingTablesAppointments();
+                var result = await _tablesAppointmentRepository.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
             
                 return _mapper.Map<List<TablesAppointmentModel>>(result);
             }

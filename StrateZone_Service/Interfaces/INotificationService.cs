@@ -16,6 +16,7 @@ namespace StrateZone_Service.Interfaces
         Task<NotificationModel> CreateNotificationAsync(NotificationRequest notification);
         Task<NotificationModel> DeleteAsync(int id);
         Task<NotificationModel> GetByIdAsync(int id);
+        Task<NotificationModel> ReadByIdAsync(int id);
         Task<PagedList<NotificationModel>> GetUserNotificationsAsync(int userId, TablesAppointmentParameters parameters);
         Task<NotificationModel> UpdateNotificationAsync(NotificationModel notification, int id);
         Task<int> SendNotificationAboutExpiredOrRejectedAppointmentrequestsAsync();

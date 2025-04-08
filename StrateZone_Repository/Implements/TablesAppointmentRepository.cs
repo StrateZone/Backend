@@ -331,7 +331,7 @@ namespace StrateZone_Repository.Implements
                             .FromSqlRaw(
                                 @"SELECT ta.*
                                 FROM tables_appointments ta
-                                WHERE ta.status IN ('confirmed', 'pending') 
+                                WHERE ta.status IN ('confirmed', 'pending', 'incoming') 
                                 AND EXISTS (
                                     SELECT 1
                                     FROM appointment_requests ar

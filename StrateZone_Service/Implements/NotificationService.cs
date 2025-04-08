@@ -96,6 +96,20 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<NotificationModel> ReadByIdAsync(int id)
+        {
+            try
+            {
+                var result = await _notificationRepository.ReadByIdAsync(id);
+
+                return _mapper.Map<NotificationModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public Task<int> SendNotificationAboutExpiredOrRejectedAppointmentrequestsAsync()
         {
             throw new NotImplementedException();

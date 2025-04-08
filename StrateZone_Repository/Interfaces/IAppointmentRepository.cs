@@ -14,6 +14,6 @@ namespace StrateZone_Repository.Implements
         Task<PagedList<Appointment>> GetAllAppointmentsAsync(AppointmentAdminParameters parameters);
         Task<PagedList<Appointment>> GetAppointmentsByUserIdAsync(AppointmentParameters parameters, int id);
         Task<Appointment> UpdateAppointmentAsync(Appointment appointment, int id);
-        Task<int> UpdateStatusForAppointmentBasedOnTablesAppointments();
+        Task<List<Appointment>> GetAppointmentsWithIncompletedStatusToBeCompletedBasedOnTablesAppointments();
     }
 }

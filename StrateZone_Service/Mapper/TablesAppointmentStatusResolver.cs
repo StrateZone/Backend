@@ -22,7 +22,6 @@ namespace StrateZone_Service.Mapper
 
         public string? Resolve(TablesAppointment source, TablesAppointmentResponse destination, string destMember, ResolutionContext context)
         {
-            // Ensure the method is synchronous (use .Result or .GetAwaiter().GetResult())
             var result = _appointmentRequestService.GetTablesAppointmentStatus(source.Id).Result;
             return result;
         }

@@ -243,7 +243,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
                 _context.Entry(toAccept).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.FindAsync(id);
+                return await _context.AppointmentRequests.AsNoTracking().Include(ar => ar.ToUserNavigation).SingleOrDefaultAsync(ar => ar.Id == id);
             }
             catch (Exception ex)
             {
@@ -269,7 +269,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), new NpgsqlParameter("@id", id));
                 _context.Entry(toReject).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.FindAsync(id);
+                return await _context.AppointmentRequests.AsNoTracking().Include(ar => ar.ToUserNavigation).SingleOrDefaultAsync(ar => ar.Id == id);
             }
             catch (Exception ex)
             {

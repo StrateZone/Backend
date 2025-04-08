@@ -20,14 +20,16 @@ namespace StrateZone_Service.Implements
         private readonly IPaymentService _paymentService;
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
+        private readonly INotificationService _notificationService;
 
-        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService, ScheduleTimeValidator scheduleTimeValidator)
+        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService, ScheduleTimeValidator scheduleTimeValidator, INotificationService notificationService)
         {
             _appointmentRequestRepository = appointmentRequestRepository;
             _mapper = mapper;
             _tablesAppointmentService = appointmentService;
             _paymentService = paymentService;
             _scheduleTimeValidator = scheduleTimeValidator;
+            _notificationService = notificationService;
         }
 
         public async Task<AppointmentrequestModel> CreateAppointmentRequestAsync(AppointmentrequestRequest request)
@@ -249,6 +251,14 @@ namespace StrateZone_Service.Implements
                     await _paymentService.UpdatePaymentAsync(updatedPayment, paymentOfTablesAppointmentOwner.Id);
                 }
 
+                NotificationRequest notification = new()
+                {
+                    ToUser = result.FromUser,
+                    Title = "Lời mời đã được chấp nhận!",
+                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận!"
+                };
+                await _notificationService.CreateNotificationAsync(notification);
+
                 return _mapper.Map<AppointmentrequestModel>(result);
             }
             catch (Exception ex)
@@ -262,6 +272,15 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRequestRepository.RejectAppointmentrequestAsync(id);
+
+                NotificationRequest notification = new()
+                {
+                    ToUser = result.FromUser,
+                    Title = "Lời mời đã bị từ chối!",
+                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã bị đối phương từ chối."
+                };
+                await _notificationService.CreateNotificationAsync(notification);
+
                 return _mapper.Map<AppointmentrequestModel>(result);
             }
             catch (Exception ex)

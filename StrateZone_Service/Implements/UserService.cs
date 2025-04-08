@@ -217,7 +217,7 @@ namespace StrateZone_Service.Implements
                 var opponents = _mapper.Map<List<OpponentResponse>>(users);
 
                 var appointmentRequestsToUsers = (await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(requestedUserId, tableId, StartTime, EndTime))
-                                            .Select(ar => ar.ToUser).ToArray();
+                                            .Where(ar => ar.Status == "pending").Select(ar => ar.ToUser).ToArray();
 
                 foreach (var opponent in opponents)
                 {

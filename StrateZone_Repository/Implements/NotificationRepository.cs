@@ -73,5 +73,24 @@ namespace StrateZone_Repository.Implements
         {
             throw new NotImplementedException();
         }
+
+        public async Task<Notification> ReadByIdAsync(int id)
+        {
+            try
+            {
+                var toRead = await _context.Notifications.FindAsync(id) 
+                    ?? throw new Exception("No notification with this ID was found.");
+
+                toRead.Status = PostgreEnums.MessageStatus.read;
+                _context.Notifications.Update(toRead);
+                await _context.SaveChangesAsync();
+
+                return toRead;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

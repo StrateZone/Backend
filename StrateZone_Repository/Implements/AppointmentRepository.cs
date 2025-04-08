@@ -278,23 +278,21 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<int> UpdateStatusForAppointmentBasedOnTablesAppointments()
+        public async Task<List<Appointment>> GetAppointmentsWithIncompletedStatusToBeCompletedBasedOnTablesAppointments()
         {
             try
             {
-                var result = await _context.Database
-                                .ExecuteSqlRawAsync(
-                                    "UPDATE appointments a " +
-                                    "SET status = CASE " +
-                                        "WHEN NOT EXISTS (" +
-                                                "SELECT 1 FROM tables_appointments ta " +
-                                                "WHERE ta.appointment_id = a.appointment_id " +
-                                                "AND ta.status IN ('pending', 'confirmed', 'incoming')" +
-                                            ") THEN 'completed'::appointment_status " +
-                                        "ELSE 'incompleted'::appointment_status " +
-                                    "END " +
-                                    "RETURNING *;"
-                                    );
+                var result = await _context.Appointments
+                                .FromSqlRaw(@"
+                                    SELECT * FROM appointments a
+                                    WHERE status = 'incompleted' 
+                                    AND NOT EXISTS (
+	                                    SELECT 1 FROM tables_appointments ta
+	                                    WHERE ta.appointment_id = a.appointment_id
+	                                    AND ta.status IN ('pending', 'confirmed', 'incoming', 'checked_in')
+	                                );"
+                                )
+                                .ToListAsync();
 
                 return result;
             }

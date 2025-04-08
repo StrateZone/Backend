@@ -3,7 +3,6 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Interfaces
 {
