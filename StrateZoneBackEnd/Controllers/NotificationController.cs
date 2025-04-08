@@ -66,5 +66,20 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPut("read/{id}")]
+        public async Task<IActionResult> ReadNoti(int id)
+        {
+            try
+            {
+                var result = await _notificationService.ReadByIdAsync(id);
+
+                return Created("Notification created", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

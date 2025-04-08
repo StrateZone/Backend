@@ -25,6 +25,8 @@ namespace StrateZone_Repository.Entities
 
         public MessageStatus Status { get; set; }
 
+        public NotificationType Type { get; set; }
+        
         public DateTime CreatedAt { get; set; }
 
         public virtual User? ToUserNavigation { get;set; }

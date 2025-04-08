@@ -16,6 +16,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         public int ToUser { get; set; }
 
+        public NotificationType Type { get; set; }
+
         public int? TablesAppointmentId { get; set; }
 
         public int? OrderId { get; set; }

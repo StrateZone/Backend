@@ -121,9 +121,11 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
-                appointmentRequest.Id = Convert.ToInt32(newAppointmentId);
+                await _context.SaveChangesAsync();
 
-                return appointmentRequest;
+                return await _context.AppointmentRequests.AsNoTracking()
+                    .Include(ar => ar.FromUserNavigation)
+                    .SingleOrDefaultAsync(ar => ar.Id == Convert.ToInt32(newAppointmentId));
             }
             catch (Exception ex)
             {
@@ -243,7 +245,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
                 _context.Entry(toAccept).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.FindAsync(id);
+                return await _context.AppointmentRequests.AsNoTracking().Include(ar => ar.ToUserNavigation).SingleOrDefaultAsync(ar => ar.Id == id);
             }
             catch (Exception ex)
             {
@@ -269,7 +271,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), new NpgsqlParameter("@id", id));
                 _context.Entry(toReject).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.FindAsync(id);
+                return await _context.AppointmentRequests.AsNoTracking().Include(ar => ar.ToUserNavigation).SingleOrDefaultAsync(ar => ar.Id == id);
             }
             catch (Exception ex)
             {

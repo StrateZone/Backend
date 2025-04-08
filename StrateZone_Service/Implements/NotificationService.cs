@@ -39,6 +39,7 @@ namespace StrateZone_Service.Implements
                     Title = request.Title,
                     Content = request.Content,
                     Status = PostgreEnums.MessageStatus.unread,
+                    Type = request.Type,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)
                 };
 
@@ -89,6 +90,20 @@ namespace StrateZone_Service.Implements
                 var mapped = _mapper.Map<PagedList<NotificationModel>>(result);
 
                 return new PagedList<NotificationModel>(mapped, result.Count, result.CurrentPage, result.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<NotificationModel> ReadByIdAsync(int id)
+        {
+            try
+            {
+                var result = await _notificationRepository.ReadByIdAsync(id);
+
+                return _mapper.Map<NotificationModel>(result);
             }
             catch (Exception ex)
             {

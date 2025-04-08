@@ -123,15 +123,19 @@ namespace StrateZone_Service.Implements
                             var appointment = await appointmentService.GetAppointmentByIdAsync((int)table.AppointmentId);
                             var userId = appointment.UserId;
 
-                            await tablesAppointmentService.CancelTablesAppointment(table.Id, userId);
+                            await tablesAppointmentService.ForceCancelTablesAppointment(table.Id, userId);
+
+                            string timeString = $"ngày {DateOnly.FromDateTime(table.ScheduleTime)}, từ {table.ScheduleTime.TimeOfDay} đến {table.EndTime.TimeOfDay}";
 
                             NotificationRequest notif = new()
                             {
                                 ToUser = userId,
-                                Title = $"Your table has been automatically cancelled!",
-                                Content = $"Your appointment on table {table.TableId}, appointment ID {table.AppointmentId} has been automatically cancelled and refunded. " +
-                                $"Reason: All of the sent invitations to this table have been either rejected or cancelled.",
+                                Title = "Đơn đặt bàn của bạn đã tự động hủy!",
+                                Content = $"Đơn đặt bàn số {table.TableId} vào {timeString} (mã đơn #{table.AppointmentId}) đã tự động được hủy " +
+                                $"và tiến hành hoàn tiền dựa theo thời gian đặt bàn. " +
+                                $"Lí do: Toàn bộ lời mời bạn đã gửi đến những người chơi khác đều đã hết hạn hoặc bị từ chối.",
                                 TablesAppointmentId = table.Id,
+                                Type = StrateZone_Repository.Parameters.PostgreEnums.NotificationType.appointment
                             };
 
                             await notificationService.CreateNotificationAsync(notif);

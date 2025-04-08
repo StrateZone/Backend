@@ -32,6 +32,8 @@ namespace StrateZone_Service.Implements
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly INotificationService _notificationService;
+        private readonly IVoucherService _voucherService;
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
@@ -44,7 +46,8 @@ namespace StrateZone_Service.Implements
             IPaymentService paymentService, 
             IWalletService walletService, 
             ITransactionRepository transactionRepository, 
-            ScheduleTimeValidator scheduleTimeValidator)
+            ScheduleTimeValidator scheduleTimeValidator, 
+            INotificationService notificationService)
         {
             _appointmentRepository = appointmentRepository;
             _userService = userService;
@@ -56,6 +59,7 @@ namespace StrateZone_Service.Implements
             _walletService = walletService;
             _transactionRepository = transactionRepository;
             _scheduleTimeValidator = scheduleTimeValidator;
+            _notificationService = notificationService;
         }
 
         public async Task<PagedList<AppointmentResponse>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -331,7 +335,24 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                return await _appointmentRepository.UpdateStatusForAppointmentBasedOnTablesAppointments();
+                var appointments = await _appointmentRepository.GetAppointmentsWithIncompletedStatusToBeCompletedBasedOnTablesAppointments();
+            
+                foreach (var appointment in appointments)
+                {
+                    appointment.Status = AppointmentStatus.completed;
+                    await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);
+
+                    NotificationRequest request = new()
+                    {
+                        ToUser = appointment.UserId,
+                        Title = $"Mã đơn #{appointment.AppointmentId} đã được hoàn thành!",
+                        Content = $"Những đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đều đã hoàn tất! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+                    };
+
+                    await _notificationService.CreateNotificationAsync(request);
+                }
+
+                return appointments.Count;
             }
             catch (Exception ex)
             {
