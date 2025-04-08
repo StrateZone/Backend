@@ -52,6 +52,8 @@ namespace StrateZone_Repository.Implements
                 var result = _context.AppointmentRequests
                                     .Where(ar => ar.FromUser == userId)
                                     .Include(ar => ar.ToUserNavigation)
+                                    .Include(ar => ar.Table)
+                                    .ThenInclude(t => t.Room)
                                     .AsQueryable();
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }

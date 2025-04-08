@@ -142,6 +142,27 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
+                foreach (var appointmentRequestModel in appointmentRequestModels)
+                {
+                    if (appointmentRequestModel.AppointmentId == null)
+                    {
+                        if (appointmentRequestModel.Status == RequestStatus.accepted.ToString())
+                            appointmentRequestModel.Status = RequestStatus.await_appointment_creation.ToString();
+                        continue;
+                    }
+
+                    var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
+
+                    appointmentRequestModel.TablesAppointmentId = ta.Id;
+                    appointmentRequestModel.TotalPrice = ta.Price;
+
+                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).SingleOrDefault(p => p.UserId == userId);
+                    if (appointmentRequestModel.Status == RequestStatus.accepted.ToString() && payment?.PaymentStatus == "unpaid")
+                    {
+                        appointmentRequestModel.Status = RequestStatus.payment_required.ToString();
+                    }
+                }
+
                 return new PagedList<AppointmentrequestModel>(
                     appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize
                     );

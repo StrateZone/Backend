@@ -74,9 +74,10 @@ namespace StrateZone_Repository.Implements
 
                 var result = _context.Appointments
                                             .FromSqlRaw(@"
-                                                SELECT a.* FROM appointments a 
+                                                SELECT a.* 
+                                                FROM appointments a 
                                                 JOIN tables_appointments ta 
-                                                ON ta.appointment_id = a.appointment_id AND ta.status = @st::appointment_status
+                                                ON ta.appointment_id = a.appointment_id AND ta.status = @st::appointment_status 
                                             ", statusParam)
                                             .AsNoTracking()
                                             .Include(a => a.User)

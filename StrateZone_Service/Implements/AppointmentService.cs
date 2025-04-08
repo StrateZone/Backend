@@ -67,9 +67,10 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRepository.GetAppointmentsAsync(parameters);
-                var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
-                return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
+                var mappedAppointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
+
+                return new PagedList<AppointmentResponse>(mappedAppointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {
@@ -82,6 +83,12 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRepository.GetAllAppointmentsAsync(parameters);
+
+                foreach (var a in result)
+                {
+                    a.TablesAppointments = a.TablesAppointments.Where(ta => ta.Status == parameters.Status).ToList();
+                }
+
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
