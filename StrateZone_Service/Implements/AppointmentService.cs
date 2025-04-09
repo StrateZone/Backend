@@ -305,7 +305,7 @@ namespace StrateZone_Service.Implements
                 var newAdminTransaction = new Transaction
                 {
                     Amount = tableAppointment.Price,
-                    Content = "Hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price + " VND.",
+                    Content = "Hoàn tiền cho bàn " + tableAppointment.Id,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     OfUser = null,
                     TransactionType = TransactionType.refund,
@@ -316,7 +316,7 @@ namespace StrateZone_Service.Implements
                 var newTransaction = new Transaction
                 {
                     Amount = tableAppointment.Price,
-                    Content = "Được hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price + " VND.",
+                    Content = "Được hoàn tiền cho bàn " + tableAppointment.Id,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     OfUser = userId,
                     TransactionType = TransactionType.refund,
