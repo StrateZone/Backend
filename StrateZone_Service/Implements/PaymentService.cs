@@ -75,8 +75,9 @@ namespace StrateZone_Service.Implements
                     await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(mappedTA, tablesAppointment.Id);
 
                     var updatingPayment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tablesAppointment.Id)).SingleOrDefault(p => p.UserId == appointment.UserId);
-                    updatingPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
-                    await _paymentRepository.UpdatePaymentAsync(updatingPayment, updatingPayment.Id);
+                    var mappedPayment = _mapper.Map<PaymentModel>(updatingPayment);
+                    mappedPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid.ToString();
+                    await UpdatePaymentAsync(mappedPayment, mappedPayment.Id);
                 }
 
                 var newTransaction = new Transaction
