@@ -90,6 +90,9 @@ namespace StrateZone_Service.Mapper
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
 
+            CreateMap<Appointmentrequest, AppointmentrequestResponse>();
+            CreateMap<AppointmentrequestModel, AppointmentrequestResponse>();
+
             CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
 
             CreateMap<Payment, PaymentModel>()

@@ -16,6 +16,7 @@ using StrateZone_Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
@@ -125,6 +126,14 @@ namespace StrateZone_Service.Implements
 
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
+                foreach (var a in appointments)
+                {
+                    var requests = await _appointmentrequestService.GetAppointmentrequestsByAppointmentIdAsync(a.AppointmentId);
+                    if (requests.Count <= 0) continue;
+
+                    a.Appointmentrequests = _mapper.Map<List<AppointmentrequestResponse>>(requests);
+                }
+
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
@@ -138,7 +147,17 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRepository.GetAppointmentByIdAsync(id);
-                return _mapper.Map<AppointmentResponse>(result);
+                if (result == null) return null;
+
+                var mapped = _mapper.Map<AppointmentResponse>(result);
+
+                var requests = await _appointmentrequestService.GetAppointmentrequestsByAppointmentIdAsync(result.AppointmentId);
+                if (requests.Count > 0)
+                {
+                    mapped.Appointmentrequests = _mapper.Map<List<AppointmentrequestResponse>>(requests);
+                }
+              
+                return mapped;
             }
             catch (Exception ex)
             {
@@ -296,8 +315,6 @@ namespace StrateZone_Service.Implements
             {
                 var tableAppointment = await _tablesAppointmentService.GetByIdAsync(tableAppointmentId);
                 var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
-                
-                
 
                 userWallet.Balance += tableAppointment.Price;
                 await _walletService.UpdateWalletAsync(userWallet, userWallet.WalletId);

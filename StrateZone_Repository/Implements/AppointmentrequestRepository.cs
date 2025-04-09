@@ -398,6 +398,28 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Appointmentrequest>> GetAppointmentRequestsByAppointmentIdAsync(int appointmentId)
+        {
+            try
+            {
+                var taIds = _context.TablesAppointments
+                                    .AsNoTracking()
+                                    .Where(ta => ta.AppointmentId == appointmentId)
+                                    .Select(ta => ta.TableId)
+                                    .ToHashSet();
+
+                return await _context.AppointmentRequests
+                                    .AsNoTracking()
+                                    .Where(ar => ar.AppointmentId == appointmentId && taIds.Contains(ar.TableId))
+                                    .Include(ar => ar.ToUserNavigation)
+                                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<List<Appointmentrequest>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tableAppointmentId)
         {
             try
