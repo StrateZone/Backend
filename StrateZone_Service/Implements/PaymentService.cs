@@ -260,9 +260,10 @@ namespace StrateZone_Service.Implements
 
                 await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
 
-                var payment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id)).SingleOrDefault(p => p.UserId == appointmentrequestModel.ToUser);
-                payment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
-                await _paymentRepository.UpdatePaymentAsync(payment, payment.Id);
+                var updatingPayment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id)).SingleOrDefault(p => p.UserId == appointmentrequestModel.ToUser);
+                var mappedPayment = _mapper.Map<PaymentModel>(updatingPayment);
+                mappedPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid.ToString();
+                await UpdatePaymentAsync(mappedPayment, mappedPayment.Id);
 
                 var newTransaction = new Transaction
                 {
