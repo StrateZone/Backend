@@ -64,7 +64,7 @@ namespace StrateZone_Service.Implements
                     {
                         ToEmail = email,
                         Subject = "Account Verification",
-                        Content = $"<p>Your activation OTP is:</p><h1><b>{updatedUser.OTP}</b></h1><p>This OTP valids for 5 minutes.<br>If this request wasn't made by you, please ignore it.</p>"
+                        Content = $"<p>Mã OTP kích hoạt của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>OTP này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
                     };
                 }
                 else
@@ -73,7 +73,7 @@ namespace StrateZone_Service.Implements
                     {
                         ToEmail = email,
                         Subject = "Login Verification",
-                        Content = $"<p>Your login OTP is:</p><h1><b>{updatedUser.OTP}</b></h1><p>This OTP valids for 5 minutes.<br>If this request wasn't made by you, please ignore it.</p>"
+                        Content = $"<p>Mã OTP đăng nhập của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>OTP này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
                     };
                 }
 

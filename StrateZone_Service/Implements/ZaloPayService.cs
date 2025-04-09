@@ -106,8 +106,6 @@ namespace StrateZone_Service.Implements
 
                 Console.WriteLine("mac = {0}", mac);
 
-
-
                 //// kiểm tra callback hợp lệ (đến từ ZaloPay server)
                 //if (!reqMac.Equals(mac))
                 //{
@@ -119,9 +117,6 @@ namespace StrateZone_Service.Implements
                 //{
 
                 //}
-
-
-
 
                 // thanh toán thành công
                 // merchant cập nhật trạng thái cho đơn hàng

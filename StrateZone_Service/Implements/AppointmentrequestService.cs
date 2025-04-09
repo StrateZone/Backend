@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
@@ -202,6 +203,21 @@ namespace StrateZone_Service.Implements
                 }
 
                 return new PagedList<AppointmentrequestModel>(appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<AppointmentrequestModel>> GetAppointmentrequestsByAppointmentIdAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentRequestRepository.GetAppointmentRequestsByAppointmentIdAsync(id);
+                var appointmentRequestModels = _mapper.Map<List<AppointmentrequestModel>>(result);
+
+                return appointmentRequestModels;
             }
             catch (Exception ex)
             {

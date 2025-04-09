@@ -23,7 +23,8 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
                     .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
                     .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
-                    .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserResponseAvatarResolver>());
+                    .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserResponseAvatarResolver>())
+                    .ReverseMap();
 
             CreateMap<UserResponse, OpponentResponse>();
 
@@ -88,6 +89,9 @@ namespace StrateZone_Service.Mapper
             CreateMap<Appointmentrequest, AppointmentrequestModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
+
+            CreateMap<Appointmentrequest, AppointmentrequestResponse>();
+            CreateMap<AppointmentrequestModel, AppointmentrequestResponse>();
 
             CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
 

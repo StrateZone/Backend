@@ -61,7 +61,7 @@ namespace StrateZone_Repository.Implements
 
         public async Task<Payment> UpdatePaymentAsync(Payment payment, int id)
         {
-            var existingPayment = await _context.Payments.FindAsync(id) ?? throw new Exception("Appointment request with this ID does not exist");
+            var existingPayment = await _context.Payments.FindAsync(id) ?? throw new Exception("Payment with this ID does not exist");
             existingPayment.Id = id;
 
             var parameters = new List<NpgsqlParameter>();

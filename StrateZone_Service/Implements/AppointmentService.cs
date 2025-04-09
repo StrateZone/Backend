@@ -16,6 +16,7 @@ using StrateZone_Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
@@ -125,6 +126,14 @@ namespace StrateZone_Service.Implements
 
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
 
+                foreach (var a in appointments)
+                {
+                    var requests = await _appointmentrequestService.GetAppointmentrequestsByAppointmentIdAsync(a.AppointmentId);
+                    if (requests.Count <= 0) continue;
+
+                    a.Appointmentrequests = _mapper.Map<List<AppointmentrequestResponse>>(requests);
+                }
+
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
@@ -138,7 +147,17 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _appointmentRepository.GetAppointmentByIdAsync(id);
-                return _mapper.Map<AppointmentResponse>(result);
+                if (result == null) return null;
+
+                var mapped = _mapper.Map<AppointmentResponse>(result);
+
+                var requests = await _appointmentrequestService.GetAppointmentrequestsByAppointmentIdAsync(result.AppointmentId);
+                if (requests.Count > 0)
+                {
+                    mapped.Appointmentrequests = _mapper.Map<List<AppointmentrequestResponse>>(requests);
+                }
+              
+                return mapped;
             }
             catch (Exception ex)
             {
@@ -302,14 +321,13 @@ namespace StrateZone_Service.Implements
                 var newAdminTransaction = new Transaction
                 {
                     Amount = tableAppointment.Price,
-                    Content = "Hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price,
+                    Content = "Hoàn tiền cho bàn " + tableAppointment.Id,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     OfUser = null,
                     TransactionType = TransactionType.refund,
                 };
 
                 await _transactionRepository.SaveTransaction(newAdminTransaction);
-
 
                 if(ownerPayment != null && ownerPayment.PaymentStatus == PaymentStatus.paid.ToString())
                 {

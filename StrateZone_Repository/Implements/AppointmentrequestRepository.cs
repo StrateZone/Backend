@@ -28,6 +28,7 @@ namespace StrateZone_Repository.Implements
                                     .Include(ar => ar.FromUserNavigation)
                                     .Include(ar => ar.Table)
                                     .ThenInclude(t => t.Room)
+                                    .OrderByDescending(ar => ar.CreatedAt)
                                     .AsQueryable();
 
                 result = parameters.OrderBy switch
@@ -54,7 +55,16 @@ namespace StrateZone_Repository.Implements
                                     .Include(ar => ar.ToUserNavigation)
                                     .Include(ar => ar.Table)
                                     .ThenInclude(t => t.Room)
+                                    .OrderByDescending(ar => ar.CreatedAt)
                                     .AsQueryable();
+
+                result = parameters.OrderBy switch
+                {
+                    "created-at" => result.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                    _ => result
+                };
+
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -92,6 +102,9 @@ namespace StrateZone_Repository.Implements
                                                     (ar.AppointmentId == null && appointmentRequest.AppointmentId == null))
                                                 )
                                                 .ToListAsync();
+
+                if (requestsList.Any(r => r.Status == RequestStatus.accepted))
+                    throw new Exception($"Someone has already accepted your invitation to this table. Invitation is no longer allowed.");
 
                 if (requestsList.Any(r => r.ToUser == appointmentRequest.ToUser && r.Status == PostgreEnums.RequestStatus.pending))
                     throw new Exception($"Invitation to this user already been sent.");
@@ -388,6 +401,28 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Appointmentrequest>> GetAppointmentRequestsByAppointmentIdAsync(int appointmentId)
+        {
+            try
+            {
+                var taIds = _context.TablesAppointments
+                                    .AsNoTracking()
+                                    .Where(ta => ta.AppointmentId == appointmentId)
+                                    .Select(ta => ta.TableId)
+                                    .ToHashSet();
+
+                return await _context.AppointmentRequests
+                                    .AsNoTracking()
+                                    .Where(ar => ar.AppointmentId == appointmentId && taIds.Contains(ar.TableId))
+                                    .Include(ar => ar.ToUserNavigation)
+                                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<List<Appointmentrequest>> GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(int userId, int tableAppointmentId)
         {
             try
@@ -411,7 +446,24 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= @now;",
+                    @"
+                        UPDATE appointment_requests ar
+                        SET status = 'expired'
+                        WHERE expire_at <= @now AND (
+                            ar.status = 'pending'
+                            OR (
+                                ar.status = 'accepted'
+                                AND EXISTS (
+                                    SELECT 1
+                                    FROM tables_appointments ta
+                                    JOIN payments p ON p.tables_appointment_id = ta.id
+                                    WHERE ta.table_id = ar.table_id
+                                      AND ta.appointment_id = ar.appointment_id
+                                      AND p.status = 'unpaid'
+                                )
+                            )
+                        );
+                    ",
                     new NpgsqlParameter("@now", DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
                 );
             }
