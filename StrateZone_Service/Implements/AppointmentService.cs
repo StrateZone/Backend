@@ -295,12 +295,9 @@ namespace StrateZone_Service.Implements
             try
             {
                 var tableAppointment = await _tablesAppointmentService.GetByIdAsync(tableAppointmentId);
-                var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
-                
-                
-
-                userWallet.Balance += tableAppointment.Price;
-                await _walletService.UpdateWalletAsync(userWallet, userWallet.WalletId);
+                var payments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tableAppointmentId);
+                var ownerPayment = payments.SingleOrDefault(p => p.UserId == userId);
+                var invitedUserPayment = payments.SingleOrDefault(p => p.UserId != userId);
 
                 var newAdminTransaction = new Transaction
                 {
@@ -313,16 +310,40 @@ namespace StrateZone_Service.Implements
 
                 await _transactionRepository.SaveTransaction(newAdminTransaction);
 
-                var newTransaction = new Transaction
-                {
-                    Amount = tableAppointment.Price,
-                    Content = "Được hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price,
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    OfUser = userId,
-                    TransactionType = TransactionType.refund,
-                };
 
-                await _transactionRepository.SaveTransaction(newTransaction);
+                if(ownerPayment != null && ownerPayment.PaymentStatus == PaymentStatus.paid.ToString())
+                {
+                    var fromUserWallet = await _walletService.GetWalletByUserIdAsync(userId);
+                    fromUserWallet.Balance += tableAppointment.Price;
+                    await _walletService.UpdateWalletAsync(fromUserWallet, fromUserWallet.WalletId);
+                    var newTransaction = new Transaction
+                    {
+                        Amount = tableAppointment.Price,
+                        Content = "Được hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price,
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = userId,
+                        TransactionType = TransactionType.refund,
+                    };
+
+                    await _transactionRepository.SaveTransaction(newTransaction);
+                }
+
+                if (invitedUserPayment != null && invitedUserPayment.PaymentStatus == PaymentStatus.paid.ToString())
+                {
+                    var toUserWallet = await _walletService.GetWalletByUserIdAsync((int)invitedUserPayment.UserId);
+                    toUserWallet.Balance += tableAppointment.Price;
+                    await _walletService.UpdateWalletAsync(toUserWallet, toUserWallet.WalletId);
+                    var newTransaction = new Transaction
+                    {
+                        Amount = tableAppointment.Price,
+                        Content = "Được hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price,
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = invitedUserPayment.UserId,
+                        TransactionType = TransactionType.refund,
+                    };
+
+                    await _transactionRepository.SaveTransaction(newTransaction);
+                }
 
 
                 tableAppointment.Status = AppointmentStatus.refunded.ToString();
