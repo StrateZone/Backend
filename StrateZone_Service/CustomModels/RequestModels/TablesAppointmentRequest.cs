@@ -21,6 +21,9 @@ namespace StrateZone_Service.CustomModels.RequestModels
         [Required]
         public DateTime EndTime { get; set; }
 
+        [Required]
+        public List<int> InvitedUsers { get; set; } = new();
+
         public override string ToString()
         {
             return $"TableId: {TableId}, ScheduleTime: {ScheduleTime}, EndTime: {EndTime}.";

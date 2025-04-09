@@ -242,10 +242,9 @@ namespace StrateZone_Service.Implements
                     };
                 }
 
-                var invitedUser = await _userRepository.GetUserByIdAsync(appointmentrequestModel.ToUser);
-                var invitorUser = await _userRepository.GetUserByIdAsync(appointmentrequestModel.FromUser);
-
-                var userWallet = await _walletRepository.GetWalletByUserIdAsync(appointmentrequestModel.ToUser);
+                var requestAcceptor = await _userRepository.GetUserByIdAsync(appointmentrequestModel.ToUser);
+                var requestSender = await _userRepository.GetUserByIdAsync(appointmentrequestModel.FromUser);
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(requestAcceptor.UserId);
 
                 if (userWallet.Balance < tableAppointment.Price)
                 {
@@ -260,10 +259,26 @@ namespace StrateZone_Service.Implements
 
                 await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
 
-                var updatingPayment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id)).SingleOrDefault(p => p.UserId == appointmentrequestModel.ToUser);
-                var mappedPayment = _mapper.Map<PaymentModel>(updatingPayment);
-                mappedPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid.ToString();
-                await UpdatePaymentAsync(mappedPayment, mappedPayment.Id);
+                var invitedUserPayment = new Payment()
+                {
+                    UserId = appointmentrequestModel.ToUser,
+                    TablesAppointmentId = tableAppointment.Id,
+                    PaymentStatus = PostgreEnums.PaymentStatus.paid,
+                    Description = $"Thanh toán cho bàn {tableAppointment.Id}"
+                                + (requestSender != null ? $"(chơi chung với {requestSender.Username})" : ""),
+                    PaymentType = PostgreEnums.PaymentType.appointment
+                };
+
+                await _paymentRepository.CreatePaymentAsync(invitedUserPayment);
+
+                await _appointmentrequestRepository.AcceptAppointmentrequestAsync(appointment_request.Id);
+
+                var invitorUserPayment = (await GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id))
+                                        .SingleOrDefault(p => p.UserId == requestSender.UserId);
+
+                invitorUserPayment.Description = $"Thanh toán cho bàn {tableAppointment.Id}"
+                                + (requestAcceptor != null ? $"(chơi chung với {requestAcceptor.Username})" : "");
+                await UpdatePaymentAsync(invitorUserPayment, invitorUserPayment.Id);
 
                 var newTransaction = new Transaction
                 {
@@ -278,8 +293,8 @@ namespace StrateZone_Service.Implements
                 NotificationRequest notificationToUser = new()
                 {
                     ToUser = appointmentrequestModel.ToUser,
-                    Title = $"Bạn đã hoàn thành thanh toán đơn mời của {invitorUser.Username}!",
-                    Content = $"Bạn đã hoàn tất thanh toán cho đơn mời đến từ {invitorUser.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                    Title = $"Bạn đã hoàn thành thanh toán đơn mời của {requestSender.Username}!",
+                    Content = $"Bạn đã hoàn tất thanh toán cho đơn mời đến từ {requestSender.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
                     $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
                     $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
                     Type = NotificationType.appointment_request_from
@@ -289,8 +304,8 @@ namespace StrateZone_Service.Implements
                 NotificationRequest notificationFromUser = new()
                 {
                     ToUser = appointmentrequestModel.FromUser,
-                    Title = $"{invitedUser.Username} đã hoàn thành thanh toán đơn mời!",
-                    Content = $"{invitedUser.Username} đã hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                    Title = $"{requestAcceptor.Username} đã hoàn thành thanh toán đơn mời!",
+                    Content = $"{requestAcceptor.Username} đã hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
                     $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
                     $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
                     Type = NotificationType.appointment_request_to

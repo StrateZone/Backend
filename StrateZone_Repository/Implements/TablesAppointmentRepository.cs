@@ -337,14 +337,14 @@ namespace StrateZone_Repository.Implements
                             .FromSqlRaw(
                                 @"SELECT ta.*
                                 FROM tables_appointments ta
-                                WHERE ta.status IN ('confirmed', 'pending', 'incoming') 
-                                AND EXISTS (
-                                    SELECT 1
-                                    FROM appointment_requests ar
-                                    WHERE ar.appointment_id = ta.appointment_id
-                                      AND ar.table_id = ta.table_id
-                                      AND ar.status IN ('rejected', 'expired')
-                                );"
+                                WHERE ta.status IN ('confirmed', 'pending', 'incoming')
+                                    AND NOT EXISTS (
+                                        SELECT 1
+                                        FROM appointment_requests ar
+                                        WHERE ar.appointment_id = ta.appointment_id
+                                        AND ar.table_id = ta.table_id
+                                        AND ar.status NOT IN ('expired', 'cancelled', 'rejected')
+                                    );"
                             ).ToListAsync();
 
                 return matchingTAs;

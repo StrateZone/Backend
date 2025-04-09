@@ -99,6 +99,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        /*
         [HttpPost]
         public async Task<IActionResult> CreateAppointmentRequestAsync([FromBody] AppointmentrequestRequest request)
         {
@@ -112,6 +113,7 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+        */
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAppointmentRequestAsync([FromBody] AppointmentrequestModel appointmentRequestModel, int id)

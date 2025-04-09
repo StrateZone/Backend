@@ -239,38 +239,39 @@ namespace StrateZone_Service.Implements
                 var tablesAppointments = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
                 result.TablesAppointments = tablesAppointments;
 
-                var requests = await _appointmentrequestService.LinkAppointmentrequestsToAppointmentAsync(result);
-                result.Appointmentrequests = requests;
+                foreach (var tableAppointment in request.TablesAppointmentRequests)
+                {
+                    var invitedUsers = tableAppointment.InvitedUsers;
+                    foreach (var invited in invitedUsers)
+                    {
+                        var newAR = new AppointmentrequestRequest()
+                        {
+                            FromUser = request.UserId,
+                            ToUser = invited,
+                            TotalPrice = tableAppointment.Price,
+                            StartTime = tableAppointment.ScheduleTime,
+                            EndTime = tableAppointment.EndTime,
+                            TableId = tableAppointment.TableId,
+                        };
+
+                        await _appointmentrequestService.CreateAppointmentRequestAsync(newAR);
+                    }
+                }
+
+                result.Appointmentrequests = await _appointmentrequestService.LinkAppointmentrequestsToAppointmentAsync(result);
 
                 foreach (var tablesAppointment in tablesAppointments)
                 {
-                    var acceptedUser = await _userService.FindUserAcceptedToJoinTablesAppointment(tablesAppointment);
-
                     PaymentModel paymentModel = new()
                     {
                         UserId = appointment.UserId,
                         TablesAppointmentId = tablesAppointment.Id,
                         PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
-                        Description = $"Thanh toán cho bàn {tablesAppointment.Id}" 
-                                + (acceptedUser != null ? $"(chơi chung với {acceptedUser.Username})" : ""),
+                        Description = $"Thanh toán cho bàn {tablesAppointment.Id}",
                         PaymentType = PostgreEnums.PaymentType.appointment.ToString()
                     };
 
                     await _paymentService.CreatePaymentAsync(paymentModel);
-
-                    if (acceptedUser != null)
-                    {
-                        PaymentModel paymentModel2 = new()
-                        {
-                            UserId = acceptedUser.UserId,
-                            TablesAppointmentId = tablesAppointment.Id,
-                            PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
-                            Description = $"Thanh toán cho bàn {tablesAppointment.Id} (chơi chung với {appointment.User.Username})",
-                            PaymentType = PostgreEnums.PaymentType.appointment.ToString()
-                        };
-
-                        await _paymentService.CreatePaymentAsync(paymentModel2);
-                    }
                 }
 
                 return result;

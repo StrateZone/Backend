@@ -16,3 +16,5 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public decimal TotalPrice { get; set; }
     }
 }
+
+
