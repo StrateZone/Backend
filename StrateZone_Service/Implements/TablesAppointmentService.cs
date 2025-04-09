@@ -242,7 +242,6 @@ namespace StrateZone_Service.Implements
                 }
                 else
                 {
-                    var refundAmount = refundCalculation.RefundAmount;
                     var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
                     var paymentForInvitedUser = bookingPayments.SingleOrDefault(p => p.UserId != userId);
                     var invitedUserWallet = await _walletService.GetWalletByUserIdAsync((int)paymentForInvitedUser.UserId);
@@ -251,12 +250,12 @@ namespace StrateZone_Service.Implements
 
                     var newTransaction = new TransactionModel
                     {
-                        Amount = refundAmount,
+                        Amount = tablesAppointment.Price,
                         Content =
                             $"Refund on shared booking cancellation / " +
                             $"Table Id: {tablesAppointment.TableId}. / " +
                             $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
-                            $"Amount: {refundAmount} VND.",
+                            $"Amount: {tablesAppointment.Price} VND.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = paymentForInvitedUser.UserId,
                         TransactionType = TransactionType.refund,
