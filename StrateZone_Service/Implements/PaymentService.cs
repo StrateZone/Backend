@@ -24,6 +24,7 @@ namespace StrateZone_Service.Implements
         private readonly IEmailService _emailService;
         private readonly IUserRepository _userRepository;
         private readonly IAppointmentRepository _appointmentRepository;
+        private readonly INotificationService _notificationService;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -34,7 +35,8 @@ namespace StrateZone_Service.Implements
             IMapper mapper,
             IEmailService emailService,
             IUserRepository userRepository,
-            IAppointmentRepository appointmentRepository)
+            IAppointmentRepository appointmentRepository,
+            INotificationService notificationService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -45,6 +47,7 @@ namespace StrateZone_Service.Implements
             _emailService = emailService;
             _userRepository = userRepository;
             _appointmentRepository = appointmentRepository;
+            _notificationService = notificationService;
         }
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
         {
@@ -79,7 +82,7 @@ namespace StrateZone_Service.Implements
                 {
                     OfUser = appointment.UserId,
                     Amount = appointment.TotalPrice,
-                    Content = "Paid booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                    Content = "Đã thanh toán đơn " + appointment.AppointmentId + ": " + appointment.TotalPrice,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     TransactionType = PostgreEnums.TransactionType.payment
                 };
@@ -89,6 +92,28 @@ namespace StrateZone_Service.Implements
                 appointment.Status = AppointmentStatus.incompleted.ToString();
                 var mapped = _mapper.Map<Appointment>(appointment);
                 await _appointmentRepository.UpdateAppointmentAsync(mapped, appointment.AppointmentId);
+
+                NotificationRequest thisUser = new()
+                {
+                    ToUser = appointment.UserId,
+                    Title = $"Mã đơn #{appointment.AppointmentId} đã được thanh toán!",
+                    Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đều đã được thanh toán! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+                };
+                await _notificationService.CreateNotificationAsync(thisUser);
+
+                foreach (var appointmentRequest in appointment.Appointmentrequests)
+                {
+                    if(appointmentRequest.Status == RequestStatus.accepted.ToString())
+                    {
+                        NotificationRequest toUser = new()
+                        {
+                            ToUser = appointmentRequest.ToUser,
+                            Title = $"Mã đơn #{appointment.AppointmentId} đã được người mời thanh toán!",
+                            Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đã được người mời thanh toán thanh toán. Hãy tiến hành thanh toán phần của bạn! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+                        };
+                        await _notificationService.CreateNotificationAsync(thisUser);
+                    }
+                }
 
                 var user = await _userRepository.GetUserByIdAsync(appointment.UserId);
 

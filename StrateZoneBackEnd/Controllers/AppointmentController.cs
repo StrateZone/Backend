@@ -75,12 +75,12 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("cancel/admin")]
-        public async Task<IActionResult> RefundAppointment100Async(int appointmentId)
+        public async Task<IActionResult> RefundAppointment100Async(int tableAppointmentId, int userId)
         {
             try
             {
-                var appointment = await _appointmentService.RefundAppointment100Async(appointmentId);
-                return Ok(new {message = "Appointment refunded: ", data = appointment});
+                var tableAppointment = await _appointmentService.RefundAppointment100Async(tableAppointmentId, userId);
+                return Ok(new {message = "Appointment refunded: ", data = tableAppointment });
             }
             catch (Exception ex)
             {
