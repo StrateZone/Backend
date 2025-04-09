@@ -103,6 +103,9 @@ namespace StrateZone_Repository.Implements
                                                 )
                                                 .ToListAsync();
 
+                if (requestsList.Any(r => r.Status == RequestStatus.accepted))
+                    throw new Exception($"Someone has already accepted your invitation to this table. Invitation is no longer allowed.");
+
                 if (requestsList.Any(r => r.ToUser == appointmentRequest.ToUser && r.Status == PostgreEnums.RequestStatus.pending))
                     throw new Exception($"Invitation to this user already been sent.");
 
