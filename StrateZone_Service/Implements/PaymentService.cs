@@ -66,7 +66,7 @@ namespace StrateZone_Service.Implements
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
                 foreach (var tablesAppointment in appointment.TablesAppointments)
                 {
-                    tablesAppointment.Status = AppointmentStatus.incompleted.ToString();
+                    tablesAppointment.Status = AppointmentStatus.confirmed.ToString();
                     var mappedTA = _mapper.Map<TablesAppointment>(tablesAppointment);
                     await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(mappedTA, tablesAppointment.Id);
 
@@ -86,7 +86,7 @@ namespace StrateZone_Service.Implements
 
                 await _transactionRepository.SaveTransaction(newTransaction);
 
-                appointment.Status = AppointmentStatus.confirmed.ToString();
+                appointment.Status = AppointmentStatus.incompleted.ToString();
                 var mapped = _mapper.Map<Appointment>(appointment);
                 await _appointmentRepository.UpdateAppointmentAsync(mapped, appointment.AppointmentId);
 
