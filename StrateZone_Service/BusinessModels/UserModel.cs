@@ -47,6 +47,7 @@ namespace StrateZone_Service.BusinessModels
         public DateTime? RefreshTokenExpiry { get; set; }
 
         public string? OTP { get; set; } // Store OTP
+
         public DateTime? OTPExpiry { get; set; } // OTP expiration time
         /***************************************************************************************************************************************/
 

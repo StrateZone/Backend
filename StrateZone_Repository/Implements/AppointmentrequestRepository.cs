@@ -28,6 +28,7 @@ namespace StrateZone_Repository.Implements
                                     .Include(ar => ar.FromUserNavigation)
                                     .Include(ar => ar.Table)
                                     .ThenInclude(t => t.Room)
+                                    .OrderByDescending(ar => ar.CreatedAt)
                                     .AsQueryable();
 
                 result = parameters.OrderBy switch
@@ -54,7 +55,16 @@ namespace StrateZone_Repository.Implements
                                     .Include(ar => ar.ToUserNavigation)
                                     .Include(ar => ar.Table)
                                     .ThenInclude(t => t.Room)
+                                    .OrderByDescending(ar => ar.CreatedAt)
                                     .AsQueryable();
+
+                result = parameters.OrderBy switch
+                {
+                    "created-at" => result.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                    _ => result
+                };
+
                 return await PagedList<Appointmentrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -411,7 +421,24 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE appointment_requests ar SET status = 'expired' WHERE ar.status = 'pending' AND ar.expire_at <= @now;",
+                    @"
+                        UPDATE appointment_requests ar
+                        SET status = 'expired'
+                        WHERE expire_at <= @now AND (
+                            ar.status = 'pending'
+                            OR (
+                                ar.status = 'accepted'
+                                AND EXISTS (
+                                    SELECT 1
+                                    FROM tables_appointments ta
+                                    JOIN payments p ON p.tables_appointment_id = ta.id
+                                    WHERE ta.table_id = ar.table_id
+                                      AND ta.appointment_id = ar.appointment_id
+                                      AND p.status = 'unpaid'
+                                )
+                            )
+                        );
+                    ",
                     new NpgsqlParameter("@now", DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
                 );
             }

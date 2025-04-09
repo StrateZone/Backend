@@ -367,7 +367,6 @@ namespace StrateZone_Service.Implements
             }
         }
 
-
         public async Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime)
         {
             var tablesAppointment = await _tablesAppointmentRepository.GetByIdAsync(tablesAppointmentId)

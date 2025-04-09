@@ -255,16 +255,22 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = (from ta in _context.TablesAppointments
-                             join ar in _context.AppointmentRequests
-                             on new { ta.TableId, ta.AppointmentId } equals new { TableId = (int?) ar.TableId, AppointmentId = ar.AppointmentId }
-                             where ar.ToUser == userId && ar.Status == PostgreEnums.RequestStatus.accepted
-                             orderby ta.ScheduleTime descending
-                             select ta)
-                             .Include(ta => ta.Table)
-                                .ThenInclude(t => t.Room)
-                            .Include(ta => ta.Table)
-                                .ThenInclude(t => t.GameType);
+                var result = _context.TablesAppointments
+                                    .Join(_context.AppointmentRequests,
+                                        ta => new { ta.TableId, ta.AppointmentId },
+                                        ar => new { TableId = (int?)ar.TableId, ar.AppointmentId },
+                                        (ta, ar) => new { ta, ar })
+                                    .Where(x => x.ar.ToUser == userId && x.ar.Status == PostgreEnums.RequestStatus.accepted)
+                                    .Join(_context.Payments,
+                                        x => x.ta.Id, 
+                                        p => p.TablesAppointmentId,   
+                                        (x, p) => new { x.ta, p })
+                                        .Where(x => x.p.UserId == userId && x.p.PaymentStatus == PostgreEnums.PaymentStatus.paid)
+                                        .Select(x => x.ta)
+                                        .Include(ta => ta.Table)
+                                            .ThenInclude(t => t.Room)
+                                        .Include(ta => ta.Table)
+                                            .ThenInclude(t => t.GameType);
 
                 return await PagedList<TablesAppointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }

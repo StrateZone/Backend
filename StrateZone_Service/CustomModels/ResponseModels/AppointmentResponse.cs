@@ -19,7 +19,7 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public DateTime? CreatedAt { get; set; }
 
-        public UserModel? User { get; set; }
+        public UserResponse? User { get; set; }
 
         public virtual ICollection<TablesAppointmentResponse> TablesAppointments { get; set; } = [];
 
