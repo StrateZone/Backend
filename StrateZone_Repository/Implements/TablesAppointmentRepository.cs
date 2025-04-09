@@ -340,13 +340,13 @@ namespace StrateZone_Repository.Implements
                                     FROM tables_appointments ta
                                     WHERE ta.status IN ('confirmed', 'pending', 'incoming')
                                       AND (
-                                          NOT EXISTS (
+                                          EXISTS (
                                               SELECT 1
                                               FROM appointment_requests ar
                                               WHERE ar.appointment_id = ta.appointment_id
                                                 AND ar.table_id = ta.table_id
                                           )
-                                          OR NOT EXISTS (
+                                          AND NOT EXISTS (
                                               SELECT 1
                                               FROM appointment_requests ar
                                               WHERE ar.appointment_id = ta.appointment_id
