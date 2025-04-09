@@ -154,6 +154,7 @@ namespace StrateZone_Service.Implements
 
                     var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
 
+                    appointmentRequestModel.TablesAppointmentStatus = ta.Status;
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
 
@@ -192,6 +193,7 @@ namespace StrateZone_Service.Implements
 
                     var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
 
+                    appointmentRequestModel.TablesAppointmentStatus = ta.Status;
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
 

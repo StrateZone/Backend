@@ -5,6 +5,7 @@ using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
@@ -19,9 +20,11 @@ namespace StrateZone_Service.Implements
         private readonly IWalletService _walletService;
         private readonly ITransactionService _transactionService;
         private readonly IPriceService _priceService;
+        private readonly INotificationService _notificationService;
+        private readonly IUserRepository _userService;
         private readonly IMapper _mapper;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -30,6 +33,8 @@ namespace StrateZone_Service.Implements
             _walletService = walletService;
             _transactionService = transactionService;
             _requestRepository = repository;
+            _notificationService = notificationService;
+            _userService = userService;
         }
 
         public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
@@ -230,15 +235,23 @@ namespace StrateZone_Service.Implements
                     {
                         Amount = refundAmount,
                         Content =
-                            $"Refund on booking cancellation. / " +
-                            $"Table Id: {tablesAppointment.TableId}. / " +
-                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
-                            $"Amount: {refundAmount} VND.",
+                            $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, " +
+                            $"đơn #{tablesAppointment.AppointmentId}.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
                     };
                     await _transactionService.SaveTransaction(newTransaction);
+
+                    NotificationRequest notificationFromUser = new()
+                    {
+                        ToUser = userId,
+                        Title = $"Hủy đơn đặt bàn thành công!. ",
+                        Content = $"Bạn đã hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}. " +
+                            $"{refundAmount} VND đã được hoàn về ví của bạn!",
+                        Type = NotificationType.appointment_request_from
+                    };
+                    await _notificationService.CreateNotificationAsync(notificationFromUser);
                 }
                 else
                 {
@@ -252,15 +265,34 @@ namespace StrateZone_Service.Implements
                     {
                         Amount = tablesAppointment.Price,
                         Content =
-                            $"Refund on shared booking cancellation / " +
-                            $"Table Id: {tablesAppointment.TableId}. / " +
-                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
-                            $"Amount: {tablesAppointment.Price} VND.",
+                            $"Hoàn tiền {tablesAppointment.Price} VND cho đơn được mời tham gia ở bàn số {tablesAppointment.TableId}, " +
+                            $"đơn #{tablesAppointment.AppointmentId}.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = paymentForInvitedUser.UserId,
                         TransactionType = TransactionType.refund,
                     };
                     await _transactionService.SaveTransaction(newTransaction);
+
+                    NotificationRequest notificationFromUser = new()
+                    {
+                        ToUser = userId,
+                        Title = $"Hủy đơn đặt bàn thành công!. ",
+                        Content = $"Bạn đã hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}. " +
+                            $"Do đây là đơn đặt có sự tham gia của người chơi khác, bạn sẽ không được hoàn tiền!",
+                        Type = NotificationType.appointment_request_from
+                    };
+                    await _notificationService.CreateNotificationAsync(notificationFromUser);
+
+                    var cancelledUser = await _userService.GetUserByIdAsync(userId);
+                    NotificationRequest notificationToUser = new()
+                    {
+                        ToUser = (int)paymentForInvitedUser.UserId,
+                        Title = $"{cancelledUser.Username} đã hủy đơn đặt bàn!",
+                        Content = $"{cancelledUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. " +
+                        $"{tablesAppointment.Price} VND đã tự động được hoàn về ví của bạn!",
+                        Type = NotificationType.appointment_request_from
+                    };
+                    await _notificationService.CreateNotificationAsync(notificationToUser);
                 }
                 
                 tablesAppointment.Status = AppointmentStatus.cancelled.ToString();

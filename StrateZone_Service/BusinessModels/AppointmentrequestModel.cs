@@ -25,6 +25,8 @@ namespace StrateZone_Service.BusinessModels
 
         public int? TablesAppointmentId { get; set; } = null;
 
+        public string TablesAppointmentStatus { get; set; }
+
         public decimal? TotalPrice { get; set; }
 
         public DateTime? StartTime { get; set; }
