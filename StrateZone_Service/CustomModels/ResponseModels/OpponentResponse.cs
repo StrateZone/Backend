@@ -28,7 +28,5 @@ namespace StrateZone_Service.CustomModels.ResponseModels
         public string Gender { get; set; }
 
         public string Ranking { get; set; }
-
-        public bool IsInvited { get; set; }
     }
 }

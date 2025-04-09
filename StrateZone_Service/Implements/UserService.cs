@@ -206,27 +206,29 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<SearchedOpponentsResponse> GetRandomUsersByRankingAsync(HashSet<int> excludedIds, int tableId, DateTime StartTime, DateTime EndTime, PostgreEnums.Ranking ranking, int up, int down)
+        public async Task<SearchedOpponentsResponse> GetRandomUsersByRankingAsync(HashSet<int> excludedIds, PostgreEnums.Ranking ranking, int up, int down)
         {
             try
             {
                 var requestedUserId = excludedIds.ElementAt(0);
 
                 var results = await _userRepository.GetRandomUsersByRanking(excludedIds, ranking, up, down);
-                var users = _mapper.Map<List<UserResponse>>(results);
-                var opponents = _mapper.Map<List<OpponentResponse>>(users);
+                var users = _mapper.Map<Dictionary<Ranking, List<UserResponse>>>(results);
+                var opponents = _mapper.Map<Dictionary<Ranking, List<OpponentResponse>>>(users);
 
-                var appointmentRequestsToUsers = (await _appointmentrequestService.GetCurrentAppointmentRequestsFromUserByUserAndTableIdAsync(requestedUserId, tableId, StartTime, EndTime))
-                                            .Where(ar => ar.Status == "pending").Select(ar => ar.ToUser).ToArray();
+                var excludeIds = new HashSet<int>();
 
-                foreach (var opponent in opponents)
-                {
-                    opponent.IsInvited = appointmentRequestsToUsers.Contains(opponent.UserId);
-                };
+                foreach (var oList in opponents.Values) 
+                { 
+                    foreach (var opponent in oList)
+                    {
+                        excludedIds.Add(opponent.UserId);
+                    }
+                }
 
                 return new SearchedOpponentsResponse()
                 {
-                    ExcludedIds = [.. excludedIds, .. opponents.Select(o => o.UserId).ToArray()],
+                    ExcludedIds = excludedIds,
                     MatchingOpponents = opponents,
                 };
             }

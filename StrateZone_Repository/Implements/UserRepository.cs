@@ -403,7 +403,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<User>> GetRandomUsersByRanking(HashSet<int> excludedIds, Ranking ranking, int up, int down)
+        public async Task<Dictionary<Ranking, List<User>>> GetRandomUsersByRanking(HashSet<int> excludedIds, Ranking ranking, int up, int down)
         {
             try
             {
@@ -413,28 +413,38 @@ namespace StrateZone_Repository.Implements
                 Ranking upperBound = (Ranking)Math.Clamp((int)ranking + up, (int)minRanking, (int)maxRanking);
                 Ranking lowerBound = (Ranking)Math.Clamp((int)ranking - down, (int)minRanking, (int)maxRanking);
 
-                var users = await _context.Users
-                                    .FromSqlRaw(
-                                        @"
-                                            SELECT * FROM users 
-                                            WHERE user_id <> ALL(@ids) 
-                                            AND ranking >= @r1::ranking 
-                                            AND ranking <= @r2::ranking 
-                                            ORDER BY RANDOM()
-                                            LIMIT 6
-                                        ",
-                                        new NpgsqlParameter("@ids", excludedIds.ToArray()),
-                                        new NpgsqlParameter("@r1", lowerBound.ToString()),
-                                        new NpgsqlParameter("@r2", upperBound.ToString()))
-                                    .Include(u => u.AppointmentRequestsToUserNavigations)
-                                    .ToListAsync();
+                var sql = @"
+                            SELECT *
+                            FROM (
+                                SELECT u.*, ROW_NUMBER() OVER (PARTITION BY u.ranking ORDER BY RANDOM()) AS rn
+                                FROM users u
+                                WHERE u.user_id <> ALL(@ids)
+                                AND u.ranking BETWEEN @r1::ranking AND @r2::ranking
+                            ) AS ranked
+                            WHERE ranked.rn <= @perGroup
+                        ";
 
-                return users;
+                var users = await _context.Users
+                    .FromSqlRaw(
+                        sql,
+                        new NpgsqlParameter("@ids", excludedIds.ToArray()),
+                        new NpgsqlParameter("@r1", lowerBound.ToString()),
+                        new NpgsqlParameter("@r2", upperBound.ToString()),
+                        new NpgsqlParameter("@perGroup", 2)
+                    )
+                    .Include(u => u.AppointmentRequestsToUserNavigations)
+                    .OrderBy(u => u.Ranking)
+                    .ToListAsync();
+
+                return users
+                            .GroupBy(u => u.Ranking)
+                            .ToDictionary(g => g.Key, g => g.ToList());
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
+
     }
 }
