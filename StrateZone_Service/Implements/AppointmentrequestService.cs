@@ -264,40 +264,6 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _appointmentRequestRepository.AcceptAppointmentrequestAsync(id);
 
-                // in case the request is accepted AFTER the appointment is booked, create a payment for the invited user
-                // otherwise, the payment will be automatically created in CreateAppointmentAsync()
-                if (result.AppointmentId != null)
-                {
-                    var tablesAppointment = await _tablesAppointmentService
-                            .GetTablesAppointmentByTableIdAndAppointmentIdAsync(result.TableId, (int) result.AppointmentId);
-
-                    await _paymentService.CreatePaymentAsync(new PaymentModel()
-                    {
-                        UserId = result.ToUser,
-                        TablesAppointmentId = tablesAppointment.Id,
-                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
-                        PaymentType = PostgreEnums.PaymentType.appointment.ToString(),
-                        Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {result.FromUser})",
-                    });
-
-                    PaymentParameters parameters = new PaymentParameters()
-                    {
-                        PageSize = 100_000,
-                        PageNumber = 1,
-                    };
-
-                    var paymentOfTablesAppointmentOwner = (await _paymentService.GetPaymentsByUserIdAsync(result.FromUser, parameters))
-                                                        .FirstOrDefault(p => p.TablesAppointmentId == tablesAppointment.Id);
-
-                    PaymentModel updatedPayment = new()
-                    {
-                        Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {result.ToUser})",
-                        PaymentStatus = paymentOfTablesAppointmentOwner.PaymentStatus,
-                        PaymentType = paymentOfTablesAppointmentOwner.PaymentType,
-                    };
-                    await _paymentService.UpdatePaymentAsync(updatedPayment, paymentOfTablesAppointmentOwner.Id);
-                }
-
                 NotificationRequest notification = new()
                 {
                     ToUser = result.FromUser,
