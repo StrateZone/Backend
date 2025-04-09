@@ -57,7 +57,7 @@ namespace StrateZone_Service.Implements
             };
             var items = new List<ZaloPayItem>
             {
-                new ZaloPayItem { ItemId = "DEPO", ItemName = "Deposite: " + zaloPayRequest.Amount, ItemPrice = zaloPayRequest.Amount, ItemQuantity = 1 }
+                new ZaloPayItem { ItemId = "DEPO", ItemName = "Đã Nạp: " + zaloPayRequest.Amount, ItemPrice = zaloPayRequest.Amount, ItemQuantity = 1 }
             };
             var app_trans_id = rnd.Next(1000000); // Generate a random order's ID.
             var param = new Dictionary<string, string>();
@@ -139,7 +139,7 @@ namespace StrateZone_Service.Implements
                     OfUser = userId,
                     Amount = amount,
                     ReferenceId = dataJson["zp_trans_id"].ToString(),
-                    Content = "Transaction for: " + itemName,
+                    Content = itemName,
                     TransactionType = TransactionType.deposit,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                 });

@@ -232,8 +232,8 @@ namespace StrateZone_Service.Implements
                         UserId = appointment.UserId,
                         TablesAppointmentId = tablesAppointment.Id,
                         PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
-                        Description = $"Payment for tables appointment {tablesAppointment.Id}" 
-                                + (acceptedUser != null ? $"(shared with user {acceptedUser.UserId})" : ""),
+                        Description = $"Thanh toán cho bàn {tablesAppointment.Id}" 
+                                + (acceptedUser != null ? $"(chơi chung với {acceptedUser.Username})" : ""),
                         PaymentType = PostgreEnums.PaymentType.appointment.ToString()
                     };
 
@@ -246,7 +246,7 @@ namespace StrateZone_Service.Implements
                             UserId = acceptedUser.UserId,
                             TablesAppointmentId = tablesAppointment.Id,
                             PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
-                            Description = $"Payment for tables appointment {tablesAppointment.Id} (shared with user {appointment.UserId})",
+                            Description = $"Thanh toán cho bàn {tablesAppointment.Id} (chơi chung với {appointment.User.Username})",
                             PaymentType = PostgreEnums.PaymentType.appointment.ToString()
                         };
 
@@ -290,28 +290,22 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<AppointmentModel> RefundAppointment100Async(int id)
+        public async Task<TablesAppointmentModel> RefundAppointment100Async(int tableAppointmentId, int userId)
         {
             try
             {
-                var appointment = await _appointmentRepository.GetAppointmentByIdAsync(id);
-                var userWallet = await _walletService.GetWalletByUserIdAsync(appointment.UserId);
-                var tableAppointments = appointment.TablesAppointments.ToList();
+                var tableAppointment = await _tablesAppointmentService.GetByIdAsync(tableAppointmentId);
+                var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
+                
+                
 
-                foreach (var tableAppointment in tableAppointments)
-                {
-                    tableAppointment.Status = AppointmentStatus.refunded;
-                    var model = _mapper.Map<TablesAppointmentModel>(tableAppointment);
-                    await _tablesAppointmentService.UpdateTablesAppointmentAsync(model, model.Id);
-                }
-
-                userWallet.Balance += appointment.TotalPrice;
+                userWallet.Balance += tableAppointment.Price;
                 await _walletService.UpdateWalletAsync(userWallet, userWallet.WalletId);
 
                 var newAdminTransaction = new Transaction
                 {
-                    Amount = appointment.TotalPrice,
-                    Content = "Refund for booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                    Amount = tableAppointment.Price,
+                    Content = "Hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     OfUser = null,
                     TransactionType = TransactionType.refund,
@@ -321,20 +315,21 @@ namespace StrateZone_Service.Implements
 
                 var newTransaction = new Transaction
                 {
-                    Amount = appointment.TotalPrice,
-                    Content = "Refunded for booking " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                    Amount = tableAppointment.Price,
+                    Content = "Được hoàn tiền cho bàn " + tableAppointment.Id + ": " + tableAppointment.Price,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    OfUser = appointment.UserId,
+                    OfUser = userId,
                     TransactionType = TransactionType.refund,
                 };
 
                 await _transactionRepository.SaveTransaction(newTransaction);
 
 
-                appointment.Status = AppointmentStatus.refunded;
-                var updatedAppointment = await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);
+                tableAppointment.Status = AppointmentStatus.refunded.ToString();
+                var model = _mapper.Map<TablesAppointmentModel>(tableAppointment);
+                var updatedTableAppointment = await _tablesAppointmentService.UpdateTablesAppointmentAsync(model, model.Id);
 
-                return _mapper.Map<AppointmentModel>(updatedAppointment);
+                return _mapper.Map<TablesAppointmentModel>(updatedTableAppointment);
             }
             catch(Exception ex)
             {
