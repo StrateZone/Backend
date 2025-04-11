@@ -51,6 +51,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IThreadRepository, ThreadRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IFriendlistRepository, FriendlistRepository>();
+            services.AddScoped<ITagRepository, TagRepository>();
+            services.AddScoped<IThreadsTagRepository, ThreadsTagRepository>();
+            services.AddScoped<ILikeRepository, LikeRepository>();
             return services;
         }
 
@@ -83,6 +86,9 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IThreadService, ThreadService>();
             services.AddScoped<ICommentService,  CommentService>();
             services.AddScoped<IFriendlistService, FriendlistService>();
+            services.AddScoped<ITagService, TagService>();
+            services.AddScoped<IThreadsTagService, ThreadsTagService>();
+            services.AddScoped<ILikeService, LikeService>();
 
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();

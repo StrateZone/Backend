@@ -16,7 +16,5 @@ namespace StrateZone_Service.BusinessModels
         public int? TagId { get; set; }
 
         public virtual TagModel? Tag { get; set; }
-
-        public virtual ThreadModel? Thread { get; set; }
     }
 }

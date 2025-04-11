@@ -12,9 +12,5 @@ namespace StrateZone_Service.BusinessModels
         public int TagId { get; set; }
 
         public string? TagName { get; set; }
-
-        public virtual ICollection<ProductTag> ProductTags { get; set; } = new List<ProductTag>();
-
-        public virtual ICollection<ThreadsTagModel> ThreadsTags { get; set; } = new List<ThreadsTagModel>();
     }
 }

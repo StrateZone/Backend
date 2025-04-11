@@ -78,6 +78,7 @@ namespace StrateZone_Repository.Implements
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
                                 .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Likes)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
@@ -101,6 +102,7 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<PagedList<Thread>> GetAllThreadsByStatusesAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses)
         {
             try
@@ -110,6 +112,7 @@ namespace StrateZone_Repository.Implements
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
                                 .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Likes)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
@@ -140,10 +143,12 @@ namespace StrateZone_Repository.Implements
             {
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => (statuses.Count() <= 0 || statuses.Contains(t.Status))
-                                        && (TagIds.Count <= 0 || !t.ThreadsTags.Any(tt => !TagIds.Contains((int) tt.TagId))))
+                                        && (TagIds.Count <= 0 || TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
+                                )
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
                                 .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Likes)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
@@ -176,6 +181,7 @@ namespace StrateZone_Repository.Implements
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
                                 .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Likes)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .SingleOrDefaultAsync(t => t.ThreadId == id);

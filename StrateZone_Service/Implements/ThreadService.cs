@@ -15,14 +15,16 @@ namespace StrateZone_Service.Implements
         private readonly IThreadRepository _threadRepository;
         private readonly INotificationService _notificationService;
         private readonly IImageService _imageService;
+        private readonly IThreadsTagService _threadsTagService;
         private readonly IMapper _mapper;
 
-        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService)
+        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService)
         {
             _threadRepository = threadRepository;
             _imageService = imageService;
             _mapper = mapper;
             _notificationService = notificationService;
+            _threadsTagService = threadsTagService;
         }
 
         public async Task<ThreadModel> CreateThreadAsync(ThreadRequest request)
@@ -34,15 +36,16 @@ namespace StrateZone_Service.Implements
                     CreatedBy = request.CreatedBy,
                     Title = request.Title,
                     Content = request.Content,
-                    ThumbnailUrl = request.ThumbnailUrl,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    ThreadsTags = new List<ThreadsTagModel>(),
                     Status = PostgreEnums.ThreadStatus.pending.ToString(),
                     Rating = 0,
                 };
 
                 var thread = _mapper.Map<Thread>(model);
                 var result = await _threadRepository.CreateThreadAsync(thread);
+
+                var threadsTags = await _threadsTagService.CreateThreadsTagsAsync(request.TagIds, result.ThreadId);
+                model.ThreadsTags = threadsTags;
 
                 return _mapper.Map<ThreadModel>(result);
             }

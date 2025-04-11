@@ -114,7 +114,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost("")]
+        [HttpPost]
         public async Task<IActionResult> CreateTablesAppointment([FromBody] TablesAppointmentModel model)
         {
             try

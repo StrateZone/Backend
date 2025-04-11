@@ -19,9 +19,9 @@ namespace StrateZone_Service.BusinessModels
 
         public DateTime? CreatedAt { get; set; }
 
-        public virtual CommentModel? Comment { get; set; }
+        //public virtual CommentModel? Comment { get; set; }
 
-        public virtual ThreadModel? Thread { get; set; }
+        //public virtual ThreadModel? Thread { get; set; }
 
         public virtual UserModel? User { get; set; }
     }

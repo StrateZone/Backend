@@ -37,7 +37,6 @@ namespace StrateZone_Service.BusinessModels
 
         public virtual ICollection<ImageModel> Images { get; set; } = new List<ImageModel>();
 
-        [JsonIgnore]
         public virtual ICollection<LikeModel> Likes { get; set; } = new List<LikeModel>();
 
         public virtual ICollection<ThreadsTagModel> ThreadsTags { get; set; } = new List<ThreadsTagModel>();
