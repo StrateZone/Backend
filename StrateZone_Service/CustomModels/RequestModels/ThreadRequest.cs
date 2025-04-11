@@ -18,6 +18,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         public string? Content { get; set; }
 
+        public string? ThumbnailUrl {  get; set; }
+
         public virtual HashSet<int> TagIds { get; set; } = new();
     }
 }

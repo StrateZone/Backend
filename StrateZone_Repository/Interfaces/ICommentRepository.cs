@@ -14,5 +14,6 @@ namespace StrateZone_Repository.Interfaces
         Task<Comment> GetCommentById(int id);
         Task<Comment> PostCommentAsync(Comment comment);
         Task<Comment> UpdateCommentAsync(Comment comment, int id);
+        Task<Comment> DeleteCommentAsync(int id);
     }
 }

@@ -93,7 +93,9 @@ namespace StrateZone_Service.Mapper
             CreateMap<Appointmentrequest, AppointmentrequestResponse>();
             CreateMap<AppointmentrequestModel, AppointmentrequestResponse>();
 
-            CreateMap<Friendrequest, FriendrequestModel>().ReverseMap();
+            CreateMap<Friendrequest, FriendrequestModel>()
+                .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                .ReverseMap();
 
             CreateMap<Payment, PaymentModel>()
                 .ForMember(mr => mr.PaymentStatus, u => u.MapFrom(src => src.PaymentStatus.ToString()))

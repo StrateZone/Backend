@@ -13,10 +13,13 @@ namespace StrateZone_Service.Interfaces
 {
     public interface IFriendrequestService
     {
+        Task<PagedList<FriendrequestModel>> GetFriendrequestsFromUserIdAsync(FriendrequestParameters parameters, int id);
         Task<PagedList<FriendrequestModel>> GetFriendrequestsOfUserIdAsync(FriendrequestParameters parameters, int id);
         Task<FriendrequestModel> GetFriendrequestByIdAsync(int id);
         Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestRequest friendrequestModel);
         Task<FriendrequestModel> UpdateFriendrequestAsync(FriendrequestModel friendrequestModel, int id);
+        Task<FriendrequestModel> AcceptFriendrequestAsync(int id);
+        Task<FriendrequestModel> RejectFriendrequestAsync(int id);
         Task<FriendrequestModel> DeleteFriendrequestAsync(int id);
     }
 }

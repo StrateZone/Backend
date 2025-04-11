@@ -6,6 +6,7 @@ namespace StrateZone_Repository.Interfaces
 {
     public interface IFriendrequestRepository
     {
+        Task<PagedList<Friendrequest>> GetFriendrequestsFromUserIdAsync(FriendrequestParameters parameters, int id);
         Task<PagedList<Friendrequest>> GetFriendrequestsOfUserIdAsync(FriendrequestParameters parameters, int id);
         Task<Friendrequest> GetFriendrequestByIdAsync(int id);
         Task<Friendrequest> CreateFriendrequestAsync(Friendrequest friendrequest);

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace StrateZone_Service.BusinessModels
@@ -21,17 +22,21 @@ namespace StrateZone_Service.BusinessModels
 
         public double? Rating { get; set; }
 
+        public int LikesCount => Likes.Count;
+
         public DateTime? CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<CommentModel> InverseReplyToNavigation { get; set; } = new List<CommentModel>();
 
+        [JsonIgnore]
         public virtual ICollection<LikeModel> Likes { get; set; } = new List<LikeModel>();
 
         public virtual CommentModel? ReplyToNavigation { get; set; }
 
-        public virtual ThreadModel? Thread { get; set; }
+        // public virtual ThreadModel? Thread { get; set; }
 
         public virtual User? User { get; set; }
     }

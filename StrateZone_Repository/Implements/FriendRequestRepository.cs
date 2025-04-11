@@ -26,8 +26,12 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var requestsList = await _context.Friendrequests.Where(ar => ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser).ToListAsync();
-                if (requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
+                if (_context.Friendlists.AsNoTracking().Any(fl => (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser) 
+                                                    || (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser)))
+                    throw new Exception($"You two are already friend with each other.");
+
+                var requestsList = await _context.Friendrequests.AsNoTracking().FirstOrDefaultAsync(ar => ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser);
+                if (requestsList != null && requestsList.Status == PostgreEnums.RequestStatus.pending)
                     throw new Exception($"Friend request to this user already been sent.");
 
                 using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
@@ -83,6 +87,24 @@ namespace StrateZone_Repository.Implements
                                     .Include(fr => fr.FromUserNavigation)
                                     .Include(fr => fr.ToUserNavigation)
                                     .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Friendrequest>> GetFriendrequestsFromUserIdAsync(FriendrequestParameters parameters, int id)
+        {
+            try
+            {
+                var result = _context.Friendrequests
+                                    .Where(fr => fr.FromUser == id)
+                                    .Include(fr => fr.FromUserNavigation)
+                                    .Include(fr => fr.ToUserNavigation)
+                                    .AsQueryable();
+
+                return await PagedList<Friendrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {

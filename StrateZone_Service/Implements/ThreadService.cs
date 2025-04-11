@@ -34,6 +34,7 @@ namespace StrateZone_Service.Implements
                     CreatedBy = request.CreatedBy,
                     Title = request.Title,
                     Content = request.Content,
+                    ThumbnailUrl = request.ThumbnailUrl,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     ThreadsTags = new List<ThreadsTagModel>(),
                     Status = PostgreEnums.ThreadStatus.pending.ToString(),

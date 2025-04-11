@@ -12,7 +12,7 @@
         public enum GameTypeEnum { chess, xiangqi, go }
         public enum Gender { male, female }
         public enum MessageStatus { read, unread }
-        public enum NotificationType { appointment, order, tables_appointment, appointment_request_from, appointment_request_to, thread }
+        public enum NotificationType { appointment, order, tables_appointment, appointment_request_from, appointment_request_to, thread, friend, friend_request }
         public enum OrderStatus { pending, shipped, delivered, cancelled }
         public enum ParticipantStatus { enrolled, drop_out, in_progress, completed }
         public enum ProductStatus { available, out_of_stock, discontinued }

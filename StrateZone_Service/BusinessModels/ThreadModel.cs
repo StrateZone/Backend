@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -22,6 +23,8 @@ namespace StrateZone_Service.BusinessModels
 
         public double? Rating { get; set; }
 
+        public int LikesCount => Likes.Count;
+
         public string Status { get; set; }
 
         public DateTime? CreatedAt { get; set; }
@@ -34,6 +37,7 @@ namespace StrateZone_Service.BusinessModels
 
         public virtual ICollection<ImageModel> Images { get; set; } = new List<ImageModel>();
 
+        [JsonIgnore]
         public virtual ICollection<LikeModel> Likes { get; set; } = new List<LikeModel>();
 
         public virtual ICollection<ThreadsTagModel> ThreadsTags { get; set; } = new List<ThreadsTagModel>();
