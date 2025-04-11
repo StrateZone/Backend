@@ -1027,9 +1027,11 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
+
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
+
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.Rating)
                 .HasDefaultValueSql("0")

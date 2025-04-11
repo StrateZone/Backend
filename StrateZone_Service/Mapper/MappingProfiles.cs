@@ -106,6 +106,16 @@ namespace StrateZone_Service.Mapper
             CreateMap<Transaction, TransactionModel>().ReverseMap();
             CreateMap<StrateZone_Repository.Entities.System, SystemModel>().ReverseMap();
             CreateMap<AbnormalDay, AbnormalDayModel>().ReverseMap();
+
+            CreateMap<StrateZone_Repository.Entities.Thread, ThreadModel>()
+                .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                .ReverseMap();
+
+            CreateMap<Comment, CommentModel>().ReverseMap();
+            CreateMap<Tag, TagModel>().ReverseMap();
+            CreateMap<ThreadsTag, ThreadsTagModel>()
+                .ReverseMap();
+            CreateMap<Like, LikeModel>().ReverseMap();  
             // add other mappings here
         }
     }

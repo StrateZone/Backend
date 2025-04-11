@@ -252,6 +252,8 @@ namespace StrateZone_Service.Implements
                         Type = NotificationType.appointment_request_from
                     };
                     await _notificationService.CreateNotificationAsync(notificationFromUser);
+
+                    
                 }
                 else
                 {
