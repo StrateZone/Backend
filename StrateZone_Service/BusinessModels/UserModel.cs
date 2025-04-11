@@ -1,4 +1,5 @@
 ﻿using StrateZone_Repository.Entities;
+using System.Text.Json.Serialization;
 
 namespace StrateZone_Service.BusinessModels
 {
@@ -51,7 +52,7 @@ namespace StrateZone_Service.BusinessModels
         public DateTime? OTPExpiry { get; set; } // OTP expiration time
         /***************************************************************************************************************************************/
 
-        public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
+        // public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
 
         public virtual WalletModel? Wallet { get; set; }
     }

@@ -119,7 +119,6 @@ builder.Services.AddAuthorization(options =>
 });
 // Service Extensions
 builder.Services.AddApplicationServices();
-
 var app = builder.Build();
 
 app.UseHealthChecks("/health");

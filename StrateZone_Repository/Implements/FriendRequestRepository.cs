@@ -30,30 +30,37 @@ namespace StrateZone_Repository.Implements
                                                     || (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser)))
                     throw new Exception($"You two are already friend with each other.");
 
-                var requestsList = await _context.Friendrequests.AsNoTracking().FirstOrDefaultAsync(ar => ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser);
+                var requestsList = await _context.Friendrequests.AsNoTracking().FirstOrDefaultAsync(ar => 
+                    (ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser) 
+                    || (ar.FromUser == friendrequest.ToUser && ar.ToUser == friendrequest.FromUser));
                 if (requestsList != null && requestsList.Status == PostgreEnums.RequestStatus.pending)
                     throw new Exception($"Friend request to this user already been sent.");
 
-                using (var connection = (NpgsqlConnection)_context.Database.GetDbConnection())
-                {
+                int newId;
 
-                    if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+                var connection = _context.Database.GetDbConnection();
 
-                    using var cmd = new NpgsqlCommand(@"
-                            INSERT INTO friendrequests (from_user, to_user, status, created_at) 
-                            VALUES (@from_user, @to_user, @status::request_status, @createdAt)
-                            RETURNING id;", connection);
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
-                    cmd.Parameters.AddWithValue("@from_user", friendrequest.FromUser);
-                    cmd.Parameters.AddWithValue("@to_user", friendrequest.ToUser);
-                    cmd.Parameters.AddWithValue("@status", friendrequest.Status.ToString());
-                    cmd.Parameters.AddWithValue("@createdAt", friendrequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc));
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = 
+                        @"
+                        INSERT INTO friendrequests (from_user, to_user, status, created_at) 
+                        VALUES (@from_user, @to_user, @status::request_status, @createdAt)
+                        RETURNING id;";
 
-                    var newUserId = await cmd.ExecuteScalarAsync();
-                    friendrequest.Id = Convert.ToInt32(newUserId);
-                }
+                cmd.Parameters.Add(new NpgsqlParameter("@from_user", friendrequest.FromUser));
+                cmd.Parameters.Add(new NpgsqlParameter("@to_user", friendrequest.ToUser));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", friendrequest.Status.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@createdAt", friendrequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)));
 
-                return friendrequest;
+                var executedResult = await cmd.ExecuteScalarAsync();
+                newId = Convert.ToInt32(executedResult);
+
+                return await _context.Friendrequests.AsNoTracking()
+                                            .Include(fr => fr.FromUserNavigation)
+                                            .Include(fr => fr.ToUserNavigation)
+                                            .SingleOrDefaultAsync(fr => fr.Id == Convert.ToInt32(newId));
             }
             catch (Exception ex)
             {
@@ -83,10 +90,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Friendrequests
-                                    .Where(x => x.Id == id)
                                     .Include(fr => fr.FromUserNavigation)
                                     .Include(fr => fr.ToUserNavigation)
-                                    .FirstOrDefaultAsync();
+                                    .SingleOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception ex)
             {

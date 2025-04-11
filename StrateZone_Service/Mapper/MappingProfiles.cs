@@ -97,6 +97,8 @@ namespace StrateZone_Service.Mapper
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ReverseMap();
 
+            CreateMap<Friendlist, FriendlistModel>().ReverseMap();
+
             CreateMap<Payment, PaymentModel>()
                 .ForMember(mr => mr.PaymentStatus, u => u.MapFrom(src => src.PaymentStatus.ToString()))
                 .ForMember(mr => mr.PaymentType, u => u.MapFrom(src => src.PaymentType.ToString()))

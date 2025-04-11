@@ -14,12 +14,15 @@ namespace StrateZone_Service.Implements
     {
         private readonly IFriendrequestRepository _friendRequestRepository;
         private readonly INotificationService _notificationService;
+        private readonly IFriendlistService _friendlistService;
         private readonly IMapper _mapper;
 
-        public FriendrequestService(IFriendrequestRepository friendRequestRepository, IMapper mapper)
+        public FriendrequestService(IFriendrequestRepository friendRequestRepository, IMapper mapper, IFriendlistService friendlistService, INotificationService notificationService)
         {
             _friendRequestRepository = friendRequestRepository;
             _mapper = mapper;
+            _friendlistService = friendlistService;
+            _notificationService = notificationService;
         }
 
         public async Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestRequest request)
@@ -141,9 +144,15 @@ namespace StrateZone_Service.Implements
                 var request = _mapper.Map<Friendrequest>(requestModel);
                 var result = await _friendRequestRepository.UpdateFriendrequestAsync(request, id);
 
+                await _friendlistService.AddFriendAsync(new FriendlistModel()
+                {
+                    UserId = result.FromUser,
+                    FriendId = result.ToUser,
+                });
+
                 NotificationRequest fromUser_notification = new()
                 {
-                    ToUser = result.FromUser,
+                    ToUser = requestModel.FromUser,
                     Title = "Lời mời kết bạn đã được chấp nhận",
                     Content = $"{requestModel.ToUserNavigation.Username} đã " +
                     $"chấp nhận lời mời kết bạn của bạn.",
@@ -153,7 +162,7 @@ namespace StrateZone_Service.Implements
 
                 NotificationRequest toUser_notification = new()
                 {
-                    ToUser = result.ToUser,
+                    ToUser = requestModel.ToUser,
                     Title = $"Chấp nhận lời mời kết bạn thành công!",
                     Content = $"Bạn đã chấp nhận lời mời kết bạn đến từ {requestModel.FromUserNavigation.Username}. " +
                     $"Cả hai bây giờ đã là bạn bè.",

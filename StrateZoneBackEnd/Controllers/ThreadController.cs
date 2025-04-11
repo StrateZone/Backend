@@ -4,6 +4,7 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using StrateZone_Service.CustomModels.ResponseModels;
 
 namespace StrateZone_API.Controllers
 {
@@ -52,7 +53,9 @@ namespace StrateZone_API.Controllers
             try
             {
                 var result = await _threadService.GetAllThreadsAsync(parameters);
-                return Ok(result);
+                var response = new PagedListResponse<ThreadModel>(result);
+
+                return response != null ? Ok(response) : Ok("No thread was found.");
             }
             catch (Exception ex)
             {

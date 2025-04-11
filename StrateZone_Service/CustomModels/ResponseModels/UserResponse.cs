@@ -48,7 +48,7 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public DateTime? UpdatedAt { get; set; }
 
-        public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
+        // public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
 
         public virtual WalletModel? Wallet { get; set; }
     }

@@ -82,6 +82,34 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("accept/{id}")]
+        public async Task<IActionResult> AcceptFriendrequestAsync(int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.AcceptFriendrequestAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("reject/{id}")]
+        public async Task<IActionResult> RejectFriendrequestAsync(int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.RejectFriendrequestAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFriendrequestAsync(int id)
         {

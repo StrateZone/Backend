@@ -34,7 +34,7 @@ namespace StrateZone_Service.Implements
             {
                 var results = await _userRepository.GetUsersAsync(parameters);
                 var users = _mapper.Map<PagedList<UserResponse>>(results);
-                return new PagedList<UserResponse>(users, results.Count, results.CurrentPage, results.PageSize);
+                return new PagedList<UserResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
             }
             catch (Exception ex)
             {
@@ -48,7 +48,7 @@ namespace StrateZone_Service.Implements
             {
                 var results = await _userRepository.GetUsersByRanking(parameters, ranking, up, down);
                 var users = _mapper.Map<PagedList<UserResponse>>(results);
-                return new PagedList<UserResponse>(users, results.Count, results.CurrentPage, results.PageSize);
+                return new PagedList<UserResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace StrateZone_Service.Implements
             {
                 var results = await _userRepository.GetUsersByUsernameAsync(parameters, username);
                 var users = _mapper.Map<PagedList<UserResponse>>(results);
-                return new PagedList<UserResponse>(users, results.Count, results.CurrentPage, results.PageSize);
+                return new PagedList<UserResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
             }
             catch (Exception ex)
             {
