@@ -240,6 +240,16 @@ namespace StrateZone_Service.Implements
                 var user = _mapper.Map<User> (userModel);
 
                 var createdUser = await _userRepository.CreateUserAsync(user);
+
+                WalletModel walletModel = new()
+                { 
+                    UserId = createdUser.UserId,
+                    Balance = 0,
+                    Status = PostgreEnums.WalletStatus.active,
+                };
+
+                await _walletRepository.CreateWalletAsync(_mapper.Map<Wallet>(walletModel));
+
                 await SendOTP(createdUser.Email);
 
                 return new ApiResponse<UserResponse>

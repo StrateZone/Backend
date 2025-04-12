@@ -289,9 +289,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 User toRemove = await _context.Users
-                                    .Include(a => a.Wallet)
-                                    .Include(a => a.Cart)
-                                    .SingleOrDefaultAsync(a => a.UserId == id) 
+                                    .FindAsync(id)
                                     ?? throw new Exception("User with this ID does not exist");
 
                 if (toRemove.Wallet != null) _context.Wallets.Remove(toRemove.Wallet);
