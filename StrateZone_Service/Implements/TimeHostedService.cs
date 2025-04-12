@@ -110,6 +110,29 @@ namespace StrateZone_Service.Implements
                     }
 
                     _logger.LogInformation($"IAppointmentrequestService cleanup executed: Changed status for {count} expired request(s).");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while updating expired appointment requests status.");
+                }
+            });
+        }
+
+        private void UpdateStatusForAppointmentBasedOnTablesAppointments(object? state)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    int count = 0;
+
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        var appointmentRequestsService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+                        count = await appointmentRequestsService.UpdateStatusForAppointmentBasedOnTablesAppointments();
+                    }
+
+                    _logger.LogInformation($"IAppointmentService auto updater executed: Changed status for {count} expired request(s).");
 
                     using (var scope = _serviceScopeFactory.CreateScope())
                     {
@@ -118,7 +141,7 @@ namespace StrateZone_Service.Implements
                         var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
                         var toBeCancelledTablesAppointments = await tablesAppointmentService.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
-                        foreach ( var table in toBeCancelledTablesAppointments )
+                        foreach (var table in toBeCancelledTablesAppointments)
                         {
                             var appointment = await appointmentService.GetAppointmentByIdAsync((int)table.AppointmentId);
                             var userId = appointment.UserId;
@@ -144,29 +167,6 @@ namespace StrateZone_Service.Implements
                         _logger.LogInformation($"ITablesAppointmentService executed: Cancelled and refunded for " +
                             $"{toBeCancelledTablesAppointments.Count} tables on appointment(s).");
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred while updating expired appointment requests status.");
-                }
-            });
-        }
-
-        private void UpdateStatusForAppointmentBasedOnTablesAppointments(object? state)
-        {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    int count = 0;
-
-                    using (var scope = _serviceScopeFactory.CreateScope())
-                    {
-                        var appointmentRequestsService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
-                        count = await appointmentRequestsService.UpdateStatusForAppointmentBasedOnTablesAppointments();
-                    }
-
-                    _logger.LogInformation($"IAppointmentService auto updater executed: Changed status for {count} expired request(s).");
                 }
                 catch (Exception ex)
                 {

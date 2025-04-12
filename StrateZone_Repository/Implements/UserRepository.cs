@@ -428,7 +428,7 @@ namespace StrateZone_Repository.Implements
                         new NpgsqlParameter("@ids", excludedIds.ToArray()),
                         new NpgsqlParameter("@r1", lowerBound.ToString()),
                         new NpgsqlParameter("@r2", upperBound.ToString()),
-                        new NpgsqlParameter("@perGroup", 2)
+                        new NpgsqlParameter("@perGroup", ranking == upperBound || ranking == lowerBound ? 3 : 2)
                     )
                     .Include(u => u.AppointmentRequestsToUserNavigations)
                     .OrderBy(u => u.Ranking)

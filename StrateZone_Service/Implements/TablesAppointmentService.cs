@@ -409,6 +409,25 @@ namespace StrateZone_Service.Implements
 
             var model = _mapper.Map<TablesAppointmentModel>(tablesAppointment);
 
+            var cancelledTablesAppointmentsWithinThisWeek = await _tablesAppointmentRepository.GetNumberOfTablesAppointmentCancelledByUserInAWeekSpanAsync(userId, CancelTime);
+            if (cancelledTablesAppointmentsWithinThisWeek > 5)
+            {
+                DateOnly monday = DateOnly.FromDateTime(
+                        CancelTime.AddDays(-(int)CancelTime.DayOfWeek + (CancelTime.DayOfWeek == DayOfWeek.Sunday ? -6 : 1))
+                    );
+                return new TablesAppointmentRefundResponse()
+                {
+                    TablesAppointmentModel = model,
+                    RefundAmount = 0,
+                    RefundStatus = RefundStatus.no_refund,
+                    Message = $"Không được hoàn tiền. " +
+                    $"Lí do: Bạn đã hủy nhiều hơn 5 bàn trong tuần này, tính từ ngày {monday:dd/MM/yyyy} (thứ hai) " +
+                    $"đến {DateOnly.FromDateTime(CancelTime):dd/MM/yyyy} (hiện tại).",
+                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
+                    CancellationTime = CancelTime,
+                };
+            }
+
             DateTime ScheduleTime = tablesAppointment.ScheduleTime;
             DateTime CreatedTime = (DateTime)tablesAppointment.CreatedAt;
 
@@ -421,7 +440,8 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel = model,
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.no_refund,
-                    Message = "No refund. Reason: Appointment is not yet paid.",
+                    Message = "Không được hoàn tiền. Lí do: Đơn đặt bàn này chưa thanh toán.",
+                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                 };
             }
@@ -433,7 +453,9 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel = model,
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.no_refund_while_refund_for_invited_user,
-                    Message = "No refund. Reason: Cancellation on shared appointment will not be refund.",
+                    Message = "Không được hoàn tiền. Lí do: Đơn đặt bàn có mời người chơi khác (người bạn đã mời vẫn " +
+                    "sẽ được hoàn tiền).",
+                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                 };
             }
@@ -448,7 +470,7 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel = model,
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.cancellation_fail,
-                    Message = "Can not cancel appointment 1.5 hours prior to the scheduled time"
+                    Message = "Không được phép hủy đơn trong vòng 1.5 tiếng trước giờ hẹn."
                 };
             }
 
@@ -466,6 +488,7 @@ namespace StrateZone_Service.Implements
                         RefundAmount = (decimal) tablesAppointment.Price,
                         RefundStatus = RefundStatus.refund_100_percentage_of_total,
                         Message = "Refund 100%",
+                        NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                         Cancellation_PartialRefund_TimeGate = TimeGate_Refund100_OnCancellation,
@@ -479,6 +502,7 @@ namespace StrateZone_Service.Implements
                         RefundAmount = (decimal) (tablesAppointment.Price / 2),
                         RefundStatus = RefundStatus.refund_50_percentage_of_total,
                         Message = "Refund 50%",
+                        NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                         Cancellation_PartialRefund_TimeGate = TimeGate_Refund100_OnCancellation,
@@ -492,7 +516,8 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel = model,
                     RefundAmount = (decimal)tablesAppointment.Price,
                     RefundStatus = RefundStatus.refund_100_percentage_of_total,
-                    Message = "Refund 100%",
+                    Message = "Hoàn tiền 100%",
+                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                     Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                     Cancellation_PartialRefund_TimeGate = TimeGate_Refund50_OnCancellation,
@@ -505,6 +530,7 @@ namespace StrateZone_Service.Implements
                 RefundAmount = (decimal)(tablesAppointment.Price / 2),
                 RefundStatus = RefundStatus.refund_50_percentage_of_total,
                 Message = "Refund 50%",
+                NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                 CancellationTime = CancelTime,
                 Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                 Cancellation_PartialRefund_TimeGate = TimeGate_Refund50_OnCancellation,

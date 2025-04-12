@@ -364,5 +364,36 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<int> GetNumberOfTablesAppointmentCancelledByUserInAWeekSpanAsync(int userId, DateTime currentDate)
+        {
+            try
+            {
+                DateTime monday = currentDate.AddDays(-(int)currentDate.DayOfWeek + (currentDate.DayOfWeek == DayOfWeek.Sunday ? -6 : 1)).Date;
+
+                var matchingTAs = await _context.TablesAppointments
+                            .FromSqlRaw(
+                                    @"
+                                        SELECT ta.*
+                                        FROM tables_appointments ta
+                                        JOIN appointments a ON a.appointment_id = ta.appointment_id
+                                        WHERE a.user_id = @user_id 
+                                        AND ta.status = 'cancelled'
+                                        AND ta.created_at >= @monday AND ta.created_at <= @today
+                                    ",
+                                    new NpgsqlParameter("@monday", monday),
+                                    new NpgsqlParameter("@today", currentDate),
+                                    new NpgsqlParameter("@user_id", userId)
+                            )
+                            .AsNoTracking()
+                            .CountAsync();
+
+                return matchingTAs;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

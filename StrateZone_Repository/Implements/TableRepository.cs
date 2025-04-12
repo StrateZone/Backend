@@ -111,6 +111,7 @@ namespace StrateZone_Repository.Implements
                         new NpgsqlParameter("@EndTime", parameters.EndTime))
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
+                    .AsNoTracking()
                     .AsQueryable();
 
                 return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);
@@ -147,6 +148,7 @@ namespace StrateZone_Repository.Implements
                         new NpgsqlParameter("@EndTime", parameters.EndTime))
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
+                    .AsNoTracking()
                     .AsQueryable();
 
                 return await PagedList<Table>.ToPagedList(tables, parameters.PageNumber, parameters.PageSize);

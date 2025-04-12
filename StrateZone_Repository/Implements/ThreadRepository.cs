@@ -137,12 +137,12 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Thread>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, HashSet<int> TagIds)
+        public async Task<PagedList<Thread>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, HashSet<int> TagIds, int? userId = null)
         {
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => (statuses.Count() <= 0 || statuses.Contains(t.Status))
+                                .Where(t => (statuses.Length <= 0 || statuses.Contains(t.Status))
                                         && (TagIds.Count <= 0 || TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
                                 )
                                 .Include(t => t.CreatedByNavigation)
@@ -151,8 +151,18 @@ namespace StrateZone_Repository.Implements
                                     .ThenInclude(c => c.Likes)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
-                                .OrderByDescending(t => t.CreatedAt)
                                 .AsQueryable();
+
+                if (parameters.OrderBy == "friends" && userId != null)
+                {
+                    HashSet<int?> friendIds = _context.Friendlists.AsNoTracking()
+                                            .Where(f => f.UserId == userId || f.FriendId == userId)
+                                            .Select(f => f.UserId == userId ? f.FriendId : f.UserId)
+                                            .ToHashSet();
+
+                    threads = threads.Where(t => friendIds.Contains(t.CreatedBy))
+                                    .OrderByDescending(t => t.CreatedAt);
+                }
 
                 threads = parameters.OrderBy switch
                 {
@@ -162,7 +172,7 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
-                    _ => threads
+                    _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
                 return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);

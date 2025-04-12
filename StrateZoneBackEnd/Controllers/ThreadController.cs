@@ -83,11 +83,12 @@ namespace StrateZone_API.Controllers
         public async Task<ActionResult> GetThreadsByStatusesAndTags(
             [FromQuery] TablesAppointmentParameters parameters,
             [FromQuery] ThreadStatus[] statuses, 
-            [FromQuery] HashSet<int> TagIds)
+            [FromQuery] HashSet<int> TagIds, 
+            [FromQuery] int? userId)
         {
             try
             {
-                var result = await _threadService.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds);
+                var result = await _threadService.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds, userId);
                 return Ok(result);
             }
             catch (Exception ex)
