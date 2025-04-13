@@ -1,6 +1,7 @@
 ﻿using MealHunt_Repositories.Pagination;
 using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Data;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using Thread = StrateZone_Repository.Entities.Thread;
@@ -92,6 +93,7 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
+                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
                     _ => threads
                 };
 
@@ -126,6 +128,7 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
+                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
                     _ => threads
                 };
 
@@ -172,6 +175,41 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
+                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
+                    _ => threads.OrderByDescending(t => t.CreatedAt)
+                };
+
+                return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id)
+        {
+            try
+            {
+                var threads = _context.Threads.AsNoTracking()
+                                .Where(t => t.CreatedBy == id)
+                                .Include(t => t.CreatedByNavigation)
+                                .Include(t => t.Likes)
+                                .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Likes)
+                                .Include(t => t.ThreadsTags)
+                                    .ThenInclude(tt => tt.Tag)
+                                .AsQueryable();
+
+                threads = parameters.OrderBy switch
+                {
+                    "created-at" => threads.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => threads.OrderByDescending(a => a.CreatedAt),
+                    "likes-count" => threads.OrderBy(a => a.Likes.Count),
+                    "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
+                    "comments-count" => threads.OrderBy(a => a.Comments.Count),
+                    "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
+                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
@@ -201,5 +239,6 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
     }
 }

@@ -114,6 +114,21 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<PagedList<ThreadModel>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id)
+        {
+            try
+            {
+                var threads = await _threadRepository.GetThreadsByUserIdAsync(parameters, id);
+                var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
+
+                return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<ThreadModel> GetThreadByIdAsync(int id)
         {
             try
@@ -203,5 +218,6 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
     }
 }
