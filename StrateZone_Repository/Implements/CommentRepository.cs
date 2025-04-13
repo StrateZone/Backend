@@ -20,6 +20,7 @@ namespace StrateZone_Repository.Implements
             {
                 return _context.Comments.AsNoTracking()
                                         .Include(c => c.Likes)
+                                        .Include(c => c.User)
                                         .SingleOrDefaultAsync(c => c.CommentId == id);
             }
             catch (Exception ex)
@@ -35,6 +36,7 @@ namespace StrateZone_Repository.Implements
                 return _context.Comments.AsNoTracking()
                                         .Where(c => c.ThreadId == id)
                                         .Include(c => c.Likes)
+                                        .Include(c => c.User)
                                         .ToListAsync();
             }
             catch (Exception ex)
@@ -50,6 +52,7 @@ namespace StrateZone_Repository.Implements
                 return _context.Comments.AsNoTracking()
                                         .Where(c => c.UserId == userId)
                                         .Include(c => c.Likes)
+                                        .Include(c => c.User)
                                         .ToListAsync();
             }
             catch (Exception ex)
