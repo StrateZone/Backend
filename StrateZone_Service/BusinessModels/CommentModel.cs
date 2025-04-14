@@ -38,6 +38,6 @@ namespace StrateZone_Service.BusinessModels
 
         // public virtual ThreadModel? Thread { get; set; }
 
-        public virtual User? User { get; set; }
+        public virtual UserModel? User { get; set; }
     }
 }

@@ -14,6 +14,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public decimal RefundAmount { get; set; }
 
+        public int NumerOfTablesCancelledThisWeek { get; set; } = 0;
+
         public DateTime? CancellationTime { get; set; }
 
         public DateTime? Cancellation_Block_TimeGate { get; set; }

@@ -47,6 +47,22 @@ namespace StrateZone_API.Controllers
             }
         }
 
+        [HttpGet("user/{id}")]
+        public async Task<ActionResult> GetThreadByUserId([FromQuery] TablesAppointmentParameters parameters, int id)
+        {
+            try
+            {
+                var result = await _threadService.GetThreadsByUserIdAsync(parameters, id);
+                var response = new PagedListResponse<ThreadModel>(result);
+
+                return response != null ? Ok(response) : Ok("No thread was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult> GetAllThreads([FromQuery] TablesAppointmentParameters parameters)
         {
@@ -71,7 +87,9 @@ namespace StrateZone_API.Controllers
             try
             {
                 var result = await _threadService.GetAllThreadsByStatusesAsync(parameters, statuses);
-                return Ok(result);
+                var response = new PagedListResponse<ThreadModel>(result);
+
+                return response != null ? Ok(response) : Ok("No thread was found.");
             }
             catch (Exception ex)
             {
@@ -83,12 +101,15 @@ namespace StrateZone_API.Controllers
         public async Task<ActionResult> GetThreadsByStatusesAndTags(
             [FromQuery] TablesAppointmentParameters parameters,
             [FromQuery] ThreadStatus[] statuses, 
-            [FromQuery] HashSet<int> TagIds)
+            [FromQuery] HashSet<int> TagIds, 
+            [FromQuery] int? userId)
         {
             try
             {
-                var result = await _threadService.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds);
-                return Ok(result);
+                var result = await _threadService.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds, userId);
+                var response = new PagedListResponse<ThreadModel>(result);
+
+                return response != null ? Ok(response) : Ok("No thread was found.");
             }
             catch (Exception ex)
             {

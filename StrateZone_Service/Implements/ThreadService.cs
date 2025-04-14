@@ -84,11 +84,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, HashSet<int> TagIds)
+        public async Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, HashSet<int> TagIds, int? userId)
         {
             try
             {
-                var threads = await _threadRepository.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds);
+                var threads = await _threadRepository.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds, userId);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
@@ -104,6 +104,21 @@ namespace StrateZone_Service.Implements
             try
             {
                 var threads = await _threadRepository.GetAllThreadsByStatusesAsync(parameters, statuses);
+                var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
+
+                return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<PagedList<ThreadModel>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id)
+        {
+            try
+            {
+                var threads = await _threadRepository.GetThreadsByUserIdAsync(parameters, id);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
@@ -234,5 +249,6 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
     }
 }

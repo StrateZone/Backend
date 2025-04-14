@@ -27,19 +27,16 @@ namespace StrateZone_Service.Implements
     {
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IAppointmentrequestService _appointmentrequestService;
-        private readonly IUserService _userService;
         private readonly ITableService _tableService;
         private readonly ITablesAppointmentService _tablesAppointmentService;
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly INotificationService _notificationService;
-        private readonly IVoucherService _voucherService;
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
         public AppointmentService(IAppointmentRepository appointmentRepository, 
-            IUserService userService, 
             ITableService tableService, 
             ITablesAppointmentService tablesAppointmentService, 
             IMapper mapper, 
@@ -51,7 +48,6 @@ namespace StrateZone_Service.Implements
             INotificationService notificationService)
         {
             _appointmentRepository = appointmentRepository;
-            _userService = userService;
             _mapper = mapper;
             _tableService = tableService;
             _tablesAppointmentService = tablesAppointmentService;

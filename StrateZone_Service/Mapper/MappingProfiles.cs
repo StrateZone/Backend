@@ -113,6 +113,7 @@ namespace StrateZone_Service.Mapper
 
             CreateMap<StrateZone_Repository.Entities.Thread, ThreadModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                .ForMember(ur => ur.ThumbnailUrl, u => u.MapFrom<ThreadThumbnailResolver>())
                 .ReverseMap();
 
             CreateMap<Comment, CommentModel>().ReverseMap();
