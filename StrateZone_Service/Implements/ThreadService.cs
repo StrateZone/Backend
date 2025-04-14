@@ -208,14 +208,14 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var toReject = await GetThreadByIdAsync(id)
+                var toReject = await _threadRepository.GetThreadByIdForAdminDeleteAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
+                var thread = _mapper.Map<ThreadModel>(toReject);
+                if (thread.Status != PostgreEnums.ThreadStatus.published.ToString())
+                    throw new Exception($"This thread is already {thread.Status}");
 
-                if (toReject.Status == PostgreEnums.ThreadStatus.deleted.ToString())
-                    throw new Exception($"This thread is already hided by admin");
-
-                toReject.Status = PostgreEnums.ThreadStatus.deleted.ToString();
-                var result = await UpdateThreadAsync(toReject, toReject.ThreadId);
+                thread.Status = PostgreEnums.ThreadStatus.deleted.ToString();
+                var result = await UpdateThreadAsync(thread, toReject.ThreadId);
 
                 NotificationRequest notification = new()
                 {
@@ -227,7 +227,7 @@ namespace StrateZone_Service.Implements
                 };
                 await _notificationService.CreateNotificationAsync(notification);
 
-                return _mapper.Map<ThreadModel>(result);
+                return result;
             }
             catch (Exception ex)
             {

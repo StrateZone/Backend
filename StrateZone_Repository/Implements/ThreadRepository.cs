@@ -249,5 +249,17 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<Thread> GetThreadByIdForAdminDeleteAsync(int id)
+        {
+            try
+            {
+                return await _context.Threads.AsNoTracking()
+                                .SingleOrDefaultAsync(t => t.ThreadId == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
