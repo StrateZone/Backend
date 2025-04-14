@@ -189,6 +189,37 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<ThreadModel> AdminHideThreadAsync(int id)
+        {
+            try
+            {
+                var toReject = await GetThreadByIdAsync(id)
+                            ?? throw new Exception("Thread with this ID does not exist");
+
+                if (toReject.Status == PostgreEnums.ThreadStatus.deleted.ToString())
+                    throw new Exception($"This thread is already hided by admin");
+
+                toReject.Status = PostgreEnums.ThreadStatus.deleted.ToString();
+                var result = await UpdateThreadAsync(toReject, toReject.ThreadId);
+
+                NotificationRequest notification = new()
+                {
+                    ToUser = (int)result.CreatedBy,
+                    Title = "Bài viết của bạn đã bị ẩn!",
+                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã bị ẩn bởi admin. " +
+                    $"Lưu ý: bài viết cần tuân thủ nghiêm ngặt các quy tắc của cộng đồng.",
+                    Type = PostgreEnums.NotificationType.thread,
+                };
+                await _notificationService.CreateNotificationAsync(notification);
+
+                return _mapper.Map<ThreadModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<ThreadModel> UpdateThreadAsync(ThreadModel threadModel, int id)
         {
             try

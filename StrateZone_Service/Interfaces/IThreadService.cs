@@ -22,5 +22,6 @@ namespace StrateZone_Service.Interfaces
         Task<ThreadModel> UpdateThreadAsync(ThreadModel thread, int id);
         Task<ThreadModel> ApproveThreadAsync(int id);
         Task<ThreadModel> RejectThreadAsync(int id);
+        Task<ThreadModel> AdminHideThreadAsync(int id);
     }
 }
