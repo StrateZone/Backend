@@ -96,6 +96,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPost("membership-payment/{userId}")]
+        public async Task<IActionResult> CreateMembershipPayment(int userId)
+        {
+            try
+            {
+                var result = await _paymentService.CreateMembershipPaymentAsync(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPost("tables-appointment-payment")]
         public async Task<IActionResult> ConfirmTablesAppointmentPayment(TablesAppointmentPaymentRequest request)
         {

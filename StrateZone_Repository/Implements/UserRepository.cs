@@ -421,48 +421,49 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Dictionary<Ranking, List<User>>> GetRandomUsersByRanking(HashSet<int> excludedIds, Ranking ranking, int up, int down)
+        public async Task<(List<User>, List<User>)> GetRandomOpponentsAsync(int userId, string? SearchTerm)
         {
             try
             {
-                Ranking minRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Min();
-                Ranking maxRanking = Enum.GetValues(typeof(Ranking)).Cast<Ranking>().Max();
+                var friends = await _context.Friendlists.AsNoTracking()
+                                                  .Where(f => f.UserId == userId
+                                                        || f.FriendId == userId)
+                                                  .Select(f => (int) (f.UserId == userId ? f.FriendId : f.UserId))
+                                                  .ToHashSetAsync();
 
-                Ranking upperBound = (Ranking)Math.Clamp((int)ranking + up, (int)minRanking, (int)maxRanking);
-                Ranking lowerBound = (Ranking)Math.Clamp((int)ranking - down, (int)minRanking, (int)maxRanking);
+                List<User> randomUsers;
 
-                var sql = @"
-                            SELECT *
-                            FROM (
-                                SELECT u.*, ROW_NUMBER() OVER (PARTITION BY u.ranking ORDER BY RANDOM()) AS rn
-                                FROM users u
-                                WHERE u.user_id <> ALL(@ids)
-                                AND u.ranking BETWEEN @r1::ranking AND @r2::ranking
-                            ) AS ranked
-                            WHERE ranked.rn <= @perGroup
-                        ";
+                if (SearchTerm == null)
+                {
+                    randomUsers = await _context.Users
+                                        .AsNoTracking()
+                                        .Where(u => u.UserId != userId && !friends.Contains(u.UserId))
+                                        .Include(u => u.AppointmentRequestsToUserNavigations)
+                                        .OrderByDescending(u => u.Points)
+                                        .Take(12)
+                                        .ToListAsync();
 
-                var users = await _context.Users
-                    .FromSqlRaw(
-                        sql,
-                        new NpgsqlParameter("@ids", excludedIds.ToArray()),
-                        new NpgsqlParameter("@r1", lowerBound.ToString()),
-                        new NpgsqlParameter("@r2", upperBound.ToString()),
-                        new NpgsqlParameter("@perGroup", ranking == upperBound || ranking == lowerBound ? 3 : 2)
-                    )
-                    .Include(u => u.AppointmentRequestsToUserNavigations)
-                    .OrderBy(u => u.Ranking)
-                    .ToListAsync();
+                    return (
+                                randomUsers,
+                                await _context.Users.AsNoTracking().Where(u => friends.Contains(u.UserId)).ToListAsync()
+                            );
+                }
+                else
+                {
+                    randomUsers = await _context.Users
+                                        .AsNoTracking()
+                                        .Where(u => u.UserId != userId && u.Username.ToLower().Contains(SearchTerm.ToLower()))
+                                        .Include(u => u.AppointmentRequestsToUserNavigations)
+                                        .OrderByDescending(u => u.Points)
+                                        .ToListAsync();
 
-                return users
-                            .GroupBy(u => u.Ranking)
-                            .ToDictionary(g => g.Key, g => g.ToList());
+                    return (randomUsers, []);
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-
     }
 }

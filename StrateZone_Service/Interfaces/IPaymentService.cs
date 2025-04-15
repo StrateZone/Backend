@@ -16,5 +16,6 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<PaymentModel>> GetPaymentsAsync(StrateZone_Repository.Parameters.PaymentParameters parameters);
         Task<PagedList<PaymentModel>> GetPaymentsByUserIdAsync(int id, StrateZone_Repository.Parameters.PaymentParameters parameters);
         Task<PaymentModel> UpdatePaymentAsync(PaymentModel payment, int id);
+        Task<ApiResponse<PaymentModel>> CreateMembershipPaymentAsync(int userId);
     }
 }

@@ -102,14 +102,13 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("by-ranking/random/{userId}/tables/{tableId}")]
-        public async Task<IActionResult> GetRandomByRanking(int userId, int tableId, [FromQuery] HashSet<int> excludedIds, [FromQuery] DateTime StartTime, DateTime EndTime, Ranking ranking, int up, int down)
+        [HttpGet("opponents/{userId}")]
+        public async Task<IActionResult> GetRandomByRanking(int userId, string? SearchTerm)
         {
             try
             {
-                if (!excludedIds.Contains(userId)) excludedIds = excludedIds.Prepend(userId).ToHashSet();
-                var opponenents = await _userService.GetRandomUsersByRankingAsync(excludedIds, ranking, up, down);
-                return opponenents.MatchingOpponents.Count > 0 ? Ok(opponenents) : NotFound("No user of this ranking was found");
+                var opponenents = await _userService.GetRandomOpponentsAsync(userId, SearchTerm);
+                return opponenents.MatchingOpponents.Count > 0 ? Ok(opponenents) : NotFound("No user was found");
             }
             catch (Exception ex)
             {
