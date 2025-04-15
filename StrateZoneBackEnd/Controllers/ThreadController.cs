@@ -99,14 +99,11 @@ namespace StrateZone_API.Controllers
 
         [HttpGet("filter/statuses-and-tags")]
         public async Task<ActionResult> GetThreadsByStatusesAndTags(
-            [FromQuery] TablesAppointmentParameters parameters,
-            [FromQuery] ThreadStatus[] statuses, 
-            [FromQuery] HashSet<int> TagIds, 
-            [FromQuery] int? userId)
+            [FromQuery] ThreadParameters parameters)
         {
             try
             {
-                var result = await _threadService.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds, userId);
+                var result = await _threadService.GetAllThreadsByStatusesAndTagsAsync(parameters);
                 var response = new PagedListResponse<ThreadModel>(result);
 
                 return response != null ? Ok(response) : Ok("No thread was found.");

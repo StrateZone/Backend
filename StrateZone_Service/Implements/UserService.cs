@@ -108,6 +108,19 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+        public async Task<PagedList<UserResponse>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
+        {
+            try
+            {
+                var results = await _userRepository.SearchForFriendsByUsernameAsync(parameters, id, username);
+                var users = _mapper.Map<PagedList<UserResponse>>(results);
+                return new PagedList<UserResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
         public async Task<UserResponse> CreateUserAsync(UserRequest userRequest)
         {

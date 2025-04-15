@@ -70,6 +70,23 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("{id}/search-friends")]
+        public async Task<IActionResult> SearchForFriendsUsername([FromQuery] UserListParameters parameters, int id, string? username)
+        {
+            try
+            {
+                var user = await _userService.SearchForFriendsByUsernameAsync(parameters, id, username);
+
+                var response = new PagedListResponse<UserResponse>(user);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No user with this username was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("by-ranking")]
         public async Task<IActionResult> GetByRanking([FromQuery] UserListParameters parameters, Ranking ranking, int up, int down)
         {

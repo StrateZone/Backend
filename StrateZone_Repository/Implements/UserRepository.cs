@@ -72,6 +72,26 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<PagedList<User>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
+        {
+            try
+            {
+                var userFriendIds = _context.Friendlists.Where(f => f.UserId == id || f.FriendId == id)
+                                                        .Select(f => f.UserId == id ? f.FriendId : f.UserId)
+                                                        .ToHashSet();
+
+                var users = _context.Users
+                                    .Where(u => u.UserId != id && (username == null || u.Username.ToLower().Contains(username.ToLower()))
+                                                && !userFriendIds.Contains(u.UserId))
+                                    .AsQueryable();
+
+                return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         public async Task<PagedList<User>> GetUsersByRanking(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down)
         {

@@ -84,11 +84,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, HashSet<int> TagIds, int? userId)
+        public async Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters)
         {
             try
             {
-                var threads = await _threadRepository.GetAllThreadsByStatusesAndTagsAsync(parameters, statuses, TagIds, userId);
+                var threads = await _threadRepository.GetAllThreadsByStatusesAndTagsAsync(parameters);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);

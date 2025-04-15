@@ -53,7 +53,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOTP([FromBody] StrateZone_Service.CustomModels.RequestModels.LoginRequest loginRequest)
+        public async Task<IActionResult> VerifyOTP([FromBody] StrateZone_Service.CustomModels.RequestModels.EmailLoginRequest loginRequest)
         {
             try
             {

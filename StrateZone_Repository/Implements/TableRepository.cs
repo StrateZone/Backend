@@ -111,6 +111,7 @@ namespace StrateZone_Repository.Implements
                         new NpgsqlParameter("@EndTime", parameters.EndTime))
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
+                    .OrderBy(t => t.Room.RoomName)
                     .AsNoTracking()
                     .AsQueryable();
 
@@ -131,7 +132,8 @@ namespace StrateZone_Repository.Implements
                             FROM tables t
                             JOIN rooms r ON t.room_id = r.room_id
                             JOIN ""gameTypes"" gt ON gt.type_name = @TypeName::game_type
-                            WHERE r.status = 'available' AND gt.type_id = t.""gameType_id""
+                            WHERE r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%')) 
+                            AND gt.type_id = t.""gameType_id""
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM tables_appointments ta
@@ -144,10 +146,12 @@ namespace StrateZone_Repository.Implements
                 var tables = _context.Tables
                     .FromSqlRaw(query,
                         new NpgsqlParameter("@TypeName", gameType.ToString()),
+                        new NpgsqlParameter("@RoomName", NpgsqlDbType.Text) { Value = string.IsNullOrEmpty(parameters.RoomName) ? DBNull.Value : parameters.RoomName },
                         new NpgsqlParameter("@StartTime", parameters.StartTime),
                         new NpgsqlParameter("@EndTime", parameters.EndTime))
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
+                    .OrderBy(t => t.Room.RoomName)
                     .AsNoTracking()
                     .AsQueryable();
 
@@ -222,7 +226,7 @@ namespace StrateZone_Repository.Implements
                     FROM tables t
                     JOIN rooms r ON t.room_id = r.room_id
                     JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
-                    WHERE r.status = 'available' 
+                    WHERE r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
                     AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds::public.game_type[]))
                     AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds::public.room_type[]))
                     AND NOT EXISTS (
@@ -245,10 +249,14 @@ namespace StrateZone_Repository.Implements
                         new NpgsqlParameter("@RoomTypeIds", NpgsqlDbType.Array | NpgsqlDbType.Text)
                         { Value = roomTypeNames ?? (object)DBNull.Value },
 
+                        new NpgsqlParameter("@RoomName", NpgsqlDbType.Text)
+                        { Value = string.IsNullOrEmpty(parameters.RoomName) ? DBNull.Value : parameters.RoomName },
+
                         new NpgsqlParameter("@StartTime", parameters.StartTime),
                         new NpgsqlParameter("@EndTime", parameters.EndTime))
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
+                    .OrderBy(t => t.Room.RoomName)
                     .AsNoTracking()
                     .AsQueryable();
 
@@ -270,7 +278,7 @@ namespace StrateZone_Repository.Implements
                                         ROW_NUMBER() OVER (PARTITION BY t.""gameType_id"" ORDER BY t.table_id) AS row_num
                                 FROM tables t
                                 JOIN rooms r ON t.room_id = r.room_id AND r.room_type != 'study'
-                                WHERE r.status = 'available'
+                                WHERE r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
                                 AND NOT EXISTS (
                                     SELECT 1
                                     FROM tables_appointments ta
@@ -286,9 +294,12 @@ namespace StrateZone_Repository.Implements
                         .FromSqlRaw(query,
                             new NpgsqlParameter("@StartTime", parameters.StartTime),
                             new NpgsqlParameter("@EndTime", parameters.EndTime),
+                            new NpgsqlParameter("@RoomName", NpgsqlDbType.Text)
+                                { Value = string.IsNullOrEmpty(parameters.RoomName) ? DBNull.Value : parameters.RoomName },
                             new NpgsqlParameter("@TableCount", tableCount))
                         .Include(t => t.GameType)
                         .Include(t => t.Room)
+                        .OrderBy(t => t.Room.RoomName)
                         .AsNoTracking()
                         .ToListAsync();
 
@@ -333,6 +344,7 @@ namespace StrateZone_Repository.Implements
                         new NpgsqlParameter("@EndTime", EndTime))
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
+                    .OrderBy(t => t.Room.RoomName)
                     .ToListAsync();
 
                 return tables;

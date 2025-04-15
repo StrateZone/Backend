@@ -6,5 +6,6 @@ namespace StrateZone_Repository.Parameters
     {
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
+        public string RoomName { get; set; } = string.Empty;
     }
 }
