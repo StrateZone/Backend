@@ -23,7 +23,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Tags.AsNoTracking().ToListAsync();
+                return await _context.Tags.AsNoTracking()
+                                        .Where(tag => tag.Status == Parameters.PostgreEnums.TagStatus.active)
+                                        .ToListAsync();
             }
             catch (Exception ex)
             {

@@ -378,7 +378,8 @@ namespace StrateZone_Repository.Implements
                                         FROM tables_appointments ta
                                         JOIN appointments a ON a.appointment_id = ta.appointment_id
                                         WHERE a.user_id = @user_id 
-                                        AND ta.status = 'cancelled'
+                                        AND NOT EXISTS (SELECT 1 FROM appointment_requests ar WHERE ar.table_id = ta.table_id AND ar.appointment_id = ta.appointment_id)
+                                        AND ta.status = 'cancelled' 
                                         AND ta.created_at >= @monday AND ta.created_at <= @today
                                     ",
                                     new NpgsqlParameter("@monday", monday),
