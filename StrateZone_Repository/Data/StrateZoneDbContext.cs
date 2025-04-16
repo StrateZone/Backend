@@ -1014,6 +1014,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TagName)
                 .HasMaxLength(50)
                 .HasColumnName("tag_name");
+            entity.Property(e => e.Status)
+            .HasConversion<string>()
+            .HasColumnName("status");
         });
 
         modelBuilder.Entity<Entities.Thread>(entity =>

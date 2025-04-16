@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -8,6 +9,8 @@ public partial class Tag
     public int TagId { get; set; }
 
     public string? TagName { get; set; }
+
+    public TagStatus Status { get; set; } = TagStatus.active;
 
     public virtual ICollection<ProductTag> ProductTags { get; set; } = new List<ProductTag>();
 

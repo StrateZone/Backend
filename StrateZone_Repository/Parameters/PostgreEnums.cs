@@ -30,5 +30,6 @@
         public enum UserRole { RegisteredUser, Member, Instructor, Staff, Admin }
         public enum VoucherStatus { active, expired }
         public enum WalletStatus { active, closed }
+        public enum TagStatus { active, hided }
     }
 }

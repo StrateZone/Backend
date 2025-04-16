@@ -12,5 +12,7 @@ namespace StrateZone_Service.BusinessModels
         public int TagId { get; set; }
 
         public string? TagName { get; set; }
+
+        public string? Status { get; set;}
     }
 }
