@@ -12,5 +12,6 @@ namespace StrateZone_Repository.Interfaces
         Task<Notification> ReadByIdAsync(int id);
         Task<PagedList<Notification>> GetUserNotificationsAsync(int userId, TablesAppointmentParameters parameters);
         Task<Notification> UpdateNotificationAsync(Notification notification, int id);
+        Task<List<Notification>> ReadNotificationsAsync(int userId);
     }
 }

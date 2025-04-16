@@ -103,11 +103,11 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("opponents/{userId}")]
-        public async Task<IActionResult> GetRandomByRanking(int userId, string? SearchTerm)
+        public async Task<IActionResult> GetRandomByRanking(int userId, [FromQuery] string? SearchTerm, [FromQuery] HashSet<int> excludedIds)
         {
             try
             {
-                var opponenents = await _userService.GetRandomOpponentsAsync(userId, SearchTerm);
+                var opponenents = await _userService.GetRandomOpponentsAsync(userId, SearchTerm, excludedIds);
                 return opponenents.MatchingOpponents.Count > 0 ? Ok(opponenents) : NotFound("No user was found");
             }
             catch (Exception ex)
