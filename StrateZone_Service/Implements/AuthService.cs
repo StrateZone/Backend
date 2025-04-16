@@ -49,10 +49,10 @@ namespace StrateZone_Service.Implements
                 string otp = GenerateOTP();
 
                 user.OTP = otp;
-                user.OTPExpiry = DateTime.UtcNow.AddSeconds(5 * 60); // OTP valid for 5 minutes
+                user.OTPExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddSeconds(5 * 60); // OTP valid for 5 minutes
 
                 user.RefreshToken = newRefreshToken;
-                user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+                user.RefreshTokenExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddDays(7);
 
                 var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
@@ -99,7 +99,7 @@ namespace StrateZone_Service.Implements
             if (user == null)
                 return null;
 
-            if (user.RefreshTokenExpiry < DateTime.UtcNow)
+            if (user.RefreshTokenExpiry < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
                 return new ApiResponse<RefreshTokenResponse>
                 {
                     Success = false,
@@ -112,7 +112,7 @@ namespace StrateZone_Service.Implements
             var newRefreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+            user.RefreshTokenExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddDays(7);
             var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
             return new ApiResponse<RefreshTokenResponse>
@@ -144,7 +144,7 @@ namespace StrateZone_Service.Implements
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
                 }
 
-                if (user.OTP != loginRequest.OTP || user.OTPExpiry < DateTime.UtcNow)
+                if (user.OTP != loginRequest.OTP || user.OTPExpiry < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid or expired OTP", Data = null };
 
                 user.OTP = null;
@@ -154,7 +154,7 @@ namespace StrateZone_Service.Implements
                 var newRefreshToken = _tokenService.GenerateRefreshToken();
 
                 user.RefreshToken = newRefreshToken;
-                user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+                user.RefreshTokenExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddDays(7);
 
                 if (user.Status == "Unactivated") user.Status = "Active";
 
