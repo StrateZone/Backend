@@ -368,7 +368,7 @@ namespace StrateZone_Service.Implements
 
                     var newTransaction = new TransactionModel
                     {
-                        Amount = refundAmount,
+                        Amount = tablesAppointment.Price,
                         Content =
                             $"Hoàn tiền {tablesAppointment.Price} VND cho đơn được mời tham gia ở bàn số {tablesAppointment.TableId}, " +
                             $"đơn #{tablesAppointment.AppointmentId}.",
