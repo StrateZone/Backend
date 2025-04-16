@@ -72,20 +72,31 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<PagedList<User>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
+
+        public async Task<(PagedList<User>, HashSet<int>, HashSet<int>)> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
         {
             try
             {
-                var userFriendIds = _context.Friendlists.Where(f => f.UserId == id || f.FriendId == id)
-                                                        .Select(f => f.UserId == id ? f.FriendId : f.UserId)
-                                                        .ToHashSet();
+                var userFriendIds = await _context.Friendlists.AsNoTracking()
+                                                        .Where(f => f.UserId == id || f.FriendId == id)
+                                                        .Select(f => (int)(f.UserId == id ? f.FriendId : f.UserId))
+                                                        .ToHashSetAsync();
+
+                var userWithFriendRequestIds = await _context.Friendrequests.AsNoTracking()
+                                                        .Where(f => f.FromUser == id || f.ToUser == id)
+                                                        .Select(f => f.FromUser == id ? f.ToUser : f.FromUser)
+                                                        .ToHashSetAsync();
 
                 var users = _context.Users
-                                    .Where(u => u.UserId != id && (username == null || u.Username.ToLower().Contains(username.ToLower()))
-                                                && !userFriendIds.Contains(u.UserId))
+                                    .AsNoTracking()
+                                    .Where(u => u.UserId != id && (username == null || u.Username.ToLower().Contains(username.ToLower())))
                                     .AsQueryable();
 
-                return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
+                return (
+                            await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize), 
+                            userFriendIds, 
+                            userWithFriendRequestIds
+                        );
             }
             catch (Exception ex)
             {

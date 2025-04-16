@@ -158,7 +158,7 @@ namespace StrateZone_Service.Implements
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
 
-                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).SingleOrDefault(p => p.UserId == userId);
+                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).FirstOrDefault(p => p.UserId == userId);
                     if (appointmentRequestModel.Status == RequestStatus.accepted.ToString() && payment?.PaymentStatus == "unpaid")
                     {
                         appointmentRequestModel.Status = RequestStatus.payment_required.ToString();
@@ -166,7 +166,7 @@ namespace StrateZone_Service.Implements
                 }
 
                 return new PagedList<AppointmentrequestModel>(
-                    appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize
+                        appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize
                     );
             }
             catch (Exception ex)
@@ -197,7 +197,7 @@ namespace StrateZone_Service.Implements
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
 
-                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).SingleOrDefault(p => p.UserId == userId);
+                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).FirstOrDefault(p => p.UserId == userId);
                     if (appointmentRequestModel.Status == RequestStatus.accepted.ToString() && payment?.PaymentStatus == "unpaid")
                     {
                         appointmentRequestModel.Status = RequestStatus.payment_required.ToString();

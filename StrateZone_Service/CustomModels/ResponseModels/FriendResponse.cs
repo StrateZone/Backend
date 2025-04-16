@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Service.CustomModels.ResponseModels
 {
+    public enum FriendStatus { stranger, request_sent, friended }
+
     public class FriendResponse
     {
         public int UserId { get; set; }
@@ -17,13 +19,13 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? Phone { get; set; }
 
-        public bool isFriended = false;
-
         public string UserRole { get; set; }
 
         public string? FullName { get; set; }
 
         public string Status { get; set; }
+
+        public FriendStatus FriendStatus;
 
         public string? Address { get; set; }
 

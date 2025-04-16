@@ -27,6 +27,7 @@ namespace StrateZone_Service.Mapper
                     .ReverseMap();
 
             CreateMap<UserResponse, OpponentResponse>();
+            CreateMap<UserResponse, FriendResponse>();
 
             CreateMap<UserModel, UserResponse>()
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))

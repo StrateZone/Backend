@@ -77,7 +77,7 @@ namespace StrateZone_APIs.Controllers
             {
                 var user = await _userService.SearchForFriendsByUsernameAsync(parameters, id, username);
 
-                var response = new PagedListResponse<UserResponse>(user);
+                var response = new PagedListResponse<FriendResponse>(user);
 
                 return response.TotalCount > 0 ? Ok(response) : Ok("No user with this username was found.");
             }
