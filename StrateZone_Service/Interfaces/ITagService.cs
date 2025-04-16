@@ -12,6 +12,9 @@ namespace StrateZone_Service.Interfaces
     {
         Task<TagModel> CreateTagAsync(TagModel tag);
         Task<TagModel> DeleteTagAsync(int id);
+        Task<TagModel> UpdateTagAsync(TagModel tagModel, int id);
+        Task<TagModel> AdminActivateTagAsync(int id);
+        Task<TagModel> AdminHideTagAsync(int id);
         Task<TagModel> GetTagByIdAsync(int id);
         Task<List<TagModel>> GetTagsAsync();
         Task<List<TagModel>> SearchTagsAsync(string content);
