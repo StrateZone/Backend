@@ -108,13 +108,29 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
-        public async Task<PagedList<UserResponse>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
+
+        public async Task<PagedList<FriendResponse>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
         {
             try
             {
                 var results = await _userRepository.SearchForFriendsByUsernameAsync(parameters, id, username);
-                var users = _mapper.Map<PagedList<UserResponse>>(results);
-                return new PagedList<UserResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
+                
+                var usersResponse = _mapper.Map<PagedList<UserResponse>>(results.Item1);
+                
+                var friends = _mapper.Map<PagedList<FriendResponse>>(usersResponse);
+                foreach (var f in friends)
+                {
+                    if (results.Item2.Contains(f.UserId)) f.FriendStatus = FriendStatus.friended;
+                    else if (results.Item3.Contains(f.UserId)) f.FriendStatus = FriendStatus.request_sent;
+                    else f.FriendStatus = FriendStatus.stranger;
+                }
+
+                return new PagedList<FriendResponse>(
+                            friends, 
+                            results.Item1.TotalCount, 
+                            results.Item1.CurrentPage, 
+                            results.Item1.PageSize
+                        );
             }
             catch (Exception ex)
             {
