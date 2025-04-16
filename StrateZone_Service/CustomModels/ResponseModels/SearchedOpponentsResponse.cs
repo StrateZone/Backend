@@ -10,6 +10,7 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 {
     public class SearchedOpponentsResponse
     {
+        public HashSet<int> ExcludedIds = new();
         public List<OpponentResponse> MatchingOpponents = new();
         public List<OpponentResponse> Friends = new();
     }

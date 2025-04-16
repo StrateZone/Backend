@@ -74,7 +74,22 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _notificationService.ReadByIdAsync(id);
 
-                return Created("Notification created", result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("read-all/{userId}")]
+        public async Task<IActionResult> ReadAllNoti(int userId)
+        {
+            try
+            {
+                var result = await _notificationService.ReadNotificationsAsync(userId);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

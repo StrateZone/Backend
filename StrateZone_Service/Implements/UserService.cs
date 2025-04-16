@@ -219,17 +219,18 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<SearchedOpponentsResponse> GetRandomOpponentsAsync(int userId, string? SearchTerm)
+        public async Task<SearchedOpponentsResponse> GetRandomOpponentsAsync(int userId, string? SearchTerm, HashSet<int> excludedIds)
         {
             try
             { 
-                var results = await _userRepository.GetRandomOpponentsAsync(userId, SearchTerm);
+                var results = await _userRepository.GetRandomOpponentsAsync(userId, SearchTerm, excludedIds);
 
                 var mappedResults1 = _mapper.Map<List<UserResponse>>(results.Item1);
                 var mappedResults2 = _mapper.Map<List<UserResponse>>(results.Item2);
 
                 return new SearchedOpponentsResponse()
                 {
+                    ExcludedIds = results.Item3,
                     MatchingOpponents = _mapper.Map<List<OpponentResponse>>(mappedResults1),
                     Friends = _mapper.Map<List<OpponentResponse>>(mappedResults2),
                 };

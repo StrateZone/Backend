@@ -421,13 +421,14 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<(List<User>, List<User>)> GetRandomOpponentsAsync(int userId, string? SearchTerm)
+        public async Task<(List<User>, List<User>, HashSet<int>)> GetRandomOpponentsAsync(int userId, string? SearchTerm, HashSet<int> excludedIds)
         {
             try
             {
                 var friends = await _context.Friendlists.AsNoTracking()
-                                                  .Where(f => f.UserId == userId
-                                                        || f.FriendId == userId)
+                                                  .Where(f => (f.UserId == userId && !excludedIds.Contains((int)f.FriendId))
+                                                        || (f.FriendId == userId && !excludedIds.Contains((int)f.UserId))
+                                                        )
                                                   .Select(f => (int) (f.UserId == userId ? f.FriendId : f.UserId))
                                                   .ToHashSetAsync();
 
@@ -437,27 +438,28 @@ namespace StrateZone_Repository.Implements
                 {
                     randomUsers = await _context.Users
                                         .AsNoTracking()
-                                        .Where(u => u.UserId != userId && !friends.Contains(u.UserId))
+                                        .Where(u => u.UserId != userId && !friends.Contains(u.UserId) && !excludedIds.Contains(u.UserId))
                                         .Include(u => u.AppointmentRequestsToUserNavigations)
-                                        .OrderByDescending(u => u.Points)
+                                        .OrderByDescending(u => Guid.NewGuid())
                                         .Take(12)
                                         .ToListAsync();
 
                     return (
                                 randomUsers,
-                                await _context.Users.AsNoTracking().Where(u => friends.Contains(u.UserId)).ToListAsync()
+                                await _context.Users.AsNoTracking().Where(u => friends.Contains(u.UserId)).ToListAsync(),
+                                randomUsers.Select(r => r.UserId).ToHashSet()
                             );
                 }
                 else
                 {
                     randomUsers = await _context.Users
                                         .AsNoTracking()
-                                        .Where(u => u.UserId != userId && u.Username.ToLower().Contains(SearchTerm.ToLower()))
+                                        .Where(u => u.UserId != userId && u.Username.ToLower().Contains(SearchTerm.ToLower()) && !excludedIds.Contains(u.UserId))
                                         .Include(u => u.AppointmentRequestsToUserNavigations)
                                         .OrderByDescending(u => u.Points)
                                         .ToListAsync();
 
-                    return (randomUsers, []);
+                    return (randomUsers, [], randomUsers.Select(r => r.UserId).ToHashSet());
                 }
             }
             catch (Exception ex)
