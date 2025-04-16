@@ -124,7 +124,7 @@ namespace StrateZone_Service.Implements
                 var toHide = await _tagRepository.GetTagByIdAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
                 var tagModel = _mapper.Map<TagModel>(toHide);
-                if (tagModel.Status != PostgreEnums.TagStatus.hided.ToString())
+                if (tagModel.Status != PostgreEnums.TagStatus.hidden.ToString())
                     throw new Exception($"This thread is already {tagModel.Status}");
 
                 tagModel.Status = PostgreEnums.TagStatus.active.ToString();
@@ -149,7 +149,7 @@ namespace StrateZone_Service.Implements
                 if (tagModel.Status != PostgreEnums.TagStatus.active.ToString())
                     throw new Exception($"This thread is already {tagModel.Status}");
 
-                tagModel.Status = PostgreEnums.TagStatus.hided.ToString();
+                tagModel.Status = PostgreEnums.TagStatus.hidden.ToString();
                 var result = await UpdateTagAsync(tagModel, tagModel.TagId);
 
                 return result;
