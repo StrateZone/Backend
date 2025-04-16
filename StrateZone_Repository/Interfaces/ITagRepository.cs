@@ -6,6 +6,7 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<Tag> CreateTagAsync(Tag tag);
         Task<Tag> DeleteTagAsync(int id);
+        Task<Tag> UpdateTagAsync(Tag tag, int tagId);
         Task<Tag> GetTagByIdAsync(int id);
         Task<List<Tag>> GetTagsAsync();
         Task<List<Tag>> GetThreadTagsAsync();

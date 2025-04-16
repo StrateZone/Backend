@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StrateZone_Repository.Implements
@@ -108,6 +109,26 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return toDelete;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<Tag> UpdateTagAsync(Tag tag, int tagId)
+        {
+            try
+            {
+                if ((await _context.Tags.AsNoTracking().SingleOrDefaultAsync(t => t.TagId == tagId)) == null)
+                    throw new Exception("Thread with this ID does not eixst");
+
+                tag.TagId = tagId;
+
+                _context.Tags.Update(tag);
+
+                await _context.SaveChangesAsync();
+                return tag;
             }
             catch (Exception ex)
             {

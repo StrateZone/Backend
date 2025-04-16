@@ -83,6 +83,34 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("admin/activate/{id}")]
+        public async Task<IActionResult> AdminActivateTagAsync(int id)
+        {
+            try
+            {
+                var result = await _tagService.AdminActivateTagAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("admin/hide/{id}")]
+        public async Task<IActionResult> AdminHideTagAsync(int id)
+        {
+            try
+            {
+                var result = await _tagService.AdminHideTagAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchTagsAsync([FromQuery] string content)
         {
