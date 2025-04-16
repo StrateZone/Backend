@@ -31,6 +31,30 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Tag>> GetThreadTagsAsync()
+        {
+            try
+            {
+                return await _context.Tags.AsNoTracking().Where(tag => tag.ThreadsTags.Any()).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<Tag>> GetProductTagsAsync()
+        {
+            try
+            {
+                return await _context.Tags.AsNoTracking().Where(tag => tag.ProductTags.Any()).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<Tag> GetTagByIdAsync(int id)
         {
             try

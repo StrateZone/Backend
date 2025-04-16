@@ -35,6 +35,36 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("thread")]
+        public async Task<IActionResult> GetThreadTagsAsync()
+        {
+            try
+            {
+                var result = await _tagService.GetThreadTagsAsync();
+                return result.Count > 0 ? Ok(result) : Ok("No tags found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all tags.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("product")]
+        public async Task<IActionResult> GetProductTagsAsync()
+        {
+            try
+            {
+                var result = await _tagService.GetProductTagsAsync();
+                return result.Count > 0 ? Ok(result) : Ok("No tags found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all tags.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTagByIdAsync(int id)
         {

@@ -15,5 +15,7 @@ namespace StrateZone_Service.Interfaces
         Task<TagModel> GetTagByIdAsync(int id);
         Task<List<TagModel>> GetTagsAsync();
         Task<List<TagModel>> SearchTagsAsync(string content);
+        Task<List<TagModel>> GetThreadTagsAsync();
+        Task<List<TagModel>> GetProductTagsAsync();
     }
 }

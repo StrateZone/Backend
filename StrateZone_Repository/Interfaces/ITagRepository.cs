@@ -8,6 +8,8 @@ namespace StrateZone_Repository.Interfaces
         Task<Tag> DeleteTagAsync(int id);
         Task<Tag> GetTagByIdAsync(int id);
         Task<List<Tag>> GetTagsAsync();
+        Task<List<Tag>> GetThreadTagsAsync();
+        Task<List<Tag>> GetProductTagsAsync();
         Task<List<Tag>> SearchTagsAsync(string content);
     }
 }

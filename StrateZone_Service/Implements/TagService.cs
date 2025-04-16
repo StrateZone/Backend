@@ -76,6 +76,32 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<TagModel>> GetThreadTagsAsync()
+        {
+            try
+            {
+                var result = await _tagRepository.GetThreadTagsAsync();
+                return _mapper.Map<List<TagModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TagModel>> GetProductTagsAsync()
+        {
+            try
+            {
+                var result = await _tagRepository.GetProductTagsAsync();
+                return _mapper.Map<List<TagModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<List<TagModel>> SearchTagsAsync(string content)
         {
             try
