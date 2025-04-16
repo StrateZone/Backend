@@ -144,13 +144,14 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Thread>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, HashSet<int> TagIds, int? userId = null)
+        public async Task<PagedList<Thread>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters)
         {
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => (statuses.Length <= 0 || statuses.Contains(t.Status))
-                                        && (TagIds.Count <= 0 || TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
+                                .Where(t => (parameters.statuses.Length <= 0 || parameters.statuses.Contains(t.Status))
+                                        && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
+                                        && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
@@ -162,11 +163,11 @@ namespace StrateZone_Repository.Implements
                                     .ThenInclude(tt => tt.Tag)
                                 .AsQueryable();
 
-                if (parameters.OrderBy == "friends" && userId != null)
+                if (parameters.OrderBy == "friends" && parameters.userId != null)
                 {
                     HashSet<int?> friendIds = _context.Friendlists.AsNoTracking()
-                                            .Where(f => f.UserId == userId || f.FriendId == userId)
-                                            .Select(f => f.UserId == userId ? f.FriendId : f.UserId)
+                                            .Where(f => f.UserId == parameters.userId || f.FriendId == parameters.userId)
+                                            .Select(f => f.UserId == parameters.userId ? f.FriendId : f.UserId)
                                             .ToHashSet();
 
                     threads = threads.Where(t => friendIds.Contains(t.CreatedBy))

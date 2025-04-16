@@ -25,6 +25,7 @@ namespace StrateZone_Service.Implements
         private readonly IUserRepository _userRepository;
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly INotificationService _notificationService;
+        private readonly IPriceService _priceService;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -36,7 +37,8 @@ namespace StrateZone_Service.Implements
             IEmailService emailService,
             IUserRepository userRepository,
             IAppointmentRepository appointmentRepository,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IPriceService priceService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -48,6 +50,7 @@ namespace StrateZone_Service.Implements
             _userRepository = userRepository;
             _appointmentRepository = appointmentRepository;
             _notificationService = notificationService;
+            _priceService = priceService;
         }
 
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
@@ -365,6 +368,97 @@ namespace StrateZone_Service.Implements
                 await _paymentRepository.UpdatePaymentAsync(payment, payment.Id);
 
                 return new ApiResponse<TablesAppointmentModel>
+                {
+                    Success = true,
+                    StatusCode = 201,
+                    Message = "Payment success",
+                    Data = null
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<PaymentModel>> CreateMembershipPaymentAsync(int userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return new ApiResponse<PaymentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"This user does not exist.",
+                        Data = null
+                    };
+                }
+
+                if (user.UserRole != UserRole.RegisteredUser)
+                {
+                    return new ApiResponse<PaymentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"This user is already a(n) {user.UserRole.ToString()}.",
+                        Data = null
+                    };
+                }
+
+                var membershipPrice = await _priceService.GetMembershipPriceAsync();
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(user.UserId);
+
+                if (userWallet.Balance < membershipPrice.Price1)
+                {
+                    return new ApiResponse<PaymentModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = "Balance is not enough",
+                        Data = null
+                    };
+                }
+
+                await _walletRepository.WithdrawalWalletAsync((int)membershipPrice.Price1, userWallet.WalletId);
+                
+                user.UserRole = UserRole.Member;
+                await _userRepository.UpdateUserAsync(user, user.UserId);
+
+                var userMembershipPayment = new Payment()
+                {
+                    UserId = user.UserId,
+                    PaymentStatus = PostgreEnums.PaymentStatus.paid,
+                    Description = "Đăng kí gói thành viên",
+                    PaymentType = PostgreEnums.PaymentType.membership
+                };
+
+                await _paymentRepository.CreatePaymentAsync(userMembershipPayment);
+
+                var newTransaction = new Transaction
+                {
+                    OfUser = user.UserId,
+                    Amount = membershipPrice.Price1,
+                    Content = "Đăng kí gói thành viên",
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    TransactionType = PostgreEnums.TransactionType.payment,
+                };
+                await _transactionRepository.SaveTransaction(newTransaction);
+
+                NotificationRequest notificationToUser = new()
+                {
+                    ToUser = user.UserId,
+                    Title = $"Đăng kí gói thành viên thành công!",
+                    Content = $"Bạn đã trở thành thành viên của CLB StrateZone, bây giờ bạn đã có thể tham gia tương tác " +
+                    $"với các thành viên của câu lạc bộ!",
+                    Type = NotificationType.community
+                };
+                await _notificationService.CreateNotificationAsync(notificationToUser);
+
+                return new ApiResponse<PaymentModel>
                 {
                     Success = true,
                     StatusCode = 201,

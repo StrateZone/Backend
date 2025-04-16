@@ -11,7 +11,7 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<Entities.Thread>> GetAllThreadsAsync(TablesAppointmentParameters parameters);
         Task<PagedList<Entities.Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id);
         Task<PagedList<Entities.Thread>> GetAllThreadsByStatusesAsync(TablesAppointmentParameters parameters, ThreadStatus[] statuses);
-        Task<PagedList<Entities.Thread>> GetAllThreadsByStatusesAndTagsAsync(TablesAppointmentParameters parameters, ThreadStatus[] statuses, HashSet<int> TagIds, int? userId);
+        Task<PagedList<Entities.Thread>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters);
         Task<Entities.Thread> GetThreadByIdAsync(int id);
         Task<Entities.Thread> GetThreadByIdForAdminDeleteAsync(int id);
         Task<Entities.Thread> UpdateThreadAsync(Entities.Thread thread, int id);

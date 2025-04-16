@@ -108,6 +108,19 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+        public async Task<PagedList<UserResponse>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username)
+        {
+            try
+            {
+                var results = await _userRepository.SearchForFriendsByUsernameAsync(parameters, id, username);
+                var users = _mapper.Map<PagedList<UserResponse>>(results);
+                return new PagedList<UserResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
         public async Task<UserResponse> CreateUserAsync(UserRequest userRequest)
         {
@@ -206,30 +219,19 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<SearchedOpponentsResponse> GetRandomUsersByRankingAsync(HashSet<int> excludedIds, PostgreEnums.Ranking ranking, int up, int down)
+        public async Task<SearchedOpponentsResponse> GetRandomOpponentsAsync(int userId, string? SearchTerm)
         {
             try
-            {
-                var requestedUserId = excludedIds.ElementAt(0);
+            { 
+                var results = await _userRepository.GetRandomOpponentsAsync(userId, SearchTerm);
 
-                var results = await _userRepository.GetRandomUsersByRanking(excludedIds, ranking, up, down);
-                var users = _mapper.Map<Dictionary<Ranking, List<UserResponse>>>(results);
-                var opponents = _mapper.Map<Dictionary<Ranking, List<OpponentResponse>>>(users);
-
-                var excludeIds = new HashSet<int>();
-
-                foreach (var oList in opponents.Values) 
-                { 
-                    foreach (var opponent in oList)
-                    {
-                        excludedIds.Add(opponent.UserId);
-                    }
-                }
+                var mappedResults1 = _mapper.Map<List<UserResponse>>(results.Item1);
+                var mappedResults2 = _mapper.Map<List<UserResponse>>(results.Item2);
 
                 return new SearchedOpponentsResponse()
                 {
-                    ExcludedIds = excludedIds,
-                    MatchingOpponents = opponents,
+                    MatchingOpponents = _mapper.Map<List<OpponentResponse>>(mappedResults1),
+                    Friends = _mapper.Map<List<OpponentResponse>>(mappedResults2),
                 };
             }
             catch (Exception ex)

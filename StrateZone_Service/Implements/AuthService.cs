@@ -134,7 +134,7 @@ namespace StrateZone_Service.Implements
             return random.Next((int)Math.Pow(10, length - 1), (int)Math.Pow(10, length)).ToString();
         }
 
-        public async Task<ApiResponse<LoginResponse>> VerifyOTP(LoginRequest loginRequest)
+        public async Task<ApiResponse<LoginResponse>> VerifyOTP(EmailLoginRequest loginRequest)
         {
             try
             {
@@ -200,6 +200,73 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<ApiResponse<LoginResponse>> VerifyLogin(PasswordLoginRequest loginRequest)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByEmailAsync(loginRequest.Email);
+                if (user == null)
+                {
+                    return new ApiResponse<LoginResponse> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
+                }
+
+                if (user.Password != loginRequest.Password || user.OTPExpiry < DateTime.UtcNow)
+                    return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid email or password", Data = null };
+
+                user.OTP = null;
+                user.OTPExpiry = null;
+
+                var newAccessToken = _tokenService.GenerateAccessToken(user);
+                var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+                user.RefreshToken = newRefreshToken;
+                user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+                var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
+
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(user.UserId);
+
+                var walletResponse = new WalletResponse
+                {
+                    UserId = userWallet.UserId,
+                    Balance = userWallet.Balance,
+                    Status = userWallet.Status.ToString(),
+                };
+
+                return new ApiResponse<LoginResponse>
+                {
+                    Success = true,
+                    StatusCode = 200,
+                    Message = "Login successfully!",
+                    Data = new LoginResponse
+                    {
+                        UserId = updatedUser.UserId,
+                        UserRole = updatedUser.UserRole.ToString(),
+                        Status = updatedUser.Status,
+                        Gender = updatedUser.Gender.ToString(),
+                        SkillLevel = updatedUser.SkillLevel.ToString(),
+                        Ranking = updatedUser.Ranking.ToString(),
+                        FullName = updatedUser.FullName,
+                        Address = updatedUser.Address,
+                        Bio = updatedUser.Bio,
+                        ImageUrl = updatedUser.Image?.Url,
+                        Wallet = walletResponse,
+                        Username = updatedUser.Username,
+                        Email = updatedUser.Email,
+                        Phone = updatedUser.Phone,
+                        AccessToken = newAccessToken,
+                        RefreshToken = updatedUser.RefreshToken
+                    }
+                };
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
 
         public async Task<ApiResponse<UserResponse>> RegisterAccount(RegisterRequest registerRequest)
         {

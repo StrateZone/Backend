@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Service.CustomModels.RequestModels
 {
-    public class LoginRequest
+    public class EmailLoginRequest
     {
         [Required]
         [EmailAddress]
@@ -15,5 +15,15 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public string OTP { get; set; }
+    }
+
+    public class PasswordLoginRequest
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        public string Password { get; set; }
     }
 }
