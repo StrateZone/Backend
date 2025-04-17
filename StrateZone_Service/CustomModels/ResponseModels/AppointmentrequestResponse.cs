@@ -15,6 +15,10 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string Status { get; set; }
 
+        public int TableId { get; set; }
+
+        public int AppointmentId { get; set; }
+
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }

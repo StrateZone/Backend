@@ -108,16 +108,15 @@ namespace StrateZone_Service.Implements
 
                 foreach (var appointmentRequest in appointment.Appointmentrequests)
                 {
-                    if(appointmentRequest.Status == RequestStatus.accepted.ToString())
+                    if (appointmentRequest.Status != RequestStatus.accepted.ToString()) continue;
+
+                    NotificationRequest toUser = new()
                     {
-                        NotificationRequest toUser = new()
-                        {
-                            ToUser = appointmentRequest.ToUser,
-                            Title = $"Mã đơn #{appointment.AppointmentId} đã được người mời thanh toán!",
-                            Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đã được người mời thanh toán thanh toán. Hãy tiến hành thanh toán phần của bạn! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
-                        };
-                        await _notificationService.CreateNotificationAsync(thisUser);
-                    }
+                        ToUser = appointmentRequest.ToUser,
+                        Title = $"Mã đơn #{appointment.AppointmentId} đã được người mời thanh toán!",
+                        Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đã được người mời thanh toán thanh toán. Hãy tiến hành thanh toán phần của bạn! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+                    };
+                    await _notificationService.CreateNotificationAsync(thisUser);
                 }
 
                 var user = await _userRepository.GetUserByIdAsync(appointment.UserId);

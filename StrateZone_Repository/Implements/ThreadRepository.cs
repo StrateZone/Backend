@@ -4,6 +4,7 @@ using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
+using System.Threading;
 using Thread = StrateZone_Repository.Entities.Thread;
 
 namespace StrateZone_Repository.Implements
@@ -60,7 +61,15 @@ namespace StrateZone_Repository.Implements
             {
                 var toDelete = await _context.Threads.FindAsync(id) ?? throw new Exception("No thread with this ID was found.");
 
-                _context.Threads.Remove(toDelete);
+                if (toDelete.Status == PostgreEnums.ThreadStatus.deleted)
+                    throw new Exception("This thread is already deleted");
+
+                toDelete.ThreadId = id;
+                toDelete.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
+                toDelete.CreatedByNavigation = null;
+                toDelete.Status = PostgreEnums.ThreadStatus.deleted;
+
+                _context.Threads.Update(toDelete);
                 await _context.SaveChangesAsync();
 
                 return toDelete;

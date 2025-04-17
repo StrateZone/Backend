@@ -54,6 +54,41 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<NotificationModel>> CreateNotificationsAsync(List<NotificationRequest> requests)
+        {
+            try
+            {
+                List<NotificationModel> models = new();
+
+                foreach (var request in requests)
+                {
+                    NotificationModel notificationModel = new()
+                    {
+                        ToUser = request.ToUser,
+                        TablesAppointmentId = request.TablesAppointmentId,
+                        TournamentId = request.TournamentId,
+                        OrderId = request.OrderId,
+                        Title = request.Title,
+                        Content = request.Content,
+                        Status = PostgreEnums.MessageStatus.unread,
+                        Type = request.Type,
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)
+                    };
+
+                    models.Add(notificationModel);
+                }
+
+                var notification = _mapper.Map<List<Notification>>(models);
+                var result = await _notificationRepository.CreateNotificationsAsync(notification);
+
+                return _mapper.Map<List<NotificationModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<NotificationModel> DeleteAsync(int id)
         {
             try

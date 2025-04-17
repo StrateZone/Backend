@@ -14,6 +14,7 @@ namespace StrateZone_Service.Interfaces
     public interface INotificationService
     {
         Task<NotificationModel> CreateNotificationAsync(NotificationRequest notification);
+        Task<List<NotificationModel>> CreateNotificationsAsync(List<NotificationRequest> notification);
         Task<NotificationModel> DeleteAsync(int id);
         Task<NotificationModel> GetByIdAsync(int id);
         Task<NotificationModel> ReadByIdAsync(int id);
