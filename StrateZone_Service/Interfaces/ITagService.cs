@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Interfaces
 {
@@ -16,6 +17,8 @@ namespace StrateZone_Service.Interfaces
         Task<TagModel> AdminActivateTagAsync(int id);
         Task<TagModel> AdminHideTagAsync(int id);
         Task<TagModel> GetTagByIdAsync(int id);
+        Task<List<TagModel>> GetTagsByIdsAsync(int[] ids);
+        Task<List<TagModel>> GetTagsByUserRoleAsync(UserRole role);
         Task<List<TagModel>> GetTagsAsync();
         Task<List<TagModel>> SearchTagsAsync(string content);
         Task<List<TagModel>> GetThreadTagsAsync();

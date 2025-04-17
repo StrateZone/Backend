@@ -21,7 +21,7 @@
         public enum RoomStatus { available, unavailable, closed }
         public enum RoomType { study, premium, basic, openspaced }
         public enum SkillLevel { beginner, intermediate, advanced }
-        public enum ThreadStatus { published, rejected, pending, deleted }
+        public enum ThreadStatus { published, rejected, pending, deleted, drafted }
         public enum TicketType { withdrawal, feedback, other }
         public enum TransactionType { deposit, withdrawal, refund, payment }
         public enum PaymentStatus { unpaid, paid }

@@ -1017,6 +1017,13 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Status)
             .HasConversion<string>()
             .HasColumnName("status");
+
+            entity.Property(e => e.AllowedRole)
+                  .HasConversion(
+                    v => v.ToString(),
+                    v => (Parameters.PostgreEnums.UserRole)Enum.Parse(typeof(Parameters.PostgreEnums.UserRole), v)
+                  )
+                .HasColumnName("allowed_role");
         });
 
         modelBuilder.Entity<Entities.Thread>(entity =>

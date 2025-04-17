@@ -63,6 +63,22 @@ namespace StrateZone_API.Controllers
             }
         }
 
+        [HttpGet("user/{id}/statuses")]
+        public async Task<ActionResult> GetThreadsByUserId([FromQuery] TablesAppointmentParameters parameters, [FromQuery] ThreadStatus[] statuses, int id)
+        {
+            try
+            {
+                var result = await _threadService.GetThreadsByUserIdAsync(parameters, statuses, id);
+                var response = new PagedListResponse<ThreadModel>(result);
+
+                return response != null ? Ok(response) : Ok("No thread was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult> GetAllThreads([FromQuery] TablesAppointmentParameters parameters)
         {
