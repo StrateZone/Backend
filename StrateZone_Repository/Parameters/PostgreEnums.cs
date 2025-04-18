@@ -17,11 +17,11 @@
         public enum ParticipantStatus { enrolled, drop_out, in_progress, completed }
         public enum ProductStatus { available, out_of_stock, discontinued }
         public enum Ranking { basic, silver, gold, platinum }
-        public enum RequestStatus { pending, accepted, rejected, cancelled, expired, payment_required, await_appointment_creation }
+        public enum RequestStatus { pending, accepted, rejected, cancelled, expired, accepted_by_others }
         public enum RoomStatus { available, unavailable, closed }
         public enum RoomType { study, premium, basic, openspaced }
         public enum SkillLevel { beginner, intermediate, advanced }
-        public enum ThreadStatus { published, rejected, pending, deleted, drafted }
+        public enum ThreadStatus { published, rejected, pending, deleted, drafted, hidden }
         public enum TicketType { withdrawal, feedback, other }
         public enum TransactionType { deposit, withdrawal, refund, payment }
         public enum PaymentStatus { unpaid, paid }

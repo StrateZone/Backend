@@ -5,6 +5,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using StrateZone_Service.CustomModels.ResponseModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_API.Controllers
 {

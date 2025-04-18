@@ -380,7 +380,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ApiResponse<PaymentModel>> CreateMembershipPaymentAsync(int userId)
+        public async Task<ApiResponse<UserResponse>> CreateMembershipPaymentAsync(int userId)
         {
             try
             {
@@ -388,7 +388,7 @@ namespace StrateZone_Service.Implements
 
                 if (user == null)
                 {
-                    return new ApiResponse<PaymentModel>
+                    return new ApiResponse<UserResponse>
                     {
                         Success = false,
                         StatusCode = 400,
@@ -399,7 +399,7 @@ namespace StrateZone_Service.Implements
 
                 if (user.UserRole != UserRole.RegisteredUser)
                 {
-                    return new ApiResponse<PaymentModel>
+                    return new ApiResponse<UserResponse>
                     {
                         Success = false,
                         StatusCode = 400,
@@ -413,7 +413,7 @@ namespace StrateZone_Service.Implements
 
                 if (userWallet.Balance < membershipPrice.Price1)
                 {
-                    return new ApiResponse<PaymentModel>
+                    return new ApiResponse<UserResponse>
                     {
                         Success = false,
                         StatusCode = 500,
@@ -457,12 +457,12 @@ namespace StrateZone_Service.Implements
                 };
                 await _notificationService.CreateNotificationAsync(notificationToUser);
 
-                return new ApiResponse<PaymentModel>
+                return new ApiResponse<UserResponse>
                 {
                     Success = true,
                     StatusCode = 201,
                     Message = "Payment success",
-                    Data = null
+                    Data = _mapper.Map<UserResponse>(user)
                 };
             }
             catch (Exception ex)

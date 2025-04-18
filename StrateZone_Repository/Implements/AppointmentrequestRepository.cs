@@ -254,9 +254,6 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
                 }
 
-                if (appointmentRequest.Status == RequestStatus.payment_required || appointmentRequest.Status == RequestStatus.await_appointment_creation)
-                    appointmentRequest.Status = RequestStatus.accepted;
-
                 sql.Append("status = @status::request_status, ");
                 parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
 
@@ -319,7 +316,7 @@ namespace StrateZone_Repository.Implements
                         "CASE " +
                             "WHEN id = @id THEN 'accepted' " +
                             "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
-                                "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'cancelled' " +
+                                "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'accepted_by_others' " +
                             "ELSE status " +
                     "END;");
                 parameters.Add(new NpgsqlParameter("@id", id));

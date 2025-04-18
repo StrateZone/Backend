@@ -249,7 +249,7 @@ namespace StrateZone_Service.Implements
                             StartTime = tableAppointment.ScheduleTime,
                             EndTime = tableAppointment.EndTime,
                             TableId = tableAppointment.TableId,
-                            AppointmentId = appointment.AppointmentId,
+                            AppointmentId = result.AppointmentId,
                         };
 
                         appointmentRequests.Add(newAR);
