@@ -166,7 +166,7 @@ namespace StrateZone_Service.Implements
                     notificationRequests.Add(notification);
                 }
 
-                _notificationService.CreateNotificationsAsync(notificationRequests);
+                await _notificationService.CreateNotificationsAsync(notificationRequests);
 
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }
@@ -330,7 +330,7 @@ namespace StrateZone_Service.Implements
                     Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận! Bấm để xem chi tiết.",
                     Type = NotificationType.appointment_request_to
                 };
-                _notificationService.CreateNotificationAsync(notification);
+                await _notificationService.CreateNotificationAsync(notification);
 
                 return _mapper.Map<AppointmentrequestModel>(result);
             }

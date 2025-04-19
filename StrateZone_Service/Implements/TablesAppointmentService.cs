@@ -199,7 +199,7 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentId = tablesAppointmentId,
                     Type = NotificationType.tables_appointment,
                 };
-                _notificationService.CreateNotificationAsync(notificationRequest);
+                await _notificationService.CreateNotificationAsync(notificationRequest);
 
                 return result;
             }
