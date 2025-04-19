@@ -40,6 +40,23 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+
+        [HttpGet("from/{id}")]
+        public async Task<IActionResult> GetFriendrequestsFromUserIdAsync(FriendrequestParameters parameters, int id)
+        {
+            try
+            {
+                var result = await _friendrequestService.GetFriendrequestsFromUserIdAsync(parameters, id);
+                var response = new PagedListResponse<FriendrequestModel>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No friend request to this user was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFriendrequestByIdAsync(int id)
         {
@@ -116,6 +133,20 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _friendrequestService.DeleteFriendrequestAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("sender/{senderId}/receiver/{receiverId}")]
+        public async Task<IActionResult> DeleteFriendrequestBySenderAndReceiverAsync(int senderId, int receiverId)
+        {
+            try
+            {
+                var result = await _friendrequestService.DeleteFriendrequestByUserAndFriendIdAsync(senderId, receiverId);
                 return Ok(result);
             }
             catch (Exception ex)
