@@ -186,6 +186,21 @@ namespace StrateZone_Service.Implements
 
                 var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
 
+                var userCheckin = await _userService.GetUserByIdAsync(userId);
+                userCheckin.Points += 10;
+                await _userService.UpdateUserAsync(userCheckin, userId);
+
+                NotificationRequest notificationRequest = new()
+                {
+                    ToUser = userId,
+                    Title = $"Check-in cho bàn số {tablesAppointment.TableId} thành công!",
+                    Content = $"Check-in hoàn tất! Bạn được cộng 10 điểm cá nhân, điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp. " +
+                    $"Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!",
+                    TablesAppointmentId = tablesAppointmentId,
+                    Type = NotificationType.tables_appointment,
+                };
+                _notificationService.CreateNotificationAsync(notificationRequest);
+
                 return result;
             }
             catch (Exception ex)

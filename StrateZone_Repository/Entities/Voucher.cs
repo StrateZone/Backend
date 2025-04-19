@@ -12,9 +12,15 @@ public partial class Voucher
 
     public int Value { get; set; }
 
+    public bool IsSample { get; set; }
+
+    public int? UserId { get; set; }
+
     public string? Description { get; set; }
 
     public decimal? MinPriceCondition { get; set; }
+
+    public int? PointsCost { get; set; }
 
     public DateOnly? ExpireDate { get; set; }
 
@@ -23,4 +29,6 @@ public partial class Voucher
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public virtual User? User { get; set; }
 }

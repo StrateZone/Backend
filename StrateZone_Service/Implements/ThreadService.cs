@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
 using Microsoft.AspNetCore.Http;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -180,20 +181,25 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var toReject = await GetThreadByIdAsync(id)
+                var toApprove = await GetThreadByIdAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
 
-                if (toReject.Status != PostgreEnums.ThreadStatus.pending.ToString())
-                    throw new Exception($"This thread is already {toReject.Status}");
+                if (toApprove.Status != PostgreEnums.ThreadStatus.pending.ToString())
+                    throw new Exception($"This thread is already {toApprove.Status}");
 
-                toReject.Status = PostgreEnums.ThreadStatus.published.ToString();
-                var result = await UpdateThreadAsync(toReject, toReject.ThreadId);
+                toApprove.Status = PostgreEnums.ThreadStatus.published.ToString();
+                var result = await UpdateThreadAsync(toApprove, toApprove.ThreadId);
+
+                var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
+                threadPoster.Points += 25;
+                await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
 
                 NotificationRequest notification = new()
                 {
                     ToUser = (int)result.CreatedBy,
                     Title = "Bài viết của bạn đã được phê duyệt!",
-                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.",
+                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.  Bạn được cộng 25 điểm cá nhân, " +
+                    $"điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp.",
                     Type = PostgreEnums.NotificationType.thread,
                 };
                 await _notificationService.CreateNotificationAsync(notification);
@@ -247,7 +253,7 @@ namespace StrateZone_Service.Implements
                 if (thread.Status != PostgreEnums.ThreadStatus.published.ToString())
                     throw new Exception($"This thread is already {thread.Status}");
 
-                thread.Status = PostgreEnums.ThreadStatus.deleted.ToString();
+                thread.Status = PostgreEnums.ThreadStatus.hidden.ToString();
                 var result = await UpdateThreadAsync(thread, toReject.ThreadId);
 
                 NotificationRequest notification = new()

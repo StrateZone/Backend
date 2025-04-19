@@ -321,7 +321,7 @@ namespace StrateZone_Repository.Implements
                     CurrentTime
                 );
 
-                return result; // Returns the number of rows affected
+                return result;
             }
             catch (Exception ex)
             {

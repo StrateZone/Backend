@@ -201,7 +201,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ApiResponse<LoginResponse>> VerifyLogin(PasswordLoginRequest loginRequest)
+        public async Task<ApiResponse<LoginResponse>> LoginPassword(PasswordLoginRequest loginRequest)
         {
             try
             {
@@ -213,6 +213,15 @@ namespace StrateZone_Service.Implements
 
                 if (user.Password != loginRequest.Password || user.OTPExpiry < DateTime.UtcNow)
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid email or password", Data = null };
+
+                if (user.Status == "Unactivated")
+                    return new ApiResponse<LoginResponse> 
+                    { 
+                        Success = false, 
+                        StatusCode = 404, 
+                        Message = "Tài khoản chưa được xác thực email.", 
+                        Data = null 
+                    };
 
                 user.OTP = null;
                 user.OTPExpiry = null;
@@ -297,7 +306,7 @@ namespace StrateZone_Service.Implements
                     Username = registerRequest.UserName,
                     Address = registerRequest.Address,
                     FullName = registerRequest.FullName,
-                    Password = "",
+                    Password = registerRequest.Password,
                     Gender = registerRequest.Gender,
                     SkillLevel = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner,
                     Ranking = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic,

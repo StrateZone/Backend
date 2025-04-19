@@ -16,5 +16,7 @@ namespace StrateZone_Service.BusinessModels
         public string? Status { get; set;}
 
         public string AllowedRole { get; set; }
+
+        public string TagColor { get; set; }
     }
 }

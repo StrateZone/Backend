@@ -53,6 +53,41 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<PagedList<Voucher>> GetSampleVouchersAsync(TablesAppointmentParameters parameters)
+        {
+            try
+            {
+                var vouchers = _context.Vouchers
+                                    .Where(v => v.Status == PostgreEnums.VoucherStatus.active && v.IsSample)
+                                    .OrderByDescending(v => v.Value)
+                                    .AsQueryable();
+
+                return await PagedList<Voucher>.ToPagedList(vouchers, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<PagedList<Voucher>> GetVouchersByUserIdAsync(TablesAppointmentParameters parameters, int userid)
+        {
+            try
+            {
+                var vouchers = _context.Vouchers
+                                    .Where(v => v.Status == PostgreEnums.VoucherStatus.active
+                                            && !v.IsSample && v.UserId == userid)
+                                    .OrderByDescending(v => v.Value)
+                                    .AsQueryable();
+
+                return await PagedList<Voucher>.ToPagedList(vouchers, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<Voucher> UpdateVoucherAsync(Voucher voucher, int id)
         {
             try

@@ -98,6 +98,9 @@ namespace StrateZone_Service.Implements
             try
             {
                 if (appointmentRequestModel.Count <= 0) return null;
+                
+                if (appointmentRequestModel[0].StartTime <= DateTime.UtcNow.AddHours(7).AddHours(1.5f)) 
+                    throw new Exception("Hiện đã sắp đến giờ chơi, không được phép mời thêm bạn.");
 
                 var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(appointmentRequestModel[0].StartTime, appointmentRequestModel[0].EndTime, false);
                 if (!isValid)
@@ -163,7 +166,7 @@ namespace StrateZone_Service.Implements
                     notificationRequests.Add(notification);
                 }
 
-                await _notificationService.CreateNotificationsAsync(notificationRequests);
+                _notificationService.CreateNotificationsAsync(notificationRequests);
 
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }
@@ -327,7 +330,7 @@ namespace StrateZone_Service.Implements
                     Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận! Bấm để xem chi tiết.",
                     Type = NotificationType.appointment_request_to
                 };
-                await _notificationService.CreateNotificationAsync(notification);
+                _notificationService.CreateNotificationAsync(notification);
 
                 return _mapper.Map<AppointmentrequestModel>(result);
             }

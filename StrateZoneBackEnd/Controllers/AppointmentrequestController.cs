@@ -99,13 +99,30 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        /*
         [HttpPost]
-        public async Task<IActionResult> CreateAppointmentRequestAsync([FromBody] AppointmentrequestRequest request)
+        public async Task<IActionResult> CreateAppointmentRequestsAsync([FromBody] AppointmentrequestsRequest request)
         {
             try
             {
-                var result = await _appointmentrequestService.CreateAppointmentRequestAsync(request);
+                List<AppointmentrequestRequest> requests = new();
+
+                foreach (var toUserId in request.ToUser)
+                {
+                    AppointmentrequestRequest appointmentrequestRequest = new AppointmentrequestRequest()
+                    { 
+                        FromUser = request.FromUser,
+                        ToUser = toUserId,
+                        AppointmentId = request.AppointmentId,
+                        TableId = request.TableId,
+                        StartTime = request.StartTime,
+                        EndTime = request.EndTime,
+                        TotalPrice = request.TotalPrice,
+                    };
+
+                    requests.Add(appointmentrequestRequest);
+                }
+
+                var result = await _appointmentrequestService.CreateAppointmentRequestsAsync(requests);
                 return Created("Appointment request created!", result);
             }
             catch (Exception ex)
@@ -113,7 +130,6 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        */
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAppointmentRequestAsync([FromBody] AppointmentrequestModel appointmentRequestModel, int id)
