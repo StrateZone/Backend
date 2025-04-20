@@ -22,6 +22,6 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         public virtual HashSet<int> TagIds { get; set; } = new();
 
-        public bool isDrafted = false;
+        public bool isDrafted { get; set; } = false;
     }
 }
