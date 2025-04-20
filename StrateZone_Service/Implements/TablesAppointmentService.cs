@@ -187,6 +187,8 @@ namespace StrateZone_Service.Implements
                 var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
 
                 var userCheckin = await _userService.GetUserByIdAsync(userId);
+                
+                var pointsCalculate = 
                 userCheckin.Points += 10;
                 await _userService.UpdateUserAsync(userCheckin, userId);
 
@@ -421,23 +423,6 @@ namespace StrateZone_Service.Implements
             var model = _mapper.Map<TablesAppointmentModel>(tablesAppointment);
 
             var cancelledTablesAppointmentsWithinThisWeek = await _tablesAppointmentRepository.GetNumberOfTablesAppointmentCancelledByUserInAWeekSpanAsync(userId, CancelTime);
-            if (cancelledTablesAppointmentsWithinThisWeek > 5)
-            {
-                DateOnly monday = DateOnly.FromDateTime(
-                        CancelTime.AddDays(-(int)CancelTime.DayOfWeek + (CancelTime.DayOfWeek == DayOfWeek.Sunday ? -6 : 1))
-                    );
-                return new TablesAppointmentRefundResponse()
-                {
-                    TablesAppointmentModel = model,
-                    RefundAmount = 0,
-                    RefundStatus = RefundStatus.no_refund,
-                    Message = $"Không được hoàn tiền. " +
-                    $"Lí do: Bạn đã hủy nhiều hơn 5 bàn trong tuần này, tính từ ngày {monday:dd/MM/yyyy} (thứ hai) " +
-                    $"đến {DateOnly.FromDateTime(CancelTime):dd/MM/yyyy} (hiện tại).",
-                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
-                    CancellationTime = CancelTime,
-                };
-            }
 
             DateTime ScheduleTime = tablesAppointment.ScheduleTime;
             DateTime CreatedTime = (DateTime)tablesAppointment.CreatedAt;
@@ -482,6 +467,24 @@ namespace StrateZone_Service.Implements
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.cancellation_fail,
                     Message = "Không được phép hủy đơn trong vòng 1.5 tiếng trước giờ hẹn."
+                };
+            }
+
+            if (cancelledTablesAppointmentsWithinThisWeek > 5)
+            {
+                DateOnly monday = DateOnly.FromDateTime(
+                        CancelTime.AddDays(-(int)CancelTime.DayOfWeek + (CancelTime.DayOfWeek == DayOfWeek.Sunday ? -6 : 1))
+                    );
+                return new TablesAppointmentRefundResponse()
+                {
+                    TablesAppointmentModel = model,
+                    RefundAmount = 0,
+                    RefundStatus = RefundStatus.no_refund,
+                    Message = $"Không được hoàn tiền. " +
+                    $"Lí do: Bạn đã hủy nhiều hơn 5 bàn trong tuần này, tính từ ngày {monday:dd/MM/yyyy} (thứ hai) " +
+                    $"đến {DateOnly.FromDateTime(CancelTime):dd/MM/yyyy} (hiện tại).",
+                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
+                    CancellationTime = CancelTime,
                 };
             }
 
