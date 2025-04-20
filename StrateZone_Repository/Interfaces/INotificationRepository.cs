@@ -8,6 +8,7 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<Notification> CreateNotificationAsync(Notification notification);
         Task<List<Notification>> CreateNotificationsAsync(List<Notification> notification);
+        Task<List<Notification>> CreateNotificationsForRejectedTablesAppoimentsAsync(List<Notification> notification);
         Task<Notification> DeleteAsync(int id);
         Task<Notification> GetByIdAsync(int id);
         Task<Notification> ReadByIdAsync(int id);

@@ -83,7 +83,7 @@ namespace StrateZone_Repository.Implements
                                                         .ToHashSetAsync();
 
                 var userWithFriendRequestIds = await _context.Friendrequests.AsNoTracking()
-                                                        .Where(f => f.FromUser == id || f.ToUser == id)
+                                                        .Where(f => (f.FromUser == id || f.ToUser == id) && f.Status == RequestStatus.pending)
                                                         .Select(f => f.FromUser == id ? f.ToUser : f.FromUser)
                                                         .ToHashSetAsync();
 

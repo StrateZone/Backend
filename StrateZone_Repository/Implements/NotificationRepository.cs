@@ -51,6 +51,28 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Notification>> CreateNotificationsForRejectedTablesAppoimentsAsync(List<Notification> notification)
+        {
+            try
+            {
+                var existings = await _context.Notifications.AsNoTracking()
+                                    .Where(n => n.TablesAppointmentId != null && n.Type == PostgreEnums.NotificationType.tables_appointment_invitations_timedout)
+                                    .Select(n => n.TablesAppointmentId)
+                                    .ToHashSetAsync();
+
+                notification.RemoveAll(n => n.TablesAppointmentId == null || existings.Contains(n.TablesAppointmentId));
+
+                await _context.Notifications.AddRangeAsync(notification);
+                await _context.SaveChangesAsync();
+
+                return notification;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<Notification> GetByIdAsync(int id)
         {
             try

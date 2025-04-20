@@ -140,32 +140,33 @@ namespace StrateZone_Service.Implements
                         var appointmentService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
                         var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-                        var toBeCancelledTablesAppointments = await tablesAppointmentService.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
-                        foreach (var table in toBeCancelledTablesAppointments)
+                        var toBeAnnouncedTablesAppointments = await tablesAppointmentService.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
+
+                        var notifications = new List<NotificationRequest>();
+                        foreach (var tableAppointment in toBeAnnouncedTablesAppointments)
                         {
-                            var appointment = await appointmentService.GetAppointmentByIdAsync((int)table.AppointmentId);
+                            var appointment = await appointmentService.GetAppointmentByIdAsync((int)tableAppointment.AppointmentId);
                             var userId = appointment.UserId;
 
-                            await tablesAppointmentService.ForceCancelTablesAppointment(table.Id, userId);
-
-                            string timeString = $"ngày {DateOnly.FromDateTime(table.ScheduleTime)}, từ {table.ScheduleTime.TimeOfDay} đến {table.EndTime.TimeOfDay}";
+                            string timeString = $"ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}, từ {tableAppointment.ScheduleTime.TimeOfDay} đến {tableAppointment.EndTime.TimeOfDay}";
 
                             NotificationRequest notif = new()
                             {
                                 ToUser = userId,
-                                Title = "Đơn đặt bàn của bạn đã tự động hủy!",
-                                Content = $"Đơn đặt bàn số {table.TableId} vào {timeString} (mã đơn #{table.AppointmentId}) đã tự động được hủy " +
-                                $"và tiến hành hoàn tiền dựa theo thời gian đặt bàn. " +
-                                $"Lí do: Toàn bộ lời mời bạn đã gửi đến những người chơi khác đều đã hết hạn hoặc bị từ chối.",
-                                TablesAppointmentId = table.Id,
-                                Type = StrateZone_Repository.Parameters.PostgreEnums.NotificationType.appointment
+                                Title = $"Các lời mời chơi cờ mà bạn đã gửi cho bàn {tableAppointment.TableId} đã bị từ chối!",
+                                Content = $"Toàn bộ các lời mời chơi cờ mà bạn đã gửi cho bàn {tableAppointment.TableId}, vào {timeString} (mã đơn #{tableAppointment.AppointmentId}) " +
+                                $"đều đã bị từ chối hoặc đã hết hạn. Bấm để xem chi tiết.",
+                                TablesAppointmentId = tableAppointment.Id,
+                                Type = StrateZone_Repository.Parameters.PostgreEnums.NotificationType.tables_appointment_invitations_timedout
                             };
 
-                            await notificationService.CreateNotificationAsync(notif);
+                            notifications.Add(notif);
                         }
 
-                        _logger.LogInformation($"ITablesAppointmentService executed: Cancelled and refunded for " +
-                            $"{toBeCancelledTablesAppointments.Count} tables on appointment(s).");
+                        await notificationService.CreateNotificationsForRejectedTablesAppoimentsAsync(notifications);
+
+                        _logger.LogInformation($"ITablesAppointmentService executed: Sent notifications to " +
+                            $"{toBeAnnouncedTablesAppointments.Count} tables on appointment(s).");
                     }
                 }
                 catch (Exception ex)

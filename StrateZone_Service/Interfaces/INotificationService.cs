@@ -15,6 +15,7 @@ namespace StrateZone_Service.Interfaces
     {
         Task<NotificationModel> CreateNotificationAsync(NotificationRequest notification);
         Task<List<NotificationModel>> CreateNotificationsAsync(List<NotificationRequest> notification);
+        Task<List<NotificationModel>> CreateNotificationsForRejectedTablesAppoimentsAsync(List<NotificationRequest> notification);
         Task<NotificationModel> DeleteAsync(int id);
         Task<NotificationModel> GetByIdAsync(int id);
         Task<NotificationModel> ReadByIdAsync(int id);
