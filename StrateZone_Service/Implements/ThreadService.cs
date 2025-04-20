@@ -56,7 +56,7 @@ namespace StrateZone_Service.Implements
                     Title = request.Title,
                     Content = request.Content,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    Status = PostgreEnums.ThreadStatus.pending.ToString(),
+                    Status = request.isDrafted ? ThreadStatus.drafted.ToString() : ThreadStatus.pending.ToString(),
                     Rating = 0,
                 };
 

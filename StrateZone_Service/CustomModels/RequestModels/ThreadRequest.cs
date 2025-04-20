@@ -21,5 +21,7 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public string? ThumbnailUrl {  get; set; }
 
         public virtual HashSet<int> TagIds { get; set; } = new();
+
+        public bool isDrafted = false;
     }
 }

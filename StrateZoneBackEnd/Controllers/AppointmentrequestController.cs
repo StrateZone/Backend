@@ -122,7 +122,7 @@ namespace StrateZone_APIs.Controllers
                     requests.Add(appointmentrequestRequest);
                 }
 
-                var result = await _appointmentrequestService.CreateAppointmentRequestsAsync(requests);
+                var result = await _appointmentrequestService.CreateAdditionalAppointmentRequestsAsync(requests);
                 return Created("Appointment request created!", result);
             }
             catch (Exception ex)
