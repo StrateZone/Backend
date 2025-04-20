@@ -31,5 +31,6 @@
         public enum VoucherStatus { active, expired }
         public enum WalletStatus { active, closed }
         public enum TagStatus { active, hidden }
+        public enum TableStatus { active, has_room, out_of_service }
     }
 }

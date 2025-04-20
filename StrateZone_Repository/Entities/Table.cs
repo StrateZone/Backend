@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Entities;
 
@@ -10,6 +11,8 @@ public partial class Table
     public int? RoomId { get; set; }
 
     public int? GameTypeId { get; set; }
+
+    public TableStatus Status { get; set; } = TableStatus.active;
 
     public virtual GameType? GameType { get; set; }
 
