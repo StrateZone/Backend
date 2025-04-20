@@ -385,7 +385,8 @@ namespace StrateZone_Service.Implements
             
                 foreach (var appointment in appointments)
                 {
-                    appointment.Status = AppointmentStatus.completed;
+                    appointment.Status = appointment.TablesAppointments.Any(ta => ta.Status != AppointmentStatus.completed)
+                        ? AppointmentStatus.unfinished : AppointmentStatus.completed;
                     await _appointmentRepository.UpdateAppointmentAsync(appointment, appointment.AppointmentId);
 
                     NotificationRequest request = new()

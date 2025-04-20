@@ -356,8 +356,9 @@ namespace StrateZone_Repository.Implements
 	                                    SELECT 1 FROM tables_appointments ta
 	                                    WHERE ta.appointment_id = a.appointment_id
 	                                    AND ta.status IN ('pending', 'confirmed', 'incoming', 'checked_in')
-	                                );"
+	                                )"
                                 )
+                                .Include(a => a.TablesAppointments)
                                 .ToListAsync();
 
                 return result;
