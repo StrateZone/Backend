@@ -36,6 +36,21 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Notification>> CreateNotificationsAsync(List<Notification> notification)
+        {
+            try
+            {
+                await _context.Notifications.AddRangeAsync(notification);
+                await _context.SaveChangesAsync();
+
+                return notification;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<Notification> GetByIdAsync(int id)
         {
             try

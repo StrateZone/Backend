@@ -51,12 +51,59 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] VoucherRequest voucherModel)
+        [HttpGet("samples")]
+        public async Task<IActionResult> GetSampleVouchers(TablesAppointmentParameters parameters)
         {
             try
             {
-                var result = await _voucherService.CreateVoucherAsync(voucherModel);
+                var result = await _voucherService.GetSampleVouchersAsync(parameters);
+                var response = new PagedListResponse<VoucherModel>(result);
+
+                return response != null ? Ok(response) : NotFound("No voucher was found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("of-user/{userId}")]
+        public async Task<IActionResult> GetExchangableVouchers(TablesAppointmentParameters parameters, int userId)
+        {
+            try
+            {
+                var result = await _voucherService.GetVouchersByUserIdAsync(parameters, userId);
+                var response = new PagedListResponse<VoucherModel>(result);
+
+                return response != null ? Ok(response) : NotFound("No voucher was found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("create-sample")]
+        public async Task<IActionResult> Post([FromBody] SampleVoucherRequest voucherModel)
+        {
+            try
+            {
+                var result = await _voucherService.CreateSampleVoucherAsync(voucherModel);
+
+                return Created("Voucher created!", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("create-voucher")]
+        public async Task<IActionResult> CreateVoucherFromSample([FromBody] UserVoucherRequest voucherModel)
+        {
+            try
+            {
+                var result = await _voucherService.CreateVoucherFromSampleAsync(voucherModel);
 
                 return Created("Voucher created!", result);
             }

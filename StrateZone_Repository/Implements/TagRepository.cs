@@ -2,12 +2,14 @@
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -24,7 +26,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Tags.AsNoTracking().ToListAsync();
+                return await _context.Tags.AsNoTracking()
+                                        .Where(tag => tag.Status == Parameters.PostgreEnums.TagStatus.active)
+                                        .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -61,6 +65,36 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Tags.AsNoTracking().SingleOrDefaultAsync(t => t.TagId == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<Tag>> GetTagsByIdsAsync(int[] ids)
+        {
+            try
+            {
+                return await _context.Tags.AsNoTracking()
+                                        .Where(t => ids.Contains(t.TagId))
+                                        .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<Tag>> GetTagsByUserRoleAsync(PostgreEnums.UserRole role)
+        {
+            try
+            {
+                var allTags = await _context.Tags.AsNoTracking().ToListAsync();
+
+                return allTags
+                    .Where(t => role >= t.AllowedRole)
+                    .ToList();
             }
             catch (Exception ex)
             {

@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
 using Microsoft.AspNetCore.Http;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 using Thread = StrateZone_Repository.Entities.Thread;
 
 namespace StrateZone_Service.Implements
@@ -17,20 +19,37 @@ namespace StrateZone_Service.Implements
         private readonly IImageService _imageService;
         private readonly IThreadsTagService _threadsTagService;
         private readonly IMapper _mapper;
-
-        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService)
+        private readonly ITagService _tagsService;
+        private readonly IUserService _userService;
+        
+        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService, ITagService tagsService, IUserService userService)
         {
             _threadRepository = threadRepository;
             _imageService = imageService;
             _mapper = mapper;
             _notificationService = notificationService;
             _threadsTagService = threadsTagService;
+            _tagsService = tagsService;
+            _userService = userService;
         }
 
         public async Task<ThreadModel> CreateThreadAsync(ThreadRequest request)
         {
             try
             {
+                var userRoleStr = (await _userService.GetUserByIdAsync((int)request.CreatedBy) ?? throw new Exception("This user does not exist"))
+                                .UserRole;
+
+                UserRole userRole = (UserRole) Enum.Parse(typeof(UserRole), userRoleStr);
+
+                var tags = await _tagsService.GetTagsByIdsAsync(request.TagIds.ToArray());
+                var bannedTag = tags.FirstOrDefault(t => (UserRole)Enum.Parse(typeof(UserRole), t.AllowedRole) > userRole);
+
+                if (bannedTag != null)
+                {
+                    throw new Exception($"Bạn không được phép gắn thẻ \"{bannedTag.TagName}\" vào trong bài đăng của mình.");
+                }
+
                 ThreadModel model = new()
                 {
                     CreatedBy = request.CreatedBy,
@@ -129,6 +148,21 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<PagedList<ThreadModel>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, ThreadStatus[] statuses, int id)
+        {
+            try
+            {
+                var threads = await _threadRepository.GetThreadsByUserIdAsync(parameters, statuses, id);
+                var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
+
+                return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<ThreadModel> GetThreadByIdAsync(int id)
         {
             try
@@ -147,20 +181,25 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var toReject = await GetThreadByIdAsync(id)
+                var toApprove = await GetThreadByIdAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
 
-                if (toReject.Status != PostgreEnums.ThreadStatus.pending.ToString())
-                    throw new Exception($"This thread is already {toReject.Status}");
+                if (toApprove.Status != PostgreEnums.ThreadStatus.pending.ToString())
+                    throw new Exception($"This thread is already {toApprove.Status}");
 
-                toReject.Status = PostgreEnums.ThreadStatus.published.ToString();
-                var result = await UpdateThreadAsync(toReject, toReject.ThreadId);
+                toApprove.Status = PostgreEnums.ThreadStatus.published.ToString();
+                var result = await UpdateThreadAsync(toApprove, toApprove.ThreadId);
+
+                var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
+                threadPoster.Points += 25;
+                await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
 
                 NotificationRequest notification = new()
                 {
                     ToUser = (int)result.CreatedBy,
                     Title = "Bài viết của bạn đã được phê duyệt!",
-                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.",
+                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.  Bạn được cộng 25 điểm cá nhân, " +
+                    $"điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp.",
                     Type = PostgreEnums.NotificationType.thread,
                 };
                 await _notificationService.CreateNotificationAsync(notification);
@@ -214,7 +253,7 @@ namespace StrateZone_Service.Implements
                 if (thread.Status != PostgreEnums.ThreadStatus.published.ToString())
                     throw new Exception($"This thread is already {thread.Status}");
 
-                thread.Status = PostgreEnums.ThreadStatus.deleted.ToString();
+                thread.Status = PostgreEnums.ThreadStatus.hidden.ToString();
                 var result = await UpdateThreadAsync(thread, toReject.ThreadId);
 
                 NotificationRequest notification = new()
@@ -249,6 +288,5 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
-
     }
 }

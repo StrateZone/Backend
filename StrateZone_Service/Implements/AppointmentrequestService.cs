@@ -93,6 +93,89 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<AppointmentrequestModel>> CreateAppointmentRequestsAsync(List<AppointmentrequestRequest> appointmentRequestModel)
+        {
+            try
+            {
+                if (appointmentRequestModel.Count <= 0) return null;
+                
+                if (appointmentRequestModel[0].StartTime <= DateTime.UtcNow.AddHours(7).AddHours(1.5f)) 
+                    throw new Exception("Hiện đã sắp đến giờ chơi, không được phép mời thêm bạn.");
+
+                var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(appointmentRequestModel[0].StartTime, appointmentRequestModel[0].EndTime, false);
+                if (!isValid)
+                {
+                    throw new Exception(errorMessage);
+                }
+
+                foreach (var request in appointmentRequestModel)
+                {
+                    if (request.ToUser == request.FromUser)
+                        throw new Exception("Can not invite self.");
+                }
+
+                DateTime currentTime = DateTime.UtcNow.AddHours(7);
+                DateTime appointmentTime = appointmentRequestModel[0].StartTime;
+
+                double timeUntilRequestExpiration =
+                    Math.Max(
+                        Math.Min(
+                            24 * 2,
+                            appointmentTime.Subtract(currentTime).TotalHours * 0.5f
+                            )
+                        , 0.5f
+                        );
+
+                List<Appointmentrequest> mappedRequests = new();
+                List<Notification> mappedNotifications = new();
+
+                foreach (var request in appointmentRequestModel)
+                {
+                    AppointmentrequestModel model = new()
+                    {
+                        FromUser = request.FromUser,
+                        ToUser = request.ToUser,
+                        TableId = request.TableId,
+                        AppointmentId = request.AppointmentId,
+                        TotalPrice = request.TotalPrice,
+                        Status = PostgreEnums.RequestStatus.pending.ToString(),
+                        StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Unspecified),
+                        EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
+                        ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddHours(timeUntilRequestExpiration),
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    };
+
+                    mappedRequests.Add(_mapper.Map<Appointmentrequest>(model));
+                }
+
+                var result = await _appointmentRequestRepository.CreateAppointmentRequestsAsync(mappedRequests);
+
+                List<NotificationRequest> notificationRequests = new();
+
+                foreach (var request in result)
+                {
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = request.ToUser,
+                        Title = $"Bạn có lời mời chơi cờ đến từ {request.FromUserNavigation.Username}!",
+                        Content = $"{request.FromUserNavigation.Username} đã gửi cho bạn 1 lời mời chơi cờ vào lúc {((DateTime)request.StartTime).TimeOfDay}, " +
+                        $"ngày {DateOnly.FromDateTime((DateTime) request.StartTime)}. Bấm để xem tất cả lời mời của bạn.",
+                        Type = NotificationType.appointment_request_from
+                    };
+
+                    notificationRequests.Add(notification);
+                }
+
+                await _notificationService.CreateNotificationsAsync(notificationRequests);
+
+                return _mapper.Map<List<AppointmentrequestModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<AppointmentrequestModel> DeleteAppointmentRequestAsync(int id)
         {
             try
@@ -145,24 +228,11 @@ namespace StrateZone_Service.Implements
 
                 foreach (var appointmentRequestModel in appointmentRequestModels)
                 {
-                    if (appointmentRequestModel.AppointmentId == null)
-                    {
-                        if (appointmentRequestModel.Status == RequestStatus.accepted.ToString())
-                            appointmentRequestModel.Status = RequestStatus.await_appointment_creation.ToString();
-                        continue;
-                    }
-
                     var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
 
                     appointmentRequestModel.TablesAppointmentStatus = ta.Status;
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
-
-                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).FirstOrDefault(p => p.UserId == userId);
-                    if (appointmentRequestModel.Status == RequestStatus.accepted.ToString() && payment?.PaymentStatus == "unpaid")
-                    {
-                        appointmentRequestModel.Status = RequestStatus.payment_required.ToString();
-                    }
                 }
 
                 return new PagedList<AppointmentrequestModel>(
@@ -184,24 +254,11 @@ namespace StrateZone_Service.Implements
 
                 foreach (var appointmentRequestModel in appointmentRequestModels)
                 {
-                    if (appointmentRequestModel.AppointmentId == null)
-                    {
-                        if (appointmentRequestModel.Status == RequestStatus.accepted.ToString()) 
-                            appointmentRequestModel.Status = RequestStatus.await_appointment_creation.ToString();
-                        continue;
-                    }
-
                     var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
 
                     appointmentRequestModel.TablesAppointmentStatus = ta.Status;
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
-
-                    var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(ta.Id)).FirstOrDefault(p => p.UserId == userId);
-                    if (appointmentRequestModel.Status == RequestStatus.accepted.ToString() && payment?.PaymentStatus == "unpaid")
-                    {
-                        appointmentRequestModel.Status = RequestStatus.payment_required.ToString();
-                    }
                 }
 
                 return new PagedList<AppointmentrequestModel>(appointmentRequestModels, result.TotalCount, result.CurrentPage, result.PageSize);

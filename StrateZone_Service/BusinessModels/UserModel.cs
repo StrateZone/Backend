@@ -54,6 +54,7 @@ namespace StrateZone_Service.BusinessModels
 
         // public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
 
+
         public virtual WalletModel? Wallet { get; set; }
     }
 }

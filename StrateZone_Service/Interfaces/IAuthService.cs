@@ -15,5 +15,6 @@ namespace StrateZone_Service.Interfaces
         Task<ApiResponse<RefreshTokenResponse>> RefreshToken(string refreshToken);
         Task<ApiResponse<MailMessage>> SendOTP(string email);
         Task<ApiResponse<LoginResponse>> VerifyOTP(EmailLoginRequest loginRequest);
+        Task<ApiResponse<LoginResponse>> LoginPassword(PasswordLoginRequest loginRequest);
     }
 }

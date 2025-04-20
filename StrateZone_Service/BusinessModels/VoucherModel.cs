@@ -16,9 +16,15 @@ namespace StrateZone_Service.BusinessModels
 
         public int Value { get; set; }
 
+        public bool IsSample { get; set; }
+
+        public int UserId { get; set; }
+
         public string? Description { get; set; }
 
         public decimal? MinPriceCondition { get; set; }
+        
+        public int? PointsCost { get; set; }
 
         public DateOnly? ExpireDate { get; set; }
 
@@ -27,5 +33,7 @@ namespace StrateZone_Service.BusinessModels
         public DateTime? CreatedAt { get; set; }
 
         public virtual ICollection<PaymentModel> Payments { get; set; } = new List<PaymentModel>();
+
+        public virtual UserModel? User { get; set; }
     }
 }

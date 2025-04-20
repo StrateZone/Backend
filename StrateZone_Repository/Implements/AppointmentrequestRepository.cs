@@ -6,6 +6,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Reflection.Metadata;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
@@ -144,6 +145,78 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+        
+        public async Task<List<Appointmentrequest>> CreateAppointmentRequestsAsync(List<Appointmentrequest> appointmentRequest)
+        {
+            try
+            {
+                var requestsList = await _context.AppointmentRequests
+                                                .Where(ar =>
+                                                    ar.FromUser == appointmentRequest[0].FromUser
+                                                    && ar.TableId == appointmentRequest[0].TableId
+                                                    && ar.StartTime == appointmentRequest[0].StartTime && ar.EndTime == appointmentRequest[0].EndTime
+                                                    && (ar.AppointmentId == appointmentRequest[0].AppointmentId ||
+                                                    (ar.AppointmentId == null && appointmentRequest[0].AppointmentId == null))
+                                                )
+                                                .ToListAsync();
+
+                if (requestsList.Any(r => r.Status == RequestStatus.accepted))
+                    throw new Exception($"Someone has already accepted your invitation to this table. Invitation is no longer allowed.");
+
+                var invitedUsers = appointmentRequest.Select(u => u.ToUser).ToHashSet();
+                if (requestsList.Any(r => invitedUsers.Contains(r.ToUser) && r.Status == PostgreEnums.RequestStatus.pending))
+                    throw new Exception($"Invitation to this user already been sent.");
+
+                var connection = _context.Database.GetDbConnection();
+
+                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+                await using var transaction = await connection.BeginTransactionAsync();
+                await using var createCmd = connection.CreateCommand();
+                createCmd.Transaction = transaction;
+
+                createCmd.CommandText = @"
+                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, estimated_price, status, start_time, end_time, expire_at, created_at) 
+                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @estimated_price, @status::request_status, @start_time, @end_time, @expire_at, @created_at)
+                    RETURNING id;"
+                ;
+
+                HashSet<int> createdIds = new();
+
+                foreach (var request in appointmentRequest)
+                {
+                    createCmd.Parameters.Clear();
+                    createCmd.Parameters.Add(new NpgsqlParameter("@from_user", request.FromUser));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@to_user", request.ToUser));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@table_id", request.TableId));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@appointment_id", request.AppointmentId == null ? DBNull.Value : request.AppointmentId));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@estimated_price", request.TotalPrice));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@status", request.Status.ToString()));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@start_time", request.StartTime));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@end_time", request.EndTime));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", request.ExpireAt));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@created_at", request.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
+
+                    var newId = await createCmd.ExecuteScalarAsync();
+                    createdIds.Add(Convert.ToInt32(newId));
+                }
+
+                await transaction.CommitAsync();
+                await _context.SaveChangesAsync();
+
+                return await _context.AppointmentRequests
+                                    .AsNoTracking()
+                                    .Where(ar => createdIds.Contains(ar.Id))
+                                    .Include(ar => ar.FromUserNavigation)
+                                    .Include(ar => ar.ToUserNavigation)
+                                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
 
         public async Task<Appointmentrequest> UpdateAppointmentRequestAsync(Appointmentrequest appointmentRequest, int id)
         {
@@ -180,9 +253,6 @@ namespace StrateZone_Repository.Implements
                     sql.Append("appointment_id = @appointment_id, ");
                     parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
                 }
-
-                if (appointmentRequest.Status == RequestStatus.payment_required || appointmentRequest.Status == RequestStatus.await_appointment_creation)
-                    appointmentRequest.Status = RequestStatus.accepted;
 
                 sql.Append("status = @status::request_status, ");
                 parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
@@ -246,7 +316,7 @@ namespace StrateZone_Repository.Implements
                         "CASE " +
                             "WHEN id = @id THEN 'accepted' " +
                             "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
-                                "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'cancelled' " +
+                                "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'accepted_by_others' " +
                             "ELSE status " +
                     "END;");
                 parameters.Add(new NpgsqlParameter("@id", id));

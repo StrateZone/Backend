@@ -47,6 +47,7 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<Wallet> GetWalletByIdAsync(int id)
         {
             try

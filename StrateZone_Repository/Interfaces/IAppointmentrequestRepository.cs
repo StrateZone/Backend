@@ -6,6 +6,7 @@ namespace StrateZone_Repository.Interfaces
     public interface IAppointmentrequestRepository
     {
         Task<Appointmentrequest> CreateAppointmentRequestAsync(Appointmentrequest appointmentRequest);
+        Task<List<Appointmentrequest>> CreateAppointmentRequestsAsync(List<Appointmentrequest> appointmentRequest);
         Task<Appointmentrequest> DeleteAppointmentRequestAsync(int id);
         Task<Appointmentrequest> GetAppointmentRequestByIdAsync(int id);
         Task<PagedList<Appointmentrequest>> GetAppointmentRequestsFromUserByUserIdAsync(AppointmentRequestParameters parameters, int userId);

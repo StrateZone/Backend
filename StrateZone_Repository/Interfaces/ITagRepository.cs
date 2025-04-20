@@ -1,4 +1,5 @@
 ﻿using StrateZone_Repository.Entities;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Interfaces
 {
@@ -8,7 +9,9 @@ namespace StrateZone_Repository.Interfaces
         Task<Tag> DeleteTagAsync(int id);
         Task<Tag> UpdateTagAsync(Tag tag, int tagId);
         Task<Tag> GetTagByIdAsync(int id);
+        Task<List<Tag>> GetTagsByIdsAsync(int[] isd);
         Task<List<Tag>> GetTagsAsync();
+        Task<List<Tag>> GetTagsByUserRoleAsync(UserRole role);
         Task<List<Tag>> GetThreadTagsAsync();
         Task<List<Tag>> GetProductTagsAsync();
         Task<List<Tag>> SearchTagsAsync(string content);

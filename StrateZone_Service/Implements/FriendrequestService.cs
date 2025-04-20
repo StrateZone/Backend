@@ -71,11 +71,40 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<FriendrequestModel> DeleteFriendrequestByUserAndFriendIdAsync(int senderId, int receiverId)
+        {
+            try
+            {
+                var toDelete = await GetFriendrequestBySenderAndReceiverIdAsync(senderId, receiverId);
+                var result = await _friendRequestRepository.DeleteFriendrequestAsync(toDelete.Id);
+
+                return _mapper.Map<FriendrequestModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<FriendrequestModel> GetFriendrequestByIdAsync(int id)
         {
             try
             {
                 var result = await _friendRequestRepository.GetFriendrequestByIdAsync(id);
+
+                return _mapper.Map<FriendrequestModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<FriendrequestModel> GetFriendrequestBySenderAndReceiverIdAsync(int senderId, int receiverId)
+        {
+            try
+            {
+                var result = await _friendRequestRepository.GetFriendrequestBySenderAndReceiverIdAsync(senderId, receiverId);
 
                 return _mapper.Map<FriendrequestModel>(result);
             }

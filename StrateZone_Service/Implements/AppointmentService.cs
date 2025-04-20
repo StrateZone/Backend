@@ -235,6 +235,7 @@ namespace StrateZone_Service.Implements
                 var tablesAppointments = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
                 result.TablesAppointments = tablesAppointments;
 
+                List<AppointmentrequestRequest> appointmentRequests = new();
                 foreach (var tableAppointment in request.TablesAppointmentRequests)
                 {
                     var invitedUsers = tableAppointment.InvitedUsers;
@@ -248,13 +249,16 @@ namespace StrateZone_Service.Implements
                             StartTime = tableAppointment.ScheduleTime,
                             EndTime = tableAppointment.EndTime,
                             TableId = tableAppointment.TableId,
+                            AppointmentId = result.AppointmentId,
                         };
 
-                        await _appointmentrequestService.CreateAppointmentRequestAsync(newAR);
+                        appointmentRequests.Add(newAR);
                     }
                 }
 
-                result.Appointmentrequests = await _appointmentrequestService.LinkAppointmentrequestsToAppointmentAsync(result);
+                result.Appointmentrequests = appointmentRequests.Count > 0 
+                                ? await _appointmentrequestService.CreateAppointmentRequestsAsync(appointmentRequests)
+                                : new();
 
                 foreach (var tablesAppointment in tablesAppointments)
                 {

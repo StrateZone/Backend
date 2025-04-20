@@ -1017,9 +1017,23 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TagName)
                 .HasMaxLength(50)
                 .HasColumnName("tag_name");
+
             entity.Property(e => e.Status)
-            .HasConversion<string>()
-            .HasColumnName("status");
+                  .HasConversion(
+                    v => v.ToString(),
+                    v => (Parameters.PostgreEnums.TagStatus)Enum.Parse(typeof(Parameters.PostgreEnums.TagStatus), v)
+                  )
+                .HasColumnName("status");
+
+            entity.Property(e => e.TagColor)
+                .HasColumnName("tag_color");
+
+            entity.Property(e => e.AllowedRole)
+                  .HasConversion(
+                    v => v.ToString(),
+                    v => (Parameters.PostgreEnums.UserRole)Enum.Parse(typeof(Parameters.PostgreEnums.UserRole), v)
+                  )
+                .HasColumnName("allowed_role");
         });
 
         modelBuilder.Entity<Entities.Thread>(entity =>
@@ -1332,10 +1346,20 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.VoucherName)
                 .HasMaxLength(50)
                 .HasColumnName("voucher_name");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.IsSample).HasColumnName("is_sample");
+            entity.Property(e => e.PointsCost).HasColumnName("points_cost");
+
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (VoucherStatus)Enum.Parse(typeof(VoucherStatus), v)
                     );
+
+            entity.HasOne(d => d.User).WithMany(p => p.Vouchers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("vouchers_user_id_fkey")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Wallet>(entity =>

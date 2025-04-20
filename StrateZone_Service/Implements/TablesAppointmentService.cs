@@ -186,6 +186,21 @@ namespace StrateZone_Service.Implements
 
                 var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
 
+                var userCheckin = await _userService.GetUserByIdAsync(userId);
+                userCheckin.Points += 10;
+                await _userService.UpdateUserAsync(userCheckin, userId);
+
+                NotificationRequest notificationRequest = new()
+                {
+                    ToUser = userId,
+                    Title = $"Check-in cho bàn số {tablesAppointment.TableId} thành công!",
+                    Content = $"Check-in hoàn tất! Bạn được cộng 10 điểm cá nhân, điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp. " +
+                    $"Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!",
+                    TablesAppointmentId = tablesAppointmentId,
+                    Type = NotificationType.tables_appointment,
+                };
+                await _notificationService.CreateNotificationAsync(notificationRequest);
+
                 return result;
             }
             catch (Exception ex)
@@ -349,10 +364,8 @@ namespace StrateZone_Service.Implements
                     {
                         Amount = refundAmount,
                         Content =
-                            $"Refund on booking cancellation. / " +
-                            $"Table Id: {tablesAppointment.TableId}. / " +
-                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
-                            $"Amount: {refundAmount} VND.",
+                            $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, " +
+                            $"đơn #{tablesAppointment.AppointmentId}.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
@@ -370,12 +383,10 @@ namespace StrateZone_Service.Implements
 
                     var newTransaction = new TransactionModel
                     {
-                        Amount = refundAmount,
+                        Amount = tablesAppointment.Price,
                         Content =
-                            $"Refund on shared booking cancellation / " +
-                            $"Table Id: {tablesAppointment.TableId}. / " +
-                            $"Appointment Id: {tablesAppointment.AppointmentId}. / " +
-                            $"Amount: {refundAmount} VND.",
+                            $"Hoàn tiền {tablesAppointment.Price} VND cho đơn được mời tham gia ở bàn số {tablesAppointment.TableId}, " +
+                            $"đơn #{tablesAppointment.AppointmentId}.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = paymentForInvitedUser.UserId,
                         TransactionType = TransactionType.refund,

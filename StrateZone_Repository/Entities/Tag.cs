@@ -10,7 +10,11 @@ public partial class Tag
 
     public string? TagName { get; set; }
 
+    public string TagColor { get; set; }
+
     public TagStatus Status { get; set; } = TagStatus.active;
+
+    public UserRole AllowedRole { get; set; } = UserRole.Member;
 
     public virtual ICollection<ProductTag> ProductTags { get; set; } = new List<ProductTag>();
 

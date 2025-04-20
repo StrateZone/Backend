@@ -7,6 +7,7 @@ using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
 {
+    [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
@@ -35,7 +36,7 @@ namespace StrateZone_APIs.Controllers
         public async Task<IActionResult> RegisterAccount([FromBody] StrateZone_Service.CustomModels.RequestModels.RegisterRequest request)
         {
             try
-            {
+            { 
                 if (string.IsNullOrEmpty(request.Email))
                     throw new Exception("Email is required.");
                 else if (string.IsNullOrEmpty(request.UserName))
@@ -58,6 +59,20 @@ namespace StrateZone_APIs.Controllers
             try
             {
                 var result = await _authService.VerifyOTP(loginRequest);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] StrateZone_Service.CustomModels.RequestModels.PasswordLoginRequest loginRequest)
+        {
+            try
+            {
+                var result = await _authService.LoginPassword(loginRequest);
                 return Ok(result);
             }
             catch (Exception ex)

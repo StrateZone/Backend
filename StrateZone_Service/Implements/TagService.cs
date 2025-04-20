@@ -65,6 +65,19 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<TagModel>> GetTagsByIdsAsync(int[] ids)
+        {
+            try
+            {
+                var result = await _tagRepository.GetTagsByIdsAsync(ids);
+                return _mapper.Map<List<TagModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<List<TagModel>> GetTagsAsync()
         {
             try
@@ -138,6 +151,18 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<List<TagModel>> GetTagsByUserRoleAsync(PostgreEnums.UserRole role)
+        {
+            try
+            {
+                var result = await _tagRepository.GetTagsByUserRoleAsync(role);
+                return _mapper.Map<List<TagModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
         public async Task<TagModel> AdminHideTagAsync(int id)
         {

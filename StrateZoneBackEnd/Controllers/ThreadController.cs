@@ -5,6 +5,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using StrateZone_Service.CustomModels.ResponseModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_API.Controllers
 {
@@ -53,6 +54,22 @@ namespace StrateZone_API.Controllers
             try
             {
                 var result = await _threadService.GetThreadsByUserIdAsync(parameters, id);
+                var response = new PagedListResponse<ThreadModel>(result);
+
+                return response != null ? Ok(response) : Ok("No thread was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("user/{id}/statuses")]
+        public async Task<ActionResult> GetThreadsByUserId([FromQuery] TablesAppointmentParameters parameters, [FromQuery] ThreadStatus[] statuses, int id)
+        {
+            try
+            {
+                var result = await _threadService.GetThreadsByUserIdAsync(parameters, statuses, id);
                 var response = new PagedListResponse<ThreadModel>(result);
 
                 return response != null ? Ok(response) : Ok("No thread was found.");

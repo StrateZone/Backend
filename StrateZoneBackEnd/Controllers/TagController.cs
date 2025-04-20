@@ -4,6 +4,7 @@ using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -79,6 +80,21 @@ namespace StrateZone_APIs.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving tag with ID {TagId}", id);
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("by-role")]
+        public async Task<IActionResult> GetTagsByUserRoleAsync([FromQuery] UserRole role)
+        {
+            try
+            {
+                var result = await _tagService.GetTagsByUserRoleAsync(role);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
                 return StatusCode(500, new { message = ex.Message });
             }
         }

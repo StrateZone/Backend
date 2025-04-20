@@ -100,12 +100,28 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<Friendrequest> GetFriendrequestBySenderAndReceiverIdAsync(int senderId, int receiverId)
+        {
+            try
+            {
+                return await _context.Friendrequests
+                                    .Include(fr => fr.FromUserNavigation)
+                                    .Include(fr => fr.ToUserNavigation)
+                                    .FirstOrDefaultAsync(x => (x.FromUser == senderId && x.ToUser == receiverId)
+                                                            || (x.FromUser == receiverId && x.ToUser == senderId));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<PagedList<Friendrequest>> GetFriendrequestsFromUserIdAsync(FriendrequestParameters parameters, int id)
         {
             try
             {
                 var result = _context.Friendrequests
-                                    .Where(fr => fr.FromUser == id)
+                                    .Where(fr => fr.FromUser == id && fr.Status == PostgreEnums.RequestStatus.pending)
                                     .Include(fr => fr.FromUserNavigation)
                                     .Include(fr => fr.ToUserNavigation)
                                     .AsQueryable();

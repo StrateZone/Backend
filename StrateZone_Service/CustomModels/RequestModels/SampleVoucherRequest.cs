@@ -9,7 +9,7 @@ using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.CustomModels.RequestModels
 {
-    public class VoucherRequest
+    public class SampleVoucherRequest
     {
         [Required]
         public string VoucherName { get; set; }
@@ -18,12 +18,21 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public int Value { get; set; }
 
         [Required]
+        public int PointsCost {  get; set; }
+
+        [Required]
         public string Description { get; set; }
 
         [Required]
         public decimal MinPriceCondition { get; set; }
+    }
+
+    public class UserVoucherRequest
+    {
+        [Required]
+        public int SampleVoucherId { get; set; }
 
         [Required]
-        public DateOnly? ExpireDate { get; set; }
+        public int UserId { get; set; }
     }
 }

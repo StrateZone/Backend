@@ -4,6 +4,7 @@ using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
+using System.Threading;
 using Thread = StrateZone_Repository.Entities.Thread;
 
 namespace StrateZone_Repository.Implements
@@ -60,7 +61,15 @@ namespace StrateZone_Repository.Implements
             {
                 var toDelete = await _context.Threads.FindAsync(id) ?? throw new Exception("No thread with this ID was found.");
 
-                _context.Threads.Remove(toDelete);
+                if (toDelete.Status == PostgreEnums.ThreadStatus.deleted)
+                    throw new Exception("This thread is already deleted");
+
+                toDelete.ThreadId = id;
+                toDelete.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
+                toDelete.CreatedByNavigation = null;
+                toDelete.Status = PostgreEnums.ThreadStatus.deleted;
+
+                _context.Threads.Update(toDelete);
                 await _context.SaveChangesAsync();
 
                 return toDelete;
@@ -174,6 +183,10 @@ namespace StrateZone_Repository.Implements
                                     .OrderByDescending(t => t.CreatedAt);
                 }
 
+                threads = threads.OrderBy(t =>
+                        t.ThreadsTags.Any(tt => tt.Tag.TagName == "quan trọng") ? 0 :
+                        t.ThreadsTags.Any(tt => tt.Tag.TagName == "thông báo") ? 1 : 2);
+
                 threads = parameters.OrderBy switch
                 {
                     "created-at" => threads.OrderBy(a => a.CreatedAt),
@@ -200,6 +213,41 @@ namespace StrateZone_Repository.Implements
             {
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => t.CreatedBy == id)
+                                .Include(t => t.CreatedByNavigation)
+                                .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Likes)
+                                .Include(t => t.Comments)
+                                    .ThenInclude(c => c.User)
+                                .Include(t => t.ThreadsTags)
+                                    .ThenInclude(tt => tt.Tag)
+                                .AsQueryable();
+
+                threads = parameters.OrderBy switch
+                {
+                    "created-at" => threads.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => threads.OrderByDescending(a => a.CreatedAt),
+                    "likes-count" => threads.OrderBy(a => a.Likes.Count),
+                    "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
+                    "comments-count" => threads.OrderBy(a => a.Comments.Count),
+                    "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
+                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
+                    _ => threads.OrderByDescending(t => t.CreatedAt)
+                };
+
+                return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, int id)
+        {
+            try
+            {
+                var threads = _context.Threads.AsNoTracking()
+                                .Where(t => t.CreatedBy == id && statuses.Contains(t.Status))
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Comments)
                                     .ThenInclude(c => c.Likes)

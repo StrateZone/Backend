@@ -17,6 +17,7 @@ namespace StrateZone_Service.Interfaces
         Task<ThreadModel> DeleteThreadAsync(int id);
         Task<PagedList<ThreadModel>> GetAllThreadsAsync(TablesAppointmentParameters parameters);
         Task<PagedList<ThreadModel>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id);
+        Task<PagedList<ThreadModel>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, ThreadStatus[] statuses, int id);
         Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAsync(TablesAppointmentParameters parameters, ThreadStatus[] statuses);
         Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters);
         Task<ThreadModel> GetThreadByIdAsync(int id);

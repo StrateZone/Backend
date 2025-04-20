@@ -108,16 +108,15 @@ namespace StrateZone_Service.Implements
 
                 foreach (var appointmentRequest in appointment.Appointmentrequests)
                 {
-                    if(appointmentRequest.Status == RequestStatus.accepted.ToString())
+                    if (appointmentRequest.Status != RequestStatus.accepted.ToString()) continue;
+
+                    NotificationRequest toUser = new()
                     {
-                        NotificationRequest toUser = new()
-                        {
-                            ToUser = appointmentRequest.ToUser,
-                            Title = $"Mã đơn #{appointment.AppointmentId} đã được người mời thanh toán!",
-                            Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đã được người mời thanh toán thanh toán. Hãy tiến hành thanh toán phần của bạn! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
-                        };
-                        await _notificationService.CreateNotificationAsync(thisUser);
-                    }
+                        ToUser = appointmentRequest.ToUser,
+                        Title = $"Mã đơn #{appointment.AppointmentId} đã được người mời thanh toán!",
+                        Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đã được người mời thanh toán thanh toán. Hãy tiến hành thanh toán phần của bạn! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+                    };
+                    await _notificationService.CreateNotificationAsync(thisUser);
                 }
 
                 var user = await _userRepository.GetUserByIdAsync(appointment.UserId);
@@ -381,7 +380,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ApiResponse<PaymentModel>> CreateMembershipPaymentAsync(int userId)
+        public async Task<ApiResponse<UserResponse>> CreateMembershipPaymentAsync(int userId)
         {
             try
             {
@@ -389,7 +388,7 @@ namespace StrateZone_Service.Implements
 
                 if (user == null)
                 {
-                    return new ApiResponse<PaymentModel>
+                    return new ApiResponse<UserResponse>
                     {
                         Success = false,
                         StatusCode = 400,
@@ -400,7 +399,7 @@ namespace StrateZone_Service.Implements
 
                 if (user.UserRole != UserRole.RegisteredUser)
                 {
-                    return new ApiResponse<PaymentModel>
+                    return new ApiResponse<UserResponse>
                     {
                         Success = false,
                         StatusCode = 400,
@@ -414,7 +413,7 @@ namespace StrateZone_Service.Implements
 
                 if (userWallet.Balance < membershipPrice.Price1)
                 {
-                    return new ApiResponse<PaymentModel>
+                    return new ApiResponse<UserResponse>
                     {
                         Success = false,
                         StatusCode = 500,
@@ -458,12 +457,12 @@ namespace StrateZone_Service.Implements
                 };
                 await _notificationService.CreateNotificationAsync(notificationToUser);
 
-                return new ApiResponse<PaymentModel>
+                return new ApiResponse<UserResponse>
                 {
                     Success = true,
                     StatusCode = 201,
                     Message = "Payment success",
-                    Data = null
+                    Data = _mapper.Map<UserResponse>(user)
                 };
             }
             catch (Exception ex)
