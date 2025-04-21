@@ -25,6 +25,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public int? Points { get; set; }
 
+        public string UserRole { get; set; }
+
         public string Gender { get; set; }
 
         public string Ranking { get; set; }

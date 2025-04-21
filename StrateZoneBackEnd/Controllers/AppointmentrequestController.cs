@@ -11,7 +11,6 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/appointmentrequests")] 
-    
     public class AppointmentrequestController : ControllerBase
     {
         private readonly IAppointmentrequestService _appointmentrequestService;
