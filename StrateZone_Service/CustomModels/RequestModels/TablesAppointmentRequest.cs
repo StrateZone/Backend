@@ -21,6 +21,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
         [Required]
         public DateTime EndTime { get; set; }
 
+        public int? VoucherId { get; set; } = null;
+
         [Required]
         public List<int> InvitedUsers { get; set; } = new();
 

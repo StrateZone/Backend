@@ -9,6 +9,7 @@ using StrateZone_Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -190,6 +191,45 @@ namespace StrateZone_Service.Implements
                 var result = await _voucherRepository.UpdateVoucherAsync(voucher, id);
 
                 return _mapper.Map<VoucherModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<VoucherModel>> UpdateVouchersAsync(List<VoucherModel> voucherModel)
+        {
+            try
+            {
+                var vouchers = _mapper.Map<List<Voucher>>(voucherModel);
+                var result = await _voucherRepository.UpdateVouchersAsync(vouchers);
+
+                return _mapper.Map<List<VoucherModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<VoucherModel>> UseVouchersAsync(List<int> voucherIds, int userId)
+        {
+            try
+            {
+                var vouchers = await _voucherRepository.GetVoucherByIdsAsync([.. voucherIds]);
+
+                if (vouchers.Any(v => v.UserId != userId))
+                    throw new Exception("One or more vouchers used do not belong to this user!");
+
+                if (vouchers.Any(v => v.Status == PostgreEnums.VoucherStatus.expired))
+                    throw new Exception("One or more vouchers have been expired!");
+
+                vouchers.ForEach(v => v.Status = PostgreEnums.VoucherStatus.expired);
+                
+                var result = await _voucherRepository.UpdateVouchersAsync(_mapper.Map<List<Voucher>>(vouchers));
+
+                return _mapper.Map<List<VoucherModel>>(result);
             }
             catch (Exception ex)
             {

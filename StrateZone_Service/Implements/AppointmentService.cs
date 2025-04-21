@@ -33,6 +33,7 @@ namespace StrateZone_Service.Implements
         private readonly IWalletService _walletService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly INotificationService _notificationService;
+        private readonly IVoucherService _voucherService;
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
@@ -45,7 +46,8 @@ namespace StrateZone_Service.Implements
             IWalletService walletService, 
             ITransactionRepository transactionRepository, 
             ScheduleTimeValidator scheduleTimeValidator, 
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IVoucherService voucherService)
         {
             _appointmentRepository = appointmentRepository;
             _mapper = mapper;
@@ -57,6 +59,7 @@ namespace StrateZone_Service.Implements
             _transactionRepository = transactionRepository;
             _scheduleTimeValidator = scheduleTimeValidator;
             _notificationService = notificationService;
+            _voucherService = voucherService;
         }
 
         public async Task<PagedList<AppointmentResponse>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -206,6 +209,13 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                /*
+                List<int> vouchers = request.TablesAppointmentRequests
+                                        .Where(ta => ta.VoucherId != null)
+                                        .Select(ta => (int) ta.VoucherId).ToList();
+                if (vouchers.Count > 0) await _voucherService.UseVouchersAsync(vouchers, request.UserId);
+                */
+
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {
                     UserId = request.UserId,

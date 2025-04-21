@@ -9,6 +9,7 @@ namespace StrateZone_Service.Interfaces
     public interface ITablesAppointmentService
     {
         Task<TablesAppointmentModel> CreateTablesAppointmentAsync(TablesAppointmentModel tablesAppointmentModel);
+        Task<string> CreateCheckinQrCode(int userId, int tablesAppointmentId);
         Task<List<TablesAppointmentModel>> CreateTablesAppointmentsFromAppointmentAsync(AppointmentModel appointmentModel);
         Task<TablesAppointmentModel> UpdateTablesAppointmentAsync(TablesAppointmentModel appointmentModel, int id);
         Task<TablesAppointmentModel> DeleteTablesAppointmentAsync(int id);
@@ -20,6 +21,7 @@ namespace StrateZone_Service.Interfaces
         Task<TablesAppointmentResponse> GetByIdAsync(int id);
         Task<TablesAppointmentResponse> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId);
         Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId);
+        Task<TablesAppointmentModel> CheckoutTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime);

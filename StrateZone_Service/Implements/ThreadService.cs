@@ -288,5 +288,33 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<ThreadModel> EditThreadAsync(ThreadModel threadModel, int id)
+        {
+            try
+            {
+                var toBeUpdated = await GetThreadByIdAsync(id)
+                                ?? throw new Exception("Thread with this ID does not exist");
+
+                if (toBeUpdated.Status != ThreadStatus.published.ToString()
+                    && toBeUpdated.Status != ThreadStatus.pending.ToString()
+                    && toBeUpdated.Status != ThreadStatus.edit_pending.ToString()
+                    && toBeUpdated.Status != ThreadStatus.drafted.ToString())
+                    throw new Exception($"This thread is currently {toBeUpdated.Status}");
+
+                if (toBeUpdated.CreatedBy != threadModel.CreatedBy)
+                    throw new Exception("Creator before and after update doesn't match.");
+
+                threadModel.Status = ThreadStatus.edit_pending.ToString();
+                var thread = _mapper.Map<Thread>(threadModel);
+                var result = await _threadRepository.UpdateThreadAsync(thread, id);
+
+                return _mapper.Map<ThreadModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

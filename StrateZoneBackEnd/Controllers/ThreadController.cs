@@ -173,6 +173,20 @@ namespace StrateZone_API.Controllers
             }
         }
 
+        [HttpPut("edit/{id}")]
+        public async Task<ActionResult> EditThread([FromBody] ThreadModel request, int id)
+        {
+            try
+            {
+                var result = await _threadService.EditThreadAsync(request, id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPut("reject/{id}")]
         public async Task<ActionResult> RejectThread(int id)
         {

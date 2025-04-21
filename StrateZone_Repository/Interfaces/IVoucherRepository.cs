@@ -14,5 +14,7 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<Voucher>> GetSampleVouchersAsync(TablesAppointmentParameters parameters);
         Task<PagedList<Voucher>> GetVouchersByUserIdAsync(TablesAppointmentParameters parameters, int userid);
         Task<Voucher> UpdateVoucherAsync(Voucher voucher, int id);
+        Task<List<Voucher>> UpdateVouchersAsync(List<Voucher> vouchers);
+        Task<List<Voucher>> GetVoucherByIdsAsync(HashSet<int> voucherIds);
     }
 }

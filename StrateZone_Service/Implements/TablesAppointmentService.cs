@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
@@ -8,7 +10,10 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using System.Net.Http;
+using System.Text;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using static System.Net.WebRequestMethods;
 
 namespace StrateZone_Service.Implements
 {
@@ -23,8 +28,9 @@ namespace StrateZone_Service.Implements
         private readonly INotificationService _notificationService;
         private readonly IUserRepository _userService;
         private readonly IMapper _mapper;
+        private readonly HttpClient _httpClient;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -35,6 +41,7 @@ namespace StrateZone_Service.Implements
             _requestRepository = repository;
             _notificationService = notificationService;
             _userService = userService;
+            _httpClient = httpClient;
         }
 
         public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
@@ -203,6 +210,26 @@ namespace StrateZone_Service.Implements
                 };
                 await _notificationService.CreateNotificationAsync(notificationRequest);
 
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+        
+        public async Task<TablesAppointmentModel> CheckoutTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var tablesAppointmentResponse = await GetByIdAsync(tablesAppointmentId);
+                var tablesAppointment = _mapper.Map<TablesAppointmentModel>(tablesAppointmentResponse);
+
+                if (tablesAppointment.Status != AppointmentStatus.checked_in.ToString()) 
+                    throw new Exception($"Check-out failed: This table appointment is not checked-in.");
+
+                tablesAppointment.Status = AppointmentStatus.completed.ToString();
+                var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
                 return result;
             }
             catch (Exception ex)
@@ -622,6 +649,48 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message, ex);
             }
+        }
+
+        public async Task<string> CreateCheckinQrCode(int userId, int tablesAppointmentId)
+        {
+            try
+            {
+                var api = $"https://backend-production-ac5e.up.railway.app/api/tables-appointments/check-in/{tablesAppointmentId}/users/{userId}";
+                var request = CreateRequest(HttpMethod.Get, 
+                            $"/v1/create-qr-code/?size=500x500&data={api}");
+                try
+                {
+                    var response = await _httpClient.SendAsync(request);
+                    return await response.Content.ReadAsStringAsync();
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"Request failed: {ex.Message}");
+                    return $"Error: {ex.Message}";
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Unexpected error: {ex.Message}");
+                    return $"Unexpected error: {ex.Message}";
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        private HttpRequestMessage CreateRequest(HttpMethod method, string endpoint, object data = null)
+        {
+            var request = new HttpRequestMessage(method, $"https://api.qrserver.com{endpoint}");
+
+            if (data != null)
+            {
+                string jsonData = JsonConvert.SerializeObject(data);
+                request.Content = new StringContent(jsonData, Encoding.UTF8, "charset=utf-8");
+            }
+
+            return request;
         }
     }
 }

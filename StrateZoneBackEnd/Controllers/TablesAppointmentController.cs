@@ -156,12 +156,42 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        /*
+        [HttpGet("check-in/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CheckinTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var result = await _services.CheckInTablesAppointment(tablesAppointmentId, userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+        */
+
         [HttpPut("check-in/{tablesAppointmentId}/users/{userId}")]
         public async Task<IActionResult> CheckinTablesAppointment(int tablesAppointmentId, int userId)
         {
             try
             {
                 var result = await _services.CheckInTablesAppointment(tablesAppointmentId, userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("check-out/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CheckoutTablesAppointment(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var result = await _services.CheckoutTablesAppointment(tablesAppointmentId, userId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -183,6 +213,22 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        /*
+        [HttpGet("check-in-qr/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CreateCheckinQrCode(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var result = await _services.CreateCheckinQrCode(userId, tablesAppointmentId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+        */
 
         [HttpPut("cancel/{tablesAppointmentId}/users/{userId}")]
         public async Task<IActionResult> CancelTablesAppointment(int tablesAppointmentId, int userId)

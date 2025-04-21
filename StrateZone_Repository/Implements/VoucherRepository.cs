@@ -107,6 +107,26 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Voucher>> UpdateVouchersAsync(List<Voucher> vouchers)
+        {
+            try
+            {
+                var ids = vouchers.Select(v => v.VoucherId).ToHashSet();
+
+                if (await _context.Vouchers.AsNoTracking().AnyAsync(v => !ids.Contains(v.VoucherId)))
+                    throw new Exception("One or more vouchers do not exist.");
+
+                _context.Vouchers.UpdateRange(vouchers);
+                await _context.SaveChangesAsync();
+
+                return vouchers;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<Voucher> GetByIdAsync(int id)
         {
             try
@@ -145,6 +165,18 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return voucher;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<Voucher>> GetVoucherByIdsAsync(HashSet<int> voucherIds)
+        {
+            try
+            {
+                return await _context.Vouchers.AsNoTracking().Where(v => voucherIds.Contains(v.VoucherId)).ToListAsync();
             }
             catch (Exception ex)
             {
