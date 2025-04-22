@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Interfaces
 {
@@ -13,7 +14,10 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<Transaction> SaveTransaction(Transaction transaction);
         Task<Transaction> GetByIdAsync(int id);
+        Task<List<Transaction>> GetTransactionsForRefundAsync(int year);
+        Task<List<Expense>> GetExpensesWithinAMonthInYearAsync(int month, int year);
         Task<PagedList<Transaction>> GetAllTransactionsAsync(TransactionParameters parameters);
+        Task<PagedList<Transaction>> GetAllTransactionsAsync(TransactionParameters parameters, TransactionType[] types);
         Task<PagedList<Transaction>> GetUsersTransactionsAsync(int id, TablesAppointmentParameters parameters);
     }
 }

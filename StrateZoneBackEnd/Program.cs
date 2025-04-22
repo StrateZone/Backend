@@ -116,6 +116,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("StaffOnly", policy => policy.RequireRole("Staff"));
     options.AddPolicy("InstructorOrAbove", policy => policy.RequireRole("Instructor", "Staff", "Admin"));
+    options.AddPolicy("ClubMember", policy => policy.RequireRole("Member", "Instructor", "Staff", "Admin"));
 });
 // Service Extensions
 builder.Services.AddApplicationServices();

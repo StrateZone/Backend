@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -26,7 +27,48 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var query = _context.Transactions.Include(t => t.OfUserNavigation).AsQueryable();
+                var query = _context.Transactions
+                                    .AsNoTracking()
+                                    .Include(t => t.OfUserNavigation)
+                                    .AsQueryable();
+
+                // filter type
+                if (parameters.Type == "user")
+                {
+                    query = query.Where(t => t.OfUser != null);
+                }
+                else if (parameters.Type == "system")
+                {
+                    query = query.Where(t => t.OfUser == null);
+                }
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
+                {
+                    string search = parameters.SearchValue.Trim().ToLower();
+
+                    query = query.Where(t =>
+                        t.Id.ToString().ToLower().Contains(search) ||
+                        t.OfUserNavigation.Email.ToLower().Contains(search));
+                }
+
+                query = query.OrderByDescending(t => t.CreatedAt);
+
+                return await PagedList<Transaction>.ToPagedList(query, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PagedList<Transaction>> GetAllTransactionsAsync(TransactionParameters parameters, TransactionType[] types)
+        {
+            try
+            {
+                var query = _context.Transactions
+                                    .AsNoTracking()
+                                    .Where(t => types.Length <= 0 || types.Contains(t.TransactionType))
+                                    .Include(t => t.OfUserNavigation).AsQueryable();
 
                 // filter type
                 if (parameters.Type == "user")
@@ -62,6 +104,38 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Transactions.FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Expense>> GetExpensesWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var result = await _context.Expenses.AsNoTracking().Where(e => e.CreatedAt.Month == month && e.CreatedAt.Year == year).ToListAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Transaction>> GetTransactionsForRefundAsync(int year)
+        {
+            try
+            {
+                return await _context.Transactions
+                                    .AsNoTracking()
+                                    .Where(t => t.TransactionType == TransactionType.refund
+                                            && t.CreatedAt.HasValue 
+                                            && t.CreatedAt.Value.Year == year
+                                    )
+                                    .ToListAsync();
             }
             catch (Exception ex)
             {

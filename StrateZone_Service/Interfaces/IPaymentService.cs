@@ -1,4 +1,5 @@
 ﻿using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -17,5 +18,6 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<PaymentModel>> GetPaymentsByUserIdAsync(int id, StrateZone_Repository.Parameters.PaymentParameters parameters);
         Task<PaymentModel> UpdatePaymentAsync(PaymentModel payment, int id);
         Task<ApiResponse<UserResponse>> CreateMembershipPaymentAsync(int userId);
+        Task<List<PaymentModel>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year);
     }
 }

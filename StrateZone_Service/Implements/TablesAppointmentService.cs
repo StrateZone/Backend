@@ -701,5 +701,19 @@ namespace StrateZone_Service.Implements
 
             return request;
         }
+
+        public async Task<decimal> GetTotalPriceOfPaidTablesAppointmentWithinAMonthOfYearAsync(int month, int year)
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.GetAllPaidTablesAppointmentWithinAMonthInYearAsync(month, year);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

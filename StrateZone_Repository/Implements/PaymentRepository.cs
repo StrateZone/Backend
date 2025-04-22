@@ -187,5 +187,33 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<Payment>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var result = await _context.Payments
+                                .FromSqlRaw(@"SELECT *  
+                                    FROM payments
+                                    WHERE status = 'paid'
+                                    AND payment_type = 'membership'
+                                    AND EXTRACT(YEAR FROM created_at) = @Year 
+                                    AND EXTRACT(MONTH FROM created_at) = @Month",
+
+                                    new NpgsqlParameter("@Year", NpgsqlDbType.Integer)
+                                    { Value = year },
+
+                                    new NpgsqlParameter("@Month", NpgsqlDbType.Integer)
+                                    { Value = month }
+                                )
+                                .ToListAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

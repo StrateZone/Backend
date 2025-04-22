@@ -11,5 +11,6 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<Payment>> GetPaymentsAsync(PaymentParameters parameters);
         Task<PagedList<Payment>> GetPaymentsByUserIdAsync(int id, PaymentParameters parameters);
         Task<Payment> UpdatePaymentAsync(Payment payment, int id);
+        Task<List<Payment>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year);
     }
 }

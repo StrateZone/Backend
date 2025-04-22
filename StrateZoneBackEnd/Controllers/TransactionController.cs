@@ -3,6 +3,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -35,12 +36,43 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("by-type")]
+        public async Task<IActionResult> GetTypes(TransactionParameters parameters, [FromQuery] TransactionType[] transactionTypes)
+        {
+            try
+            {
+                var result = await _transactionService.GetTransactionsAsync(parameters, transactionTypes);
+                var response = new PagedListResponse<TransactionModel>(result);
+
+                return response != null ? Ok(response) : NotFound("No transaction was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             try
             {
                 var result = await _transactionService.GetById(id);
+
+                return result != null ? Ok(result) : NotFound("No transaction was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("report/{year}")]
+        public async Task<IActionResult> GetAnnualReportForTransactionsGroupedByMonth(int year)
+        {
+            try
+            {
+                var result = await _transactionService.GetAnnualReportForTransactionsGroupedByMonth(year);
 
                 return result != null ? Ok(result) : NotFound("No transaction was found.");
             }

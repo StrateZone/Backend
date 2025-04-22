@@ -1385,6 +1385,38 @@ public partial class StrateZoneDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("expenses_pkey");
+
+            entity.ToTable("expenses");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+
+            entity.Property(e => e.Amount)
+                .HasPrecision(10, 2)
+                .HasDefaultValueSql("0")
+                .HasColumnName("amount");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Type).HasColumnName("type");
+            
+            entity.Property(e => e.Description).HasColumnName("description");
+            
+            entity.Property(e => e.TransactionDate).HasColumnName("transaction_date");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+
+            entity.Property(e => e.SystemId).HasColumnName("system_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Expenses)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("expenses_user_id_fkey")
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

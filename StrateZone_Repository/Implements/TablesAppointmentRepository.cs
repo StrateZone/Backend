@@ -396,5 +396,38 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<decimal> GetAllPaidTablesAppointmentWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var totalPrice = await _context.Database
+                    .SqlQuery<decimal?>(
+                        $@"
+                            SELECT SUM(
+                                CASE 
+                                    WHEN sub.paid_count >= 2 THEN ta.price * 2
+                                    ELSE ta.price
+                                END
+                            ) AS ""Value""
+                            FROM tables_appointments ta
+                            JOIN (
+                                SELECT tables_appointment_id, COUNT(*) AS paid_count
+                                FROM payments
+                                WHERE status = 'paid'
+                                GROUP BY tables_appointment_id
+                            ) sub ON sub.tables_appointment_id = ta.id
+                            WHERE EXTRACT(YEAR FROM ta.created_at) = {year} AND EXTRACT(MONTH FROM ta.created_at) = {month}
+                        ")
+                    .FirstOrDefaultAsync();
+
+                return totalPrice ?? 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
     }
 }

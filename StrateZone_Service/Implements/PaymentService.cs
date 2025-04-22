@@ -548,5 +548,20 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<PaymentModel>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var result = await _paymentRepository.GetMembershipPaymentsWithinAMonthInYearAsync(month, year);
+                var mapped = _mapper.Map<List<PaymentModel>>(result);
+
+                return mapped;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

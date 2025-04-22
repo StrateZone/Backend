@@ -79,7 +79,6 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<IZaloPayService, ZaloPayService>();
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<ITournamentService, TournamentService>();
-            services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IVoucherService, VoucherService>();
             services.AddScoped<ISystemService, SystemService>();
             services.AddScoped<INotificationService, NotificationService>();
