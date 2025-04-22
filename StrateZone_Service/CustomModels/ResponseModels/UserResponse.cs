@@ -28,6 +28,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? FullName { get; set; }
 
+        public string UserLabel { get; set; }
+
         public string Status { get; set; }
 
         public string? Address { get; set; }
@@ -37,6 +39,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
         public string? Bio { get; set; }
 
         public int? Points { get; set; }
+
+        public int? ContributionPoints { get; set; }
 
         public string Gender { get; set; }
 

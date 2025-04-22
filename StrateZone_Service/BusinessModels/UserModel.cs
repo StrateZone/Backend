@@ -1,5 +1,6 @@
 ﻿using StrateZone_Repository.Entities;
 using System.Text.Json.Serialization;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.BusinessModels
 {
@@ -28,6 +29,10 @@ namespace StrateZone_Service.BusinessModels
         public string? Bio { get; set; }
 
         public int? Points { get; set; }
+
+        public int? ContributionPoints { get; set; }
+
+        public UserLabel UserLabel { get; set; }
 
         public StrateZone_Repository.Parameters.PostgreEnums.UserRole UserRole { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.UserRole.RegisteredUser;
 

@@ -491,5 +491,42 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task AssignTopContributorsAsync()
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    UPDATE users
+                    SET label = 'none';
+                ");
+
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    UPDATE users
+                    SET label = 'top_contributor'
+                    WHERE user_id IN (
+                        SELECT user_id
+                        FROM users
+                        WHERE role = 'Member'
+                        ORDER BY contribution_points DESC
+                        LIMIT 10
+                    );
+                ");
+
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    UPDATE users
+                    SET contribution_points = 0;
+                ");
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Failed to reset top contributors: " + ex.Message, ex);
+            }
+        }
     }
 }

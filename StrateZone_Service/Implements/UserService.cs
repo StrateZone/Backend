@@ -300,5 +300,17 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task AssignTopContributorsAsync()
+        {
+            try
+            { 
+                await _userRepository.AssignTopContributorsAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

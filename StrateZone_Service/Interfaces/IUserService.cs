@@ -25,5 +25,6 @@ namespace StrateZone_Service.Interfaces
         Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
         Task<UserResponse> FindUserAcceptedToJoinTablesAppointment(TablesAppointmentModel tablesAppointment);
         Task<bool> CheckUserNotification(int id);
+        Task AssignTopContributorsAsync();
     }
 }

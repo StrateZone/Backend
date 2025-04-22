@@ -30,5 +30,9 @@ namespace StrateZone_Service.CustomModels.ResponseModels
         public string Gender { get; set; }
 
         public string Ranking { get; set; }
+
+        public string UserLabel { get; set; }
+
+        public int ContributionPoints { get; set; }
     }
 }

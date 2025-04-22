@@ -191,7 +191,8 @@ namespace StrateZone_Service.Implements
                 var result = await UpdateThreadAsync(toApprove, toApprove.ThreadId);
 
                 var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
-                threadPoster.Points += 25;
+                threadPoster.Points += 10;
+                threadPoster.ContributionPoints += 50;
                 await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
 
                 NotificationRequest notification = new()

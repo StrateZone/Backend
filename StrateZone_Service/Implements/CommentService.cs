@@ -15,6 +15,7 @@ namespace StrateZone_Service.Implements
     public class CommentService : ICommentService
     {
         private readonly ICommentRepository _commentRepository;
+        private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
@@ -38,11 +39,12 @@ namespace StrateZone_Service.Implements
             "buôn người", "buôn ma túy", "mua bán nội tạng", "dâm ô", "lừa đảo", "tống tiền", "tự sát"
         };
 
-        public CommentService(ICommentRepository commentRepository, INotificationService notificationService, IMapper mapper)
+        public CommentService(ICommentRepository commentRepository, INotificationService notificationService, IMapper mapper, IUserService userService)
         {
             _commentRepository = commentRepository;
             _notificationService = notificationService;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<CommentModel> DeleteCommentAsync(int id)
@@ -108,6 +110,9 @@ namespace StrateZone_Service.Implements
                 if (IsContentInappropriate(request.Content))
                     throw new Exception("Comment contains inapproriate content, unable to comment.");
 
+                var user = await _userService.GetUserByIdAsync(request.UserId)
+                        ?? throw new Exception("User with this ID does not exist");
+
                 CommentModel model = new()
                 {
                     UserId = request.UserId,
@@ -120,7 +125,10 @@ namespace StrateZone_Service.Implements
 
                 var comment = _mapper.Map<Comment>(model);
                 var result = await _commentRepository.PostCommentAsync(comment);
-            
+
+                user.ContributionPoints += 2;
+                await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), user.UserId);
+
                 return _mapper.Map<CommentModel>(result);
             }
             catch (Exception ex)

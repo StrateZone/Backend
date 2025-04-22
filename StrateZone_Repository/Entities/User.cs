@@ -35,7 +35,9 @@ public partial class User
 
     public Ranking Ranking { get; set; }
 
-    // public UserLabel UserLabel { get; set; }
+    public UserLabel UserLabel { get; set; }
+
+    public int? ContributionPoints { get; set; }
 
     public string? FullName { get; set; }
 

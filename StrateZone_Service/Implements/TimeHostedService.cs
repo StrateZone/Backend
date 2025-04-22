@@ -20,11 +20,13 @@ namespace StrateZone_Service.Implements
         private Timer? _appointmentRequestsServiceTimer = null;
         private Timer? _tablesAppointmentsServiceTimer = null;
         private Timer? _appointmentServiceTimer = null;
+        private Timer? _topContributorAssignTimer = null;
 
         private static readonly TimeSpan _userCleanupInterval = TimeSpan.FromHours(12);
         private static readonly TimeSpan _appointmentRequestsCleanupInterval = TimeSpan.FromSeconds(120);
         private static readonly TimeSpan _tablesAppointmentsCleanupInterval = TimeSpan.FromSeconds(60);
         private static readonly TimeSpan _appointmentsUpdateInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _topContributorAssignInterval = TimeSpan.FromDays(7);
 
         public TimedHostedService(IServiceScopeFactory serviceScopeFactory, ILogger<TimedHostedService> logger)
         {
@@ -40,6 +42,7 @@ namespace StrateZone_Service.Implements
             _appointmentRequestsServiceTimer = new Timer(UpdateExpiredAppointmentRequestStatus, null, new TimeSpan(0, 0, 5), _appointmentRequestsCleanupInterval);
             _tablesAppointmentsServiceTimer = new Timer(UpdateStatusForExpiredAndIncomingTablesAppointments, null, new TimeSpan(0, 0, 10), _tablesAppointmentsCleanupInterval);
             _appointmentServiceTimer = new Timer(UpdateStatusForAppointmentBasedOnTablesAppointments, null, new TimeSpan(0, 0, 15), _appointmentsUpdateInterval);
+            _topContributorAssignTimer = new Timer(AssignTopContributorsAfterEvery7Days, null, TimeSpan.Zero, _topContributorAssignInterval);
 
             return Task.CompletedTask;
         }
@@ -59,6 +62,27 @@ namespace StrateZone_Service.Implements
                     }
 
                     _logger.LogInformation($"IUserService cleanup executed: Deleted {count} unactivated account(s).");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while deleting unactivated accounts.");
+                }
+            });
+        }
+
+        private void AssignTopContributorsAfterEvery7Days(object? state)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+                        await userService.AssignTopContributorsAsync();
+                    }
+
+                    _logger.LogInformation($"IUserService executed: Assigned label for top contributors.");
                 }
                 catch (Exception ex)
                 {
@@ -204,6 +228,11 @@ namespace StrateZone_Service.Implements
             {
                 await _appointmentServiceTimer.DisposeAsync();
             }
+
+            if (_topContributorAssignTimer != null)
+            {
+                await _topContributorAssignTimer.DisposeAsync();
+            }
         }
 
         public void Dispose()
@@ -212,6 +241,7 @@ namespace StrateZone_Service.Implements
             _appointmentRequestsServiceTimer?.Dispose();
             _tablesAppointmentsServiceTimer?.Dispose();
             _appointmentServiceTimer?.Dispose();
+            _topContributorAssignTimer?.Dispose();
         }
     }
 }

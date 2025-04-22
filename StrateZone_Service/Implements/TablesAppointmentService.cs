@@ -198,15 +198,16 @@ namespace StrateZone_Service.Implements
 
                 var userCheckin = await _userService.GetUserByIdAsync(userId);
                 
-                var pointsCalculate = 
-                userCheckin.Points += 10;
+                int pointsCalculate = (int)(tablesAppointment.Price / 2000);
+
+                userCheckin.Points += pointsCalculate;
                 await _userService.UpdateUserAsync(userCheckin, userId);
 
                 NotificationRequest notificationRequest = new()
                 {
                     ToUser = userId,
                     Title = $"Check-in cho bàn số {tablesAppointment.TableId} thành công!",
-                    Content = $"Check-in hoàn tất! Bạn được cộng 10 điểm cá nhân, điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp. " +
+                    Content = $"Check-in hoàn tất! Bạn được cộng {pointsCalculate} điểm cá nhân, điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp. " +
                     $"Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!",
                     TablesAppointmentId = tablesAppointmentId,
                     Type = NotificationType.tables_appointment,

@@ -23,6 +23,7 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
                     .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
                     .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
+                    .ForMember(ur => ur.UserLabel, u => u.MapFrom(src => src.UserLabel.ToString()))
                     .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserResponseAvatarResolver>())
                     .ReverseMap();
 
@@ -38,6 +39,7 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
                     .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
                     .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
+                    .ForMember(ur => ur.UserLabel, u => u.MapFrom(src => src.UserLabel.ToString()))
                 .ReverseMap();
 
             CreateMap<GameType, GameTypeModel>()

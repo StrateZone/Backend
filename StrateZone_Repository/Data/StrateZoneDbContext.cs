@@ -1224,6 +1224,12 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (UserRole)Enum.Parse(typeof(UserRole), v)
                 );
+
+            entity.Property(e => e.UserLabel).HasColumnName("label").HasConversion(
+                    v => v.ToString(),
+                    v => (UserLabel)Enum.Parse(typeof(UserLabel), v)
+                );
+
             entity.Property(e => e.Address)
                 .HasMaxLength(100)
                 .HasColumnName("address");
@@ -1263,6 +1269,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Points)
                 .HasDefaultValue(0)
                 .HasColumnName("points");
+            entity.Property(e => e.ContributionPoints)
+                .HasDefaultValue(0)
+                .HasColumnName("contribution_points");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasComment("Depends on Role")
