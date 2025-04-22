@@ -32,5 +32,6 @@
         public enum WalletStatus { active, closed }
         public enum TagStatus { active, hidden }
         public enum TableStatus { active, has_room, out_of_service }
+        public enum UserLabel { none, top_contributor }
     }
 }

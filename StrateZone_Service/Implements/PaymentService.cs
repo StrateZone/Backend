@@ -71,9 +71,16 @@ namespace StrateZone_Service.Implements
 
                 userWallet.Balance -= appointment.TotalPrice;
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
+
                 foreach (var tablesAppointment in appointment.TablesAppointments)
                 {
-                    tablesAppointment.Status = AppointmentStatus.confirmed.ToString();
+                    string Status;
+
+                    if (((DateTime)tablesAppointment.CreatedAt).AddHours(1.5f) > tablesAppointment.ScheduleTime)
+                        Status = AppointmentStatus.incoming.ToString();
+                    else Status = AppointmentStatus.confirmed.ToString();
+
+                    tablesAppointment.Status = Status;
                     var mappedTA = _mapper.Map<TablesAppointment>(tablesAppointment);
                     await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(mappedTA, tablesAppointment.Id);
 

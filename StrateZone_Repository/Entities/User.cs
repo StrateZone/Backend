@@ -35,6 +35,8 @@ public partial class User
 
     public Ranking Ranking { get; set; }
 
+    // public UserLabel UserLabel { get; set; }
+
     public string? FullName { get; set; }
 
     public string? Address { get; set; }

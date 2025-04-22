@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Text;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using static System.Net.WebRequestMethods;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -29,8 +30,9 @@ namespace StrateZone_Service.Implements
         private readonly IUserRepository _userService;
         private readonly IMapper _mapper;
         private readonly HttpClient _httpClient;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient, IServiceScopeFactory serviceProvider)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -42,6 +44,7 @@ namespace StrateZone_Service.Implements
             _notificationService = notificationService;
             _userService = userService;
             _httpClient = httpClient;
+            _serviceScopeFactory = serviceProvider;
         }
 
         public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
@@ -230,6 +233,12 @@ namespace StrateZone_Service.Implements
 
                 tablesAppointment.Status = AppointmentStatus.completed.ToString();
                 var result = await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
+                
+                var scope = _serviceScopeFactory.CreateScope();
+                var appointmentService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+
+                await appointmentService.UpdateStatusForAppointmentBasedOnTablesAppointments();
+
                 return result;
             }
             catch (Exception ex)

@@ -236,7 +236,7 @@ namespace StrateZone_Service.Implements
                         ScheduleTime = DateTime.SpecifyKind(tablesAppointmentRequest.ScheduleTime, DateTimeKind.Unspecified),
                         EndTime = DateTime.SpecifyKind(tablesAppointmentRequest.EndTime, DateTimeKind.Unspecified),
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        Price = tablesAppointmentRequest.Price
+                        Price = tablesAppointmentRequest.Price,
                     };
 
                     result.TablesAppointments.Add(tablesAppointmentModel);

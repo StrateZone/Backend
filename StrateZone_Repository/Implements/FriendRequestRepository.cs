@@ -30,10 +30,15 @@ namespace StrateZone_Repository.Implements
                                                     || (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser)))
                     throw new Exception($"You two are already friend with each other.");
 
-                var requestsList = await _context.Friendrequests.AsNoTracking().FirstOrDefaultAsync(ar => 
-                    (ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser) 
-                    || (ar.FromUser == friendrequest.ToUser && ar.ToUser == friendrequest.FromUser));
-                if (requestsList != null && requestsList.Status == PostgreEnums.RequestStatus.pending)
+                var requestsList = await _context.Friendrequests.AsNoTracking()
+                                    .Where(ar => 
+                                        (ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser) 
+                                        || 
+                                        (ar.FromUser == friendrequest.ToUser && ar.ToUser == friendrequest.FromUser)
+                                    )
+                                    .ToListAsync();
+
+                if (requestsList != null && requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
                     throw new Exception($"Friend request to this user already been sent.");
 
                 int newId;
