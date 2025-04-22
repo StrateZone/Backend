@@ -19,6 +19,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<TransactionModel>> GetTransactionsAsync(TransactionParameters parameters);
         Task<PagedList<TransactionModel>> GetTransactionsAsync(TransactionParameters parameters, TransactionType[] types);
         Task<TransactionModel> SaveTransaction(TransactionModel newTransaction);
-        Task<List<TransactionResponse>> GetAnnualReportForTransactionsGroupedByMonth(int year);
+        Task<TransactionMonthResponse> GetDailyTransactionReportsInAMonth(int month, int year);
+        Task<ProfitMonthResponse> GetDailyProfitInAMonth(int month, int year);
     }
 }

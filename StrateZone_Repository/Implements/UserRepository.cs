@@ -528,5 +528,22 @@ namespace StrateZone_Repository.Implements
                 throw new Exception("Failed to reset top contributors: " + ex.Message, ex);
             }
         }
+
+        public async Task<List<User>> GetNewUserWithinDayAsync(int day, int month, int year)
+        {
+            try
+            {
+                return await _context.Users.AsNoTracking()
+                                        .Where(u => u.CreatedAt.HasValue
+                                            && u.CreatedAt.Value.Year == year
+                                            && u.CreatedAt.Value.Month == month
+                                            && u.CreatedAt.Value.Day == day)
+                                        .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

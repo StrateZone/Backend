@@ -201,12 +201,12 @@ namespace StrateZone_API.Controllers
             }
         }
 
-        [HttpPut("admin/hide/{id}")]
-        public async Task<ActionResult> AdminHideThread(int id)
+        [HttpPut("hide/{id}")]
+        public async Task<ActionResult> HideThread(int id)
         {
             try
             {
-                var result = await _threadService.AdminHideThreadAsync(id);
+                var result = await _threadService.HideThreadAsync(id);
                 return Ok(result);
             }
             catch (Exception ex)

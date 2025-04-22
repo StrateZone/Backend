@@ -121,7 +121,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => statuses.Count() <= 0 || statuses.Contains(t.Status))
+                                .Where(t => statuses.Count() <= 0 || statuses.Contains(t.Status) && t.Status != PostgreEnums.ThreadStatus.deleted)
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
                                 .Include(t => t.Comments)
@@ -212,7 +212,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => t.CreatedBy == id)
+                                .Where(t => t.CreatedBy == id && t.Status != PostgreEnums.ThreadStatus.deleted)
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Comments)
                                     .ThenInclude(c => c.Likes)
@@ -247,7 +247,8 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => t.CreatedBy == id && statuses.Contains(t.Status))
+                                .Where(t => t.CreatedBy == id && statuses.Contains(t.Status)
+                                        && t.Status != PostgreEnums.ThreadStatus.deleted)
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Comments)
                                     .ThenInclude(c => c.Likes)
@@ -290,7 +291,7 @@ namespace StrateZone_Repository.Implements
                                     .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
-                                .SingleOrDefaultAsync(t => t.ThreadId == id);
+                                .SingleOrDefaultAsync(t => t.ThreadId == id && t.Status != PostgreEnums.ThreadStatus.deleted);
             }
             catch (Exception ex)
             {
@@ -304,6 +305,23 @@ namespace StrateZone_Repository.Implements
             {
                 return await _context.Threads.AsNoTracking()
                                 .SingleOrDefaultAsync(t => t.ThreadId == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Thread>> GetThreadsWithinMonthAsync(int month, int year)
+        {
+            try
+            {
+                return await _context.Threads.AsNoTracking()
+                                        .Where(u => u.Status != PostgreEnums.ThreadStatus.drafted 
+                                            && u.CreatedAt.HasValue
+                                            && u.CreatedAt.Value.Year == year
+                                            && u.CreatedAt.Value.Month == month)
+                                        .ToListAsync();
             }
             catch (Exception ex)
             {

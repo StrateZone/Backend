@@ -429,5 +429,55 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<decimal> GetAllPaidTablesAppointmentWithinADayInYearAsync(int day, int month, int year)
+        {
+            try
+            {
+                var totalPrice = await _context.Database
+                    .SqlQuery<decimal?>(
+                        $@"
+                            SELECT SUM(
+                                CASE 
+                                    WHEN sub.paid_count >= 2 THEN ta.price * 2
+                                    ELSE ta.price
+                                END
+                            ) AS ""Value""
+                            FROM tables_appointments ta
+                            JOIN (
+                                SELECT tables_appointment_id, COUNT(*) AS paid_count
+                                FROM payments
+                                WHERE status = 'paid'
+                                GROUP BY tables_appointment_id
+                            ) sub ON sub.tables_appointment_id = ta.id
+                            WHERE EXTRACT(YEAR FROM ta.created_at) = {year} AND EXTRACT(MONTH FROM ta.created_at) = {month} AND EXTRACT(DAY FROM ta.created_at) = {day}
+                        ")
+                    .FirstOrDefaultAsync();
+
+                return totalPrice ?? 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<TablesAppointment>> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var total = await _context.TablesAppointments.AsNoTracking()
+                                        .Where(u => u.CreatedAt.HasValue
+                                            && u.CreatedAt.Value.Year == year
+                                            && u.CreatedAt.Value.Month == month
+                                            )
+                                        .ToListAsync();
+
+                return total;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

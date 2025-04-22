@@ -15,6 +15,7 @@ using System.Text;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using static System.Net.WebRequestMethods;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace StrateZone_Service.Implements
 {
@@ -710,6 +711,50 @@ namespace StrateZone_Service.Implements
                 var result = await _tablesAppointmentRepository.GetAllPaidTablesAppointmentWithinAMonthInYearAsync(month, year);
 
                 return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<TablesAppointmentsMonthResponse> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var allTAs = await _tablesAppointmentRepository.GetAllBookedTablesAppointmentWithinAMonthInYearAsync(month, year);
+                List<TablesAppointmentsDailyResponse> taDailyResponses = new();
+
+                int dayInMonth = DateTime.DaysInMonth(year, month);
+                for (int i = 1; i <= dayInMonth; ++i)
+                {
+                    int booked = allTAs.Where(ta => ta.CreatedAt.Value.Day == i).Count();
+                    int cancelled = allTAs.Where(ta => ta.Status == AppointmentStatus.cancelled && ta.CreatedAt.Value.Day == i).Count();
+                    int completed = allTAs.Where(ta => ta.Status == AppointmentStatus.completed && ta.CreatedAt.Value.Day == i).Count();
+                    int expired = allTAs.Where(ta => ta.Status == AppointmentStatus.expired && ta.CreatedAt.Value.Day == i).Count();
+                    int others = allTAs.Where(ta =>
+                                        ta.Status != AppointmentStatus.cancelled 
+                                        && ta.Status != AppointmentStatus.completed 
+                                        && ta.Status != AppointmentStatus.expired
+                                        && ta.CreatedAt.Value.Day == i).Count();
+
+                    taDailyResponses.Add(new() 
+                    { 
+                        DayOfMonth = i, 
+                        TablesAppointmentBooked = booked, 
+                        CancelledCount = cancelled,
+                        CompletedCount = completed,
+                        ExpiredCount = expired,
+                        FutureCount = others
+                    });
+                }
+
+                return new()
+                {
+                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
+                    TotalDays = dayInMonth,
+                    TablesAppointmentsDailyResponse = taDailyResponses
+                };
             }
             catch (Exception ex)
             {

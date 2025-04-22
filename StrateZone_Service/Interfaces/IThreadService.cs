@@ -2,6 +2,7 @@
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace StrateZone_Service.Interfaces
         Task<ThreadModel> EditThreadAsync(ThreadModel thread, int id);
         Task<ThreadModel> ApproveThreadAsync(int id);
         Task<ThreadModel> RejectThreadAsync(int id);
-        Task<ThreadModel> AdminHideThreadAsync(int id);
+        Task<ThreadModel> HideThreadAsync(int id);
+        Task<ThreadMonthResponse> GetAllThreadsWithinAMonthInYearAsync(int month, int year);
     }
 }

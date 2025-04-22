@@ -19,5 +19,7 @@ namespace StrateZone_Service.Interfaces
         Task<PaymentModel> UpdatePaymentAsync(PaymentModel payment, int id);
         Task<ApiResponse<UserResponse>> CreateMembershipPaymentAsync(int userId);
         Task<List<PaymentModel>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year);
+        Task<List<PaymentModel>> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year);
+        Task<MembershipMonthResponse> GetReportMembershipPaymentsWithinADayInYearAsync(int month, int year);
     }
 }

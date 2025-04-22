@@ -7,12 +7,7 @@ using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements
 {
@@ -205,6 +200,38 @@ namespace StrateZone_Repository.Implements
 
                                     new NpgsqlParameter("@Month", NpgsqlDbType.Integer)
                                     { Value = month }
+                                )
+                                .ToListAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Payment>> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year)
+        {
+            try
+            {
+                var result = await _context.Payments
+                                .FromSqlRaw(@"SELECT *  
+                                    FROM payments
+                                    WHERE status = 'paid'
+                                    AND payment_type = 'membership'
+                                    AND EXTRACT(YEAR FROM created_at) = @Year 
+                                    AND EXTRACT(MONTH FROM created_at) = @Month
+                                    AND EXTRACT(DAY FROM created_at) = @Day ",
+
+                                    new NpgsqlParameter("@Year", NpgsqlDbType.Integer)
+                                    { Value = year },
+
+                                    new NpgsqlParameter("@Month", NpgsqlDbType.Integer)
+                                    { Value = month },
+
+                                    new NpgsqlParameter("@Day", NpgsqlDbType.Integer)
+                                    { Value = day }
                                 )
                                 .ToListAsync();
 

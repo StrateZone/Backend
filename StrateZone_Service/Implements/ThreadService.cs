@@ -2,11 +2,14 @@
 using MealHunt_Repositories.Pagination;
 using Microsoft.AspNetCore.Http;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
+using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using System.Globalization;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using Thread = StrateZone_Repository.Entities.Thread;
 
@@ -21,7 +24,7 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly ITagService _tagsService;
         private readonly IUserService _userService;
-        
+
         public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService, ITagService tagsService, IUserService userService)
         {
             _threadRepository = threadRepository;
@@ -40,7 +43,7 @@ namespace StrateZone_Service.Implements
                 var userRoleStr = (await _userService.GetUserByIdAsync((int)request.CreatedBy) ?? throw new Exception("This user does not exist"))
                                 .UserRole;
 
-                UserRole userRole = (UserRole) Enum.Parse(typeof(UserRole), userRoleStr);
+                UserRole userRole = (UserRole)Enum.Parse(typeof(UserRole), userRoleStr);
 
                 var tags = await _tagsService.GetTagsByIdsAsync(request.TagIds.ToArray());
                 var bannedTag = tags.FirstOrDefault(t => (UserRole)Enum.Parse(typeof(UserRole), t.AllowedRole) > userRole);
@@ -76,7 +79,7 @@ namespace StrateZone_Service.Implements
 
         public async Task<ThreadModel> DeleteThreadAsync(int id)
         {
-            try 
+            try
             {
                 var result = await _threadRepository.DeleteThreadAsync(id);
 
@@ -244,7 +247,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ThreadModel> AdminHideThreadAsync(int id)
+        public async Task<ThreadModel> HideThreadAsync(int id)
         {
             try
             {
@@ -311,6 +314,49 @@ namespace StrateZone_Service.Implements
                 var result = await _threadRepository.UpdateThreadAsync(thread, id);
 
                 return _mapper.Map<ThreadModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<ThreadMonthResponse> GetAllThreadsWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                var allThreads = await _threadRepository.GetThreadsWithinMonthAsync(month, year);
+                List<ThreadDailyResponse> threadDailyResponses = new();
+
+                int dayInMonth = DateTime.DaysInMonth(year, month);
+                for (int i = 1; i <= dayInMonth; ++i)
+                {
+                    int created = allThreads.Where(ta => ta.CreatedAt.Value.Day == i).Count();
+
+                    int pending = allThreads.Where(ta => (ta.Status == ThreadStatus.pending || ta.Status == ThreadStatus.edit_pending) && ta.CreatedAt.Value.Day == i).Count();
+                    int published = allThreads.Where(ta => ta.Status == ThreadStatus.published && ta.CreatedAt.Value.Day == i).Count();
+                    int rejected = allThreads.Where(ta => ta.Status == ThreadStatus.rejected && ta.CreatedAt.Value.Day == i).Count();
+                    int deleted = allThreads.Where(ta => ta.Status == ThreadStatus.deleted && ta.CreatedAt.Value.Day == i).Count();
+                    int hidden = allThreads.Where(ta => ta.Status == ThreadStatus.hidden && ta.CreatedAt.Value.Day == i).Count();
+
+                    threadDailyResponses.Add(new()
+                    {
+                        DayOfMonth = i,
+                        ThreadsCreated = created,
+                        PendingCount = pending,
+                        RejectedCount = rejected,
+                        DeletedCount = deleted,
+                        HiddenCount = hidden,
+                        PublishedCount = published,
+                    });
+                }
+
+                return new()
+                {
+                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
+                    TotalDays = dayInMonth,
+                    ThreadDailyResponse = threadDailyResponses
+                };
             }
             catch (Exception ex)
             {

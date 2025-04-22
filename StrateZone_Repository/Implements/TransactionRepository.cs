@@ -125,7 +125,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Transaction>> GetTransactionsForRefundAsync(int year)
+        public async Task<List<Transaction>> GetTransactionsForRefundWithinAYearAsync(int year)
         {
             try
             {
@@ -133,6 +133,62 @@ namespace StrateZone_Repository.Implements
                                     .AsNoTracking()
                                     .Where(t => t.TransactionType == TransactionType.refund
                                             && t.CreatedAt.HasValue 
+                                            && t.CreatedAt.Value.Year == year
+                                    )
+                                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Transaction>> GetTransactionsForRefundWithinAMonthAsync(int month, int year)
+        {
+            try
+            {
+                return await _context.Transactions
+                                    .AsNoTracking()
+                                    .Where(t => t.TransactionType == TransactionType.refund
+                                            && t.CreatedAt.HasValue
+                                            && t.CreatedAt.Value.Month == month
+                                            && t.CreatedAt.Value.Year == year
+                                    )
+                                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Transaction>> GetTransactionsForDepositWithinAYearAsync(int year)
+        {
+            try
+            {
+                return await _context.Transactions
+                                    .AsNoTracking()
+                                    .Where(t => t.TransactionType == TransactionType.deposit
+                                            && t.CreatedAt.HasValue
+                                            && t.CreatedAt.Value.Year == year
+                                    )
+                                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<Transaction>> GetTransactionsForDepositWithinAMonthAsync(int month, int year)
+        {
+            try
+            {
+                return await _context.Transactions
+                                    .AsNoTracking()
+                                    .Where(t => t.TransactionType == TransactionType.deposit
+                                            && t.CreatedAt.HasValue
+                                            && t.CreatedAt.Value.Month == month
                                             && t.CreatedAt.Value.Year == year
                                     )
                                     .ToListAsync();

@@ -67,21 +67,6 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpGet("report/{year}")]
-        public async Task<IActionResult> GetAnnualReportForTransactionsGroupedByMonth(int year)
-        {
-            try
-            {
-                var result = await _transactionService.GetAnnualReportForTransactionsGroupedByMonth(year);
-
-                return result != null ? Ok(result) : NotFound("No transaction was found.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
         [HttpGet("users/{id}")]
         public async Task<IActionResult> GetByUserId(int id, TablesAppointmentParameters parameters)
         {

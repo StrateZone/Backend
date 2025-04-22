@@ -14,6 +14,7 @@ namespace StrateZone_Service.Implements
 {
     public class LikeService : ILikeService
     {
+        private readonly IUserService _userService;
         private readonly ILikeRepository _likeRepository;
         private readonly IMapper _mapper;
 

@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using MealHunt_Repositories.Pagination;
 using StrateZone_Repository.Entities;
+using StrateZone_Repository.Implements;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using System.Globalization;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
@@ -306,6 +308,33 @@ namespace StrateZone_Service.Implements
             try
             { 
                 await _userRepository.AssignTopContributorsAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<UserMonthResponse> GetUsersJoinedInAMonth(int month, int year)
+        {
+            try
+            {
+                List<UserDailyResponse> userDailyResponses = new();
+
+                int dayInMonth = DateTime.DaysInMonth(year, month);
+                for (int i = 1; i <= dayInMonth; ++i)
+                {
+                    int userJoined = (await _userRepository.GetNewUserWithinDayAsync(i, month, year)).Count();
+
+                    userDailyResponses.Add(new() { DayOfMonth = i, UsersJoined = userJoined });
+                }
+
+                return new()
+                {
+                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
+                    TotalDays = dayInMonth,
+                    UserDailyResponses = userDailyResponses
+                };
             }
             catch (Exception ex)
             {
