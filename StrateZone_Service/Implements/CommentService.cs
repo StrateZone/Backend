@@ -126,7 +126,7 @@ namespace StrateZone_Service.Implements
                 var comment = _mapper.Map<Comment>(model);
                 var result = await _commentRepository.PostCommentAsync(comment);
 
-                user.ContributionPoints += 2;
+                user.ContributionPoints += 5;
                 await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), user.UserId);
 
                 return _mapper.Map<CommentModel>(result);

@@ -238,7 +238,7 @@ namespace StrateZone_Service.Implements
             {
                 var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
                 var appointment_request = (await _appointmentrequestRepository.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(appointmentrequestModel.FromUser, tableAppointment.Id))
-                                            .SingleOrDefault(ar => ar.ToUser == appointmentrequestModel.ToUser);
+                                            .SingleOrDefault(ar => ar.ToUser == appointmentrequestModel.ToUser && ar.Status == RequestStatus.pending);
 
                 if (appointment_request.Status == RequestStatus.expired || appointment_request.Status == RequestStatus.cancelled || appointment_request.Status == RequestStatus.rejected)
                 {
