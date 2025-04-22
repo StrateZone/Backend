@@ -17,6 +17,7 @@ namespace StrateZone_Repository.Interfaces
         Task<User> GetUserByUsernameAsync(string username);
         Task<(PagedList<User>, HashSet<int>, HashSet<int>)> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username);
         Task<PagedList<User>> GetUsersAsync(UserListParameters parameters);
+        Task<List<User>> GetUsersDashboardAsync();
         Task<PagedList<User>> GetUsersByRanking(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down);
         Task<(List<User>, List<User>, HashSet<int>)> GetRandomOpponentsAsync(int userId, string? SearchTerm, HashSet<int> excludedIds);
         Task<PagedList<User>> GetUsersByUsernameAsync(UserListParameters parameters, string username);

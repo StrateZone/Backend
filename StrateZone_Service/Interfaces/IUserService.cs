@@ -18,6 +18,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<UserResponse>> GetUsersByUsernameAsync(UserListParameters parameters, string username);
         Task<PagedList<FriendResponse>> SearchForFriendsByUsernameAsync(UserListParameters parameters, int id, string? username);
         Task<PagedList<UserResponse>> GetUsersAsync(UserListParameters parameters);
+        Task<List<UserDashboardResponse>> GetUsersDashboardAsync();
         Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, Ranking ranking, int up, int down);
         Task<SearchedOpponentsResponse> GetRandomOpponentsAsync(int userId, string? SearchTerm, HashSet<int> excludedIds);
         Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);

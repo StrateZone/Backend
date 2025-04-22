@@ -33,6 +33,19 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<User>> GetUsersDashboardAsync()
+        {
+            try
+            {
+                var users = _context.Users.AsQueryable().ToList();
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<User> GetUserByIdAsync(int id)
         {
             try

@@ -41,6 +41,19 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+        public async Task<List<UserDashboardResponse>> GetUsersDashboardAsync()
+        {
+            try
+            {
+                var results = await _userRepository.GetUsersDashboardAsync();
+                var users = _mapper.Map<List<UserDashboardResponse>>(results);
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
         public async Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, PostgreEnums.Ranking ranking, int up, int down)
         {

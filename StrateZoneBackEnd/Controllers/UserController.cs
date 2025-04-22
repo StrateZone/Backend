@@ -39,6 +39,21 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("all/dashboard")]
+        public async Task<IActionResult> GetAllUsersDashboard()
+        {
+            try
+            {
+                var user = await _userService.GetUsersDashboardAsync();
+
+                return user.Count > 0 ? Ok(user) : Ok("No user was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("email/{email}")]
         public async Task<IActionResult> GetByEmail(string email)
         {
