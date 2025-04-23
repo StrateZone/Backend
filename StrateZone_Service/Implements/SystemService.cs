@@ -79,6 +79,42 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<int> GetAppointmentCheckinTimeInMinuesAsync(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetAppointmentCheckinTimeInMinuesAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<decimal> GetAppointmentIncomingTimeInHoursAsync(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetAppointmentIncomingTimeInHoursAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<decimal> GetAppointmentRefund100TimeInHoursAsync(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetAppointmentRefund100TimeInHoursAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<TimeOnly> GetClosingHourAsync(int id)
         {
             try
@@ -153,6 +189,20 @@ namespace StrateZone_Service.Implements
                 var result = await _systemRepository.UpdateAbnormalDayAsync(abnormalDay, id);
 
                 return _mapper.Map<AbnormalDayModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<SystemModel> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin)
+        {
+            try
+            {
+                var result = await _systemRepository.UpdateAppointmentTimeRulesAsync(id, refund100Time, incomingTime, minutesCheckin);
+
+                return _mapper.Map<SystemModel>(result);
             }
             catch (Exception ex)
             {

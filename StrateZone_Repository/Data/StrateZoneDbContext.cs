@@ -941,6 +941,15 @@ public partial class StrateZoneDbContext : DbContext
                   .HasColumnName("close_time")
                   .HasColumnType("time");
 
+            entity.Property(e => e.Appointment_Refund100_HoursFromScheduleTime)
+                  .HasColumnName("appointment_refund100_hoursfromscheduletime");
+
+            entity.Property(e => e.Appointment_Incoming_HoursFromScheduleTime)
+                    .HasColumnName("appointment_incoming_hoursfromscheduletime");
+
+            entity.Property(e => e.Appointment_Checkin_MinutesFromScheduleTime)
+                    .HasColumnName("appointment_checkin_minutesfromscheduletime");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");
@@ -1434,7 +1443,7 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.Entity<Profanity>(entity =>
         {
             entity.ToTable("profanities");
-            entity.HasKey(p => p.Id).HasName("profanities_pkey"); ;
+            entity.HasKey(p => p.Id).HasName("e_pkey"); ;
 
             entity.Property(p => p.Id).HasColumnName("id");
             entity.Property(p => p.Word).IsRequired().HasColumnName("word");

@@ -118,6 +118,75 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<decimal> GetAppointmentRefund100TimeInHoursAsync(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.Appointment_Refund100_HoursFromScheduleTime;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<decimal> GetAppointmentIncomingTimeInHoursAsync(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.Appointment_Incoming_HoursFromScheduleTime;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetAppointmentCheckinTimeInMinuesAsync(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.Appointment_Checkin_MinutesFromScheduleTime;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<ESystem> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin)
+        {
+            try
+            {
+                var system = await _context.Systems.FindAsync(id) ?? throw new Exception("System with this ID does not exist");
+
+                system.Appointment_Refund100_HoursFromScheduleTime = refund100Time;
+                system.Appointment_Incoming_HoursFromScheduleTime = incomingTime;
+                system.Appointment_Checkin_MinutesFromScheduleTime = minutesCheckin;
+
+                _context.Systems.Update(system);
+                await _context.SaveChangesAsync();
+
+                return system;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<ESystem> UpdateSystemWorkingHoursAsync(int id, TimeOnly openTime, TimeOnly closeTime)
         {
             try

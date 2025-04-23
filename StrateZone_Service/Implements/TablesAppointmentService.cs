@@ -32,9 +32,10 @@ namespace StrateZone_Service.Implements
         private readonly IUserRepository _userService;
         private readonly IMapper _mapper;
         private readonly HttpClient _httpClient;
+        private readonly ISystemService _systemService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient, IServiceScopeFactory serviceProvider)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient, IServiceScopeFactory serviceProvider, ISystemService systemService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -47,6 +48,7 @@ namespace StrateZone_Service.Implements
             _userService = userService;
             _httpClient = httpClient;
             _serviceScopeFactory = serviceProvider;
+            _systemService = systemService;
         }
 
         public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
@@ -191,8 +193,10 @@ namespace StrateZone_Service.Implements
 
                 if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Check-in failed: {errorMessage}");
 
-                if (DateTime.UtcNow.AddHours(7) < tablesAppointment.ScheduleTime.AddMinutes(-5))
-                    throw new Exception($"Check-in is not yet opened: Check-in only available 5 minutes prior to schedule time!");
+                int minutes_beforeCheckin = await _systemService.GetAppointmentCheckinTimeInMinuesAsync(1);
+
+                if (DateTime.UtcNow.AddHours(7) < tablesAppointment.ScheduleTime.AddMinutes(-minutes_beforeCheckin))
+                    throw new Exception($"Check-in is not yet opened: Check-in only available {minutes_beforeCheckin} minutes prior to schedule time!");
 
                 tablesAppointment.Status = AppointmentStatus.checked_in.ToString();
 
@@ -495,8 +499,11 @@ namespace StrateZone_Service.Implements
                 };
             }
 
-            DateTime TimeGate_BlockAppointmentCancellation = ScheduleTime.AddHours(-1.5f),
-                     TimeGate_Refund50_OnCancellation = ScheduleTime.AddHours(-3.5f);
+            decimal refund100_hours = await _systemService.GetAppointmentRefund100TimeInHoursAsync(1),
+                    incoming_hours = await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
+
+            DateTime TimeGate_BlockAppointmentCancellation = ScheduleTime.AddHours((double)(incoming_hours * -1)),
+                     TimeGate_Refund50_OnCancellation = ScheduleTime.AddHours((double)(refund100_hours * -1));
 
             if (CancelTime >= TimeGate_BlockAppointmentCancellation)
             {
@@ -505,7 +512,7 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel = model,
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.cancellation_fail,
-                    Message = "Không được phép hủy đơn trong vòng 1.5 tiếng trước giờ hẹn."
+                    Message = $"Không được phép hủy đơn trong vòng {incoming_hours} tiếng trước giờ hẹn."
                 };
             }
 

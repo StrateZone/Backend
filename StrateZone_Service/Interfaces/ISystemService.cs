@@ -20,9 +20,13 @@ namespace StrateZone_Service.Interfaces
         Task<List<SystemModel>> GetSystemsAsync();
         Task<SystemModel> GetSystemsByIdAsync(int id);
         Task<SystemModel> UpdateSystemWorkingTimeAsync(int id, TimeOnly openTime, TimeOnly closeTime);
+        Task<SystemModel> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin);
         Task<AbnormalDayModel> AddAbnormalDayAsync(AbnormalDayRequest abnormalDay);
         Task<AbnormalDayModel> UpdateAbnormalDayAsync(AbnormalDayModel abnormalDay, int id);
         Task<AbnormalDayModel> DeleteAbnormalDayAsync(int id);
         Task<PagedList<AbnormalDayModel>> GetAbnormalDaysAsync(int id, TablesAppointmentParameters parameters);
+        Task<decimal> GetAppointmentRefund100TimeInHoursAsync(int id);
+        Task<decimal> GetAppointmentIncomingTimeInHoursAsync(int id);
+        Task<int> GetAppointmentCheckinTimeInMinuesAsync(int id);
     }
 }

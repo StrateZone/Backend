@@ -109,6 +109,48 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("{id}/check-in/minutes-before-schedule")]
+        public async Task<IActionResult> GetSystemCheckinHours(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetAppointmentCheckinTimeInMinuesAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/refund-100/hours-before-schedule")]
+        public async Task<IActionResult> GetSystemRefundHours(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetAppointmentRefund100TimeInHoursAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/incoming/hours-before-schedule")]
+        public async Task<IActionResult> GetSystemInComingHours(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetAppointmentIncomingTimeInHoursAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}/abnormal-days")]
         public async Task<IActionResult> GetAbnormalDays(int id, TablesAppointmentParameters parameters)
         {
@@ -153,6 +195,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("{id}/appointment-time-rules")]
+        public async Task<IActionResult> UpdateTimeRules(int id, [FromBody] AppointmentTimeRules model)
+        {
+            try
+            {
+                var result = await _systemService.UpdateAppointmentTimeRulesAsync(id, model.Refund100_Hours_BeforeScheduleTime, model.Incoming_Hours_BeforeScheduleTime, model.Checkin_Minutes_BeforeScheduleTime);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("abnormal-day/{id}")]
         public async Task<IActionResult> DeleteAbnormalDay(int id)
         {
@@ -166,5 +222,12 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+    }
+
+    public class AppointmentTimeRules
+    {
+        public decimal Refund100_Hours_BeforeScheduleTime { get; set; }
+        public decimal Incoming_Hours_BeforeScheduleTime { get; set; }
+        public int Checkin_Minutes_BeforeScheduleTime { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -307,6 +308,8 @@ namespace StrateZone_Repository.Implements
             {
                 DateTime CurrentTime = DateTime.UtcNow.AddHours(7);
 
+                decimal incomingTime = (await _context.Systems.AsNoTracking().SingleOrDefaultAsync(s => s.Id == 1)).Appointment_Incoming_HoursFromScheduleTime;
+
                 var result = await _context.Database.ExecuteSqlRawAsync(
                     @"
                         UPDATE tables_appointments
@@ -314,12 +317,16 @@ namespace StrateZone_Repository.Implements
                             WHEN status IN ('expired', 'completed', 'cancelled', 'refunded') THEN status
                             WHEN end_time < {0} AND status NOT IN ('checked_in', 'completed', 'cancelled', 'refunded') THEN 'expired'
                             WHEN end_time < {0} AND status = 'checked_in' THEN 'completed'
-                            WHEN schedule_time <= {0} + INTERVAL '1.5 hours' AND status NOT IN ('checked_in', 'completed', 'cancelled', 'refunded') AND schedule_time > {0} THEN 'incoming'
+                            WHEN schedule_time <= {0} + ({1} || ' hours')::interval
+                                 AND status NOT IN ('checked_in', 'completed', 'cancelled', 'refunded') 
+                                 AND schedule_time > {0} THEN 'incoming'
                             ELSE status
                         END;
                         ",
-                    CurrentTime
+                    CurrentTime,
+                    incomingTime.ToString(CultureInfo.InvariantCulture)
                 );
+
 
                 return result;
             }

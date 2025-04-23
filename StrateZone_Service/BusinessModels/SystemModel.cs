@@ -17,6 +17,12 @@ namespace StrateZone_Service.BusinessModels
 
         public TimeOnly CloseTime { get; set; }
 
+        public decimal Appointment_Refund100_HoursFromScheduleTime { get; set; }
+
+        public decimal Appointment_Incoming_HoursFromScheduleTime { get; set; }
+
+        public int Appointment_Checkin_MinutesFromScheduleTime { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }
