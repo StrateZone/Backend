@@ -44,6 +44,8 @@ namespace StrateZone_Repository.Implements
                 thread.Rating = existing.Rating;
                 thread.CreatedBy = existing.CreatedBy;
                 thread.ThreadId = id;
+                thread.Comments = null;
+                thread.ThreadsTags = null;
                 thread.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
                 thread.CreatedByNavigation = null;
 
