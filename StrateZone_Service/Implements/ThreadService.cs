@@ -253,9 +253,10 @@ namespace StrateZone_Service.Implements
             {
                 var toReject = await _threadRepository.GetThreadByIdForAdminDeleteAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
+
                 var thread = _mapper.Map<ThreadModel>(toReject);
                 if (thread.Status != PostgreEnums.ThreadStatus.published.ToString())
-                    throw new Exception($"This thread is already {thread.Status}");
+                    throw new Exception($"Can only hide published threads, this thread is {thread.Status}");
 
                 thread.Status = PostgreEnums.ThreadStatus.hidden.ToString();
                 var result = await UpdateThreadAsync(thread, toReject.ThreadId);
@@ -263,9 +264,9 @@ namespace StrateZone_Service.Implements
                 NotificationRequest notification = new()
                 {
                     ToUser = (int)result.CreatedBy,
-                    Title = "Bài viết của bạn đã bị ẩn!",
-                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã bị ẩn bởi admin. " +
-                    $"Lưu ý: bài viết cần tuân thủ nghiêm ngặt các quy tắc của cộng đồng.",
+                    Title = "Bài viết của bạn đã ẩn thành công!",
+                    Content = $"Bạn đã ẩn bài viết có chủ đề \"{result.Title}\". " +
+                    $"Để hiện lại bài viết, vui lòng truy cập vào mục \"Bài viết của tôi\".",
                     Type = PostgreEnums.NotificationType.thread,
                 };
                 await _notificationService.CreateNotificationAsync(notification);
@@ -314,6 +315,28 @@ namespace StrateZone_Service.Implements
                 var result = await _threadRepository.UpdateThreadAsync(thread, id);
 
                 return _mapper.Map<ThreadModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<ThreadModel> ShowThreadAsync(int id)
+        {
+            try
+            {
+                var toShow = await _threadRepository.GetThreadByIdForAdminDeleteAsync(id)
+                                            ?? throw new Exception("Thread with this ID does not exist");
+
+                var thread = _mapper.Map<ThreadModel>(toShow);
+                if (thread.Status != PostgreEnums.ThreadStatus.hidden.ToString())
+                    throw new Exception($"Can only show hidden threads, this thread is {thread.Status}");
+
+                thread.Status = PostgreEnums.ThreadStatus.published.ToString();
+                var result = await UpdateThreadAsync(thread, toShow.ThreadId);
+
+                return result;
             }
             catch (Exception ex)
             {

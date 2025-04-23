@@ -214,5 +214,19 @@ namespace StrateZone_API.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPut("show/{id}")]
+        public async Task<ActionResult> ShowThread(int id)
+        {
+            try
+            {
+                var result = await _threadService.ShowThreadAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

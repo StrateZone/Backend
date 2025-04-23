@@ -64,12 +64,19 @@ namespace StrateZone_Repository.Implements
                 if (toDelete.Status == PostgreEnums.ThreadStatus.deleted)
                     throw new Exception("This thread is already deleted");
 
-                toDelete.ThreadId = id;
-                toDelete.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
-                toDelete.CreatedByNavigation = null;
-                toDelete.Status = PostgreEnums.ThreadStatus.deleted;
+                if (toDelete.Status == PostgreEnums.ThreadStatus.drafted)
+                {
+                    _context.Threads.Remove(toDelete);
+                }
+                else
+                {
+                    toDelete.ThreadId = id;
+                    toDelete.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
+                    toDelete.CreatedByNavigation = null;
+                    toDelete.Status = PostgreEnums.ThreadStatus.deleted;
 
-                _context.Threads.Update(toDelete);
+                    _context.Threads.Update(toDelete);
+                }
                 await _context.SaveChangesAsync();
 
                 return toDelete;
