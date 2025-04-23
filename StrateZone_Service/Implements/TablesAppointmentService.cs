@@ -667,7 +667,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                string payloadUrl = $"https://backend-production-ac5e.up.railway.app/api/tables-appointments/check-in/{tablesAppointmentId}/users/{userId}";
+                string payloadUrl = $"https://backend-production-ac5e.up.railway.app/api/tables-appointment/check-in/{tablesAppointmentId}/users/{userId}";
 
                 using var qrGenerator = new QRCodeGenerator();
                 QRCodeData qrCodeData = qrGenerator.CreateQrCode(payloadUrl, QRCodeGenerator.ECCLevel.Q);
