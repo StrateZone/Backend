@@ -214,13 +214,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        /*
-        [HttpGet("check-in-qr/{tablesAppointmentId}/users/{userId}")]
-        public async Task<IActionResult> CreateCheckinQrCode(int tablesAppointmentId, int userId)
+        [HttpPost("check-in/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> ScanCheckinTablesAppointment(int tablesAppointmentId, int userId)
         {
             try
             {
-                var result = await _services.CreateCheckinQrCode(userId, tablesAppointmentId);
+                var result = await _services.CheckInTablesAppointment(tablesAppointmentId, userId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -228,7 +227,20 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        */
+
+        [HttpGet("check-in-qr/{tablesAppointmentId}/users/{userId}")]
+        public async Task<IActionResult> CreateCheckinQrCode(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var result = await _services.CreateCheckinQrCode(userId, tablesAppointmentId);
+                return Ok(new { result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
 
         [HttpPut("cancel/{tablesAppointmentId}/users/{userId}")]
         public async Task<IActionResult> CancelTablesAppointment(int tablesAppointmentId, int userId)

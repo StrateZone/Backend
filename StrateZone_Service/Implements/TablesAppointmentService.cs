@@ -16,6 +16,7 @@ using static StrateZone_Repository.Parameters.PostgreEnums;
 using static System.Net.WebRequestMethods;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
+using QRCoder;
 
 namespace StrateZone_Service.Implements
 {
@@ -666,42 +667,19 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var api = $"https://backend-production-ac5e.up.railway.app/api/tables-appointments/check-in/{tablesAppointmentId}/users/{userId}";
-                var request = CreateRequest(HttpMethod.Get, 
-                            $"/v1/create-qr-code/?size=500x500&data={api}");
-                try
-                {
-                    var response = await _httpClient.SendAsync(request);
-                    return await response.Content.ReadAsStringAsync();
-                }
-                catch (HttpRequestException ex)
-                {
-                    Console.WriteLine($"Request failed: {ex.Message}");
-                    return $"Error: {ex.Message}";
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Unexpected error: {ex.Message}");
-                    return $"Unexpected error: {ex.Message}";
-                }
+                string payloadUrl = $"https://backend-production-ac5e.up.railway.app/api/tables-appointments/check-in/{tablesAppointmentId}/users/{userId}";
+
+                using var qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(payloadUrl, QRCodeGenerator.ECCLevel.Q);
+                using var qrCode = new PngByteQRCode(qrCodeData);
+                byte[] qrCodeBytes = qrCode.GetGraphic(20);
+                string base64Qr = Convert.ToBase64String(qrCodeBytes);
+                return $"data:image/png;base64,{base64Qr}";
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
             }
-        }
-
-        private HttpRequestMessage CreateRequest(HttpMethod method, string endpoint, object data = null)
-        {
-            var request = new HttpRequestMessage(method, $"https://api.qrserver.com{endpoint}");
-
-            if (data != null)
-            {
-                string jsonData = JsonConvert.SerializeObject(data);
-                request.Content = new StringContent(jsonData, Encoding.UTF8, "charset=utf-8");
-            }
-
-            return request;
         }
 
         public async Task<decimal> GetTotalPriceOfPaidTablesAppointmentWithinAMonthOfYearAsync(int month, int year)
