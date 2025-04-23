@@ -103,7 +103,7 @@ public partial class StrateZoneDbContext : DbContext
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder
                 .UseNpgsql(
-                    "Host=interchange.proxy.rlwy.net;Port=55988;Database=railway;Username=postgres;Password=LkbSuqBdhBaYqQehvnAWHZCLZOHTqaHk;SslMode=Disable",
+                    GetConnectionString(),
                     dataSourceBuilder =>
                     {
                         dataSourceBuilder.MapEnum<CourseSlotStatus>("course_slot_status");
@@ -140,7 +140,7 @@ public partial class StrateZoneDbContext : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();
         string connection = configuration["ConnectionStrings:DB"];
-        return connection;
+        return "Host=centerbeam.proxy.rlwy.net;Port=16477;Database=railway;Username=postgres;Password=FSRdUxlJFvAfhkdvLNdgzEeNDZGiIrWx;SslMode=Disable";
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
