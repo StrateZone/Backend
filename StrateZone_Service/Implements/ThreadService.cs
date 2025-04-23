@@ -223,7 +223,8 @@ namespace StrateZone_Service.Implements
                 var toReject = await GetThreadByIdAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
 
-                if (toReject.Status != PostgreEnums.ThreadStatus.pending.ToString())
+                if (toReject.Status != PostgreEnums.ThreadStatus.pending.ToString()
+                    && toReject.Status != PostgreEnums.ThreadStatus.edit_pending.ToString())
                     throw new Exception($"This thread is already {toReject.Status}");
 
                 toReject.Status = PostgreEnums.ThreadStatus.rejected.ToString();
