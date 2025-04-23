@@ -17,34 +17,16 @@ namespace StrateZone_Service.Implements
         private readonly ICommentRepository _commentRepository;
         private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
+        private readonly IProfanityService _profanityService;
         private readonly IMapper _mapper;
 
-        private static readonly string[] InappropriateKeywords = new string[]
-        {
-            "vcl", "vl", "vđ", "dm", "đm", "dmm", "cmm", "ml", "cl", "cc", "vãi", "vãi l", "vãi đái",
-            "địt", "lồn", "cặc", "buồi", "bướm", "nứng", "bú lol", "bú l", "đụ", "đéo", "lol", "dái", "cu", "vú", "bú", "liếm",
-            "xếp hình", "sex", "fuck", "f u", "fuk", "f*ck", "fucking", "shit", "bitch", "wtf", "đĩ", "điếm", "cave", "phò",
-            "v*l", "đ*o", "c*l", "đ.m", "d.m", "l*on", "b*oi", "f.u", "fuk", "c@", "b@", "l@", "n@g", "s.x", "s.xh", "đ*x", "v@i",
-            "cmn", "dmtt", "vcd", "vlcl", "ch0", "ngu vl", "ngu vc", "ngu vkl", "óc", "óc heo",
-            "súc vật", "óc chó", "óc lợn", "đần", "ngu", "thằng điên",
-            "con điên", "vô học", "thất học", "mất dạy", "thiểu năng", "tâm thần",
-
-            "dcs", "đcs", "hcm", "bkc", "bắc kì", "nam kì", "trung kì",
-            "phản động", "biểu tình", "đa đảng", "đa nguyên", "dân chủ", "tự do ngôn luận", "chống phá", "chế độ", "cách mạng",
-            "lật đổ", "đảo chính", "thế lực thù địch", "việt tân", "vnch", "cờ vàng", "cộng sản", "đảng", "nhà nước", "bộ công an",
-            "cảnh sát", "bạo quyền", "trấn áp", "đấu tố", "tôn giáo", "thiên chúa", "phật giáo", "hồi giáo", "thần học", "chúa trời", "thiên đường",
-
-            "giết", "ám sát", "khủng bố", "chém", "đánh", "nổ bom", "tấn công", "hành quyết",
-            "thuốc nổ", "vũ khí", "chất nổ", "đập phá", "cướp", "hiếp", "hiếp dâm", "lạm dụng", "bạo lực",
-            "buôn người", "buôn ma túy", "mua bán nội tạng", "dâm ô", "lừa đảo", "tống tiền", "tự sát"
-        };
-
-        public CommentService(ICommentRepository commentRepository, INotificationService notificationService, IMapper mapper, IUserService userService)
+        public CommentService(ICommentRepository commentRepository, INotificationService notificationService, IMapper mapper, IUserService userService, IProfanityService profanityService)
         {
             _commentRepository = commentRepository;
             _notificationService = notificationService;
             _mapper = mapper;
             _userService = userService;
+            _profanityService = profanityService;
         }
 
         public async Task<CommentModel> DeleteCommentAsync(int id)
@@ -107,7 +89,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                if (IsContentInappropriate(request.Content))
+                if (await _profanityService.CheckContain(request.Content))
                     throw new Exception("Comment contains inapproriate content, unable to comment.");
 
                 var user = await _userService.GetUserByIdAsync(request.UserId)
@@ -141,7 +123,7 @@ namespace StrateZone_Service.Implements
         {
             try 
             { 
-                if (IsContentInappropriate(comment.Content))
+                if (await _profanityService.CheckContain(comment.Content))
                     throw new Exception("Updated comment contains inapproriate content, unable to comment.");
 
                 var mappedComment = _mapper.Map<Comment>(comment);
@@ -153,21 +135,6 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message, ex);
             }
-        }
-
-        public static bool IsContentInappropriate(string input)
-        {
-            if (string.IsNullOrWhiteSpace(input)) return false;
-
-            string[] normalizedInput = input.ToLowerInvariant().Split(" ");
-
-            foreach (var keyword in InappropriateKeywords)
-            {
-                if (normalizedInput.Contains(keyword))
-                    return true;
-            }
-
-            return false;
         }
     }
 }
