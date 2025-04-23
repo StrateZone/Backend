@@ -187,6 +187,8 @@ namespace StrateZone_Service.Implements
                 var toApprove = await GetThreadByIdAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
 
+                var prevStatus = toApprove.Status;
+
                 if (toApprove.Status != PostgreEnums.ThreadStatus.pending.ToString()
                     && toApprove.Status != PostgreEnums.ThreadStatus.edit_pending.ToString())
                     throw new Exception($"This thread is already {toApprove.Status}");
@@ -194,20 +196,36 @@ namespace StrateZone_Service.Implements
                 toApprove.Status = PostgreEnums.ThreadStatus.published.ToString();
                 var result = await UpdateThreadAsync(toApprove, toApprove.ThreadId);
 
-                var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
-                threadPoster.Points += 10;
-                threadPoster.ContributionPoints += 50;
-                await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
-
-                NotificationRequest notification = new()
+                if (prevStatus == ThreadStatus.pending.ToString())
                 {
-                    ToUser = (int)result.CreatedBy,
-                    Title = "Bài viết của bạn đã được phê duyệt!",
-                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.  Bạn được cộng 25 điểm cá nhân, " +
-                    $"điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp.",
-                    Type = PostgreEnums.NotificationType.thread,
-                };
-                await _notificationService.CreateNotificationAsync(notification);
+                    var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
+                    threadPoster.Points += 10;
+                    threadPoster.ContributionPoints += 50;
+                    await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
+
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = (int)result.CreatedBy,
+                        Title = "Bài viết của bạn đã được phê duyệt!",
+                        Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt. Bạn được cộng 25 điểm cá nhân, " +
+                        $"điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp.",
+                        Type = PostgreEnums.NotificationType.thread,
+                    };
+                    await _notificationService.CreateNotificationAsync(notification);
+                }
+                else if (prevStatus == ThreadStatus.edit_pending.ToString())
+                {
+                    var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
+
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = (int)result.CreatedBy,
+                        Title = "Bài viết của bạn đã được phê duyệt!",
+                        Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.",
+                        Type = PostgreEnums.NotificationType.thread,
+                    };
+                    await _notificationService.CreateNotificationAsync(notification);
+                }
 
                 return _mapper.Map<ThreadModel>(result);
             }
