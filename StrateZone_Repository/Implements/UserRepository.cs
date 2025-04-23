@@ -319,6 +319,12 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@refreshTokenExpiry", updatedUser.RefreshTokenExpiry));
                 }
 
+                if (updatedUser.MembershipExpiry != null)
+                {
+                    sql.Append("membership_expiry = @membershipExpiry, ");
+                    parameters.Add(new NpgsqlParameter("@membershipExpiry", updatedUser.MembershipExpiry));
+                }
+
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(" WHERE user_id = @userId");
                 parameters.Add(new NpgsqlParameter("@userId", id));
@@ -532,6 +538,32 @@ namespace StrateZone_Repository.Implements
             {
                 await transaction.RollbackAsync();
                 throw new Exception("Failed to reset top contributors: " + ex.Message, ex);
+            }
+        }
+
+        public async Task UpdateExpiredMemberships()
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var now = DateTime.UtcNow.AddHours(7);
+                var formattedDate = now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                var sql = @"
+                            UPDATE users
+                            SET role = 'RegisteredUser'
+                            WHERE role = 'Member' 
+                              AND membership_expiry < {0}";
+
+                await _context.Database.ExecuteSqlRawAsync(sql, now);
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Failed to reset user roles: " + ex.Message, ex);
             }
         }
 

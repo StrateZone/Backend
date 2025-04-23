@@ -1257,6 +1257,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
+            entity.Property(e => e.MembershipExpiry)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("membership_expiry");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");

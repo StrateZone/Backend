@@ -30,6 +30,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var tables = _context.Tables
+                                    .AsNoTracking()
                                     .Include(t => t.GameType)
                                     .AsQueryable();
 
@@ -69,6 +70,7 @@ namespace StrateZone_Repository.Implements
 
                 var expectedId = await _context.GameTypes
                     .FromSqlRaw(query, gameType.ToString())
+                    .AsNoTracking()
                     .Select(g => g.TypeId)
                     .FirstOrDefaultAsync();
 

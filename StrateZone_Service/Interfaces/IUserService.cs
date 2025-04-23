@@ -27,5 +27,6 @@ namespace StrateZone_Service.Interfaces
         Task<bool> CheckUserNotification(int id);
         Task<UserMonthResponse> GetUsersJoinedInAMonth(int month, int year);
         Task AssignTopContributorsAsync();
+        Task UpdateExpiredMemberships();
     }
 }

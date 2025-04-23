@@ -432,6 +432,7 @@ namespace StrateZone_Service.Implements
                 await _walletRepository.WithdrawalWalletAsync((int)membershipPrice.Price1, userWallet.WalletId);
                 
                 user.UserRole = UserRole.Member;
+                user.MembershipExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7).AddDays(30), DateTimeKind.Unspecified);
                 await _userRepository.UpdateUserAsync(user, user.UserId);
 
                 var userMembershipPayment = new Payment()

@@ -315,6 +315,18 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task UpdateExpiredMemberships()
+        {
+            try
+            {
+                await _userRepository.UpdateExpiredMemberships();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<UserMonthResponse> GetUsersJoinedInAMonth(int month, int year)
         {
             try

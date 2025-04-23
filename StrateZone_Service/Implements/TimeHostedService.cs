@@ -133,7 +133,15 @@ namespace StrateZone_Service.Implements
                         count = await appointmentRequestsService.UpdateExpiredAppointmentRequests();
                     }
 
-                    _logger.LogInformation($"IAppointmentrequestService cleanup executed: Changed status for {count} expired request(s).");
+                    _logger.LogInformation($"IAppointmentrequestService update executed: Changed status for {count} expired request(s).");
+
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+                        await userService.UpdateExpiredMemberships();
+                    }
+
+                    _logger.LogInformation($"IUserService membership update executed.");
                 }
                 catch (Exception ex)
                 {

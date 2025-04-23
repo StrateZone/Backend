@@ -26,6 +26,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string UserRole { get; set; }
 
+        public DateTime? MembershipExpiry { get; set; }
+
         public string? FullName { get; set; }
 
         public string UserLabel { get; set; }

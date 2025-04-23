@@ -16,6 +16,8 @@ public partial class User
     [Column(TypeName = "user_role")]
     public UserRole UserRole { get; set; }
 
+    public DateTime? MembershipExpiry {  get; set; }
+
     public string? Email { get; set; }
 
     public string? Phone { get; set; }
