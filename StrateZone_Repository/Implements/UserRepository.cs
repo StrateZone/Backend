@@ -250,6 +250,12 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@status", updatedUser.Status));
                 }
 
+                if (updatedUser.ContributionPoints.HasValue)
+                {
+                    sql.Append("contribution_points = @cp, ");
+                    parameters.Add(new NpgsqlParameter("@cp", updatedUser.ContributionPoints.Value));
+                }
+
                 sql.Append("gender = @gender::gender, ");
                 parameters.Add(new NpgsqlParameter("@gender", updatedUser.Gender.ToString()));
 
