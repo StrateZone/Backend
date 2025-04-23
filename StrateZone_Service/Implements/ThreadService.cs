@@ -187,7 +187,8 @@ namespace StrateZone_Service.Implements
                 var toApprove = await GetThreadByIdAsync(id)
                             ?? throw new Exception("Thread with this ID does not exist");
 
-                if (toApprove.Status != PostgreEnums.ThreadStatus.pending.ToString())
+                if (toApprove.Status != PostgreEnums.ThreadStatus.pending.ToString()
+                    && toApprove.Status != PostgreEnums.ThreadStatus.edit_pending.ToString())
                     throw new Exception($"This thread is already {toApprove.Status}");
 
                 toApprove.Status = PostgreEnums.ThreadStatus.published.ToString();
