@@ -310,7 +310,10 @@ namespace StrateZone_Service.Implements
                 if (toBeUpdated.CreatedBy != threadModel.CreatedBy)
                     throw new Exception("Creator before and after update doesn't match.");
 
-                threadModel.Status = ThreadStatus.edit_pending.ToString();
+                if (threadModel.Status == ThreadStatus.published.ToString()
+                 || threadModel.Status == ThreadStatus.hidden.ToString()) 
+                    threadModel.Status = ThreadStatus.edit_pending.ToString();
+
                 var thread = _mapper.Map<Thread>(threadModel);
                 var result = await _threadRepository.UpdateThreadAsync(thread, id);
 
