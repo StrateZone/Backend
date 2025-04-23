@@ -37,9 +37,12 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                if ((await _context.Threads.AsNoTracking().SingleOrDefaultAsync(t => t.ThreadId == id)) == null)
+                var existing = (await _context.Threads.AsNoTracking().SingleOrDefaultAsync(t => t.ThreadId == id)) ??
                     throw new Exception("Thread with this ID does not eixst");
 
+                thread.CreatedAt = existing.CreatedAt;
+                thread.Rating = existing.Rating;
+                thread.CreatedBy = existing.CreatedBy;
                 thread.ThreadId = id;
                 thread.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
                 thread.CreatedByNavigation = null;
