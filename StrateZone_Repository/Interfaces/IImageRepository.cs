@@ -8,7 +8,7 @@ namespace StrateZone_Repository.Interfaces
         Task<Image> DeleteImageAsync(int id);
         Task<Image> GetEventThumbnailAsync(int eventId);
         Task<List<Image>> GetProductImagesAsync(int productId);
-        Task<List<Image>> GetThreadImagesAsync(int threadId);
+        Task<Image> GetThreadImagesAsync(int threadId);
         Task<Image> GetTournamentThumbnailAsync(int tournamentId);
         Task<Image> GetUserAvatarAsync(int userId);
         Task<Image> GetGametypeThumbnailAsync(int gametypeId);

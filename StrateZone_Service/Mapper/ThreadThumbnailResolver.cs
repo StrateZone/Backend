@@ -20,7 +20,7 @@ namespace StrateZone_Service.Mapper
         {
             // Ensure the method is synchronous (use .Result or .GetAwaiter().GetResult())
             var result = _imageService.GetThreadImagesAsync(source.ThreadId).Result;
-            return result?.FirstOrDefault()?.Url;
+            return result?.Url;
         }
     }
 }

@@ -19,7 +19,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Images.AsNoTracking().FirstOrDefaultAsync(i => i.UserId == userId);
+                return await _context.Images.AsNoTracking()
+                                .OrderByDescending(i => i.CreatedAt)
+                                .FirstOrDefaultAsync(i => i.UserId == userId);
             }
             catch (Exception ex)
             {
@@ -66,15 +68,15 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Image>> GetThreadImagesAsync(int threadId)
+        public async Task<Image> GetThreadImagesAsync(int threadId)
         {
             try
             {
                 return await _context.Images
                                     .AsNoTracking()
                                     .Where(i => i.ThreadId == threadId)
-                                    .OrderBy(i => i.CreatedAt)
-                                    .ToListAsync();
+                                    .OrderByDescending(i => i.CreatedAt)
+                                    .FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {

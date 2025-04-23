@@ -55,6 +55,13 @@ namespace StrateZone_Service.Implements
                         break;
                     case ImageType.thread:
                         imageModel.ThreadId = imageRequest.EntityId;
+
+                        ImageModel exsitingThreadThumbnail = await GetThreadImagesAsync((int) imageModel.ThreadId);
+                        if (exsitingThreadThumbnail != null)
+                        {
+                            return await UpdateImageAsync(imageModel, exsitingThreadThumbnail.ImageId);
+                        }
+
                         break;
                     case ImageType.event_thumbnail:
                         imageModel.EventId = imageRequest.EntityId;
@@ -127,12 +134,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<ImageModel>> GetThreadImagesAsync(int threadId)
+        public async Task<ImageModel> GetThreadImagesAsync(int threadId)
         {
             try
             {
                 var result = await _imageRepository.GetThreadImagesAsync(threadId);
-                return _mapper.Map<List<ImageModel>>(result);
+                return _mapper.Map<ImageModel>(result);
             }
             catch (Exception ex)
             {
