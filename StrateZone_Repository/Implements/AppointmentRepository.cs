@@ -222,6 +222,18 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<int> GetTablesCountForAppointment(int id)
+        {
+            try
+            {
+                return await _context.TablesAppointments.AsNoTracking().CountAsync(ta => ta.AppointmentId == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
         {
             try

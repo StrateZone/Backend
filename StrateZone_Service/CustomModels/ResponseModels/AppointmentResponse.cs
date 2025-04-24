@@ -17,6 +17,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string Status { get; set; }
 
+        public int TablesCount { get; set; }
+
         public DateTime? CreatedAt { get; set; }
 
         public UserResponse? User { get; set; }

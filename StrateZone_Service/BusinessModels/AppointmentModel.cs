@@ -23,6 +23,8 @@ namespace StrateZone_Service.BusinessModels
 
         public UserResponse? User { get; set; }
 
+        public int TablesCount { get; set; }
+
         public virtual ICollection<TablesAppointmentModel> TablesAppointments { get; set; } = [];
     
         public virtual ICollection<AppointmentrequestModel>? Appointmentrequests { get; set; } = [];
