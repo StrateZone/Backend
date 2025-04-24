@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using Microsoft.AspNetCore.Http;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
@@ -98,6 +98,14 @@ namespace StrateZone_Service.Implements
                 var threads = await _threadRepository.GetAllThreadsAsync(parameters);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
+                foreach (var m in mapped)
+                {
+                    var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
+
+                    m.LikesCount = counts.Item1;
+                    m.CommentsCount = counts.Item2;
+                }
+
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
             }
             catch (Exception ex)
@@ -112,6 +120,14 @@ namespace StrateZone_Service.Implements
             {
                 var threads = await _threadRepository.GetAllThreadsByStatusesAndTagsAsync(parameters);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
+
+                foreach (var m in mapped)
+                {
+                    var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
+
+                    m.LikesCount = counts.Item1;
+                    m.CommentsCount = counts.Item2;
+                }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
             }
@@ -128,6 +144,14 @@ namespace StrateZone_Service.Implements
                 var threads = await _threadRepository.GetAllThreadsByStatusesAsync(parameters, statuses);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
+                foreach (var m in mapped)
+                {
+                    var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
+
+                    m.LikesCount = counts.Item1;
+                    m.CommentsCount = counts.Item2;
+                }
+
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
             }
             catch (Exception ex)
@@ -142,6 +166,14 @@ namespace StrateZone_Service.Implements
             {
                 var threads = await _threadRepository.GetThreadsByUserIdAsync(parameters, id);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
+
+                foreach (var m in mapped)
+                {
+                    var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
+
+                    m.LikesCount = counts.Item1;
+                    m.CommentsCount = counts.Item2;
+                }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
             }
@@ -158,6 +190,14 @@ namespace StrateZone_Service.Implements
                 var threads = await _threadRepository.GetThreadsByUserIdAsync(parameters, statuses, id);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
+                foreach (var m in mapped)
+                {
+                    var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
+
+                    m.LikesCount = counts.Item1;
+                    m.CommentsCount = counts.Item2;
+                }
+
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
             }
             catch (Exception ex)
@@ -171,8 +211,12 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _threadRepository.GetThreadByIdAsync(id);
+                var mapped = _mapper.Map<ThreadModel>(result);
 
-                return _mapper.Map<ThreadModel>(result);
+                mapped.LikesCount = mapped.Likes.Count;
+                mapped.CommentsCount = mapped.Comments.Count;
+
+                return mapped;
             }
             catch (Exception ex)
             {

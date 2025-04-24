@@ -7,7 +7,7 @@ using StrateZone_Repository.Parameters;
 ﻿using AutoMapper;
 using StrateZone_Service.BusinessModels;
 using System.Globalization;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using StrateZone_Repository.Implements;
 

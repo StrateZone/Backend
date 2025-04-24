@@ -1,4 +1,4 @@
-﻿using MealHunt_Repositories.Pagination;
+﻿using StrateZone_Repository.Pagination;
 using System;
 using System.Collections.Generic;
 using System.Linq;

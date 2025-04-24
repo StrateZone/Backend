@@ -1,5 +1,5 @@
 ﻿using CloudinaryDotNet.Actions;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;

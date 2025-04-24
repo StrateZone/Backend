@@ -108,7 +108,8 @@ namespace StrateZone_Repository.Implements
             {
                 content = content.ToLower();
                 return await _context.Tags.AsNoTracking()
-                                .Where(t => t.TagName.ToLower().Contains(content))
+                                .Where(t => t.TagName.ToLower()
+                                .Contains(content))
                                 .ToListAsync();
             }
             catch (Exception ex)

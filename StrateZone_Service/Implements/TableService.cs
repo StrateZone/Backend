@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Core;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;

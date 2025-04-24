@@ -23,7 +23,9 @@ namespace StrateZone_Service.BusinessModels
 
         public double? Rating { get; set; }
 
-        public int LikesCount => Likes.Count;
+        public int LikesCount { get; set; }
+
+        public int CommentsCount {get; set; }
 
         public string Status { get; set; }
 

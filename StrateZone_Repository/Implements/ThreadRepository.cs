@@ -1,4 +1,4 @@
-﻿using MealHunt_Repositories.Pagination;
+﻿using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
@@ -98,11 +98,6 @@ namespace StrateZone_Repository.Implements
             {
                 var threads = _context.Threads.AsNoTracking()
                                 .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
@@ -117,7 +112,7 @@ namespace StrateZone_Repository.Implements
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
                     "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
-                    _ => threads
+                    _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
                 return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
@@ -135,11 +130,6 @@ namespace StrateZone_Repository.Implements
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => statuses.Count() <= 0 || statuses.Contains(t.Status) && t.Status != PostgreEnums.ThreadStatus.deleted)
                                 .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
@@ -154,7 +144,7 @@ namespace StrateZone_Repository.Implements
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
                     "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
-                    _ => threads
+                    _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
                 return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
@@ -175,11 +165,6 @@ namespace StrateZone_Repository.Implements
                                         && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
                                 .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .AsQueryable();
@@ -226,10 +211,6 @@ namespace StrateZone_Repository.Implements
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => t.CreatedBy == id && t.Status != PostgreEnums.ThreadStatus.deleted)
                                 .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .AsQueryable();
@@ -254,6 +235,14 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<(int, int)> GetThreadLikeAndCommentCount(int id)
+        {
+            var likeCount = await _context.Likes.AsNoTracking().CountAsync(l => l.ThreadId == id);
+            var cmtCount = await _context.Comments.AsNoTracking().CountAsync(cc => cc.ThreadId == id);
+
+            return (likeCount, cmtCount);
+        }
+
         public async Task<PagedList<Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, int id)
         {
             try
@@ -261,11 +250,6 @@ namespace StrateZone_Repository.Implements
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => t.CreatedBy == id && statuses.Contains(t.Status)
                                         && t.Status != PostgreEnums.ThreadStatus.deleted)
-                                .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Likes)
-                                .Include(t => t.Comments)
-                                    .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .AsQueryable();
@@ -274,11 +258,6 @@ namespace StrateZone_Repository.Implements
                 {
                     "created-at" => threads.OrderBy(a => a.CreatedAt),
                     "created-at-desc" => threads.OrderByDescending(a => a.CreatedAt),
-                    "likes-count" => threads.OrderBy(a => a.Likes.Count),
-                    "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
-                    "comments-count" => threads.OrderBy(a => a.Comments.Count),
-                    "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
-                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 

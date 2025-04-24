@@ -1,5 +1,5 @@
 ﻿using Azure.Core;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.OpenApi.Any;

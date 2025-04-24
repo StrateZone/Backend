@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace MealHunt_Repositories.Pagination
+namespace StrateZone_Repository.Pagination
 {
     public class PagedList<T> : List<T>
     {

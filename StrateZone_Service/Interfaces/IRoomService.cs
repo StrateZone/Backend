@@ -1,4 +1,4 @@
-﻿using MealHunt_Repositories.Pagination;
+﻿using StrateZone_Repository.Pagination;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;

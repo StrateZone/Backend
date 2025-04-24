@@ -1,4 +1,4 @@
-﻿using MealHunt_Repositories.Pagination;
+﻿using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;

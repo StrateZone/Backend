@@ -6,7 +6,7 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_APIs.Controllers;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using StrateZone_Repository.Entities;
 
 namespace StrateZone.Tests.Controllers_Tests

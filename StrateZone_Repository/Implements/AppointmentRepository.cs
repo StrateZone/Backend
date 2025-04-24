@@ -1,4 +1,4 @@
-﻿using MealHunt_Repositories.Pagination;
+﻿using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
@@ -35,13 +35,7 @@ namespace StrateZone_Repository.Implements
                                     .FromSqlRaw(
                                         "SELECT * FROM appointments WHERE (@st IS NULL OR status = @st::appointment_status)",
                                         statusParam)
-                                    .Include(a => a.TablesAppointments)
-                                        .ThenInclude(ta => ta.Table)
-                                            .ThenInclude(t => t.GameType)
-                                    .Include(a => a.TablesAppointments)
-                                        .ThenInclude(ta => ta.Table)
-                                            .ThenInclude(t => t.Room)
-                                    .AsQueryable();
+                                    .AsNoTracking();
 
                 result = parameters.OrderBy switch
                 {
@@ -82,13 +76,6 @@ namespace StrateZone_Repository.Implements
                                             ", statusParam)
                                             .AsNoTracking()
                                             .Include(a => a.User)
-                                            .Include(a => a.TablesAppointments)
-                                                .ThenInclude(ta => ta.Table)
-                                                    .ThenInclude(t => t.GameType)
-                                            .Include(a => a.TablesAppointments)
-                                                .ThenInclude(ta => ta.Table)
-                                                    .ThenInclude(t => t.Room)
-                                            .Where(r => r.TablesAppointments.Count > 0)
                                             .AsQueryable();
 
                 result = parameters.OrderBy switch
@@ -139,13 +126,9 @@ namespace StrateZone_Repository.Implements
                   WHERE (@st IS NULL OR a.status = @st::appointment_status)
                     AND ta.schedule_time >= @today AND ta.schedule_time < @today + interval '1 day'",
                                         statusParam, dateParam
-                                        ).Include(a => a.User)
-                                        .Include(a => a.TablesAppointments)
-                                            .ThenInclude(ta => ta.Table)
-                                                .ThenInclude(t => t.GameType)
-                                        .Include(a => a.TablesAppointments)
-                                            .ThenInclude(ta => ta.Table)
-                                                .ThenInclude(t => t.Room)
+                                        )
+                                        .AsNoTracking()
+                                        .Include(a => a.User)
                                         .AsQueryable();
 
 
@@ -183,14 +166,14 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Appointments
-                    .Where(a => a.AppointmentId == id)
+                    .AsNoTracking()
                     .Include(a => a.TablesAppointments)
                         .ThenInclude(ta => ta.Table)
                             .ThenInclude(t => t.GameType)
                     .Include(a => a.TablesAppointments)
                         .ThenInclude(ta => ta.Table)
                             .ThenInclude(t => t.Room)
-                    .FirstOrDefaultAsync();
+                    .SingleOrDefaultAsync(a => a.AppointmentId == id);
             }
             catch (Exception ex)
             {
@@ -217,12 +200,7 @@ namespace StrateZone_Repository.Implements
                                         "AND (@st IS NULL OR status = @st::appointment_status)", 
                                         statusParam,
                                         userId)
-                                    .Include(a => a.TablesAppointments)
-                                        .ThenInclude(ta => ta.Table)
-                                            .ThenInclude(t => t.GameType)
-                                    .Include(a => a.TablesAppointments)
-                                        .ThenInclude(ta => ta.Table)
-                                            .ThenInclude(t => t.Room)
+                                    .AsNoTracking()
                                     .AsQueryable();
 
                 result = parameters.OrderBy switch

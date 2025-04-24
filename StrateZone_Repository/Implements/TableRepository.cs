@@ -1,4 +1,4 @@
-﻿using MealHunt_Repositories.Pagination;
+﻿using StrateZone_Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
@@ -256,10 +256,10 @@ namespace StrateZone_Repository.Implements
 
                         new NpgsqlParameter("@StartTime", parameters.StartTime),
                         new NpgsqlParameter("@EndTime", parameters.EndTime))
+                    .AsNoTracking()
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
                     .OrderBy(t => t.Room.RoomName)
-                    .AsNoTracking()
                     .AsQueryable();
 
                 return await PagedList<Table>.ToPagedList(tablesQuery, parameters.PageNumber, parameters.PageSize);

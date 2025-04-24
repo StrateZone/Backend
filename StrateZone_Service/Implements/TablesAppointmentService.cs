@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using StrateZone_Repository.Entities;

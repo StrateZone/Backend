@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Core;
-using MealHunt_Repositories.Pagination;
+using StrateZone_Repository.Pagination;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -124,14 +124,6 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRepository.GetAppointmentsByUserIdAsync(parameters, userId);
 
                 var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
-
-                foreach (var a in appointments)
-                {
-                    var requests = await _appointmentrequestService.GetAppointmentrequestsByAppointmentIdAsync(a.AppointmentId);
-                    if (requests.Count <= 0) continue;
-
-                    a.Appointmentrequests = _mapper.Map<List<AppointmentrequestResponse>>(requests);
-                }
 
                 return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
             }

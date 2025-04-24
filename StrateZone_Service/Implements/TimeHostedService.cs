@@ -25,7 +25,7 @@ namespace StrateZone_Service.Implements
         private static readonly TimeSpan _userCleanupInterval = TimeSpan.FromHours(12);
         private static readonly TimeSpan _appointmentRequestsCleanupInterval = TimeSpan.FromSeconds(120);
         private static readonly TimeSpan _tablesAppointmentsCleanupInterval = TimeSpan.FromSeconds(60);
-        private static readonly TimeSpan _appointmentsUpdateInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _appointmentsUpdateInterval = TimeSpan.FromSeconds(60);
         private static readonly TimeSpan _topContributorAssignInterval = TimeSpan.FromDays(7);
 
         public TimedHostedService(IServiceScopeFactory serviceScopeFactory, ILogger<TimedHostedService> logger)
