@@ -48,17 +48,24 @@ namespace StrateZone_Service.Implements
                 var result = await _tableRepository.GetAvailableTablesAsync(parameters);
                 var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
+                var gameTypesPrices = await _priceService.GetPricesPerHourEachGameTypeAsync();
+                var roomTypesPrices = await _priceService.GetPricesPerHourEachRoomTypeAsync();
+
+                decimal duration =
+                    (decimal)(parameters.EndTime).Subtract(parameters.StartTime).TotalHours;
+
                 foreach (var table in tables)
                 {
                     table.StartDate = parameters.StartTime;
                     table.EndDate = parameters.EndTime;
 
-                    var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
+                    var gtPrices = gameTypesPrices[(int)table.GameTypeId];
+                    var rtPrice = roomTypesPrices[table.RoomType];
 
-                    table.GameTypePrice = prices.ElementAt(0);
-                    table.RoomTypePrice = prices.ElementAt(1);
-                    table.DurationInHours = (float?)prices.ElementAt(2);
-                    table.TotalPrice = prices.ElementAt(3);
+                    table.GameTypePrice = gtPrices;
+                    table.RoomTypePrice = rtPrice;
+                    table.DurationInHours = (float?)duration;
+                    table.TotalPrice = (gtPrices + rtPrice) * duration;
                 }
 
                 return new PagedList<TableResponse>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
@@ -91,17 +98,24 @@ namespace StrateZone_Service.Implements
                 var result = await _tableRepository.GetAvailableTablesByGameTypeAsync(parameters, gameType);
                 var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
+                var gameTypesPrices = await _priceService.GetPricesPerHourEachGameTypeAsync();
+                var roomTypesPrices = await _priceService.GetPricesPerHourEachRoomTypeAsync();
+
+                decimal duration =
+                    (decimal)(parameters.EndTime).Subtract(parameters.StartTime).TotalHours;
+
                 foreach (var table in tables)
                 {
                     table.StartDate = parameters.StartTime;
                     table.EndDate = parameters.EndTime;
-                    
-                    var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
 
-                    table.GameTypePrice = prices.ElementAt(0);
-                    table.RoomTypePrice = prices.ElementAt(1);
-                    table.DurationInHours = (float?) prices.ElementAt(2);
-                    table.TotalPrice = prices.ElementAt(3);
+                    var gtPrices = gameTypesPrices[(int)table.GameTypeId];
+                    var rtPrice = roomTypesPrices[table.RoomType];
+
+                    table.GameTypePrice = gtPrices;
+                    table.RoomTypePrice = rtPrice;
+                    table.DurationInHours = (float?)duration;
+                    table.TotalPrice = (gtPrices + rtPrice) * duration;
                 }
 
                 return new PagedList<TableResponse>(tables, result.TotalCount, result.CurrentPage, result.PageSize);
@@ -119,17 +133,24 @@ namespace StrateZone_Service.Implements
                 var result = await _tableRepository.GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, gameTypes, roomTypes);
                 var tables = _mapper.Map<PagedList<TableResponse>>(result);
 
+                var gameTypesPrices = await _priceService.GetPricesPerHourEachGameTypeAsync();
+                var roomTypesPrices = await _priceService.GetPricesPerHourEachRoomTypeAsync();
+
+                decimal duration = 
+                    (decimal)(parameters.EndTime).Subtract(parameters.StartTime).TotalHours;
+
                 foreach (var table in tables)
                 {
                     table.StartDate = parameters.StartTime;
                     table.EndDate = parameters.EndTime;
 
-                    var prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, parameters.StartTime, parameters.EndTime);
+                    var gtPrices = gameTypesPrices[(int)table.GameTypeId];
+                    var rtPrice = roomTypesPrices[table.RoomType];
 
-                    table.GameTypePrice = prices.ElementAt(0);
-                    table.RoomTypePrice = prices.ElementAt(1);
-                    table.DurationInHours = (float?)prices.ElementAt(2);
-                    table.TotalPrice = prices.ElementAt(3);
+                    table.GameTypePrice = gtPrices;
+                    table.RoomTypePrice = rtPrice;
+                    table.DurationInHours = (float?)duration;
+                    table.TotalPrice = (gtPrices + rtPrice) * duration;
                 }
 
                 return new PagedList<TableResponse>(tables, result.TotalCount, result.CurrentPage, result.PageSize);

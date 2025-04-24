@@ -15,6 +15,8 @@ namespace StrateZone_Repository.Interfaces
         Task<Price> GetProductPriceByIdAsync(int productId);
         Task<decimal> GetPriceOfAppointmentTablesFromTimeRangeAsync(int[] tableId, DateTime FromTime, DateTime ToTime);
         Task<List<decimal>> GetDetailedPriceOfTableFromTimeRangeAsync(int tableId, DateTime FromTime, DateTime ToTime);
+        Task<Dictionary<int, decimal>> GetPricesPerHourEachGameTypeAsync();
+        Task<Dictionary<string, decimal>> GetPricesPerHourEachRoomTypeAsync();
         Task<decimal> GetPriceOfTablesAppointmentAsync(TablesAppointment tablesAppointment);
         Task<decimal> GetPriceOfAppointmentAsync(Appointment appointment);
         Task<PagedList<Price>> GetServicePrices(PriceParameters parameters);

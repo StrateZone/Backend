@@ -13,10 +13,6 @@ namespace StrateZone_Service.Implements
     public class PriceService : IPriceService
     {
         private readonly IPriceRepository _priceRepository;
-        private readonly IAppointmentService _appointmentService;
-        private readonly ITableService _tableService;
-        private readonly ITablesAppointmentService _tablesAppointmentService;
-        private readonly IRoomService _roomService;
         private readonly IMapper _mapper;
 
         public PriceService(IPriceRepository priceRepository, IMapper mapper)
@@ -187,6 +183,30 @@ namespace StrateZone_Service.Implements
             {
                 var appointment = _mapper.Map<Appointment>(appointmentModel);
                 return await _priceRepository.GetPriceOfAppointmentAsync(appointment);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Dictionary<int, decimal>> GetPricesPerHourEachGameTypeAsync()
+        {
+            try
+            {
+                return await _priceRepository.GetPricesPerHourEachGameTypeAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Dictionary<string, decimal>> GetPricesPerHourEachRoomTypeAsync()
+        {
+            try
+            {
+                return await _priceRepository.GetPricesPerHourEachRoomTypeAsync();
             }
             catch (Exception ex)
             {

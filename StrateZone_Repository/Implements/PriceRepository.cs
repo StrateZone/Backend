@@ -87,7 +87,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Prices
+                return await _context.Prices.AsNoTracking()
                                     .FirstOrDefaultAsync(p => p.MemberFee);
             }
             catch (Exception ex)
@@ -100,7 +100,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Prices
+                return await _context.Prices.AsNoTracking()
                                     .FirstOrDefaultAsync(p => p.TeachingSalary);
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Prices
+                return await _context.Prices.AsNoTracking()
                                     .FirstOrDefaultAsync(p => p.ProductId == productId);
 
             }
@@ -209,13 +209,14 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var appointment = await _context.Appointments
-                    .Include(a => a.TablesAppointments)
-                        .ThenInclude(ta => ta.Table)
-                            .ThenInclude(t => t.Room)
-                    .Include(a => a.TablesAppointments)
-                        .ThenInclude(ta => ta.Table)
-                            .ThenInclude(t => t.GameType)
-                    .SingleOrDefaultAsync(a => a.AppointmentId == appointmentId)
+                                            .AsNoTracking()
+                                            .Include(a => a.TablesAppointments)
+                                                .ThenInclude(ta => ta.Table)
+                                                    .ThenInclude(t => t.Room)
+                                            .Include(a => a.TablesAppointments)
+                                                .ThenInclude(ta => ta.Table)
+                                                    .ThenInclude(t => t.GameType)
+                                            .SingleOrDefaultAsync(a => a.AppointmentId == appointmentId)
                     ?? throw new KeyNotFoundException("Appointment with this ID was not found");
 
                 var tablesAppointments = await _context.TablesAppointments
@@ -330,6 +331,7 @@ namespace StrateZone_Repository.Implements
                 decimal DurationInHours = (decimal) ToTime.Subtract(FromTime).TotalHours;
 
                 var table = await _context.Tables
+                                        .AsNoTracking()
                                         .Include(t => t.GameType)
                                         .Include(t => t.Room)
                                         .SingleOrDefaultAsync(t => t.TableId == tableId)
@@ -348,6 +350,46 @@ namespace StrateZone_Repository.Implements
             catch
             {
                 throw;
+            }
+        }
+
+        public async Task<Dictionary<int, decimal>> GetPricesPerHourEachGameTypeAsync()
+        {
+            try
+            {
+                var prices = await _context.Prices.AsNoTracking()
+                    .Where(p => p.GameTypeId != null)
+                    .GroupBy(p => p.GameTypeId.Value)
+                    .ToDictionaryAsync(
+                        g => g.Key,
+                        g => g.Average(p => (decimal) p.Price1)
+                    );
+
+                return prices;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<string, decimal>> GetPricesPerHourEachRoomTypeAsync()
+        {
+            try
+            {
+                var prices = await _context.Prices.AsNoTracking()
+                    .Where(p => p.RoomType.HasValue)
+                    .GroupBy(p => p.RoomType) // group by nullable
+                    .ToDictionaryAsync(
+                        g => g.Key!.Value.ToString(), // safe because of the HasValue filter
+                        g => g.Average(p => (decimal)p.Price1)
+                    );
+
+                return prices;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving prices: {ex.Message}");
             }
         }
     }
