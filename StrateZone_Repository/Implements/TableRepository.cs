@@ -46,10 +46,10 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Tables.Where(t => t.TableId == id)
+                return await _context.Tables.AsNoTracking()
                                     .Include(t => t.GameType)
                                     .Include(t => t.Room)
-                                    .FirstOrDefaultAsync() ?? throw new Exception("No table with this ID was found");
+                                    .FirstOrDefaultAsync(t => t.TableId == id) ?? throw new Exception("No table with this ID was found");
             }
             catch (Exception ex)
             {
@@ -319,7 +319,7 @@ namespace StrateZone_Repository.Implements
 
         public async Task<List<Table>> GetTablesAsync()
         {
-            return await _context.Tables.ToListAsync();
+            return await _context.Tables.AsNoTracking().ToListAsync();
         }
 
         public Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime)

@@ -75,6 +75,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Rooms
+                                    .AsNoTracking()
                                     .Include(r => r.Tables)
                                     .FirstOrDefaultAsync(r => r.RoomId == id);
             }
@@ -88,7 +89,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var rooms = _context.Rooms.Include(r => r.Tables).AsQueryable();
+                var rooms = _context.Rooms.AsNoTracking().Include(r => r.Tables).AsQueryable();
                 return await PagedList<Room>.ToPagedList(rooms, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -106,6 +107,7 @@ namespace StrateZone_Repository.Implements
                                             @"SELECT * FROM rooms WHERE room_type = @room_type::room_type",
                                         new NpgsqlParameter("@room_type", roomType.ToString())
                                     )
+                                    .AsNoTracking()
                                     .Include(r => r.Tables)
                                     .AsQueryable();
 

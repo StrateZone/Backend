@@ -28,7 +28,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var prices = _context.Prices.Where(p => !p.TeachingSalary && !p.MemberFee && (p.ProductId == null || p.ProductId == 0)).AsQueryable();
+                var prices = _context.Prices.AsNoTracking().Where(p => !p.TeachingSalary && !p.MemberFee && (p.ProductId == null || p.ProductId == 0)).AsQueryable();
                 return await PagedList<Price>.ToPagedList(prices, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -51,6 +51,7 @@ namespace StrateZone_Repository.Implements
                                         LIMIT 1",
                                         new NpgsqlParameter("@gt", gameType.ToString())
                                         )
+                                    .AsNoTracking()
                                     .FirstOrDefaultAsync();
 
                 return price;
@@ -73,6 +74,7 @@ namespace StrateZone_Repository.Implements
                                         LIMIT 1",
                                         new NpgsqlParameter("@rt", roomType.ToString())
                                         )
+                                    .AsNoTracking()
                                     .FirstOrDefaultAsync();
 
                 return price;
@@ -196,7 +198,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Prices.FirstOrDefaultAsync(p => p.CourseId == courseId);
+                return await _context.Prices.AsNoTracking().FirstOrDefaultAsync(p => p.CourseId == courseId);
             }
             catch
             {
@@ -288,6 +290,7 @@ namespace StrateZone_Repository.Implements
                     throw new ArgumentNullException(nameof(appointment), "Appointment cannot be null");
 
                 var tablesAppointments = await _context.TablesAppointments
+                    .AsNoTracking()
                     .Where(ta => ta.AppointmentId == appointment.AppointmentId)
                     .ToListAsync();
 

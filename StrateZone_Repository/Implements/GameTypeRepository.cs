@@ -23,7 +23,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.GameTypes.ToListAsync();
+                return await _context.GameTypes.AsNoTracking().ToListAsync();
             }
             catch (Exception ex)
             {
@@ -35,7 +35,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.GameTypes.FindAsync(id);
+                return await _context.GameTypes.AsNoTracking().FirstOrDefaultAsync(g => g.TypeId == id);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.GameTypes.Include(gt => gt.GameExtensions).ToListAsync();
+                return await _context.GameTypes.AsNoTracking().Include(gt => gt.GameExtensions).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -59,7 +59,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.GameTypes.Where(gt => gt.TypeId == id)
+                return await _context.GameTypes.AsNoTracking().Where(gt => gt.TypeId == id)
                                                .Include(gt => gt.GameExtensions)
                                                .FirstOrDefaultAsync();
             }

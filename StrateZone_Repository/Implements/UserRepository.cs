@@ -24,7 +24,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var users = _context.Users.AsQueryable();
+                var users = _context.Users.AsNoTracking().AsQueryable();
                 return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -37,7 +37,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var users = _context.Users.AsQueryable().ToList();
+                var users = _context.Users.AsNoTracking().AsQueryable().ToList();
                 return users;
             }
             catch (Exception ex)
@@ -50,7 +50,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Users.FindAsync(id);
+                return await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserId == id);
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
             }
             catch (Exception ex)
             {
@@ -75,6 +75,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var users = _context.Users
+                                    .AsNoTracking()
                                     .Where(u => u.Username.ToLower().Contains(username.ToLower()))
                                     .AsQueryable();
 
@@ -133,6 +134,7 @@ namespace StrateZone_Repository.Implements
                                                 AND ranking <= @r2::ranking",
                                         new NpgsqlParameter("@r1", lowerBound.ToString()),
                                         new NpgsqlParameter("@r2", upperBound.ToString()))
+                                    .AsNoTracking()
                                     .AsQueryable();
 
 
@@ -444,6 +446,7 @@ namespace StrateZone_Repository.Implements
                                         "LIMIT 1",
                                         tablesAppointment.TableId, 
                                         tablesAppointment.AppointmentId)
+                                    .AsNoTracking()
                                     .FirstOrDefaultAsync()
                                 ?? null;
 
