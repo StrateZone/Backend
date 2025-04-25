@@ -42,7 +42,5 @@ namespace StrateZone_Service.BusinessModels
         public virtual UserModel ToUserNavigation { get; set; } = null!;
 
         public virtual TableResponse? Table { get; set; } = null!;
-
-        public virtual TablesAppointmentModel? Appointment { get; set; }
     }
 }

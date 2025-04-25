@@ -200,7 +200,21 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var result = await _systemService.UpdateAppointmentTimeRulesAsync(id, model.Refund100_Hours_BeforeScheduleTime, model.Incoming_Hours_BeforeScheduleTime, model.Checkin_Minutes_BeforeScheduleTime);
+                var result = await _systemService.UpdateAppointmentTimeRulesAsync(id, model.Refund100_Hours_BeforeScheduleTime, model.Incoming_Hours_BeforeScheduleTime, model.Checkin_Minutes_BeforeScheduleTime, model.MaxTablesCancel_PerWeek);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/points-rules")]
+        public async Task<IActionResult> UpdateTimeRules(int id, [FromBody] PointRules model)
+        {
+            try
+            {
+                var result = await _systemService.UpdatePointsRulesAsync(id, model.UserPoints_By_TablePricePercentage, model.ContributionPoints_PerThread, model.ContributionPoints_PerComment);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -229,5 +243,13 @@ namespace StrateZone_APIs.Controllers
         public decimal Refund100_Hours_BeforeScheduleTime { get; set; }
         public decimal Incoming_Hours_BeforeScheduleTime { get; set; }
         public int Checkin_Minutes_BeforeScheduleTime { get; set; }
+        public int MaxTablesCancel_PerWeek { get; set; }
+    }
+
+    public class PointRules
+    {
+        public float UserPoints_By_TablePricePercentage { get; set; }
+        public int ContributionPoints_PerThread { get; set; }
+        public int ContributionPoints_PerComment { get; set; }
     }
 }

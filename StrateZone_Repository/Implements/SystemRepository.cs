@@ -166,7 +166,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<ESystem> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin)
+        public async Task<ESystem> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin, int maxTablesCancelPerWeek)
         {
             try
             {
@@ -175,6 +175,29 @@ namespace StrateZone_Repository.Implements
                 system.Appointment_Refund100_HoursFromScheduleTime = refund100Time;
                 system.Appointment_Incoming_HoursFromScheduleTime = incomingTime;
                 system.Appointment_Checkin_MinutesFromScheduleTime = minutesCheckin;
+                system.Max_NumberOfTables_CancelPerWeek = maxTablesCancelPerWeek;
+
+                _context.Systems.Update(system);
+                await _context.SaveChangesAsync();
+
+                return system;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+
+        public async Task<ESystem> UpdatePointsRulesAsync(int id, float userPointsPerCheckedinTableByTablePricesPercentage, int contributionPointsPerThread, int contributionPointsPerComment)
+        {
+            try
+            {
+                var system = await _context.Systems.FindAsync(id) ?? throw new Exception("System with this ID does not exist");
+
+                system.UserPoints_PerCheckinTable_ByPercentageOfTablesPrice = userPointsPerCheckedinTableByTablePricesPercentage;
+                system.ContributionPoints_PerThread = contributionPointsPerThread;
+                system.ContributionPoints_PerComment = contributionPointsPerComment;
 
                 _context.Systems.Update(system);
                 await _context.SaveChangesAsync();
@@ -266,6 +289,86 @@ namespace StrateZone_Repository.Implements
                 await _context.SaveChangesAsync();
 
                 return abnormalDay;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetMaxNumberOfTablesCancelPerWeek(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.Max_NumberOfTables_CancelPerWeek;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetContributionPointsPerThread(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.ContributionPoints_PerThread;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetContributionPointsPerComment(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.ContributionPoints_PerComment;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<float> GetUserPointsPerCheckedInTableInPercentageOfTablesPrice(int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return system.UserPoints_PerCheckinTable_ByPercentageOfTablesPrice;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetUserPointsForCheckingInByTablesPrice(decimal price, int id)
+        {
+            try
+            {
+                var system = await _context.Systems
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(s => s.Id == id);
+
+                return (int) Math.Floor(price * (decimal) system.UserPoints_PerCheckinTable_ByPercentageOfTablesPrice);
             }
             catch (Exception ex)
             {

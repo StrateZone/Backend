@@ -25,8 +25,11 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.AppointmentRequests           
+                                    .AsNoTracking()
                                     .Where(ar => ar.ToUser == userId)
                                     .Include(ar => ar.FromUserNavigation)
+                                    .Include(ar => ar.Appointment)
+                                        .ThenInclude(ar => ar.TablesAppointments)
                                     .Include(ar => ar.Table)
                                     .ThenInclude(t => t.Room)
                                     .OrderByDescending(ar => ar.CreatedAt)
@@ -52,8 +55,11 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.AppointmentRequests
+                                    .AsNoTracking()
                                     .Where(ar => ar.FromUser == userId)
                                     .Include(ar => ar.ToUserNavigation)
+                                    .Include(ar => ar.Appointment)
+                                        .ThenInclude(ar => ar.TablesAppointments)
                                     .Include(ar => ar.Table)
                                     .ThenInclude(t => t.Room)
                                     .OrderByDescending(ar => ar.CreatedAt)
@@ -79,6 +85,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.AppointmentRequests
+                                    .AsNoTracking()
                                     .Where(ar => ar.Id == id)
                                     .Include(ar => ar.FromUserNavigation)
                                     .Include(ar => ar.ToUserNavigation)
@@ -441,6 +448,7 @@ namespace StrateZone_Repository.Implements
                                                 new NpgsqlParameter("@tableId", tableId),
                                                 new NpgsqlParameter("@start_time", DateTime.SpecifyKind(startTime, DateTimeKind.Unspecified)),
                                                 new NpgsqlParameter("@end_time", DateTime.SpecifyKind(endTime, DateTimeKind.Unspecified)))
+                                            .AsNoTracking()
                                             .Include(ar => ar.ToUserNavigation)
                                             .Include(ar => ar.Table)
                                             .ToListAsync();

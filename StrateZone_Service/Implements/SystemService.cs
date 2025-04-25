@@ -139,6 +139,42 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<int> GetContributionPointsPerComment(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetContributionPointsPerComment(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetContributionPointsPerThread(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetContributionPointsPerThread(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetMaxNumberOfTablesCancelPerWeek(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetMaxNumberOfTablesCancelPerWeek(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<TimeOnly> GetOpeningHourAsync(int id)
         {
             try
@@ -181,6 +217,30 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<int> GetUserPointsForCheckingInByTablesPrice(decimal price, int id)
+        {
+            try
+            {
+                return await _systemRepository.GetUserPointsForCheckingInByTablesPrice(price, id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<float> GetUserPointsPerCheckedInTableInPercentageOfTablesPrice(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetUserPointsPerCheckedInTableInPercentageOfTablesPrice(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<AbnormalDayModel> UpdateAbnormalDayAsync(AbnormalDayModel abnormalDayModel, int id)
         {
             try
@@ -196,11 +256,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<SystemModel> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin)
+        public async Task<SystemModel> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin, int maxTablesCancelPerWeek)
         {
             try
             {
-                var result = await _systemRepository.UpdateAppointmentTimeRulesAsync(id, refund100Time, incomingTime, minutesCheckin);
+                var result = await _systemRepository.UpdateAppointmentTimeRulesAsync(id, refund100Time, incomingTime, minutesCheckin, maxTablesCancelPerWeek);
 
                 return _mapper.Map<SystemModel>(result);
             }
@@ -208,6 +268,25 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message, ex);
             }
+        }
+
+        public async Task<SystemModel> UpdatePointsRulesAsync(int id, float userPointsPerCheckedinTableByTablePricesPercentage, int contributionPointsPerThread, int contributionPointsPerComment)
+        {
+            try
+            {
+                var result = await _systemRepository.UpdatePointsRulesAsync(id, userPointsPerCheckedinTableByTablePricesPercentage, contributionPointsPerThread, contributionPointsPerComment);
+
+                return _mapper.Map<SystemModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public Task<SystemModel> UpdateSystemAsync(int id, SystemModel model)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<SystemModel> UpdateSystemWorkingTimeAsync(int id, TimeOnly openTime, TimeOnly closeTime)

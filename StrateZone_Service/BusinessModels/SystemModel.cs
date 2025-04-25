@@ -23,6 +23,14 @@ namespace StrateZone_Service.BusinessModels
 
         public int Appointment_Checkin_MinutesFromScheduleTime { get; set; }
 
+        public int Max_NumberOfTables_CancelPerWeek { get; set; }
+
+        public int ContributionPoints_PerThread { get; set; }
+
+        public int ContributionPoints_PerComment { get; set; }
+
+        public float UserPoints_PerCheckinTable_ByPercentageOfTablesPrice { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }

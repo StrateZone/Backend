@@ -304,11 +304,13 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsFromUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
-                foreach (var appointmentRequestModel in appointmentRequestModels)
+                for (int i = 0; i < appointmentRequestModels.Count; ++i)
                 {
-                    var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
+                    var appointmentRequestModel = appointmentRequestModels[i];
 
-                    appointmentRequestModel.TablesAppointmentStatus = ta.Status;
+                    var ta = result[i].Appointment.TablesAppointments.FirstOrDefault(ta => ta.AppointmentId == appointmentRequestModel.AppointmentId && ta.TableId == appointmentRequestModel.TableId);
+
+                    appointmentRequestModel.TablesAppointmentStatus = ta.Status.ToString();
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
                 }
@@ -330,11 +332,13 @@ namespace StrateZone_Service.Implements
                 var result = await _appointmentRequestRepository.GetAppointmentRequestsOfUserByUserIdAsync(parameters, userId);
                 var appointmentRequestModels = _mapper.Map<PagedList<AppointmentrequestModel>>(result);
 
-                foreach (var appointmentRequestModel in appointmentRequestModels)
+                for (int i = 0; i < appointmentRequestModels.Count; ++i)
                 {
-                    var ta = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel.TableId, (int)appointmentRequestModel.AppointmentId);
+                    var appointmentRequestModel = appointmentRequestModels[i];
 
-                    appointmentRequestModel.TablesAppointmentStatus = ta.Status;
+                    var ta = result[i].Appointment.TablesAppointments.FirstOrDefault(ta => ta.AppointmentId == appointmentRequestModel.AppointmentId && ta.TableId == appointmentRequestModel.TableId);
+
+                    appointmentRequestModel.TablesAppointmentStatus = ta.Status.ToString();
                     appointmentRequestModel.TablesAppointmentId = ta.Id;
                     appointmentRequestModel.TotalPrice = ta.Price;
                 }

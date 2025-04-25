@@ -204,7 +204,7 @@ namespace StrateZone_Service.Implements
 
                 var userCheckin = await _userService.GetUserByIdAsync(userId);
                 
-                int pointsCalculate = (int)(tablesAppointment.Price / 2000);
+                int pointsCalculate = await _systemService.GetUserPointsForCheckingInByTablesPrice((decimal)tablesAppointment.Price, 1);
 
                 userCheckin.Points += pointsCalculate;
                 await _userService.UpdateUserAsync(userCheckin, userId);
@@ -516,7 +516,9 @@ namespace StrateZone_Service.Implements
                 };
             }
 
-            if (cancelledTablesAppointmentsWithinThisWeek > 5)
+            int maxTablesCancelPerWeek = await _systemService.GetMaxNumberOfTablesCancelPerWeek(1);
+
+            if (cancelledTablesAppointmentsWithinThisWeek > maxTablesCancelPerWeek)
             {
                 DateOnly monday = DateOnly.FromDateTime(
                         CancelTime.AddDays(-(int)CancelTime.DayOfWeek + (CancelTime.DayOfWeek == DayOfWeek.Sunday ? -6 : 1))
@@ -527,7 +529,7 @@ namespace StrateZone_Service.Implements
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.no_refund,
                     Message = $"Không được hoàn tiền. " +
-                    $"Lí do: Bạn đã hủy nhiều hơn 5 bàn trong tuần này, tính từ ngày {monday:dd/MM/yyyy} (thứ hai) " +
+                    $"Lí do: Bạn đã hủy nhiều hơn {maxTablesCancelPerWeek} bàn trong tuần này, tính từ ngày {monday:dd/MM/yyyy} (thứ hai) " +
                     $"đến {DateOnly.FromDateTime(CancelTime):dd/MM/yyyy} (hiện tại).",
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,

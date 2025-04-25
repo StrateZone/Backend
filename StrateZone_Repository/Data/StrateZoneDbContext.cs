@@ -950,6 +950,18 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Appointment_Checkin_MinutesFromScheduleTime)
                     .HasColumnName("appointment_checkin_minutesfromscheduletime");
 
+            entity.Property(e => e.Max_NumberOfTables_CancelPerWeek)
+                    .HasColumnName("number_of_tables_cancel_perweek");
+
+            entity.Property(e => e.ContributionPoints_PerThread)
+                    .HasColumnName("contribution_points_per_thread");
+
+            entity.Property(e => e.ContributionPoints_PerComment)
+                    .HasColumnName("contribution_points_per_comment");
+
+            entity.Property(e => e.UserPoints_PerCheckinTable_ByPercentageOfTablesPrice)
+                    .HasColumnName("user_points_per_checked_in_appointment_by_percentage_of_price");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");
