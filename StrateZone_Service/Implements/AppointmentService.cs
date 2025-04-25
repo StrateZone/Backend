@@ -381,7 +381,6 @@ namespace StrateZone_Service.Implements
                     await _transactionRepository.SaveTransaction(newTransaction);
                 }
 
-
                 tableAppointment.Status = AppointmentStatus.refunded.ToString();
                 var model = _mapper.Map<TablesAppointmentModel>(tableAppointment);
                 var updatedTableAppointment = await _tablesAppointmentService.UpdateTablesAppointmentAsync(model, model.Id);

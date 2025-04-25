@@ -95,6 +95,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Friendrequests
+                                    .AsNoTracking()
                                     .Include(fr => fr.FromUserNavigation)
                                     .Include(fr => fr.ToUserNavigation)
                                     .SingleOrDefaultAsync(x => x.Id == id);
@@ -110,6 +111,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Friendrequests
+                                    .AsNoTracking()
                                     .Include(fr => fr.FromUserNavigation)
                                     .Include(fr => fr.ToUserNavigation)
                                     .FirstOrDefaultAsync(x => (x.FromUser == senderId && x.ToUser == receiverId)
@@ -126,8 +128,8 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.Friendrequests
+                                    .AsNoTracking()         
                                     .Where(fr => fr.FromUser == id && fr.Status == PostgreEnums.RequestStatus.pending)
-                                    .Include(fr => fr.FromUserNavigation)
                                     .Include(fr => fr.ToUserNavigation)
                                     .AsQueryable();
 
@@ -144,9 +146,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.Friendrequests
+                                    .AsNoTracking()
                                     .Where(fr => fr.ToUser == id)
                                     .Include(fr => fr.FromUserNavigation)
-                                    .Include(fr => fr.ToUserNavigation)
                                     .AsQueryable();
 
                 return await PagedList<Friendrequest>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);

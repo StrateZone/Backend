@@ -121,10 +121,10 @@ namespace StrateZone_Repository.Implements
                 var result = _context.Appointments
                                     .FromSqlRaw(
                                         @"SELECT DISTINCT a.*
-                  FROM appointments a
-                  JOIN tables_appointments ta ON ta.appointment_id = a.appointment_id
-                  WHERE (@st IS NULL OR a.status = @st::appointment_status)
-                    AND ta.schedule_time >= @today AND ta.schedule_time < @today + interval '1 day'",
+                                          FROM appointments a
+                                          JOIN tables_appointments ta ON ta.appointment_id = a.appointment_id
+                                          WHERE (@st IS NULL OR a.status = @st::appointment_status)
+                                            AND ta.schedule_time >= @today AND ta.schedule_time < @today + interval '1 day'",
                                         statusParam, dateParam
                                         )
                                         .AsNoTracking()
