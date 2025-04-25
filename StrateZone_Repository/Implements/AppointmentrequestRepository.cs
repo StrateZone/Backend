@@ -158,6 +158,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var requestsList = await _context.AppointmentRequests
+                                                .AsNoTracking()
                                                 .Where(ar =>
                                                     ar.FromUser == appointmentRequest[0].FromUser
                                                     && ar.TableId == appointmentRequest[0].TableId

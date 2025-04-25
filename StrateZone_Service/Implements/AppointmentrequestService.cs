@@ -163,7 +163,7 @@ namespace StrateZone_Service.Implements
                     notificationRequests.Add(notification);
                 }
 
-                await _notificationService.CreateNotificationsAsync(notificationRequests);
+                _ = Task.Run(() => _notificationService.CreateNotificationsAsync(notificationRequests));
 
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }
@@ -244,7 +244,7 @@ namespace StrateZone_Service.Implements
                     notificationRequests.Add(notification);
                 }
 
-                await _notificationService.CreateNotificationsAsync(notificationRequests);
+                _ = Task.Run(() => _notificationService.CreateNotificationsAsync(notificationRequests));
 
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }

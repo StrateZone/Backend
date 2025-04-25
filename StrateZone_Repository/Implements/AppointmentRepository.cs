@@ -258,10 +258,7 @@ namespace StrateZone_Repository.Implements
 
                 appointment.AppointmentId = appointmentId;
 
-                return await _context.Appointments
-                    .AsNoTracking()
-                    .Include(a => a.User)
-                    .SingleOrDefaultAsync(a => a.AppointmentId == appointmentId);
+                return appointment;
             }
             catch (Exception ex)
             {
