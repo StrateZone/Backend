@@ -28,6 +28,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.TablesAppointments
+                                    .AsNoTracking()
                                      .Include(ta => ta.Table)
                                         .ThenInclude(t => t.Room)
                                     .Include(ta => ta.Table)
@@ -47,6 +48,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.TablesAppointments
+                                    .AsNoTracking()
                                     .Include(ta => ta.Table)
                                     .SingleOrDefaultAsync(ta => ta.Id == id);
             }
@@ -62,6 +64,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.TablesAppointments
+                                    .AsNoTracking()
                                     .Where(ta => ta.TableId == id)
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.Room)
@@ -83,6 +86,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.TablesAppointments
+                                    .AsNoTracking()
                                     .Where(ta => ta.AppointmentId == id)
                                      .Include(ta => ta.Table)
                                         .ThenInclude(t => t.Room)
@@ -100,7 +104,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.TablesAppointments
+                return await _context.TablesAppointments.AsNoTracking()
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.GameType)
                                     .SingleOrDefaultAsync(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId);
@@ -257,6 +261,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.TablesAppointments
+                                    .AsNoTracking()
                                     .Join(_context.AppointmentRequests,
                                         ta => new { ta.TableId, ta.AppointmentId },
                                         ar => new { TableId = (int?)ar.TableId, ar.AppointmentId },
@@ -286,6 +291,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var result = _context.TablesAppointments
+                        .AsNoTracking()
                         .Where(ta => ta.Appointment.UserId == userId)
                         .Include(ta => ta.Table)
                             .ThenInclude(t => t.Room)
@@ -362,7 +368,7 @@ namespace StrateZone_Repository.Implements
                                           )
                                       );
                                     "
-                            ).ToListAsync();
+                            ).AsNoTracking().ToListAsync();
 
                 return matchingTAs;
             }

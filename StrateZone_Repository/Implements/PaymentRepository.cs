@@ -118,7 +118,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Payments.Where(p => p.TablesAppointmentId == id).ToListAsync();
+                return await _context.Payments.AsNoTracking().Where(p => p.TablesAppointmentId == id).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -146,6 +146,7 @@ namespace StrateZone_Repository.Implements
                                     new NpgsqlParameter("@PaymentTypes", NpgsqlDbType.Array | NpgsqlDbType.Text)
                                     { Value = parameters.PaymentTypes.Select(rt => rt.ToString()).ToArray() ?? (object)DBNull.Value }
                                 )
+                                .AsNoTracking()
                                 .AsQueryable();
 
                 return await PagedList<Payment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
@@ -173,6 +174,7 @@ namespace StrateZone_Repository.Implements
                                     new NpgsqlParameter("@PaymentTypes", NpgsqlDbType.Array | NpgsqlDbType.Text)
                                     { Value = parameters.PaymentTypes.Select(rt => rt.ToString()).ToArray() ?? (object)DBNull.Value }
                                 )
+                                .AsNoTracking()
                                 .AsQueryable();
 
                 return await PagedList<Payment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
@@ -201,6 +203,7 @@ namespace StrateZone_Repository.Implements
                                     new NpgsqlParameter("@Month", NpgsqlDbType.Integer)
                                     { Value = month }
                                 )
+                                .AsNoTracking()
                                 .ToListAsync();
 
                 return result;
@@ -233,6 +236,7 @@ namespace StrateZone_Repository.Implements
                                     new NpgsqlParameter("@Day", NpgsqlDbType.Integer)
                                     { Value = day }
                                 )
+                                .AsNoTracking()
                                 .ToListAsync();
 
                 return result;

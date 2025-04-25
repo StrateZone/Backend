@@ -39,7 +39,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Tournaments.ToListAsync();
+                return await _context.Tournaments.AsNoTracking().ToListAsync();
             }catch(Exception ex)
             {
                 throw new Exception(ex.Message);

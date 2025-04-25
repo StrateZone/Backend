@@ -19,7 +19,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Messages
+                return await _context.Messages.AsNoTracking()
                     .Where(m => m.SenderId == id)
                     .Include(m => m.Sender)
                     .Include(m => m.Receiver)
@@ -37,6 +37,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.Messages
+                    .AsNoTracking()
                     .Where(m => m.SenderId == senderId && m.ReceiverId == receiverId)
                     .Include(m => m.Sender)
                     .Include(m => m.Receiver)
@@ -56,7 +57,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Messages
+                return await _context.Messages.AsNoTracking()
                                     .Where(m =>
                                         (m.SenderId == user_1_Id && m.ReceiverId == user_2_Id)
                                         ||

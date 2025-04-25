@@ -57,7 +57,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Images
+                return await _context.Images.AsNoTracking()
                                     .Where(i => i.ProductId == productId)
                                     .OrderBy(i => i.CreatedAt)
                                     .ToListAsync();

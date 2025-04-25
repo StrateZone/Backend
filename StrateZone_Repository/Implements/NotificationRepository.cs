@@ -89,7 +89,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var result = _context.Notifications
+                var result = _context.Notifications.AsNoTracking()
                                     .Where(n => n.ToUser == userId)
                                     .OrderByDescending(n => n.CreatedAt)
                                     .AsQueryable();
