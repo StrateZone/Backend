@@ -68,7 +68,7 @@ namespace StrateZone_Repository.Implements
 
                 var result = _context.Appointments
                                             .FromSqlRaw(@"
-                                                SELECT a.* 
+                                                SELECT DISTINCT a.* 
                                                 FROM appointments a 
                                                 JOIN tables_appointments ta 
                                                 ON ta.appointment_id = a.appointment_id 
