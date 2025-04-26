@@ -1276,6 +1276,8 @@ public partial class StrateZoneDbContext : DbContext
                     v => (Ranking)Enum.Parse(typeof(Ranking), v)
                 );
 
+            entity.Property(e => e.AvatarUrl).HasColumnName("avatar_url");
+
             entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")

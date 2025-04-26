@@ -23,7 +23,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<ThreadModel>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters);
         Task<ThreadModel> GetThreadByIdAsync(int id);
         Task<ThreadModel> UpdateThreadAsync(ThreadModel thread, int id);
-        Task<ThreadModel> EditThreadAsync(ThreadModel thread, int id);
+        Task<ThreadModel> EditThreadAsync(ThreadEditRequest thread, int id);
         Task<ThreadModel> ApproveThreadAsync(int id);
         Task<ThreadModel> RejectThreadAsync(int id);
         Task<ThreadModel> HideThreadAsync(int id);

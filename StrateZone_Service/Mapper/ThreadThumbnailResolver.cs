@@ -18,6 +18,8 @@ namespace StrateZone_Service.Mapper
 
         public string? Resolve(Thread source, ThreadModel destination, string destMember, ResolutionContext context)
         {
+            if (source.ThumbnailUrl != null) return source.ThumbnailUrl;    
+
             // Ensure the method is synchronous (use .Result or .GetAwaiter().GetResult())
             var result = _imageService.GetThreadImagesAsync(source.ThreadId).Result;
             return result?.Url;

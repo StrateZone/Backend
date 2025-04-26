@@ -103,7 +103,7 @@ namespace StrateZone_Repository.Implements
 
                 var users = _context.Users
                                     .AsNoTracking()
-                                    .Where(u => u.UserId != id && (username == null || u.Username.ToLower().Contains(username.ToLower())))
+                                    .Where(u => u.UserId != id && u.Status == "Active" && (username == null || u.Username.ToLower().Contains(username.ToLower())))
                                     .AsQueryable();
 
                 return (
@@ -130,7 +130,8 @@ namespace StrateZone_Repository.Implements
 
                 var users = _context.Users
                                     .FromSqlRaw(
-                                            @"SELECT * FROM users WHERE ranking >= @r1::ranking 
+                                            @"SELECT * FROM users
+                                                WHERE ranking >= @r1::ranking 
                                                 AND ranking <= @r2::ranking",
                                         new NpgsqlParameter("@r1", lowerBound.ToString()),
                                         new NpgsqlParameter("@r2", upperBound.ToString()))
@@ -400,14 +401,6 @@ namespace StrateZone_Repository.Implements
                     .Include(a => a.Wallet)
                     .Include(a => a.Cart)
                     .ToListAsync();
-
-                var wallets = accounts.Select(a => a.Wallet).Where(w => w != null).ToList();
-                if (wallets.Count > 0)
-                    _context.Wallets.RemoveRange(wallets);
-
-                var carts = accounts.Select(a => a.Cart).Where(c => c != null).ToList();
-                if (carts.Count > 0)
-                    _context.Carts.RemoveRange(carts);
 
                 if (accounts.Count > 0)
                     _context.Users.RemoveRange(accounts);

@@ -23,6 +23,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                if (await _context.ThreadsTags.AsNoTracking().AnyAsync(t => t.TagId == t.TagId && t.ThreadId == threadsTag.ThreadId))
+                    return threadsTag;
+
                 await _context.ThreadsTags.AddAsync(threadsTag);
                 await _context.SaveChangesAsync();
 
@@ -46,6 +49,38 @@ namespace StrateZone_Repository.Implements
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<ThreadsTag>> UpdateThreadsTagsAsync(List<ThreadsTag> threadsTags, int threadId)
+        {
+            try
+            {
+                var existingTags = await _context.ThreadsTags
+                    .Where(tt => tt.ThreadId == threadId)
+                    .ToListAsync();
+
+                var tagsToAdd = threadsTags
+                    .Where(newTag => !existingTags.Any(existing => existing.TagId == newTag.TagId))
+                    .ToList();
+
+                var tagsToRemove = existingTags
+                    .Where(existing => !threadsTags.Any(newTag => newTag.TagId == existing.TagId))
+                    .ToList();
+
+                if (tagsToAdd.Any())
+                    await _context.ThreadsTags.AddRangeAsync(tagsToAdd);
+
+                if (tagsToRemove.Any())
+                    _context.ThreadsTags.RemoveRange(tagsToRemove);
+
+                await _context.SaveChangesAsync();
+
+                return threadsTags;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to update thread tags.", ex);
             }
         }
 

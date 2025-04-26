@@ -174,7 +174,7 @@ namespace StrateZone_API.Controllers
         }
 
         [HttpPut("edit/{id}")]
-        public async Task<ActionResult> EditThread([FromBody] ThreadModel request, int id)
+        public async Task<ActionResult> EditThread([FromBody] ThreadEditRequest request, int id)
         {
             try
             {

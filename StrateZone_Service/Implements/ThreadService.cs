@@ -358,10 +358,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ThreadModel> EditThreadAsync(ThreadModel threadModel, int id)
+        public async Task<ThreadModel> EditThreadAsync(ThreadEditRequest threadModel, int id)
         {
             try
             {
+
                 var toBeUpdated = await GetThreadByIdAsync(id)
                                 ?? throw new Exception("Thread with this ID does not exist");
 
@@ -371,15 +372,28 @@ namespace StrateZone_Service.Implements
                     && toBeUpdated.Status != ThreadStatus.drafted.ToString())
                     throw new Exception($"This thread is currently {toBeUpdated.Status}");
 
-                if (toBeUpdated.CreatedBy != threadModel.CreatedBy)
-                    throw new Exception("Creator before and after update doesn't match.");
+                var userRoleStr = (await _userService.GetUserByIdAsync((int)toBeUpdated.CreatedBy) ?? throw new Exception("This user does not exist")).UserRole;
 
-                if (threadModel.Status == ThreadStatus.published.ToString()
-                 || threadModel.Status == ThreadStatus.hidden.ToString()) 
-                    threadModel.Status = ThreadStatus.edit_pending.ToString();
+                UserRole userRole = (UserRole)Enum.Parse(typeof(UserRole), userRoleStr);
 
-                var thread = _mapper.Map<Thread>(threadModel);
-                var result = await _threadRepository.UpdateThreadAsync(thread, id);
+                var tags = await _tagsService.GetTagsByIdsAsync(threadModel.TagIds.ToArray());
+                var bannedTag = tags.FirstOrDefault(t => (UserRole)Enum.Parse(typeof(UserRole), t.AllowedRole) > userRole);
+
+                if (bannedTag != null)
+                {
+                    throw new Exception($"Bạn không được phép gắn thẻ \"{bannedTag.TagName}\" vào trong bài đăng của mình.");
+                }
+
+                if (toBeUpdated.Status == ThreadStatus.published.ToString()
+                 || toBeUpdated.Status == ThreadStatus.hidden.ToString()) 
+                    toBeUpdated.Status = ThreadStatus.edit_pending.ToString();
+
+                toBeUpdated.Title = threadModel.Title;
+                toBeUpdated.Content = threadModel.Content;
+
+                var result = await _threadRepository.UpdateThreadAsync(_mapper.Map<Thread>(toBeUpdated), id);
+
+                await _threadsTagService.UpdateThreadsTagsAsync(threadModel.TagIds, toBeUpdated.ThreadId);
 
                 return _mapper.Map<ThreadModel>(result);
             }

@@ -24,6 +24,8 @@ public partial class User
 
     public string? Password { get; set; }
 
+    public string? AvatarUrl { get; set; }
+
     /// <summary>
     /// Depends on Role
     /// </summary>

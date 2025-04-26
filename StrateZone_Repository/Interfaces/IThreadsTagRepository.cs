@@ -8,5 +8,6 @@ namespace StrateZone_Repository.Interfaces
         Task<List<ThreadsTag>> CreateThreadsTagsAsync(List<ThreadsTag> threadsTags);
         Task<ThreadsTag> DeleteThreadsTagAsync(int id);
         Task<ThreadsTag> UpdateThreadsTagAsync(ThreadsTag threadsTag, int id);
+        Task<List<ThreadsTag>> UpdateThreadsTagsAsync(List<ThreadsTag> threadsTags, int threadId);
     }
 }

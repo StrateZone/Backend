@@ -17,7 +17,8 @@ namespace StrateZone_Service.Mapper
 
         public string? Resolve(User source, UserResponse destination, string destMember, ResolutionContext context)
         {
-            // Ensure the method is synchronous (use .Result or .GetAwaiter().GetResult())
+            if (source.AvatarUrl != null) return source.AvatarUrl;
+
             var result = _imageService.GetUserAvatarAsync(source.UserId).Result;
             return result?.Url;
         }
@@ -34,7 +35,8 @@ namespace StrateZone_Service.Mapper
 
         public string? Resolve(User source, UserModel destination, string destMember, ResolutionContext context)
         {
-            // Ensure the method is synchronous (use .Result or .GetAwaiter().GetResult())
+            if (source.AvatarUrl != null) return source.AvatarUrl;
+
             var result = _imageService.GetUserAvatarAsync(source.UserId).Result;
             return result?.Url;
         }

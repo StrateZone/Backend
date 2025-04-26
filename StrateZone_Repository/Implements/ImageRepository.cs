@@ -103,6 +103,8 @@ namespace StrateZone_Repository.Implements
                 await _context.Images.AddAsync(image);
                 await _context.SaveChangesAsync();
 
+                await UpdateUserAndThreadsImgUrl();
+
                 return image;
             }
             catch (Exception ex)
@@ -123,6 +125,8 @@ namespace StrateZone_Repository.Implements
                 _context.Images.Update(image);
                 await _context.SaveChangesAsync();
 
+                await UpdateUserAndThreadsImgUrl();
+
                 return image;
             }
             catch (Exception ex)
@@ -140,11 +144,50 @@ namespace StrateZone_Repository.Implements
                 _context.Images.Remove(toDelete);
                 await _context.SaveChangesAsync();
 
+                await UpdateUserAndThreadsImgUrl();
+
                 return toDelete;
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateUserAndThreadsImgUrl()
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    UPDATE users u SET avatar_url = 
+	                (
+		                SELECT url 
+		                FROM images i 
+		                WHERE i.user_id = u.user_id 
+		                ORDER BY created_at DESC 
+		                LIMIT 1
+	                );
+                ");
+
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    UPDATE threads u SET thumbnail_url = 
+	                (
+		                SELECT url 
+		                FROM images i 
+		                WHERE i.thread_id = u.thread_id 
+		                ORDER BY created_at DESC 
+		                LIMIT 1
+	                );
+                ");
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Failed to update images: " + ex.Message, ex);
             }
         }
     }

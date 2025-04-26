@@ -33,12 +33,16 @@ namespace StrateZone_Repository.Implements
 
         public async Task<bool> CheckContain(string content)
         {
-            content = content.ToLower();
+            var wordSeparators = new[] { ' ', ',', '.', '!', '?', ';', ':', '-', '\n', '\r', '\t' };
 
-            return await _context.Profanities.AsNoTracking()
-                        .AnyAsync(p => 
-                            content.Contains(p.Word.ToLower())
-                        );
+            HashSet<string> words = content
+                .ToLower()
+                .Split(wordSeparators, StringSplitOptions.RemoveEmptyEntries)
+                .ToHashSet();
+
+            return await _context.Profanities
+                .AsNoTracking()
+                .AnyAsync(p => words.Contains(p.Word));
         }
 
         public async Task<Profanity> AddAsync(Profanity profanity)
