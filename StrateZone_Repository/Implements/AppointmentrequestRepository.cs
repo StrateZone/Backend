@@ -304,6 +304,103 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<Appointmentrequest>> MassUpdateAppointmentRequestsAsync(List<Appointmentrequest> appointmentRequests)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var updatedRequests = new List<Appointmentrequest>();
+
+                foreach (var appointmentRequest in appointmentRequests)
+                {
+                    var id = appointmentRequest.Id;
+                    if (id <= 0)
+                        throw new Exception("Appointment request must have a valid ID for update.");
+
+                    var existingAppointmentRequest = await _context.AppointmentRequests.FindAsync(id)
+                        ?? throw new Exception($"Appointment request with ID {id} does not exist");
+
+                    _context.Entry(existingAppointmentRequest).State = EntityState.Detached;
+
+                    var parameters = new List<NpgsqlParameter>();
+                    var sql = new StringBuilder("UPDATE appointment_requests SET ");
+
+                    if (appointmentRequest.FromUser > 0)
+                    {
+                        sql.Append("from_user = @from_user, ");
+                        parameters.Add(new NpgsqlParameter("@from_user", appointmentRequest.FromUser));
+                    }
+
+                    if (appointmentRequest.ToUser > 0)
+                    {
+                        sql.Append("to_user = @to_user, ");
+                        parameters.Add(new NpgsqlParameter("@to_user", appointmentRequest.ToUser));
+                    }
+
+                    if (appointmentRequest.TableId > 0)
+                    {
+                        sql.Append("table_id = @table_id, ");
+                        parameters.Add(new NpgsqlParameter("@table_id", appointmentRequest.TableId));
+                    }
+
+                    if (appointmentRequest.AppointmentId > 0)
+                    {
+                        sql.Append("appointment_id = @appointment_id, ");
+                        parameters.Add(new NpgsqlParameter("@appointment_id", appointmentRequest.AppointmentId));
+                    }
+
+                    sql.Append("status = @status::request_status, ");
+                    parameters.Add(new NpgsqlParameter("@status", appointmentRequest.Status.ToString()));
+
+                    if (appointmentRequest.StartTime.HasValue)
+                    {
+                        sql.Append("start_time = @start_time, ");
+                        parameters.Add(new NpgsqlParameter("@start_time", appointmentRequest.StartTime.Value));
+                    }
+
+                    if (appointmentRequest.EndTime.HasValue)
+                    {
+                        sql.Append("end_time = @end_time, ");
+                        parameters.Add(new NpgsqlParameter("@end_time", appointmentRequest.EndTime.Value));
+                    }
+
+                    if (appointmentRequest.ExpireAt.HasValue)
+                    {
+                        sql.Append("expire_at = @expire_at, ");
+                        parameters.Add(new NpgsqlParameter("@expire_at", appointmentRequest.ExpireAt.Value));
+                    }
+
+                    if (appointmentRequest.CreatedAt.HasValue)
+                    {
+                        sql.Append("created_at = @created_at, ");
+                        parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt.Value));
+                    }
+
+                    sql.Remove(sql.Length - 2, 2); // Remove last comma and space
+                    sql.Append(" WHERE id = @id");
+                    parameters.Add(new NpgsqlParameter("@id", id));
+
+                    await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
+                    _context.Entry(appointmentRequest).State = EntityState.Detached;
+
+                    var updatedRequest = await _context.AppointmentRequests.FindAsync(id);
+                    if (updatedRequest != null)
+                    {
+                        updatedRequests.Add(updatedRequest);
+                    }
+                }
+
+                await transaction.CommitAsync();
+                return updatedRequests;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Failed to mass update appointment requests: " + ex.Message, ex);
+            }
+        }
+
         public async Task<Appointmentrequest> AcceptAppointmentrequestAsync(int id)
         {
             try

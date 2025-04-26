@@ -114,6 +114,86 @@ namespace StrateZone_Repository.Implements
             return updatedPayment;
         }
 
+        public async Task MassUpdatePaymentsAsync(List<Payment> payments)
+        {
+            if (payments == null || !payments.Any())
+                return;
+
+            try
+            {
+                var commands = new List<string>();
+                var allParameters = new List<NpgsqlParameter>();
+
+                int index = 0;
+
+                foreach (var payment in payments)
+                {
+                    var sql = new StringBuilder("UPDATE payments SET ");
+                    var parameters = new List<NpgsqlParameter>();
+
+                    if (payment.UserId.HasValue)
+                    {
+                        sql.Append($"user_id = @user_id_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@user_id_{index}", payment.UserId.Value));
+                    }
+
+                    if (payment.OrderId.HasValue)
+                    {
+                        sql.Append($"order_id = @order_id_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@order_id_{index}", payment.OrderId.Value));
+                    }
+
+                    if (payment.TablesAppointmentId.HasValue)
+                    {
+                        sql.Append($"tables_appointment_id = @tables_appointment_id_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@tables_appointment_id_{index}", payment.TablesAppointmentId.Value));
+                    }
+
+                    if (payment.CourseId.HasValue)
+                    {
+                        sql.Append($"course_id = @course_id_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@course_id_{index}", payment.CourseId.Value));
+                    }
+
+                    sql.Append($"status = @status_{index}::payment_status, ");
+                    parameters.Add(new NpgsqlParameter($"@status_{index}", payment.PaymentStatus.ToString()));
+
+                    if (!string.IsNullOrEmpty(payment.Description))
+                    {
+                        sql.Append($"description = @description_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@description_{index}", payment.Description));
+                    }
+
+                    if (payment.CreatedAt.HasValue)
+                    {
+                        sql.Append($"created_at = @created_at_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@created_at_{index}", payment.CreatedAt.Value));
+                    }
+
+                    sql.Append($"payment_type = @payment_type_{index}, ");
+                    parameters.Add(new NpgsqlParameter($"@payment_type_{index}", payment.PaymentType.ToString()));
+
+                    sql.Remove(sql.Length - 2, 2); // Remove last comma
+                    sql.Append($" WHERE id = @id_{index}");
+                    parameters.Add(new NpgsqlParameter($"@id_{index}", payment.Id));
+
+                    commands.Add(sql.ToString());
+                    allParameters.AddRange(parameters);
+
+                    index++;
+                }
+
+                var finalSql = string.Join(";", commands);
+
+                await _context.Database.ExecuteSqlRawAsync(finalSql, allParameters.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed mass update payments: {ex.Message}", ex);
+            }
+        }
+
+
         public async Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id)
         {
             try

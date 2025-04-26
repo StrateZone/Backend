@@ -8,6 +8,7 @@ namespace StrateZone_Repository.Interfaces
     {
         Task<Payment> CreatePaymentAsync(Payment payment);
         Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id);
+        Task MassUpdatePaymentsAsync(List<Payment> payments);
         Task<PagedList<Payment>> GetPaymentsAsync(PaymentParameters parameters);
         Task<PagedList<Payment>> GetPaymentsByUserIdAsync(int id, PaymentParameters parameters);
         Task<Payment> UpdatePaymentAsync(Payment payment, int id);

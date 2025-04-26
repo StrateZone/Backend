@@ -77,6 +77,8 @@ namespace StrateZone_Service.Implements
 
                 float incomingHours = (float) await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
 
+                List<TablesAppointment> toBeUpdatedTAs = new();
+                List<Payment> toBeUpdatedPayments = new();
                 foreach (var tablesAppointment in appointment.TablesAppointments)
                 {
                     string status = ((DateTime)tablesAppointment.CreatedAt).AddHours(incomingHours) > tablesAppointment.ScheduleTime
@@ -85,16 +87,20 @@ namespace StrateZone_Service.Implements
 
                     tablesAppointment.Status = status;
                     var mappedTA = _mapper.Map<TablesAppointment>(tablesAppointment);
-                    await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(mappedTA, tablesAppointment.Id);
+                    toBeUpdatedTAs.Add(mappedTA);
 
                     var updatingPayment = (await _paymentRepository
                         .GetPaymentsByTablesAppointmentIdAsync(tablesAppointment.Id))
                         .SingleOrDefault(p => p.UserId == appointment.UserId);
 
-                    var mappedPayment = _mapper.Map<PaymentModel>(updatingPayment);
-                    mappedPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid.ToString();
-                    await UpdatePaymentAsync(mappedPayment, mappedPayment.Id);
+                    if (updatingPayment == null) continue;
+
+                    updatingPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
+                    toBeUpdatedPayments.Add(updatingPayment);
                 }
+
+                await _tablesAppointmentRepository.MassUpdateTablesAppointmentsAsync(toBeUpdatedTAs);
+                await _paymentRepository.MassUpdatePaymentsAsync(toBeUpdatedPayments);
 
                 var newTransaction = new Transaction
                 {
@@ -118,19 +124,6 @@ namespace StrateZone_Service.Implements
                     Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đều đã được thanh toán! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
                 };
                 await _notificationService.CreateNotificationAsync(thisUser);
-
-                foreach (var appointmentRequest in appointment.Appointmentrequests)
-                {
-                    if (appointmentRequest.Status != RequestStatus.accepted.ToString()) continue;
-
-                    NotificationRequest toUser = new()
-                    {
-                        ToUser = appointmentRequest.ToUser,
-                        Title = $"Mã đơn #{appointment.AppointmentId} đã được người mời thanh toán!",
-                        Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đã được người mời thanh toán thanh toán. Hãy tiến hành thanh toán phần của bạn! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
-                    };
-                    await _notificationService.CreateNotificationAsync(toUser);
-                }
 
                 var user = await _userRepository.GetUserByIdAsync(appointment.UserId);
 

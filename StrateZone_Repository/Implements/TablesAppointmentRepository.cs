@@ -239,6 +239,83 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task MassUpdateTablesAppointmentsAsync(List<TablesAppointment> tablesAppointments)
+        {
+            if (tablesAppointments == null || !tablesAppointments.Any())
+                return;
+
+            try
+            {
+                var commands = new List<string>();
+                var allParameters = new List<NpgsqlParameter>();
+
+                int index = 0;
+
+                foreach (var ta in tablesAppointments)
+                {
+                    var sql = new StringBuilder("UPDATE tables_appointments SET ");
+                    var parameters = new List<NpgsqlParameter>();
+
+                    if (ta.TableId.HasValue)
+                    {
+                        sql.Append($"table_id = @table_id_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@table_id_{index}", ta.TableId));
+                    }
+
+                    if (ta.AppointmentId.HasValue)
+                    {
+                        sql.Append($"appointment_id = @appointment_id_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@appointment_id_{index}", ta.AppointmentId));
+                    }
+
+                    if (ta.ScheduleTime != null)
+                    {
+                        sql.Append($"schedule_time = @schedule_time_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@schedule_time_{index}", ta.ScheduleTime));
+                    }
+
+                    if (ta.EndTime != null)
+                    {
+                        sql.Append($"end_time = @end_time_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@end_time_{index}", ta.EndTime));
+                    }
+
+                    if (ta.Price.HasValue)
+                    {
+                        sql.Append($"price = @price_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@price_{index}", ta.Price));
+                    }
+
+                    if (ta.CreatedAt.HasValue)
+                    {
+                        sql.Append($"created_at = @created_at_{index}, ");
+                        parameters.Add(new NpgsqlParameter($"@created_at_{index}", ta.CreatedAt));
+                    }
+
+                    sql.Append($"status = @status_{index}::appointment_status, ");
+                    parameters.Add(new NpgsqlParameter($"@status_{index}", ta.Status.ToString()));
+
+                    sql.Remove(sql.Length - 2, 2);
+                    sql.Append($" WHERE id = @id_{index}");
+                    parameters.Add(new NpgsqlParameter($"@id_{index}", ta.Id));
+
+                    commands.Add(sql.ToString());
+                    allParameters.AddRange(parameters);
+
+                    index++;
+                }
+
+                var finalSql = string.Join(";", commands);
+
+                await _context.Database.ExecuteSqlRawAsync(finalSql, allParameters.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed mass update: {ex.Message}", ex);
+            }
+        }
+
+
         public async Task<TablesAppointment> DeleteTablesAppointmentAsync(int id)
         {
             try

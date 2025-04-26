@@ -17,6 +17,7 @@ using static System.Net.WebRequestMethods;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using QRCoder;
+using Org.BouncyCastle.Ocsp;
 
 namespace StrateZone_Service.Implements
 {
@@ -258,26 +259,28 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var refundCalculation = await CalculateRefundAmountOnAppointmentCancellation(userId, tablesAppointmentId, DateTime.UtcNow.AddHours(7));
-
+                var now = DateTime.UtcNow.AddHours(7);
+                var refundCalculation = await CalculateRefundAmountOnAppointmentCancellation(userId, tablesAppointmentId, now);
                 var tablesAppointment = refundCalculation.TablesAppointmentModel;
-                string errorMessage = (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status) switch
-                {
-                    AppointmentStatus.cancelled => "This appointment has already been cancelled.",
-                    AppointmentStatus.refunded => "This appointment has already been cancelled and refunded.",
-                    AppointmentStatus.checked_in => "This appointment has already been checked-in.",
-                    AppointmentStatus.expired => "This appointment is expired.",
-                    AppointmentStatus.completed => "This appointment is already completed.",
-                    AppointmentStatus.incoming => "Can not cancel incoming appointments.",
-                    _ => string.Empty,
-                };
 
-                if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Cancellation failed: {errorMessage}");
+                var status = (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status);
+                if (status is AppointmentStatus.cancelled or AppointmentStatus.refunded or AppointmentStatus.checked_in or AppointmentStatus.expired or AppointmentStatus.completed or AppointmentStatus.incoming)
+                {
+                    string errorMessage = status switch
+                    {
+                        AppointmentStatus.cancelled => "This appointment has already been cancelled.",
+                        AppointmentStatus.refunded => "This appointment has already been cancelled and refunded.",
+                        AppointmentStatus.checked_in => "This appointment has already been checked-in.",
+                        AppointmentStatus.expired => "This appointment is expired.",
+                        AppointmentStatus.completed => "This appointment is already completed.",
+                        AppointmentStatus.incoming => "Cannot cancel incoming appointments.",
+                        _ => "Invalid appointment status."
+                    };
+                    throw new Exception($"Cancellation failed: {errorMessage}");
+                }
 
                 if (refundCalculation.RefundStatus == RefundStatus.cancellation_fail)
-                {
                     throw new Exception(refundCalculation.Message);
-                }
 
                 if (refundCalculation.RefundStatus == RefundStatus.no_refund)
                 {
@@ -285,86 +288,17 @@ namespace StrateZone_Service.Implements
                     return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
                 }
 
-                if (refundCalculation.RefundStatus != RefundStatus.no_refund_while_refund_for_invited_user)
+                if (refundCalculation.RefundStatus == RefundStatus.no_refund_while_refund_for_invited_user)
                 {
-                    var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
-                    var refundAmount = refundCalculation.RefundAmount;
-                    await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
-
-                    var newTransaction = new TransactionModel
-                    {
-                        Amount = refundAmount,
-                        Content =
-                            $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, " +
-                            $"đơn #{tablesAppointment.AppointmentId}.",
-                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        OfUser = userId,
-                        TransactionType = TransactionType.refund,
-                    };
-                    await _transactionService.SaveTransaction(newTransaction);
-
-                    NotificationRequest notificationFromUser = new()
-                    {
-                        ToUser = userId,
-                        Title = $"Hủy đơn đặt bàn thành công!. ",
-                        Content = $"Bạn đã hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}. " +
-                            $"{refundAmount} VND đã được hoàn về ví của bạn!",
-                        Type = NotificationType.appointment_request_from
-                    };
-                    await _notificationService.CreateNotificationAsync(notificationFromUser);
-
-                    
+                    await HandleInvitedUserRefund(tablesAppointment, userId);
                 }
                 else
                 {
-                    var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
-                    var paymentForInvitedUser = bookingPayments.SingleOrDefault(p => p.UserId != userId);
-                    var invitedUserWallet = await _walletService.GetWalletByUserIdAsync((int)paymentForInvitedUser.UserId);
-
-                    await _walletService.DepositWalletAsync((int)tablesAppointment.Price, invitedUserWallet.WalletId);
-
-                    var newTransaction = new TransactionModel
-                    {
-                        Amount = tablesAppointment.Price,
-                        Content =
-                            $"Hoàn tiền {tablesAppointment.Price} VND cho đơn được mời tham gia ở bàn số {tablesAppointment.TableId}, " +
-                            $"đơn #{tablesAppointment.AppointmentId}.",
-                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        OfUser = paymentForInvitedUser.UserId,
-                        TransactionType = TransactionType.refund,
-                    };
-                    await _transactionService.SaveTransaction(newTransaction);
-
-                    NotificationRequest notificationFromUser = new()
-                    {
-                        ToUser = userId,
-                        Title = $"Hủy đơn đặt bàn thành công!. ",
-                        Content = $"Bạn đã hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}. " +
-                            $"Do đây là đơn đặt có sự tham gia của người chơi khác, bạn sẽ không được hoàn tiền!",
-                        Type = NotificationType.appointment_request_from
-                    };
-                    await _notificationService.CreateNotificationAsync(notificationFromUser);
-
-                    var cancelledUser = await _userService.GetUserByIdAsync(userId);
-                    NotificationRequest notificationToUser = new()
-                    {
-                        ToUser = (int)paymentForInvitedUser.UserId,
-                        Title = $"{cancelledUser.Username} đã hủy đơn đặt bàn!",
-                        Content = $"{cancelledUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. " +
-                        $"{tablesAppointment.Price} VND đã tự động được hoàn về ví của bạn!",
-                        Type = NotificationType.appointment_request_from
-                    };
-                    await _notificationService.CreateNotificationAsync(notificationToUser);
+                    await HandleUserRefund(tablesAppointment, userId, refundCalculation.RefundAmount);
                 }
-                
+
                 tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
-
-                var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
-                foreach (var req in requests)
-                {
-                    req.Status = RequestStatus.cancelled;
-                    await _requestRepository.UpdateAppointmentRequestAsync(req, req.Id);
-                }
+                await CancelAppointmentRequests(tablesAppointmentId);
 
                 return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
             }
@@ -372,6 +306,96 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message, ex);
             }
+        }
+
+        private async Task HandleUserRefund(TablesAppointmentModel appointment, int userId, decimal refundAmount)
+        {
+            try
+            {
+                var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
+                await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
+
+                var transaction = new TransactionModel
+                {
+                    Amount = refundAmount,
+                    Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    OfUser = userId,
+                    TransactionType = TransactionType.refund,
+                };
+                await _transactionService.SaveTransaction(transaction);
+
+                var notification = new NotificationRequest
+                {
+                    ToUser = userId,
+                    Title = "Hủy đơn đặt bàn thành công!",
+                    Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
+                    Type = NotificationType.appointment_request_from
+                };
+                await _notificationService.CreateNotificationAsync(notification);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        private async Task HandleInvitedUserRefund(TablesAppointmentModel appointment, int cancellingUserId)
+        {
+            try
+            {
+                var payments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync((int)appointment.AppointmentId);
+                var invitedPayment = payments.SingleOrDefault(p => p.UserId != cancellingUserId)
+                    ?? throw new Exception("Invited user's payment not found.");
+
+                var invitedWallet = await _walletService.GetWalletByUserIdAsync((int)invitedPayment.UserId);
+                await _walletService.DepositWalletAsync((int)appointment.Price, invitedWallet.WalletId);
+
+                var transaction = new TransactionModel
+                {
+                    Amount = appointment.Price,
+                    Content = $"Hoàn tiền {appointment.Price} VND cho đơn được mời tham gia ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    OfUser = invitedPayment.UserId,
+                    TransactionType = TransactionType.refund,
+                };
+                await _transactionService.SaveTransaction(transaction);
+
+                var cancellingUser = await _userService.GetUserByIdAsync(cancellingUserId);
+
+                var notificationToCancellingUser = new NotificationRequest
+                {
+                    ToUser = cancellingUserId,
+                    Title = "Hủy đơn đặt bàn thành công!",
+                    Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. " +
+                              "Do đây là đơn đặt có sự tham gia của người chơi khác, bạn sẽ không được hoàn tiền!",
+                    Type = NotificationType.appointment_request_from
+                };
+                await _notificationService.CreateNotificationAsync(notificationToCancellingUser);
+
+                var notificationToInvitedUser = new NotificationRequest
+                {
+                    ToUser = (int)invitedPayment.UserId,
+                    Title = $"{cancellingUser.Username} đã hủy đơn đặt bàn!",
+                    Content = $"{cancellingUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. {appointment.Price} VND đã tự động được hoàn về ví của bạn!",
+                    Type = NotificationType.appointment_request_from
+                };
+                await _notificationService.CreateNotificationAsync(notificationToInvitedUser);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        private async Task CancelAppointmentRequests(int tablesAppointmentId)
+        {
+            var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
+            foreach (var request in requests)
+            {
+                request.Status = RequestStatus.cancelled;
+            }
+            await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
         }
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)
