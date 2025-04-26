@@ -266,12 +266,13 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<TableResponse>> GetAllTablesAsync()
+        public async Task<PagedList<TableModel>> GetAllTablesAsync(TablesAppointmentParameters parameters, string? search)
         {
             try
             {
-                var result = await _tableRepository.GetTablesAsync();
-                return _mapper.Map<List<TableResponse>>(result);
+                var result = await _tableRepository.GetTablesAsync(parameters, search);
+                var mapped = _mapper.Map<PagedList<TableModel>>(result);
+                return new PagedList<TableModel>(mapped, result.TotalCount, result.CurrentPage, result.PageSize);
             }
             catch (Exception ex)
             {

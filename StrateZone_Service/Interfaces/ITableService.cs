@@ -1,4 +1,5 @@
-﻿using StrateZone_Repository.Pagination;
+﻿using Microsoft.AspNetCore.Mvc;
+using StrateZone_Repository.Pagination;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -12,7 +13,7 @@ namespace StrateZone_Service.Implements
         Task<TableModel> CreateTableAsync(TableRequest request);
         Task<TableModel> DeleteTableAsync(int id);
         Task<PagedList<TableResponse>> GetAvailableTablesAsync(TableParameters parameters);
-        Task<List<TableResponse>> GetAllTablesAsync();
+        Task<PagedList<TableModel>> GetAllTablesAsync(TablesAppointmentParameters parameters, string? search);
         Task<List<TableResponse>> GetAllAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
         Task<PagedList<TableResponse>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType);
         Task<TableResponse> GetTableByIdAsync(DateTime StartTime, DateTime EndTime, int id);

@@ -13,6 +13,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using System.Buffers;
 
 namespace StrateZone_Repository.Implements
 {
@@ -317,9 +318,13 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Table>> GetTablesAsync()
+        public async Task<PagedList<Table>> GetTablesAsync(TablesAppointmentParameters parameters, string? search)
         {
-            return await _context.Tables.AsNoTracking().ToListAsync();
+
+            var result = _context.Tables.AsNoTracking()
+            .Where(t => search == null || t.TableId.ToString().Equals(search))
+                                    .AsQueryable();
+            return await PagedList<Table>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
         }
 
         public Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime)

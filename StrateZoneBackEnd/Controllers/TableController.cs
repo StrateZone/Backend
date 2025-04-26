@@ -28,6 +28,23 @@ namespace StrateZone_APIs.Controllers
             _scheduleTimeValidator = scheduleTimeValidator;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] TablesAppointmentParameters parameters, [FromQuery] string? search)
+        {
+            try
+            {
+                var result = await _tableService.GetAllTablesAsync(parameters, search);
+                var response = new PagedListResponse<TableModel>(result);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No table was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
         [HttpGet("all")]
         public async Task<IActionResult> GetTables([FromQuery] TableParameters parameters)
         {
