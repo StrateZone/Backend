@@ -93,7 +93,7 @@ namespace StrateZone_Repository.Implements
                 var allTags = await _context.Tags.AsNoTracking().ToListAsync();
 
                 return allTags
-                    .Where(t => role >= t.AllowedRole)
+                    .Where(t => role >= t.AllowedRole && t.Status == TagStatus.active)
                     .ToList();
             }
             catch (Exception ex)
@@ -107,9 +107,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 content = content.ToLower();
-                return await _context.Tags.AsNoTracking()
-                                .Where(t => t.TagName.ToLower()
-                                .Contains(content))
+                return await _context.Tags
+                                .AsNoTracking()
+                                .Where(t => t.Status == TagStatus.active && t.TagName.ToLower().Contains(content))
                                 .ToListAsync();
             }
             catch (Exception ex)

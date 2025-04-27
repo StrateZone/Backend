@@ -318,7 +318,7 @@ namespace StrateZone_Service.Implements
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
                     };
-                    await _transactionService.SaveTransaction(transaction);
+                    _ = Task.Run(() => _transactionService.SaveTransaction(transaction));
 
                     var notification = new NotificationRequest
                     {
@@ -327,7 +327,7 @@ namespace StrateZone_Service.Implements
                         Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
                         Type = NotificationType.appointment
                     };
-                    await _notificationService.CreateNotificationAsync(notification);
+                    _ = Task.Run(() => _notificationService.CreateNotificationAsync(notification));
                 }
                 else
                 {
@@ -338,7 +338,7 @@ namespace StrateZone_Service.Implements
                         Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
                         Type = NotificationType.appointment
                     };
-                    await _notificationService.CreateNotificationAsync(notification);
+                    _ = Task.Run(() => _notificationService.CreateNotificationAsync(notification));
                 }
             }
             catch (Exception ex)
@@ -361,7 +361,7 @@ namespace StrateZone_Service.Implements
                     OfUser = invitedUserId,
                     TransactionType = TransactionType.refund,
                 };
-                await _transactionService.SaveTransaction(transaction);
+                _ = Task.Run(() => _transactionService.SaveTransaction(transaction));
 
                 var cancellingUser = await _userService.GetUserByIdAsync(cancellingUserId);
 
@@ -382,7 +382,7 @@ namespace StrateZone_Service.Implements
                     Type = NotificationType.appointment_request_from
                 };
 
-                await _notificationService.CreateNotificationsAsync(new() { notificationToCancellingUser, notificationToInvitedUser });
+                _ = Task.Run(() => _notificationService.CreateNotificationsAsync(new() { notificationToCancellingUser, notificationToInvitedUser }));
 
             }
             catch (Exception ex)
@@ -396,11 +396,10 @@ namespace StrateZone_Service.Implements
             var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
             foreach (var request in requests)
             {
-                if (request.Status != RequestStatus.pending && request.Status != RequestStatus.accepted)
-
-                request.Status = RequestStatus.cancelled;
+                if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
+                else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
             }
-            await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
+            _ = Task.Run(() => _requestRepository.MassUpdateAppointmentRequestsAsync(requests));
         }
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)
@@ -443,7 +442,7 @@ namespace StrateZone_Service.Implements
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
                     };
-                    await _transactionService.SaveTransaction(newTransaction);
+                    _ = Task.Run(() => _transactionService.SaveTransaction(newTransaction));
                 }
                 else 
                 {
@@ -472,7 +471,7 @@ namespace StrateZone_Service.Implements
                     req.Status = RequestStatus.cancelled;
                    
                 }
-                await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
+                _ = Task.Run(() => _requestRepository.MassUpdateAppointmentRequestsAsync(requests));
 
                 return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
             }

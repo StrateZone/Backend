@@ -111,7 +111,7 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
-                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
+                    "popularity" => threads.OrderByDescending(a => a.CreatedByNavigation.UserLabel == PostgreEnums.UserLabel.top_contributor ? (10 + (a.Comments.Count * 3 + a.Likes.Count) * 1.5) : (a.Comments.Count * 3 + a.Likes.Count)),
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
@@ -143,7 +143,7 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
-                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
+                    "popularity" => threads.OrderByDescending(a => a.CreatedByNavigation.UserLabel == PostgreEnums.UserLabel.top_contributor ? (10 + (a.Comments.Count * 3 + a.Likes.Count) * 1.5) : (a.Comments.Count * 3 + a.Likes.Count)),
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
@@ -192,7 +192,7 @@ namespace StrateZone_Repository.Implements
                     "likes-count-desc" => threads.OrderByDescending(a => a.Likes.Count),
                     "comments-count" => threads.OrderBy(a => a.Comments.Count),
                     "comments-count-desc" => threads.OrderByDescending(a => a.Comments.Count),
-                    "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
+                    "popularity" => threads.OrderByDescending(a => a.CreatedByNavigation.UserLabel == PostgreEnums.UserLabel.top_contributor ? (10 + (a.Comments.Count * 3 + a.Likes.Count) * 1.5) : (a.Comments.Count * 3 + a.Likes.Count)),
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 

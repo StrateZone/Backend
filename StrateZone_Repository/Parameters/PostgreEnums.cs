@@ -17,7 +17,7 @@
         public enum ParticipantStatus { enrolled, drop_out, in_progress, completed }
         public enum ProductStatus { available, out_of_stock, discontinued }
         public enum Ranking { basic, silver, gold, platinum }
-        public enum RequestStatus { pending, accepted, rejected, cancelled, expired, accepted_by_others }
+        public enum RequestStatus { pending, accepted, rejected, cancelled, expired, accepted_by_others, table_cancelled }
         public enum RoomStatus { available, unavailable, closed }
         public enum RoomType { study, premium, basic, openspaced }
         public enum SkillLevel { beginner, intermediate, advanced }
@@ -31,7 +31,7 @@
         public enum VoucherStatus { active, expired }
         public enum WalletStatus { active, closed }
         public enum TagStatus { active, hidden }
-        public enum TableStatus { active, has_room, out_of_service }
+        public enum TableStatus { active, out_of_service }
         public enum UserLabel { none, top_contributor }
         public enum UserStatus { Active, Unactivated, Suspended }
     }

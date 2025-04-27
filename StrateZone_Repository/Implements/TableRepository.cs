@@ -98,7 +98,7 @@ namespace StrateZone_Repository.Implements
                             SELECT t.*
                             FROM tables t
                             JOIN rooms r ON t.room_id = r.room_id
-                            WHERE r.status = 'available'
+                            WHERE t.status = 'active' AND r.status = 'available'
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM tables_appointments ta
@@ -135,7 +135,7 @@ namespace StrateZone_Repository.Implements
                             FROM tables t
                             JOIN rooms r ON t.room_id = r.room_id
                             JOIN ""gameTypes"" gt ON gt.type_name = @TypeName::game_type
-                            WHERE r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%')) 
+                            WHERE t.status = 'active' AND r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%')) 
                             AND gt.type_id = t.""gameType_id""
                             AND NOT EXISTS (
                                 SELECT 1
@@ -229,7 +229,7 @@ namespace StrateZone_Repository.Implements
                     FROM tables t
                     JOIN rooms r ON t.room_id = r.room_id
                     JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
-                    WHERE r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
+                    WHERE t.status = 'active' AND r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
                     AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds::public.game_type[]))
                     AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds::public.room_type[]))
                     AND NOT EXISTS (
@@ -281,7 +281,7 @@ namespace StrateZone_Repository.Implements
                                         ROW_NUMBER() OVER (PARTITION BY t.""gameType_id"" ORDER BY t.table_id) AS row_num
                                 FROM tables t
                                 JOIN rooms r ON t.room_id = r.room_id AND r.room_type != 'study'
-                                WHERE r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
+                                WHERE t.status = 'active' AND r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
                                 AND NOT EXISTS (
                                     SELECT 1
                                     FROM tables_appointments ta
@@ -335,7 +335,7 @@ namespace StrateZone_Repository.Implements
                             SELECT t.*
                             FROM tables t
                             JOIN rooms r ON t.room_id = r.room_id
-                            WHERE r.status = 'available'
+                            WHERE t.status = 'active' AND r.status = 'available'
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM tables_appointments ta
