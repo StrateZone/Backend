@@ -562,9 +562,13 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var ta = await _context.TablesAppointments.AsNoTracking().SingleOrDefaultAsync(ta => ta.Id == tablesAppointmentId);
+                var ta = await _context.TablesAppointments.AsNoTracking()
+                                .Where(ta => ta.Id == tablesAppointmentId)
+                                .Select(ta => new { ta.AppointmentId, ta.TableId })
+                                .FirstOrDefaultAsync();
 
                 return await _context.AppointmentRequests
+                                    .AsNoTracking()
                                     .Where(ar => ar.TableId == ta.TableId && ar.AppointmentId == ar.AppointmentId)
                                     .ToListAsync();
             }

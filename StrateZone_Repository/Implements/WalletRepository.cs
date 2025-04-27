@@ -64,7 +64,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Wallets.AsNoTracking()
+                return await _context.Wallets
                                 .SingleOrDefaultAsync(w => w.UserId == userId) 
                             ?? throw new Exception("No wallet for this user was found.");
             }
@@ -114,23 +114,39 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Wallet> DepositWalletAsync(int amount, int id)
+        public async Task DepositWalletAsync(int amount, int id)
         {
             try
             {
                 if (amount <= 0) throw new Exception("Deposit amount must be higher than 0.");
 
-                Wallet wallet = await _context.Wallets.FindAsync(id)
-                    ?? throw new KeyNotFoundException("Wallet with this ID does not exist.");
+                await _context.Database.ExecuteSqlRawAsync(
+                    @"UPDATE wallet SET balance = balance + {0} 
+                    WHERE wallet_id = {1} 
+                    AND status != 'closed';",
+                    amount,
+                    id
+                );
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
-                if (wallet.Status == Parameters.PostgreEnums.WalletStatus.closed)
-                    throw new Exception("This wallet is closed.");
+        public async Task DepositWalletByUserIdAsync(int amount, int userId)
+        {
+            try
+            {
+                if (amount <= 0) throw new Exception("Deposit amount must be higher than 0.");
 
-                wallet.Balance += amount;
-                await _context.SaveChangesAsync();
-
-                return wallet;
-
+                await _context.Database.ExecuteSqlRawAsync(
+                    @"UPDATE wallet SET balance = balance + {0} 
+                    WHERE user_id = {1} 
+                    AND status != 'closed';", 
+                    amount, 
+                    userId
+                );
             }
             catch
             {
@@ -151,9 +167,33 @@ namespace StrateZone_Repository.Implements
                 else if (wallet.Balance < amount)
                     throw new Exception("Wallet's balance is lower than the withdrawal amount.");
 
-                wallet.WalletId = id;
                 wallet.Balance -= amount;
+                await _context.SaveChangesAsync();
 
+                return wallet;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Wallet> WithdrawalWalletByUserIdAsync(int amount, int userId)
+        {
+            try
+            {
+                if (amount <= 0) throw new Exception("Withdrawal amount must be higher than 0.");
+
+                Wallet wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId) 
+                            ?? throw new Exception("Wallet with this user ID does not exist.");
+
+                if (wallet.Status == Parameters.PostgreEnums.WalletStatus.closed)
+                    throw new Exception("This wallet is closed.");
+                else if (wallet.Balance < amount)
+                    throw new Exception("Wallet's balance is lower than the withdrawal amount.");
+
+                wallet.Balance -= amount;
                 await _context.SaveChangesAsync();
 
                 return wallet;

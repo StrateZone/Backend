@@ -78,7 +78,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var result = await _walletService.DepositWalletAsync(amount, id);
+                await _walletService.DepositWalletAsync(amount, id);
+                var result = await _walletService.GetWalletByIdAsync(id);
                 return Ok(result);
             }
             catch (Exception ex)

@@ -38,12 +38,23 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<WalletModel> DepositWalletAsync(int amount, int id)
+        public async Task DepositWalletAsync(int amount, int id)
         {
             try
             {
-                var result = await _walletRepository.DepositWalletAsync(amount, id);
-                return _mapper.Map<WalletModel>(result);
+                await _walletRepository.DepositWalletAsync(amount, id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task DepositWalletByUserIdAsync(int amount, int userId)
+        {
+            try
+            {
+                await _walletRepository.DepositWalletByUserIdAsync(amount, userId);
             }
             catch (Exception ex)
             {
@@ -102,6 +113,11 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public Task<WalletModel> WithdrawalWalletByUserIdAsync(int amount, int userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

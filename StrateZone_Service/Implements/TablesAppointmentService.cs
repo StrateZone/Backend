@@ -308,8 +308,7 @@ namespace StrateZone_Service.Implements
             {
                 if (refundAmount > 0)
                 {
-                    var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
-                    await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
+                    await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
 
                     var transaction = new TransactionModel
                     {
@@ -356,8 +355,7 @@ namespace StrateZone_Service.Implements
                 var invitedPayment = payments.SingleOrDefault(p => p.UserId != cancellingUserId)
                     ?? throw new Exception("Invited user's payment not found.");
 
-                var invitedWallet = await _walletService.GetWalletByUserIdAsync((int)invitedPayment.UserId);
-                await _walletService.DepositWalletAsync((int)appointment.Price, invitedWallet.WalletId);
+                await _walletService.DepositWalletByUserIdAsync((int)appointment.Price, (int)invitedPayment.UserId);
 
                 var transaction = new TransactionModel
                 {
@@ -434,9 +432,8 @@ namespace StrateZone_Service.Implements
 
                 if (refundCalculation.RefundStatus != RefundStatus.no_refund_while_refund_for_invited_user)
                 {
-                    var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
                     var refundAmount = refundCalculation.RefundAmount;
-                    await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
+                    await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
 
                     var newTransaction = new TransactionModel
                     {
@@ -455,9 +452,8 @@ namespace StrateZone_Service.Implements
                     var refundAmount = refundCalculation.RefundAmount;
                     var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
                     var paymentForInvitedUser = bookingPayments.SingleOrDefault(p => p.UserId != userId);
-                    var invitedUserWallet = await _walletService.GetWalletByUserIdAsync((int)paymentForInvitedUser.UserId);
 
-                    await _walletService.DepositWalletAsync((int)tablesAppointment.Price, invitedUserWallet.WalletId);
+                    await _walletService.DepositWalletByUserIdAsync((int)tablesAppointment.Price, (int) paymentForInvitedUser.UserId);
 
                     var newTransaction = new TransactionModel
                     {

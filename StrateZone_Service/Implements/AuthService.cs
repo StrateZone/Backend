@@ -147,6 +147,18 @@ namespace StrateZone_Service.Implements
                 if (user.OTP != loginRequest.OTP || user.OTPExpiry < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid or expired OTP", Data = null };
 
+                if (user.Status == PostgreEnums.UserStatus.Suspended)
+                {
+                    return new ApiResponse<LoginResponse> 
+                    { 
+                        Success = false, 
+                        StatusCode = 401, 
+                        Message = "Tài khoản này hiện đang bị cấm do vi phạm tiêu chuẩn cộng đồng. " +
+                        "Mọi thắc mắc vui lòng liên hệ: stratezone.app@gmail.com", 
+                        Data = null 
+                    };
+                }
+
                 user.OTP = null;
                 user.OTPExpiry = null;
 
@@ -222,6 +234,18 @@ namespace StrateZone_Service.Implements
                         Message = "Tài khoản chưa được xác thực email.", 
                         Data = null 
                     };
+
+                if (user.Status == PostgreEnums.UserStatus.Suspended)
+                {
+                    return new ApiResponse<LoginResponse>
+                    {
+                        Success = false,
+                        StatusCode = 401,
+                        Message = "Tài khoản này hiện đang bị cấm do vi phạm tiêu chuẩn cộng đồng. " +
+                        "Mọi thắc mắc vui lòng liên hệ: stratezone.app@gmail.com",
+                        Data = null
+                    };
+                }
 
                 user.OTP = null;
                 user.OTPExpiry = null;

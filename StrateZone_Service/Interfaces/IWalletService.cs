@@ -11,10 +11,12 @@ namespace StrateZone_Service.Interfaces
     public interface IWalletService
     {
         Task<WalletModel> CreateWalletAsync(WalletModel wallet);
-        Task<WalletModel> DepositWalletAsync(int amount, int id);
+        Task DepositWalletAsync(int amount, int id);
+        Task DepositWalletByUserIdAsync(int amount, int userId);
         Task<WalletModel> GetWalletByIdAsync(int id);
         Task<WalletModel> GetWalletByUserIdAsync(int userId);
         Task<WalletModel> UpdateWalletAsync(WalletModel wallet, int id);
         Task<WalletModel> WithdrawalWalletAsync(int amount, int id);
+        Task<WalletModel> WithdrawalWalletByUserIdAsync(int amount, int userId);
     }
 }

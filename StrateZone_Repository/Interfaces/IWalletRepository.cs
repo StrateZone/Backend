@@ -10,7 +10,8 @@ namespace StrateZone_Repository.Interfaces
     public interface IWalletRepository
     {
         Task<Wallet> CreateWalletAsync(Wallet wallet);
-        Task<Wallet> DepositWalletAsync(int amount, int id);
+        Task DepositWalletAsync(int amount, int id);
+        Task DepositWalletByUserIdAsync(int amount, int userId);
         Task<Wallet> GetWalletByIdAsync(int id);
         Task<Wallet> GetWalletByUserIdAsync(int userId);
         Task<Wallet> UpdateWalletAsync(Wallet wallet, int id);

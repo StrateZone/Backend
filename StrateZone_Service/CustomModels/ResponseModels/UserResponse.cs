@@ -24,15 +24,15 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? Password { get; set; }
 
-        public string UserRole { get; set; }
+        public string? UserRole { get; set; }
 
         public DateTime? MembershipExpiry { get; set; }
 
         public string? FullName { get; set; }
 
-        public string UserLabel { get; set; }
+        public string? UserLabel { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         public string? Address { get; set; }
 
@@ -44,11 +44,11 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public int? ContributionPoints { get; set; }
 
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
-        public string SkillLevel { get; set; }
+        public string? SkillLevel { get; set; }
 
-        public string Ranking { get; set; }
+        public string? Ranking { get; set; }
 
         public DateTime? CreatedAt { get; set; }
 

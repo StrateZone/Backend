@@ -20,7 +20,7 @@ namespace StrateZone_Service.BusinessModels
 
         public string? Password { get; set; }
 
-        public string Status { get; set; } = "Active";
+        public string? Status { get; set; } = "Active";
 
         public string? Address { get; set; }
 
@@ -47,20 +47,6 @@ namespace StrateZone_Service.BusinessModels
         public DateTime? CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
-
-        /***************************************************ONLY RESPONSE TO AUTH APIS*********************************************************/
-        // Refresh Token Fields
-        public string? RefreshToken { get; set; }
-
-        public DateTime? RefreshTokenExpiry { get; set; }
-
-        public string? OTP { get; set; } // Store OTP
-
-        public DateTime? OTPExpiry { get; set; } // OTP expiration time
-        /***************************************************************************************************************************************/
-
-        // public virtual ICollection<FriendlistModel> FriendlistUsers { get; set; } = new List<FriendlistModel>();
-
 
         public virtual WalletModel? Wallet { get; set; }
     }
