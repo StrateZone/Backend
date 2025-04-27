@@ -233,6 +233,17 @@ namespace StrateZone_Service.Implements
             try
             {
                 var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
+                if (tableAppointment.Status != AppointmentStatus.cancelled || tableAppointment.Status != AppointmentStatus.confirmed)
+                {
+                    return new ApiResponse<AppointmentrequestModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = $"This appointment is already {tableAppointment.Status}",
+                        Data = null
+                    };
+                }
+                
                 var appointment_request = (await _appointmentrequestRepository.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(appointmentrequestModel.FromUser, tableAppointment.Id))
                                             .SingleOrDefault(ar => ar.ToUser == appointmentrequestModel.ToUser && ar.Status == RequestStatus.pending);
 
