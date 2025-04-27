@@ -27,6 +27,8 @@ namespace StrateZone_Service.BusinessModels
 
         public int CommentsCount {get; set; }
 
+        public bool IsUserLiked { get; set; } = false;
+
         public string Status { get; set; }
 
         public DateTime? CreatedAt { get; set; }

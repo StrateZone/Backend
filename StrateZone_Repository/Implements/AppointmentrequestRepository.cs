@@ -316,11 +316,6 @@ namespace StrateZone_Repository.Implements
                     if (id <= 0)
                         throw new Exception("Appointment request must have a valid ID for update.");
 
-                    var existingAppointmentRequest = await _context.AppointmentRequests.FindAsync(id)
-                        ?? throw new Exception($"Appointment request with ID {id} does not exist");
-
-                    _context.Entry(existingAppointmentRequest).State = EntityState.Detached;
-
                     var parameters = new List<NpgsqlParameter>();
                     var sql = new StringBuilder("UPDATE appointment_requests SET ");
 

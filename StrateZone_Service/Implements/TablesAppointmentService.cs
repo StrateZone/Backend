@@ -10,16 +10,10 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
-using System.Net.Http;
-using System.Text;
 using static StrateZone_Repository.Parameters.PostgreEnums;
-using static System.Net.WebRequestMethods;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using QRCoder;
-using Org.BouncyCastle.Ocsp;
-using Microsoft.EntityFrameworkCore;
-using StrateZone_Repository.Data;
 
 namespace StrateZone_Service.Implements
 {
@@ -395,27 +389,28 @@ namespace StrateZone_Service.Implements
 
                 var cancellingUser = await _userService.GetUserByIdAsync(cancellingUserId);
 
-                var notificationToCancellingUser = new NotificationRequest
-                {
-                    ToUser = cancellingUserId,
-                    Title = "Hủy đơn đặt bàn thành công!",
-                    Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. " +
-                              "Do đây là đơn đặt có sự tham gia của người chơi khác, bạn sẽ không được hoàn tiền!",
-                    Type = NotificationType.appointment_request_from
-                };
-
-                var notificationToInvitedUser = new NotificationRequest
-                {
-                    ToUser = invitedUserId,
-                    Title = $"{cancellingUser.Username} đã hủy đơn đặt bàn!",
-                    Content = $"{cancellingUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. {appointment.Price} VND đã tự động được hoàn về ví của bạn!",
-                    Type = NotificationType.appointment_request_from
-                };
-
                 _ = Task.Run(async () =>
                 {
                     using var scope = _serviceScopeFactory.CreateScope();
                     var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    var notificationToCancellingUser = new NotificationRequest
+                    {
+                        ToUser = cancellingUserId,
+                        Title = "Hủy đơn đặt bàn thành công!",
+                        Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. " +
+                                  "Do đây là đơn đặt có sự tham gia của người chơi khác, bạn sẽ không được hoàn tiền!",
+                        Type = NotificationType.appointment_request_from
+                    };
+
+                    var notificationToInvitedUser = new NotificationRequest
+                    {
+                        ToUser = invitedUserId,
+                        Title = $"{cancellingUser.Username} đã hủy đơn đặt bàn!",
+                        Content = $"{cancellingUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. {appointment.Price} VND đã tự động được hoàn về ví của bạn!",
+                        Type = NotificationType.appointment_request_from
+                    };
+
                     await service.CreateNotificationsAsync(new() { notificationToInvitedUser, notificationToCancellingUser });
                 });
 
@@ -426,24 +421,16 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        private Task CancelAppointmentRequests(int tablesAppointmentId)
+        private async Task CancelAppointmentRequests(int tablesAppointmentId)
         {
-            _ = Task.Run(async () =>
+            var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
+            foreach (var request in requests)
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var service = scope.ServiceProvider.GetRequiredService<IAppointmentrequestRepository>();
+                if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
+                else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
+            }
 
-                var requests = await service.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
-                foreach (var request in requests)
-                {
-                    if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
-                    else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
-                }
-
-                await service.MassUpdateAppointmentRequestsAsync(requests);
-            });
-
-            return Task.CompletedTask;
+            await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
         }
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)

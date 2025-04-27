@@ -235,12 +235,12 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<(int, int)> GetThreadLikeAndCommentCount(int id)
+        public async Task<(int, bool, int)> GetThreadLikeAndCommentCount(int id)
         {
-            var likeCount = await _context.Likes.AsNoTracking().CountAsync(l => l.ThreadId == id);
+            var likes = await _context.Likes.AsNoTracking().Where(l => l.ThreadId == id).ToListAsync();
             var cmtCount = await _context.Comments.AsNoTracking().CountAsync(cc => cc.ThreadId == id);
 
-            return (likeCount, cmtCount);
+            return (likes.Count, likes.Any(l => l.UserId == id), cmtCount);
         }
 
         public async Task<PagedList<Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, int id)

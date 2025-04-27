@@ -11,6 +11,7 @@ using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -22,8 +23,9 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
         private readonly INotificationService _notificationService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService, ScheduleTimeValidator scheduleTimeValidator, INotificationService notificationService)
+        public AppointmentrequestService(IAppointmentrequestRepository appointmentRequestRepository, IMapper mapper, ITablesAppointmentService appointmentService, IPaymentService paymentService, ScheduleTimeValidator scheduleTimeValidator, INotificationService notificationService, IServiceScopeFactory serviceScopeFactory)
         {
             _appointmentRequestRepository = appointmentRequestRepository;
             _mapper = mapper;
@@ -31,6 +33,7 @@ namespace StrateZone_Service.Implements
             _paymentService = paymentService;
             _scheduleTimeValidator = scheduleTimeValidator;
             _notificationService = notificationService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<AppointmentrequestModel> CreateAppointmentRequestAsync(AppointmentrequestRequest request)
@@ -124,7 +127,6 @@ namespace StrateZone_Service.Implements
                         );
 
                 List<Appointmentrequest> mappedRequests = new();
-                List<Notification> mappedNotifications = new();
 
                 foreach (var request in appointmentRequestModel)
                 {
@@ -147,23 +149,29 @@ namespace StrateZone_Service.Implements
 
                 var result = await _appointmentRequestRepository.CreateAppointmentRequestsAsync(mappedRequests);
 
-                List<NotificationRequest> notificationRequests = new();
-
-                foreach (var request in result)
+                _ = Task.Run(async () =>
                 {
-                    NotificationRequest notification = new()
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    List<NotificationRequest> notificationRequests = new();
+
+                    foreach (var request in result)
                     {
-                        ToUser = request.ToUser,
-                        Title = $"Bạn có lời mời chơi cờ đến từ {request.FromUserNavigation.Username}!",
-                        Content = $"{request.FromUserNavigation.Username} đã gửi cho bạn 1 lời mời chơi cờ vào lúc {((DateTime)request.StartTime).TimeOfDay}, " +
-                        $"ngày {DateOnly.FromDateTime((DateTime) request.StartTime)}. Bấm để xem tất cả lời mời của bạn.",
-                        Type = NotificationType.appointment_request_from
-                    };
+                        NotificationRequest notification = new()
+                        {
+                            ToUser = request.ToUser,
+                            Title = $"Bạn có lời mời chơi cờ đến từ {request.FromUserNavigation.Username}!",
+                            Content = $"{request.FromUserNavigation.Username} đã gửi cho bạn 1 lời mời chơi cờ vào lúc {((DateTime)request.StartTime).TimeOfDay}, " +
+                            $"ngày {DateOnly.FromDateTime((DateTime)request.StartTime)}. Bấm để xem tất cả lời mời của bạn.",
+                            Type = NotificationType.appointment_request_from
+                        };
 
-                    notificationRequests.Add(notification);
-                }
+                        notificationRequests.Add(notification);
+                    }
 
-                _ = Task.Run(() => _notificationService.CreateNotificationsAsync(notificationRequests));
+                    await service.CreateNotificationsAsync(notificationRequests);
+                });
 
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }

@@ -103,7 +103,8 @@ namespace StrateZone_Service.Implements
                     var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
 
                     m.LikesCount = counts.Item1;
-                    m.CommentsCount = counts.Item2;
+                    m.IsUserLiked = counts.Item2;
+                    m.CommentsCount = counts.Item3;
                 }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
@@ -126,7 +127,8 @@ namespace StrateZone_Service.Implements
                     var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
 
                     m.LikesCount = counts.Item1;
-                    m.CommentsCount = counts.Item2;
+                    m.IsUserLiked = counts.Item2;
+                    m.CommentsCount = counts.Item3;
                 }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
@@ -149,7 +151,8 @@ namespace StrateZone_Service.Implements
                     var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
 
                     m.LikesCount = counts.Item1;
-                    m.CommentsCount = counts.Item2;
+                    m.IsUserLiked = counts.Item2;
+                    m.CommentsCount = counts.Item3;
                 }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
@@ -172,7 +175,8 @@ namespace StrateZone_Service.Implements
                     var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
 
                     m.LikesCount = counts.Item1;
-                    m.CommentsCount = counts.Item2;
+                    m.IsUserLiked = counts.Item2;
+                    m.CommentsCount = counts.Item3;
                 }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
@@ -195,7 +199,8 @@ namespace StrateZone_Service.Implements
                     var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
 
                     m.LikesCount = counts.Item1;
-                    m.CommentsCount = counts.Item2;
+                    m.IsUserLiked = counts.Item2;
+                    m.CommentsCount = counts.Item3;
                 }
 
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
