@@ -282,12 +282,6 @@ namespace StrateZone_Service.Implements
                 if (refundCalculation.RefundStatus == RefundStatus.cancellation_fail)
                     throw new Exception(refundCalculation.Message);
 
-                if (refundCalculation.RefundStatus == RefundStatus.no_refund)
-                {
-                    tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
-                    return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
-                }
-
                 if (refundCalculation.RefundStatus == RefundStatus.no_refund_while_refund_for_invited_user)
                 {
                     await HandleInvitedUserRefund(tablesAppointment, userId);
@@ -371,7 +365,6 @@ namespace StrateZone_Service.Implements
                               "Do đây là đơn đặt có sự tham gia của người chơi khác, bạn sẽ không được hoàn tiền!",
                     Type = NotificationType.appointment_request_from
                 };
-                await _notificationService.CreateNotificationAsync(notificationToCancellingUser);
 
                 var notificationToInvitedUser = new NotificationRequest
                 {
@@ -380,7 +373,9 @@ namespace StrateZone_Service.Implements
                     Content = $"{cancellingUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. {appointment.Price} VND đã tự động được hoàn về ví của bạn!",
                     Type = NotificationType.appointment_request_from
                 };
-                await _notificationService.CreateNotificationAsync(notificationToInvitedUser);
+
+                await _notificationService.CreateNotificationsAsync(new() { notificationToCancellingUser, notificationToInvitedUser });
+
             }
             catch (Exception ex)
             {
