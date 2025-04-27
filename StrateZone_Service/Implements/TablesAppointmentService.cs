@@ -18,6 +18,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using QRCoder;
 using Org.BouncyCastle.Ocsp;
+using Microsoft.EntityFrameworkCore;
+using StrateZone_Repository.Data;
 
 namespace StrateZone_Service.Implements
 {
@@ -310,35 +312,56 @@ namespace StrateZone_Service.Implements
                 {
                     await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
 
-                    var transaction = new TransactionModel
+                    _ = Task.Run(async () =>
                     {
-                        Amount = refundAmount,
-                        Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
-                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        OfUser = userId,
-                        TransactionType = TransactionType.refund,
-                    };
-                    _ = Task.Run(() => _transactionService.SaveTransaction(transaction));
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<ITransactionService>();
 
-                    var notification = new NotificationRequest
+                        var transaction = new TransactionModel
+                        {
+                            Amount = refundAmount,
+                            Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                            OfUser = userId,
+                            TransactionType = TransactionType.refund,
+                        };
+
+                        await service.SaveTransaction(transaction);
+                    });
+
+                    _ = Task.Run(async () =>
                     {
-                        ToUser = userId,
-                        Title = "Hủy đơn đặt bàn thành công!",
-                        Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
-                        Type = NotificationType.appointment
-                    };
-                    _ = Task.Run(() => _notificationService.CreateNotificationAsync(notification));
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        var notification = new NotificationRequest
+                        {
+                            ToUser = userId,
+                            Title = "Hủy đơn đặt bàn thành công!",
+                            Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
+                            Type = NotificationType.appointment
+                        };
+
+                        await service.CreateNotificationAsync(notification);
+                    });
                 }
                 else
                 {
-                    var notification = new NotificationRequest
+                    _ = Task.Run(async () =>
                     {
-                        ToUser = userId,
-                        Title = "Hủy đơn đặt bàn thành công!",
-                        Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
-                        Type = NotificationType.appointment
-                    };
-                    _ = Task.Run(() => _notificationService.CreateNotificationAsync(notification));
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        var notification = new NotificationRequest
+                        {
+                            ToUser = userId,
+                            Title = "Hủy đơn đặt bàn thành công!",
+                            Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                            Type = NotificationType.appointment
+                        };
+
+                        await service.CreateNotificationAsync(notification);
+                    });
                 }
             }
             catch (Exception ex)
@@ -353,15 +376,22 @@ namespace StrateZone_Service.Implements
             {
                 await _walletService.DepositWalletByUserIdAsync((int)appointment.Price, invitedUserId);
 
-                var transaction = new TransactionModel
+                _ = Task.Run(async () =>
                 {
-                    Amount = appointment.Price,
-                    Content = $"Hoàn tiền {appointment.Price} VND cho đơn được mời tham gia ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    OfUser = invitedUserId,
-                    TransactionType = TransactionType.refund,
-                };
-                _ = Task.Run(() => _transactionService.SaveTransaction(transaction));
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITransactionService>();
+
+                    var transaction = new TransactionModel
+                    {
+                        Amount = appointment.Price,
+                        Content = $"Hoàn tiền {appointment.Price} VND cho đơn được mời tham gia ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = invitedUserId,
+                        TransactionType = TransactionType.refund,
+                    };
+
+                    await service.SaveTransaction(transaction);
+                });
 
                 var cancellingUser = await _userService.GetUserByIdAsync(cancellingUserId);
 
@@ -382,7 +412,12 @@ namespace StrateZone_Service.Implements
                     Type = NotificationType.appointment_request_from
                 };
 
-                _ = Task.Run(() => _notificationService.CreateNotificationsAsync(new() { notificationToCancellingUser, notificationToInvitedUser }));
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    await service.CreateNotificationsAsync(new() { notificationToInvitedUser, notificationToCancellingUser });
+                });
 
             }
             catch (Exception ex)
@@ -391,15 +426,24 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        private async Task CancelAppointmentRequests(int tablesAppointmentId)
+        private Task CancelAppointmentRequests(int tablesAppointmentId)
         {
-            var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
-            foreach (var request in requests)
+            _ = Task.Run(async () =>
             {
-                if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
-                else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
-            }
-            await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
+                using var scope = _serviceScopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IAppointmentrequestRepository>();
+
+                var requests = await service.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
+                foreach (var request in requests)
+                {
+                    if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
+                    else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
+                }
+
+                await service.MassUpdateAppointmentRequestsAsync(requests);
+            });
+
+            return Task.CompletedTask;
         }
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)
@@ -442,7 +486,13 @@ namespace StrateZone_Service.Implements
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
                     };
-                    _ = Task.Run(() => _transactionService.SaveTransaction(newTransaction));
+
+                    _ = Task.Run(async () =>
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<TransactionService>();
+                        await service.SaveTransaction(newTransaction);
+                    });
                 }
                 else 
                 {
@@ -460,7 +510,13 @@ namespace StrateZone_Service.Implements
                         OfUser = refundCalculation.InvitedUserId,
                         TransactionType = TransactionType.refund,
                     };
-                    _ = Task.Run(() => _transactionService.SaveTransaction(newTransaction));
+
+                    _ = Task.Run(async () =>
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<TransactionService>();
+                        await service.SaveTransaction(newTransaction);
+                    });
                 }
 
                 tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
@@ -471,7 +527,13 @@ namespace StrateZone_Service.Implements
                     req.Status = RequestStatus.cancelled;
                    
                 }
-                _ = Task.Run(() => _requestRepository.MassUpdateAppointmentRequestsAsync(requests));
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<AppointmentrequestRepository>();
+                    await service.MassUpdateAppointmentRequestsAsync(requests);
+                });
 
                 return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
             }

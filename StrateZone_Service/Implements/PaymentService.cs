@@ -11,6 +11,7 @@ using StrateZone_Repository.Pagination;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using StrateZone_Repository.Implements;
 using System.Transactions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -22,10 +23,10 @@ namespace StrateZone_Service.Implements
         private readonly IWalletRepository _walletRepository;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
-        private readonly IEmailService _emailService;
         private readonly IUserRepository _userRepository;
         private readonly INotificationService _notificationService;
         private readonly IPriceService _priceService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -34,10 +35,10 @@ namespace StrateZone_Service.Implements
             IWalletRepository walletRepository,
             ITransactionRepository transactionRepository,
             IMapper mapper,
-            IEmailService emailService,
             IUserRepository userRepository,
             INotificationService notificationService,
-            IPriceService priceService)
+            IPriceService priceService,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -45,10 +46,10 @@ namespace StrateZone_Service.Implements
             _walletRepository = walletRepository;
             _transactionRepository = transactionRepository;
             _mapper = mapper;
-            _emailService = emailService;
             _userRepository = userRepository;
             _notificationService = notificationService;
             _priceService = priceService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
@@ -84,32 +85,50 @@ namespace StrateZone_Service.Implements
                 userWallet.Balance -= appointment.TotalPrice;
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
 
-                var newTransaction = new StrateZone_Repository.Entities.Transaction
+                _ = Task.Run(async () =>
                 {
-                    OfUser = appointment.UserId,
-                    Amount = appointment.TotalPrice,
-                    Content = "Đã thanh toán đơn " + appointment.AppointmentId + ": " + appointment.TotalPrice,
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    TransactionType = PostgreEnums.TransactionType.payment
-                };
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITransactionRepository>();
 
-                await _transactionRepository.SaveTransaction(newTransaction);
+                    var newTransaction = new StrateZone_Repository.Entities.Transaction
+                    {
+                        OfUser = appointment.UserId,
+                        Amount = appointment.TotalPrice,
+                        Content = "Đã thanh toán đơn " + appointment.AppointmentId + ": " + appointment.TotalPrice,
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        TransactionType = PostgreEnums.TransactionType.payment
+                    };
 
-                NotificationRequest thisUser = new()
+                    await service.SaveTransaction(newTransaction);
+                });
+
+                _ = Task.Run(async () =>
                 {
-                    ToUser = appointment.UserId,
-                    Title = $"Mã đơn #{appointment.AppointmentId} đã được thanh toán!",
-                    Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đều đã được thanh toán! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
-                };
-                await _notificationService.CreateNotificationAsync(thisUser);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    NotificationRequest thisUser = new()
+                    {
+                        ToUser = appointment.UserId,
+                        Title = $"Mã đơn #{appointment.AppointmentId} đã được thanh toán!",
+                        Content = $"Đơn đặt bàn với mã đơn #{appointment.AppointmentId} của bạn đều đã được thanh toán! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+                    };
+
+                    await service.CreateNotificationAsync(thisUser);
+                });
 
                 var user = await _userRepository.GetUserByIdAsync(appointment.UserId);
 
-                var email = new EmailRequest
+                _ = Task.Run(async () =>
                 {
-                    Subject = "Chi tiết đặt hẹn của bạn tại StrateZone.",
-                    ToEmail = user.Email,
-                    Content = $@"
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IEmailService>();
+
+                    var email = new EmailRequest
+                    {
+                        Subject = "Chi tiết đặt hẹn của bạn tại StrateZone.",
+                        ToEmail = user.Email,
+                        Content = $@"
                                 <html>
                                 <head>
                                     <style>
@@ -189,9 +208,9 @@ namespace StrateZone_Service.Implements
                                 </body>
                                 </html>
                             "
-                };
-
-                _ = Task.Run(() => _emailService.SendEmailAsync(email));
+                    };
+                    await service.SendEmailAsync(email);
+                });
 
                 var result = new ApiResponse<AppointmentModel>
                 {
