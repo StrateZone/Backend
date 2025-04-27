@@ -503,6 +503,12 @@ namespace StrateZone_Service.Implements
             DateTime ScheduleTime = tablesAppointment.ScheduleTime;
             DateTime CreatedTime = (DateTime)tablesAppointment.CreatedAt;
 
+            decimal refund100_hours = await _systemService.GetAppointmentRefund100TimeInHoursAsync(1),
+                    incoming_hours = await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
+
+            DateTime TimeGate_BlockAppointmentCancellation = ScheduleTime.AddHours((double)(incoming_hours * -1)),
+                     TimeGate_Refund50_OnCancellation = ScheduleTime.AddHours((double)(refund100_hours * -1));
+
             var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
             var paymentForUser = bookingPayments.SingleOrDefault(p => p.UserId == userId);
             if (paymentForUser == null || paymentForUser.PaymentStatus == PaymentStatus.unpaid.ToString())
@@ -515,6 +521,7 @@ namespace StrateZone_Service.Implements
                     Message = "Không được hoàn tiền. Lí do: Đơn đặt bàn này chưa thanh toán.",
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
+                    Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                 };
             }
 
@@ -529,14 +536,9 @@ namespace StrateZone_Service.Implements
                     "sẽ được hoàn tiền).",
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
+                    Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                 };
             }
-
-            decimal refund100_hours = await _systemService.GetAppointmentRefund100TimeInHoursAsync(1),
-                    incoming_hours = await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
-
-            DateTime TimeGate_BlockAppointmentCancellation = ScheduleTime.AddHours((double)(incoming_hours * -1)),
-                     TimeGate_Refund50_OnCancellation = ScheduleTime.AddHours((double)(refund100_hours * -1));
 
             if (CancelTime >= TimeGate_BlockAppointmentCancellation)
             {
@@ -545,7 +547,7 @@ namespace StrateZone_Service.Implements
                     TablesAppointmentModel = model,
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.cancellation_fail,
-                    Message = $"Không được phép hủy đơn trong vòng {incoming_hours} tiếng trước giờ hẹn."
+                    Message = $"Không được phép hủy đơn trong vòng {incoming_hours} tiếng trước giờ hẹn.",
                 };
             }
 
@@ -566,6 +568,7 @@ namespace StrateZone_Service.Implements
                     $"đến {DateOnly.FromDateTime(CancelTime):dd/MM/yyyy} (hiện tại).",
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
+                    Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                 };
             }
 
