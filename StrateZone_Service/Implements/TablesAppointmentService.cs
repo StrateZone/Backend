@@ -567,8 +567,8 @@ namespace StrateZone_Service.Implements
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                     Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
-                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
                 };
             }
 
