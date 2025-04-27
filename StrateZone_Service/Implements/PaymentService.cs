@@ -233,7 +233,7 @@ namespace StrateZone_Service.Implements
             try
             {
                 var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
-                if (tableAppointment.Status != AppointmentStatus.cancelled || tableAppointment.Status != AppointmentStatus.confirmed)
+                if (tableAppointment.Status != AppointmentStatus.confirmed && tableAppointment.Status != AppointmentStatus.pending && tableAppointment.Status != AppointmentStatus.incoming)
                 {
                     return new ApiResponse<AppointmentrequestModel>
                     {
