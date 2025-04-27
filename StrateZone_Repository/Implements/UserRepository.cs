@@ -178,7 +178,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@gender", user.Gender.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
-                cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status));
+                cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
                 var newUserId = await cmd.ExecuteScalarAsync();
@@ -248,7 +248,7 @@ namespace StrateZone_Repository.Implements
                 }
 
                 sql.Append("status = @status, ");
-                parameters.Add(new NpgsqlParameter("@status", updatedUser.Status));
+                parameters.Add(new NpgsqlParameter("@status", updatedUser.Status.ToString()));
 
                 if (updatedUser.ContributionPoints.HasValue)
                 {
