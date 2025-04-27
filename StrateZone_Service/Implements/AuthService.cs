@@ -58,7 +58,7 @@ namespace StrateZone_Service.Implements
 
                 EmailRequest emailSending;
 
-                if (user.Status == "Unactivated")
+                if (user.Status == PostgreEnums.UserStatus.Unactivated)
                 {
                     emailSending = new EmailRequest
                     {
@@ -156,7 +156,7 @@ namespace StrateZone_Service.Implements
                 user.RefreshToken = newRefreshToken;
                 user.RefreshTokenExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddDays(7);
 
-                if (user.Status == "Unactivated") user.Status = "Active";
+                if (user.Status == PostgreEnums.UserStatus.Unactivated) user.Status = PostgreEnums.UserStatus.Active;
 
                 var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
@@ -177,14 +177,14 @@ namespace StrateZone_Service.Implements
                     {
                         UserId = updatedUser.UserId,
                         UserRole = updatedUser.UserRole.ToString(),
-                        Status = updatedUser.Status,
+                        Status = updatedUser.Status.ToString(),
                         Gender = updatedUser.Gender.ToString(),
                         SkillLevel = updatedUser.SkillLevel.ToString(),
                         Ranking = updatedUser.Ranking.ToString(),
                         FullName = updatedUser.FullName,
                         Address = updatedUser.Address,
                         Bio = updatedUser.Bio,
-                        ImageUrl = updatedUser.Image?.Url,
+                        ImageUrl = updatedUser.AvatarUrl,
                         Wallet = walletResponse,
                         Username = updatedUser.Username,
                         Email = updatedUser.Email,
@@ -214,7 +214,7 @@ namespace StrateZone_Service.Implements
                 if (user.Password != loginRequest.Password || user.OTPExpiry < DateTime.UtcNow)
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid email or password", Data = null };
 
-                if (user.Status == "Unactivated")
+                if (user.Status == PostgreEnums.UserStatus.Unactivated)
                     return new ApiResponse<LoginResponse> 
                     { 
                         Success = false, 
@@ -252,14 +252,14 @@ namespace StrateZone_Service.Implements
                     {
                         UserId = updatedUser.UserId,
                         UserRole = updatedUser.UserRole.ToString(),
-                        Status = updatedUser.Status,
+                        Status = updatedUser.Status.ToString(),
                         Gender = updatedUser.Gender.ToString(),
                         SkillLevel = updatedUser.SkillLevel.ToString(),
                         Ranking = updatedUser.Ranking.ToString(),
                         FullName = updatedUser.FullName,
                         Address = updatedUser.Address,
                         Bio = updatedUser.Bio,
-                        ImageUrl = updatedUser.Image?.Url,
+                        ImageUrl = updatedUser.AvatarUrl,
                         Wallet = walletResponse,
                         Username = updatedUser.Username,
                         Email = updatedUser.Email,

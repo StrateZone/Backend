@@ -103,7 +103,7 @@ namespace StrateZone_Repository.Implements
 
                 var users = _context.Users
                                     .AsNoTracking()
-                                    .Where(u => u.UserId != id && u.Status == "Active" && (username == null || u.Username.ToLower().Contains(username.ToLower())))
+                                    .Where(u => u.UserId != id && u.Status == UserStatus.Active && (username == null || u.Username.ToLower().Contains(username.ToLower())))
                                     .AsQueryable();
 
                 return (
@@ -247,11 +247,8 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@fullname", updatedUser.FullName));
                 }
 
-                if (!string.IsNullOrEmpty(updatedUser.Status))
-                {
-                    sql.Append("status = @status, ");
-                    parameters.Add(new NpgsqlParameter("@status", updatedUser.Status));
-                }
+                sql.Append("status = @status, ");
+                parameters.Add(new NpgsqlParameter("@status", updatedUser.Status));
 
                 if (updatedUser.ContributionPoints.HasValue)
                 {
@@ -396,7 +393,7 @@ namespace StrateZone_Repository.Implements
                 var currentDay = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
                 var accounts = await _context.Users
                     .Where(a =>
-                        a.Status == "Unactivated" &&
+                        a.Status == UserStatus.Unactivated &&
                         (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
                     .Include(a => a.Wallet)
                     .Include(a => a.Cart)

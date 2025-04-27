@@ -64,7 +64,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Wallets.AsNoTracking().Include(u => u.User).SingleOrDefaultAsync(w => w.UserId == userId) ?? throw new Exception("No wallet for this user was found.");
+                return await _context.Wallets.AsNoTracking()
+                                .SingleOrDefaultAsync(w => w.UserId == userId) 
+                            ?? throw new Exception("No wallet for this user was found.");
             }
             catch (Exception ex)
             {
@@ -76,10 +78,8 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingWallet = await _context.Wallets.FindAsync(id)
+                var existingWallet = await _context.Wallets.AsNoTracking().SingleOrDefaultAsync(w => w.WalletId == id)
                         ?? throw new KeyNotFoundException("Wallet with this ID does not exist.");
-
-                _context.Entry(existingWallet).State = EntityState.Detached;
 
                 wallet.WalletId = id;
                 var parameters = new List<NpgsqlParameter>();
@@ -106,8 +106,7 @@ namespace StrateZone_Repository.Implements
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
 
-                var updatedWallet = await _context.Wallets.FindAsync(id);
-                return updatedWallet;
+                return wallet;
             }
             catch (Exception ex)
             {

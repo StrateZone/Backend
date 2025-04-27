@@ -10,6 +10,7 @@ using System.Globalization;
 using StrateZone_Repository.Pagination;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using StrateZone_Repository.Implements;
+using System.Transactions;
 
 namespace StrateZone_Service.Implements
 {
@@ -23,10 +24,8 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IUserRepository _userRepository;
-        private readonly IAppointmentRepository _appointmentRepository;
         private readonly INotificationService _notificationService;
         private readonly IPriceService _priceService;
-        private readonly ISystemService _systemService;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -37,10 +36,8 @@ namespace StrateZone_Service.Implements
             IMapper mapper,
             IEmailService emailService,
             IUserRepository userRepository,
-            IAppointmentRepository appointmentRepository,
             INotificationService notificationService,
-            IPriceService priceService,
-            ISystemService systemService)
+            IPriceService priceService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -50,10 +47,8 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
             _emailService = emailService;
             _userRepository = userRepository;
-            _appointmentRepository = appointmentRepository;
             _notificationService = notificationService;
             _priceService = priceService;
-            _systemService = systemService;
         }
 
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
@@ -72,37 +67,24 @@ namespace StrateZone_Service.Implements
                     };
                 }
 
+                foreach (var tablesAppointment in appointment.TablesAppointments)
+                {
+                    PaymentModel paymentModel = new()
+                    {
+                        UserId = appointment.UserId,
+                        TablesAppointmentId = tablesAppointment.Id,
+                        PaymentStatus = PostgreEnums.PaymentStatus.paid.ToString(),
+                        Description = $"Thanh toán cho bàn {tablesAppointment.Id}",
+                        PaymentType = PostgreEnums.PaymentType.appointment.ToString()
+                    };
+
+                    await CreatePaymentAsync(paymentModel);
+                }
+
                 userWallet.Balance -= appointment.TotalPrice;
                 await _walletRepository.UpdateWalletAsync(userWallet, userWallet.WalletId);
 
-                float incomingHours = (float) await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
-
-                List<TablesAppointment> toBeUpdatedTAs = new();
-                List<Payment> toBeUpdatedPayments = new();
-                foreach (var tablesAppointment in appointment.TablesAppointments)
-                {
-                    string status = ((DateTime)tablesAppointment.CreatedAt).AddHours(incomingHours) > tablesAppointment.ScheduleTime
-                                    ? AppointmentStatus.incoming.ToString()
-                                    : AppointmentStatus.confirmed.ToString();
-
-                    tablesAppointment.Status = status;
-                    var mappedTA = _mapper.Map<TablesAppointment>(tablesAppointment);
-                    toBeUpdatedTAs.Add(mappedTA);
-
-                    var updatingPayment = (await _paymentRepository
-                        .GetPaymentsByTablesAppointmentIdAsync(tablesAppointment.Id))
-                        .SingleOrDefault(p => p.UserId == appointment.UserId);
-
-                    if (updatingPayment == null) continue;
-
-                    updatingPayment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
-                    toBeUpdatedPayments.Add(updatingPayment);
-                }
-
-                await _tablesAppointmentRepository.MassUpdateTablesAppointmentsAsync(toBeUpdatedTAs);
-                await _paymentRepository.MassUpdatePaymentsAsync(toBeUpdatedPayments);
-
-                var newTransaction = new Transaction
+                var newTransaction = new StrateZone_Repository.Entities.Transaction
                 {
                     OfUser = appointment.UserId,
                     Amount = appointment.TotalPrice,
@@ -112,10 +94,6 @@ namespace StrateZone_Service.Implements
                 };
 
                 await _transactionRepository.SaveTransaction(newTransaction);
-
-                appointment.Status = AppointmentStatus.incompleted.ToString();
-                var mapped = _mapper.Map<Appointment>(appointment);
-                await _appointmentRepository.UpdateAppointmentAsync(mapped, appointment.AppointmentId);
 
                 NotificationRequest thisUser = new()
                 {
@@ -288,7 +266,7 @@ namespace StrateZone_Service.Implements
                                 + (requestAcceptor != null ? $"(chơi chung với {requestAcceptor.Username})" : "");
                 await UpdatePaymentAsync(invitorUserPayment, invitorUserPayment.Id);
 
-                var newTransaction = new Transaction
+                var newTransaction = new StrateZone_Repository.Entities.Transaction
                 {
                     OfUser = appointmentrequestModel.ToUser,
                     Amount = tableAppointment.Price,
@@ -444,7 +422,7 @@ namespace StrateZone_Service.Implements
 
                 await _paymentRepository.CreatePaymentAsync(userMembershipPayment);
 
-                var newTransaction = new Transaction
+                var newTransaction = new StrateZone_Repository.Entities.Transaction
                 {
                     OfUser = user.UserId,
                     Amount = membershipPrice.Price1,

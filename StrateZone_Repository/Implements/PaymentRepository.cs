@@ -26,7 +26,7 @@ namespace StrateZone_Repository.Implements
             {
                 var connection = _context.Database.GetDbConnection();
 
-                if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+                if (connection.State == System.Data.ConnectionState.Broken || connection.State == System.Data.ConnectionState.Closed) await connection.OpenAsync();
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"

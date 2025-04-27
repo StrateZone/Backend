@@ -1271,6 +1271,11 @@ public partial class StrateZoneDbContext : DbContext
                     v => (SkillLevel) Enum.Parse(typeof(SkillLevel), v)
                 );
 
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
+                    v => v.ToString(),
+                    v => (UserStatus)Enum.Parse(typeof(UserStatus), v)
+                );
+
             entity.Property(e => e.Ranking).HasColumnName("ranking").HasColumnType("ranking").HasConversion(
                     v => v.ToString(),
                     v => (Ranking)Enum.Parse(typeof(Ranking), v)

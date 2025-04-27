@@ -29,7 +29,7 @@ public partial class User
     /// <summary>
     /// Depends on Role
     /// </summary>
-    public string Status { get; set; } = null!;
+    public UserStatus Status { get; set; }
 
     [Column(TypeName = "gender")]
     public Gender Gender { get; set; }

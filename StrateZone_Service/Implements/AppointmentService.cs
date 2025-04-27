@@ -36,6 +36,7 @@ namespace StrateZone_Service.Implements
         private readonly IVoucherService _voucherService;
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
+        private readonly ISystemService _systemService;
 
         public AppointmentService(IAppointmentRepository appointmentRepository, 
             ITableService tableService, 
@@ -47,7 +48,8 @@ namespace StrateZone_Service.Implements
             ITransactionRepository transactionRepository, 
             ScheduleTimeValidator scheduleTimeValidator, 
             INotificationService notificationService,
-            IVoucherService voucherService)
+            IVoucherService voucherService,
+            ISystemService systemService)
         {
             _appointmentRepository = appointmentRepository;
             _mapper = mapper;
@@ -60,6 +62,7 @@ namespace StrateZone_Service.Implements
             _scheduleTimeValidator = scheduleTimeValidator;
             _notificationService = notificationService;
             _voucherService = voucherService;
+            _systemService = systemService;
         }
 
         public async Task<PagedList<AppointmentResponse>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -227,6 +230,7 @@ namespace StrateZone_Service.Implements
                 {
                     UserId = request.UserId,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Local),
+                    Status = AppointmentStatus.incompleted.ToString(),
                     TotalPrice = request.TotalPrice,
                 };
 
@@ -234,6 +238,7 @@ namespace StrateZone_Service.Implements
                 var appointment = await _appointmentRepository.CreateAppointmentAsync(mappedAppointment);
                 var result = _mapper.Map<AppointmentModel>(appointment);
 
+                float incomingHour = (float) await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
                 foreach (var tablesAppointmentRequest in request.TablesAppointmentRequests)
                 {
                     TablesAppointmentModel tablesAppointmentModel = new()
@@ -243,6 +248,9 @@ namespace StrateZone_Service.Implements
                         ScheduleTime = DateTime.SpecifyKind(tablesAppointmentRequest.ScheduleTime, DateTimeKind.Unspecified),
                         EndTime = DateTime.SpecifyKind(tablesAppointmentRequest.EndTime, DateTimeKind.Unspecified),
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        Status = DateTime.UtcNow.AddHours(7).AddHours(incomingHour) > tablesAppointmentRequest.ScheduleTime 
+                                ? AppointmentStatus.incoming.ToString()
+                                : AppointmentStatus.confirmed.ToString(),
                         Price = tablesAppointmentRequest.Price,
                     };
 
@@ -276,20 +284,6 @@ namespace StrateZone_Service.Implements
                 result.Appointmentrequests = appointmentRequests.Count > 0 
                                 ? await _appointmentrequestService.CreateAppointmentRequestsAsync(appointmentRequests)
                                 : new();
-
-                foreach (var tablesAppointment in tablesAppointments)
-                {
-                    PaymentModel paymentModel = new()
-                    {
-                        UserId = appointment.UserId,
-                        TablesAppointmentId = tablesAppointment.Id,
-                        PaymentStatus = PostgreEnums.PaymentStatus.unpaid.ToString(),
-                        Description = $"Thanh toán cho bàn {tablesAppointment.Id}",
-                        PaymentType = PostgreEnums.PaymentType.appointment.ToString()
-                    };
-
-                    await _paymentService.CreatePaymentAsync(paymentModel);
-                }
 
                 return result;
             }
