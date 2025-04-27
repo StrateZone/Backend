@@ -306,27 +306,41 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
-                await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
-
-                var transaction = new TransactionModel
+                if (refundAmount > 0)
                 {
-                    Amount = refundAmount,
-                    Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    OfUser = userId,
-                    TransactionType = TransactionType.refund,
-                };
-                await _transactionService.SaveTransaction(transaction);
+                    var userWallet = await _walletService.GetWalletByUserIdAsync(userId);
+                    await _walletService.DepositWalletAsync((int)refundAmount, userWallet.WalletId);
 
-                var notification = new NotificationRequest
+                    var transaction = new TransactionModel
+                    {
+                        Amount = refundAmount,
+                        Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = userId,
+                        TransactionType = TransactionType.refund,
+                    };
+                    await _transactionService.SaveTransaction(transaction);
+
+                    var notification = new NotificationRequest
+                    {
+                        ToUser = userId,
+                        Title = "Hủy đơn đặt bàn thành công!",
+                        Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
+                        Type = NotificationType.appointment
+                    };
+                    await _notificationService.CreateNotificationAsync(notification);
+                }
+                else
                 {
-                    ToUser = userId,
-                    Title = "Hủy đơn đặt bàn thành công!",
-                    Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
-                    Type = NotificationType.appointment_request_from
-                };
-                await _notificationService.CreateNotificationAsync(notification);
+                    var notification = new NotificationRequest
+                    {
+                        ToUser = userId,
+                        Title = "Hủy đơn đặt bàn thành công!",
+                        Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                        Type = NotificationType.appointment
+                    };
+                    await _notificationService.CreateNotificationAsync(notification);
+                }
             }
             catch (Exception ex)
             {
