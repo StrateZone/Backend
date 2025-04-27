@@ -383,12 +383,6 @@ namespace StrateZone_Repository.Implements
                     await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
 
                     _context.Entry(appointmentRequest).State = EntityState.Detached;
-
-                    var updatedRequest = await _context.AppointmentRequests.FindAsync(id);
-                    if (updatedRequest != null)
-                    {
-                        updatedRequests.Add(updatedRequest);
-                    }
                 }
 
                 await transaction.CommitAsync();

@@ -193,12 +193,12 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-
         public async Task<List<Payment>> GetPaymentsByTablesAppointmentIdAsync(int id)
         {
             try
             {
-                return await _context.Payments.AsNoTracking().Where(p => p.TablesAppointmentId == id).ToListAsync();
+                return await _context.Payments.AsNoTracking().Where(p => p.TablesAppointmentId == id)
+                                .OrderByDescending(p => p.CreatedAt).ToListAsync();
             }
             catch (Exception ex)
             {

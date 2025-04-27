@@ -22,5 +22,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public DateTime? Cancellation_PartialRefund_TimeGate { get; set; }
 
+        public int? CancelUserId { get; set; }
+
+        public int? InvitedUserId { get; set; }
     }
 }
