@@ -445,13 +445,11 @@ namespace StrateZone_Service.Implements
                     };
                     await _transactionService.SaveTransaction(newTransaction);
                 }
-                else
+                else 
                 {
                     var refundAmount = refundCalculation.RefundAmount;
-                    var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
-                    var paymentForInvitedUser = bookingPayments.SingleOrDefault(p => p.UserId != userId);
 
-                    await _walletService.DepositWalletByUserIdAsync((int)tablesAppointment.Price, (int) paymentForInvitedUser.UserId);
+                    await _walletService.DepositWalletByUserIdAsync((int)tablesAppointment.Price, (int)refundCalculation.InvitedUserId);
 
                     var newTransaction = new TransactionModel
                     {
@@ -460,10 +458,10 @@ namespace StrateZone_Service.Implements
                             $"Hoàn tiền {tablesAppointment.Price} VND cho đơn được mời tham gia ở bàn số {tablesAppointment.TableId}, " +
                             $"đơn #{tablesAppointment.AppointmentId}.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        OfUser = paymentForInvitedUser.UserId,
+                        OfUser = refundCalculation.InvitedUserId,
                         TransactionType = TransactionType.refund,
                     };
-                    await _transactionService.SaveTransaction(newTransaction);
+                    _ = Task.Run(() => _transactionService.SaveTransaction(newTransaction));
                 }
 
                 tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
@@ -472,8 +470,9 @@ namespace StrateZone_Service.Implements
                 foreach (var req in requests)
                 {
                     req.Status = RequestStatus.cancelled;
-                    await _requestRepository.UpdateAppointmentRequestAsync(req, req.Id);
+                   
                 }
+                await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
 
                 return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
             }
@@ -513,8 +512,8 @@ namespace StrateZone_Service.Implements
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.no_refund,
                     Message = "Không được hoàn tiền. Lí do: Đơn đặt bàn này chưa thanh toán.",
-                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                     Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
@@ -530,8 +529,8 @@ namespace StrateZone_Service.Implements
                     RefundStatus = RefundStatus.no_refund_while_refund_for_invited_user,
                     Message = "Không được hoàn tiền. Lí do: Đơn đặt bàn có mời người chơi khác (người bạn đã mời vẫn " +
                     "sẽ được hoàn tiền).",
-                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                     Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
@@ -590,8 +589,8 @@ namespace StrateZone_Service.Implements
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                         Cancellation_PartialRefund_TimeGate = TimeGate_Refund100_OnCancellation,
-                        CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                        InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                        CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                        InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
                     };
                 }
                 else
@@ -606,8 +605,8 @@ namespace StrateZone_Service.Implements
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                         Cancellation_PartialRefund_TimeGate = TimeGate_Refund100_OnCancellation,
-                        CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                        InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                        CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                        InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
                     };
                 }
             }
@@ -623,8 +622,8 @@ namespace StrateZone_Service.Implements
                     CancellationTime = CancelTime,
                     Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                     Cancellation_PartialRefund_TimeGate = TimeGate_Refund50_OnCancellation,
-                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
                 };
             }
 
@@ -638,8 +637,8 @@ namespace StrateZone_Service.Implements
                 CancellationTime = CancelTime,
                 Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
                 Cancellation_PartialRefund_TimeGate = TimeGate_Refund50_OnCancellation,
-                CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId).UserId,
-                InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId).UserId,
+                CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
             };
         }
 
