@@ -28,7 +28,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var prices = _context.Prices.AsNoTracking().Where(p => !p.TeachingSalary && !p.MemberFee && (p.ProductId == null || p.ProductId == 0)).AsQueryable();
+                var prices = _context.Prices.AsNoTracking().Where(p => !p.TeachingSalary && (p.ProductId == null || p.ProductId == 0)).AsQueryable();
                 return await PagedList<Price>.ToPagedList(prices, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
