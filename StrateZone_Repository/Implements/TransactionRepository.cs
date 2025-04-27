@@ -48,7 +48,8 @@ namespace StrateZone_Repository.Implements
 
                     query = query.Where(t =>
                         t.Id.ToString().ToLower().Contains(search) ||
-                        t.OfUserNavigation.Email.ToLower().Contains(search));
+                        t.OfUserNavigation.Email.ToLower().Contains(search) || 
+                        t.Content.ToLower().Contains(search));
                 }
 
                 query = query.OrderByDescending(t => t.CreatedAt);
