@@ -175,11 +175,10 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingTablesAppointment = await _context.TablesAppointments.FindAsync(id) 
+                var existingTablesAppointment = await _context.TablesAppointments.AsNoTracking().SingleOrDefaultAsync(ta => ta.Id == id) 
                     ?? throw new Exception("Tables appointment with this ID does not exist");
 
                 tablesAppointment.Id = id;
-                _context.Entry(existingTablesAppointment).State = EntityState.Detached;
 
                 var parameters = new List<NpgsqlParameter>();
                 var sql = new StringBuilder("UPDATE tables_appointments SET ");
@@ -230,8 +229,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
                 _context.Entry(tablesAppointment).State = EntityState.Detached;
 
-                var updatedAppointmentRequest = await _context.TablesAppointments.FindAsync(id);
-                return updatedAppointmentRequest;
+                return tablesAppointment;
             }
             catch (Exception ex)
             {

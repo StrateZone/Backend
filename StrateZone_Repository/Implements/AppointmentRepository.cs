@@ -270,8 +270,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingAppointment = await _context.Appointments.FindAsync(id) ?? throw new Exception("Appointment with this ID does not exist");
-                _context.Entry(existingAppointment).State = EntityState.Detached;
+                var existingAppointment = await _context.Appointments.AsNoTracking().SingleOrDefaultAsync(a => a.AppointmentId == id) ?? throw new Exception("Appointment with this ID does not exist");
 
                 appointment.AppointmentId = id;
                 var parameters = new List<NpgsqlParameter>();
@@ -306,7 +305,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
                 _context.Entry(appointment).State = EntityState.Detached;
 
-                return await _context.Appointments.FindAsync(id);
+                return appointment;
             }
             catch (Exception ex)
             {

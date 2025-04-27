@@ -8,6 +8,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using StrateZone_Repository.Entities;
 
 namespace StrateZone_Repository.Implements
 {
@@ -230,9 +231,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingAppointmentrequest = await _context.AppointmentRequests.FindAsync(id) ?? throw new Exception("Appointment request with this ID does not exist");
-
-                _context.Entry(existingAppointmentrequest).State = EntityState.Detached;
+                var existingAppointmentrequest = await _context.AppointmentRequests.AsNoTracking().SingleOrDefaultAsync(a => a.Id == id) ?? throw new Exception("Appointment request with this ID does not exist");
 
                 appointmentRequest.Id = id;
                 var parameters = new List<NpgsqlParameter>();
@@ -296,7 +295,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
                 _context.Entry(appointmentRequest).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.FindAsync(id);
+                return appointmentRequest;
             }
             catch (Exception ex)
             {

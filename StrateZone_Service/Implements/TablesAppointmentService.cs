@@ -399,7 +399,7 @@ namespace StrateZone_Service.Implements
                 if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
                 else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
             }
-            _ = Task.Run(() => _requestRepository.MassUpdateAppointmentRequestsAsync(requests));
+            await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
         }
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)

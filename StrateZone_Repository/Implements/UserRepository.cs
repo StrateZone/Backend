@@ -196,12 +196,10 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingUser = await _context.Users.FindAsync(id) ?? throw new Exception("User with this ID does not exist");
+                var existingUser = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserId == id) ?? throw new Exception("User with this ID does not exist");
 
-                if (await _context.Users.AnyAsync(u => u != existingUser && u.Username == updatedUser.Username))
+                if (await _context.Users.AsNoTracking().AnyAsync(u => u != existingUser && u.Username == updatedUser.Username))
                     throw new Exception("Duplicated username detected.");
-
-                _context.Entry(existingUser).State = EntityState.Detached;
 
                 updatedUser.UserId = id;
 
@@ -330,9 +328,9 @@ namespace StrateZone_Repository.Implements
                 parameters.Add(new NpgsqlParameter("@userId", id));
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
-
-                var refreshedUser = await _context.Users.FindAsync(id);
-                return refreshedUser;
+                _context.Entry(updatedUser).State = EntityState.Detached;
+                
+                return updatedUser;
             }
             catch (Exception ex)
             {
