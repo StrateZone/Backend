@@ -145,9 +145,9 @@ namespace StrateZone_Repository.Implements
 
                 return tablesAppointment;
             }
-            catch (Exception ex)
+            catch (PostgresException ex) when (ex.SqlState == "23P01")
             {
-                throw new Exception(ex.Message);
+                throw new Exception($"This table is being booked by someone else: Table ID {tablesAppointment.TableId}, schedule time: {tablesAppointment.ScheduleTime}, end time: {tablesAppointment.EndTime}");
             }
         }
 
