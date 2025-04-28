@@ -223,7 +223,7 @@ namespace StrateZone_Service.Implements
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
                 }
 
-                if (user.Password != loginRequest.Password || user.OTPExpiry < DateTime.UtcNow)
+                if (user.Password != loginRequest.Password)
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid email or password", Data = null };
 
                 if (user.Status == PostgreEnums.UserStatus.Unactivated)
