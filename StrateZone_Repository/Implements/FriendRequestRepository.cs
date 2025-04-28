@@ -78,7 +78,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var toDelete = await _context.Friendrequests.FindAsync(id) ?? throw new Exception("Friendrequest with this ID doesn't exist.");
-                
+
+                if (toDelete.Status != PostgreEnums.RequestStatus.pending) throw new Exception($"This request is already {toDelete.Status}");
+
                 _context.Friendrequests.Remove(toDelete);
                 await _context.SaveChangesAsync();
 

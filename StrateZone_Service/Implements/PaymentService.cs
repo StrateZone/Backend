@@ -247,6 +247,17 @@ namespace StrateZone_Service.Implements
                 var appointment_request = (await _appointmentrequestRepository.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(appointmentrequestModel.FromUser, tableAppointment.Id))
                                             .SingleOrDefault(ar => ar.ToUser == appointmentrequestModel.ToUser && ar.Status == RequestStatus.pending);
 
+                if (appointment_request == null)
+                {
+                    return new ApiResponse<AppointmentrequestModel>
+                    {
+                        Success = false,
+                        StatusCode = 500,
+                        Message = $"This appointment invitation is no longer available.",
+                        Data = null
+                    };
+                }
+
                 if (appointment_request.Status == RequestStatus.expired || appointment_request.Status == RequestStatus.cancelled || appointment_request.Status == RequestStatus.rejected)
                 {
                     return new ApiResponse<AppointmentrequestModel>
@@ -273,6 +284,7 @@ namespace StrateZone_Service.Implements
                     };
                 }
 
+                await _appointmentrequestRepository.AcceptAppointmentrequestAsync(appointment_request.Id);
                 await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
 
                 var invitedUserPayment = new Payment()
@@ -286,8 +298,6 @@ namespace StrateZone_Service.Implements
                 };
 
                 await _paymentRepository.CreatePaymentAsync(invitedUserPayment);
-
-                await _appointmentrequestRepository.AcceptAppointmentrequestAsync(appointment_request.Id);
 
                 var invitorUserPayment = (await GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id))
                                         .SingleOrDefault(p => p.UserId == requestSender.UserId);

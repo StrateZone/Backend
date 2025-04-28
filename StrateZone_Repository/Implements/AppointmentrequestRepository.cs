@@ -391,42 +391,68 @@ namespace StrateZone_Repository.Implements
 
         public async Task<Appointmentrequest> AcceptAppointmentrequestAsync(int id)
         {
+            await using var transaction = await _context.Database.BeginTransactionAsync(); 
+
             try
             {
-                var toAccept = await _context.AppointmentRequests.FindAsync(id)
-                            ?? throw new Exception("Appointment request with this ID does not exist");
+                var toAccept = await _context.AppointmentRequests
+                    .FromSqlRaw("SELECT * FROM appointment_requests WHERE id = {0} FOR UPDATE", id)
+                    .FirstOrDefaultAsync()
+                    ?? throw new Exception("Appointment request with this ID does not exist");
 
                 if (toAccept.Status != PostgreEnums.RequestStatus.pending)
                 {
                     throw new Exception($"This request is already {toAccept.Status}.");
                 }
 
-                toAccept.Id = id;
-                var parameters = new List<NpgsqlParameter>();
+                var invtList = await _context.AppointmentRequests
+                    .FromSqlRaw(@"
+                SELECT * FROM appointment_requests
+                WHERE appointment_id = {0} AND table_id = {1} AND from_user = {2}
+                FOR UPDATE",
+                        toAccept.AppointmentId, toAccept.TableId, toAccept.FromUser)
+                    .ToListAsync();
+
+                if (invtList.Any(i => i.Status == RequestStatus.accepted))
+                {
+                    throw new Exception("Someone has already accepted this invitation.");
+                }
+
+                var parameters = new List<NpgsqlParameter>
+                {
+                    new NpgsqlParameter("@id", id),
+                    new NpgsqlParameter("@user_id", toAccept.FromUser),
+                    new NpgsqlParameter("@table_id", toAccept.TableId),
+                    new NpgsqlParameter("@appointment_id", toAccept.AppointmentId ?? (object)DBNull.Value)
+                };
+
                 var sql = new StringBuilder(
                     "UPDATE appointment_requests " +
-                        "SET status = " +
-                        "CASE " +
-                            "WHEN id = @id THEN 'accepted' " +
-                            "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
-                                "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'accepted_by_others' " +
-                            "ELSE status " +
-                    "END;");
-                parameters.Add(new NpgsqlParameter("@id", id));
-                parameters.Add(new NpgsqlParameter("@user_id", toAccept.FromUser));
-                parameters.Add(new NpgsqlParameter("@table_id", toAccept.TableId));
-                parameters.Add(new NpgsqlParameter("@appointment_id", toAccept.AppointmentId != null ? toAccept.AppointmentId : DBNull.Value));
+                    "SET status = " +
+                    "CASE " +
+                        "WHEN id = @id THEN 'accepted' " +
+                        "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
+                            "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'accepted_by_others' " +
+                        "ELSE status " +
+                    "END " +
+                    "WHERE table_id = @table_id AND from_user = @user_id;"
+                );
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+
                 _context.Entry(toAccept).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.AsNoTracking().Include(ar => ar.ToUserNavigation).SingleOrDefaultAsync(ar => ar.Id == id);
+                await transaction.CommitAsync(); // COMMIT only after all operations succeed
+
+                return toAccept;
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception(ex.Message);
+                await transaction.RollbackAsync(); 
+                throw;
             }
         }
+
 
         public async Task<Appointmentrequest> RejectAppointmentrequestAsync(int id)
         {
