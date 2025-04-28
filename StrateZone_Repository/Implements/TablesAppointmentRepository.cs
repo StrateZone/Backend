@@ -128,7 +128,7 @@ namespace StrateZone_Repository.Implements
 
                 createCmd.CommandText = @"
                     INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at) 
-                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at)
+                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time))
                     RETURNING id;"
                 ;
 
