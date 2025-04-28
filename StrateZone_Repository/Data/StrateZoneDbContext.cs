@@ -1256,7 +1256,10 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Address)
                 .HasMaxLength(100)
                 .HasColumnName("address");
-            
+
+            entity.Property(e => e.IsPasswordHashed)
+                .HasColumnName("is_hashed_password");
+
             entity.Property(e => e.Bio).HasColumnName("bio");
             
             entity.Property(e => e.FullName).HasColumnName("full_name");

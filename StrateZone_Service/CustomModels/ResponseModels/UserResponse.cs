@@ -38,6 +38,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? AvatarUrl { get; set; }
 
+        public bool? IsPasswordHashed { get; set; }
+
         public string? Bio { get; set; }
 
         public int? Points { get; set; }

@@ -23,6 +23,7 @@ namespace StrateZone_Service.Interfaces
         Task<SearchedOpponentsResponse> GetRandomOpponentsAsync(int userId, string? SearchTerm, HashSet<int> excludedIds);
         Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);
         Task<UserResponse> SuspendUserAccount(int id);
+        Task<List<UserResponse>> PasswordUserAsync();
         Task<UserResponse> KickUserFromCommunityAsync(int id);
         Task<int> DeleteUnactivatedAccountsAsync(int daysAfterAccountCreate);
         Task<UserResponse> FindUserAcceptedToJoinTablesAppointment(TablesAppointmentModel tablesAppointment);

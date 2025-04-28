@@ -54,7 +54,9 @@ public partial class User
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-    
+
+    public bool? IsPasswordHashed { get; set; }
+
     // Refresh Token Fields
     public string? RefreshToken { get; set; }
 

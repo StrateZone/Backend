@@ -166,8 +166,8 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                        INSERT INTO users (username, email, phone, full_name, password, gender, role, skill_level, status, created_at) 
-                        VALUES (@username, @email, @phone, @fullname, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @status, @createdAt)
+                        INSERT INTO users (username, email, phone, full_name, password, gender, role, skill_level, label, status, created_at, is_hashed_password) 
+                        VALUES (@username, @email, @phone, @fullname, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @label, @status, @createdAt, true)
                         RETURNING user_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@username", user.Username));
@@ -178,6 +178,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@gender", user.Gender.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@label", user.UserLabel.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
 
@@ -321,6 +322,12 @@ namespace StrateZone_Repository.Implements
                 {
                     sql.Append("membership_expiry = @membershipExpiry, ");
                     parameters.Add(new NpgsqlParameter("@membershipExpiry", updatedUser.MembershipExpiry));
+                }
+
+                if (updatedUser.IsPasswordHashed.HasValue)
+                {
+                    sql.Append("is_hashed_password = @a, ");
+                    parameters.Add(new NpgsqlParameter("@a", updatedUser.IsPasswordHashed.Value));
                 }
 
                 sql.Remove(sql.Length - 2, 2);

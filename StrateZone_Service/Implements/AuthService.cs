@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using StrateZone_Repository.Entities;
@@ -223,7 +224,9 @@ namespace StrateZone_Service.Implements
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
                 }
 
-                if (user.Password != loginRequest.Password)
+                var verification = new PasswordHasher<string>().VerifyHashedPassword(null, user.Password, loginRequest.Password);
+
+                if (verification == PasswordVerificationResult.Failed)
                     return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid email or password", Data = null };
 
                 if (user.Status == PostgreEnums.UserStatus.Unactivated)
@@ -330,7 +333,8 @@ namespace StrateZone_Service.Implements
                     Username = registerRequest.UserName,
                     Address = registerRequest.Address,
                     FullName = registerRequest.FullName,
-                    Password = registerRequest.Password,
+                    Password = new PasswordHasher<string>().HashPassword(null, registerRequest.Password),
+                    UserLabel = PostgreEnums.UserLabel.none,
                     Gender = registerRequest.Gender,
                     SkillLevel = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner,
                     Ranking = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic,

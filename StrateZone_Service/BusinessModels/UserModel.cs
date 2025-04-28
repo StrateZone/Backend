@@ -33,6 +33,8 @@ namespace StrateZone_Service.BusinessModels
         public int? ContributionPoints { get; set; }
 
         public UserLabel UserLabel { get; set; }
+        
+        public bool? IsPasswordHashed { get; set; }
 
         public StrateZone_Repository.Parameters.PostgreEnums.UserRole UserRole { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.UserRole.RegisteredUser;
 

@@ -10,6 +10,7 @@ using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using System.Globalization;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.AspNetCore.Identity;
 
 namespace StrateZone_Service.Implements
 {
@@ -160,12 +161,13 @@ namespace StrateZone_Service.Implements
                 UserModel userModel = new UserModel()
                 {
                     Username = userRequest.UserName,
-                    Password = userRequest.Password,
+                    Password = new PasswordHasher<string>().HashPassword(null, userRequest.Password),
                     Email = userRequest.Email,
                     Phone = userRequest.PhoneNumber,
                     Address = userRequest.Address,
                     Gender = (StrateZone_Repository.Parameters.PostgreEnums.Gender)userRequest.Gender,
                     SkillLevel = (StrateZone_Repository.Parameters.PostgreEnums.SkillLevel)userRequest.SkillLevel,
+                    UserLabel = UserLabel.none,
                     CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                     Status = "Unactivated"
                 };
@@ -196,10 +198,41 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                if (userModel.Password != null)
+                    userModel.Password = new PasswordHasher<string>().HashPassword(null, userModel.Password);
+
                 var user = _mapper.Map<User>(userModel);
                 var result = await _userRepository.UpdateUserAsync(user, id);
 
                 return _mapper.Map<UserResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<UserResponse>> PasswordUserAsync()
+        {
+            try
+            {
+                var users = await GetUsersAsync(new() { PageNumber = 1, PageSize = 10_000 });
+
+                foreach (var u in users)
+                {
+                    if (u.IsPasswordHashed == true) continue;
+
+                    if (u.Password != null)
+                    {
+                        u.Password = new PasswordHasher<string>().HashPassword(null, u.Password);
+                        u.IsPasswordHashed = true;
+                    }
+
+                    var user = _mapper.Map<User>(u);
+                    await _userRepository.UpdateUserAsync(user, u.UserId);
+                }
+
+                return users;
             }
             catch (Exception ex)
             {

@@ -215,6 +215,22 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        /*
+        [HttpPut("password")]
+        public async Task<IActionResult> ass()
+        {
+            try
+            {
+                var result = await _userService.PasswordUserAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+        */
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
