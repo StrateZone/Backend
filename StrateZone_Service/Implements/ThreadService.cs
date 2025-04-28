@@ -53,13 +53,15 @@ namespace StrateZone_Service.Implements
                     throw new Exception($"Bạn không được phép gắn thẻ \"{bannedTag.TagName}\" vào trong bài đăng của mình.");
                 }
 
+                ThreadStatus threadStatus = userRole >= UserRole.Staff ? ThreadStatus.published : ThreadStatus.pending;
+
                 ThreadModel model = new()
                 {
                     CreatedBy = request.CreatedBy,
                     Title = request.Title,
                     Content = request.Content,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    Status = request.isDrafted ? ThreadStatus.drafted.ToString() : ThreadStatus.pending.ToString(),
+                    Status = request.isDrafted ? ThreadStatus.drafted.ToString() : threadStatus.ToString(),
                     Rating = 0,
                 };
 
@@ -391,7 +393,7 @@ namespace StrateZone_Service.Implements
 
                 if (toBeUpdated.Status == ThreadStatus.published.ToString()
                  || toBeUpdated.Status == ThreadStatus.hidden.ToString()) 
-                    toBeUpdated.Status = ThreadStatus.edit_pending.ToString();
+                    toBeUpdated.Status = userRole >= UserRole.Staff ? ThreadStatus.published.ToString() : ThreadStatus.edit_pending.ToString();
 
                 toBeUpdated.Title = threadModel.Title;
                 toBeUpdated.Content = threadModel.Content;
