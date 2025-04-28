@@ -187,6 +187,34 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("suspend/{userId}")]
+        public async Task<IActionResult> SuspendUser(int userId)
+        {
+            try
+            {
+                var result = await _userService.SuspendUserAccount(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("kick/{userId}")]
+        public async Task<IActionResult> KickUser(int userId)
+        {
+            try
+            {
+                var result = await _userService.KickUserFromCommunityAsync(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

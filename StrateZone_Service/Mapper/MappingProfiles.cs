@@ -130,6 +130,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<ThreadsTag, ThreadsTagModel>()
                 .ReverseMap();
             CreateMap<Like, LikeModel>().ReverseMap();  
+            CreateMap<Expense, ExpenseModel>().ReverseMap();   
             // add other mappings here
         }
     }

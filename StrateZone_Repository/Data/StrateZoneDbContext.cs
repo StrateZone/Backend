@@ -1445,11 +1445,11 @@ public partial class StrateZoneDbContext : DbContext
             
             entity.Property(e => e.Description).HasColumnName("description");
             
-            entity.Property(e => e.TransactionDate).HasColumnName("transaction_date");
+            entity.Property(e => e.TransactionDate).HasColumnName("transaction_date").HasColumnType("timestamp without time zone");
 
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp without time zone");
 
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp without time zone");
 
             entity.Property(e => e.SystemId).HasColumnName("system_id");
 

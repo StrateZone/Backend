@@ -466,7 +466,7 @@ namespace StrateZone_Repository.Implements
                                         FROM tables_appointments ta
                                         JOIN appointments a ON a.appointment_id = ta.appointment_id
                                         WHERE a.user_id = @user_id 
-                                        AND NOT EXISTS (SELECT 1 FROM appointment_requests ar WHERE ar.table_id = ta.table_id AND ar.appointment_id = ta.appointment_id AND ar.status = 'accepted')
+                                        AND NOT EXISTS (SELECT 1 FROM appointment_requests ar WHERE ar.table_id = ta.table_id AND ar.appointment_id = ta.appointment_id AND ar.status = 'table_cancelled')
                                         AND ta.status = 'cancelled' 
                                         AND ta.created_at >= @monday AND ta.created_at <= @today
                                     ",

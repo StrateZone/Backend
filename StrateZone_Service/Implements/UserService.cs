@@ -207,6 +207,42 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<UserResponse> SuspendUserAccount(int id)
+        {
+            try
+            {
+                var find = await GetUserByIdAsync(id);
+
+                if (find.Status == UserStatus.Suspended.ToString()) throw new Exception("This account is already suspended");
+
+                var result = await _userRepository.UpdateUserAsync(new() { Status = UserStatus.Suspended }, id);
+
+                return _mapper.Map<UserResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<UserResponse> KickUserFromCommunityAsync(int id)
+        {
+            try
+            {
+                var find = await GetUserByIdAsync(id);
+
+                if (find.UserRole == UserRole.RegisteredUser.ToString()) throw new Exception("This account is not a member of community");
+
+                var result = await _userRepository.UpdateUserAsync(new() { UserRole = UserRole.RegisteredUser }, id);
+
+                return _mapper.Map<UserResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<UserResponse> DeleteUserAsync(int id)
         {
             try

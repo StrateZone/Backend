@@ -20,6 +20,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -37,6 +38,7 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
         private readonly ISystemService _systemService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public AppointmentService(IAppointmentRepository appointmentRepository, 
             ITableService tableService, 
@@ -49,7 +51,8 @@ namespace StrateZone_Service.Implements
             ScheduleTimeValidator scheduleTimeValidator, 
             INotificationService notificationService,
             IVoucherService voucherService,
-            ISystemService systemService)
+            ISystemService systemService,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _appointmentRepository = appointmentRepository;
             _mapper = mapper;
@@ -63,6 +66,7 @@ namespace StrateZone_Service.Implements
             _notificationService = notificationService;
             _voucherService = voucherService;
             _systemService = systemService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<PagedList<AppointmentResponse>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -260,30 +264,34 @@ namespace StrateZone_Service.Implements
                 var tablesAppointments = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
                 result.TablesAppointments = tablesAppointments;
 
-                List<AppointmentrequestRequest> appointmentRequests = new();
-                foreach (var tableAppointment in request.TablesAppointmentRequests)
+                _ = Task.Run(async () =>
                 {
-                    var invitedUsers = tableAppointment.InvitedUsers;
-                    foreach (var invited in invitedUsers)
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IAppointmentrequestService>();
+
+                    List<AppointmentrequestRequest> appointmentRequests = new();
+                    foreach (var tableAppointment in request.TablesAppointmentRequests)
                     {
-                        var newAR = new AppointmentrequestRequest()
+                        var invitedUsers = tableAppointment.InvitedUsers;
+                        foreach (var invited in invitedUsers)
                         {
-                            FromUser = request.UserId,
-                            ToUser = invited,
-                            TotalPrice = tableAppointment.Price,
-                            StartTime = tableAppointment.ScheduleTime,
-                            EndTime = tableAppointment.EndTime,
-                            TableId = tableAppointment.TableId,
-                            AppointmentId = result.AppointmentId,
-                        };
+                            var newAR = new AppointmentrequestRequest()
+                            {
+                                FromUser = request.UserId,
+                                ToUser = invited,
+                                TotalPrice = tableAppointment.Price,
+                                StartTime = tableAppointment.ScheduleTime,
+                                EndTime = tableAppointment.EndTime,
+                                TableId = tableAppointment.TableId,
+                                AppointmentId = result.AppointmentId,
+                            };
 
-                        appointmentRequests.Add(newAR);
+                            appointmentRequests.Add(newAR);
+                        }
                     }
-                }
 
-                result.Appointmentrequests = appointmentRequests.Count > 0 
-                                ? await _appointmentrequestService.CreateAppointmentRequestsAsync(appointmentRequests)
-                                : new();
+                    await service.CreateAppointmentRequestsAsync(appointmentRequests);
+                });
 
                 return result;
             }
