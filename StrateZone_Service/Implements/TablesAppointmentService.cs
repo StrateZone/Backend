@@ -423,23 +423,16 @@ namespace StrateZone_Service.Implements
 
         private async Task CancelAppointmentRequests(int tablesAppointmentId)
         {
-            var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
-            foreach (var request in requests)
-            {
-                if (request.Status == RequestStatus.pending) request.Status = RequestStatus.cancelled;
-                else if (request.Status == RequestStatus.accepted) request.Status = RequestStatus.table_cancelled;
-            }
-
-            await _requestRepository.MassUpdateAppointmentRequestsAsync(requests);
+            await _requestRepository.CancelAllSentRequestsFromTablesAppointmentIdAsync(tablesAppointmentId);
         }
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId)
         {
             try
             {
-                var refundCalculation = await CalculateRefundAmountOnAppointmentCancellation(userId, tablesAppointmentId, DateTime.UtcNow.AddHours(7));
+                var tablesAppointment = await GetByIdAsync(tablesAppointmentId);
+                var refundAmount = tablesAppointment.Price;
 
-                var tablesAppointment = refundCalculation.TablesAppointmentModel;
                 string errorMessage = (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status) switch
                 {
                     AppointmentStatus.cancelled => "This appointment has already been cancelled.",
@@ -450,79 +443,42 @@ namespace StrateZone_Service.Implements
                     _ => string.Empty,
                 };
 
-                if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Cancellation failed: {errorMessage}");
+                await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
 
-                if (refundCalculation.RefundStatus == RefundStatus.no_refund || refundCalculation.RefundStatus == RefundStatus.cancellation_fail)
+                _ = Task.Run(async () =>
                 {
-                    tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
-                    return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
-                }
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITransactionService>();
 
-                if (refundCalculation.RefundStatus != RefundStatus.no_refund_while_refund_for_invited_user)
-                {
-                    var refundAmount = refundCalculation.RefundAmount;
-                    await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
-
-                    var newTransaction = new TransactionModel
+                    var transaction = new TransactionModel
                     {
                         Amount = refundAmount,
-                        Content =
-                            $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, " +
-                            $"đơn #{tablesAppointment.AppointmentId}.",
+                        Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}.",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                         OfUser = userId,
                         TransactionType = TransactionType.refund,
                     };
 
-                    _ = Task.Run(async () =>
-                    {
-                        using var scope = _serviceScopeFactory.CreateScope();
-                        var service = scope.ServiceProvider.GetRequiredService<TransactionService>();
-                        await service.SaveTransaction(newTransaction);
-                    });
-                }
-                else 
-                {
-                    var refundAmount = refundCalculation.RefundAmount;
-
-                    await _walletService.DepositWalletByUserIdAsync((int)tablesAppointment.Price, (int)refundCalculation.InvitedUserId);
-
-                    var newTransaction = new TransactionModel
-                    {
-                        Amount = tablesAppointment.Price,
-                        Content =
-                            $"Hoàn tiền {tablesAppointment.Price} VND cho đơn được mời tham gia ở bàn số {tablesAppointment.TableId}, " +
-                            $"đơn #{tablesAppointment.AppointmentId}.",
-                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        OfUser = refundCalculation.InvitedUserId,
-                        TransactionType = TransactionType.refund,
-                    };
-
-                    _ = Task.Run(async () =>
-                    {
-                        using var scope = _serviceScopeFactory.CreateScope();
-                        var service = scope.ServiceProvider.GetRequiredService<TransactionService>();
-                        await service.SaveTransaction(newTransaction);
-                    });
-                }
-
-                tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
-
-                var requests = await _requestRepository.GetAppointmentRequestsByTablesAppointmentIdAsync(tablesAppointmentId);
-                foreach (var req in requests)
-                {
-                    req.Status = RequestStatus.cancelled;
-                   
-                }
+                    await service.SaveTransaction(transaction);
+                });
 
                 _ = Task.Run(async () =>
                 {
                     using var scope = _serviceScopeFactory.CreateScope();
-                    var service = scope.ServiceProvider.GetRequiredService<AppointmentrequestRepository>();
-                    await service.MassUpdateAppointmentRequestsAsync(requests);
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    var notification = new NotificationRequest
+                    {
+                        ToUser = userId,
+                        Title = "Bàn của bạn đã được tự động hủy!",
+                        Content = $"Hệ thống đã tự động hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}. {refundAmount} VND đã được hoàn về ví của bạn!",
+                        Type = NotificationType.tables_appointment
+                    };
+
+                    await service.CreateNotificationAsync(notification);
                 });
 
-                return await UpdateTablesAppointmentAsync(tablesAppointment, tablesAppointmentId);
+                return await UpdateTablesAppointmentAsync(_mapper.Map<TablesAppointmentModel>(tablesAppointment), tablesAppointmentId);
             }
             catch (Exception ex)
             {

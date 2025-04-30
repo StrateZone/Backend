@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -147,60 +148,81 @@ namespace StrateZone_Service.Implements
 
         private void UpdateStatusForAppointmentBasedOnTablesAppointments(object? state)
         {
-            Task.Run(async () =>
+            // Create a cancellation token source with a reasonable timeout
+            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+
+            try
             {
-                try
+                // Execute the work synchronously but still allow for cancellation
+                ExecuteWorkAsync(cts.Token).GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("The appointment status update operation was canceled due to timeout.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating appointment status.");
+            }
+        }
+
+        // Extract the actual work to a separate async method
+        private async Task ExecuteWorkAsync(CancellationToken cancellationToken)
+        {
+            int count = 0;
+
+            // Use a single scope for the entire operation
+            using var scope = _serviceScopeFactory.CreateScope();
+            var appointmentRequestsService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+            var tablesAppointmentService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
+            var appointmentService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+            // First operation
+            count = await appointmentRequestsService.UpdateStatusForAppointmentBasedOnTablesAppointments();
+            _logger.LogInformation($"IAppointmentService auto updater executed: Changed status for {count} expired request(s).");
+
+            // Check cancellation before continuing
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Second operation
+            var toBeAnnouncedTablesAppointments = await tablesAppointmentService.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
+            var notifications = new List<NotificationRequest>();
+            int cancelledCount = 0;
+
+            foreach (var tableAppointment in toBeAnnouncedTablesAppointments)
+            {
+                // Check cancellation periodically
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var appointment = await appointmentService.GetAppointmentByIdAsync((int)tableAppointment.AppointmentId);
+                var userId = appointment.UserId;
+                string timeString = $"ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}, từ {tableAppointment.ScheduleTime.TimeOfDay} đến {tableAppointment.EndTime.TimeOfDay}";
+
+                NotificationRequest notif = new()
                 {
-                    int count = 0;
+                    ToUser = userId,
+                    Title = $"Các lời mời chơi cờ mà bạn đã gửi cho bàn {tableAppointment.TableId} đã bị từ chối!",
+                    Content = $"Toàn bộ các lời mời chơi cờ mà bạn đã gửi cho bàn {tableAppointment.TableId}, vào {timeString} (mã đơn #{tableAppointment.AppointmentId}) " +
+                        $"đều đã bị từ chối hoặc đã hết hạn. Bấm để xem chi tiết.",
+                    TablesAppointmentId = tableAppointment.Id,
+                    Type = StrateZone_Repository.Parameters.PostgreEnums.NotificationType.tables_appointment_invitations_timedout
+                };
 
-                    using (var scope = _serviceScopeFactory.CreateScope())
-                    {
-                        var appointmentRequestsService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
-                        count = await appointmentRequestsService.UpdateStatusForAppointmentBasedOnTablesAppointments();
-                    }
+                notifications.Add(notif);
 
-                    _logger.LogInformation($"IAppointmentService auto updater executed: Changed status for {count} expired request(s).");
-
-                    using (var scope = _serviceScopeFactory.CreateScope())
-                    {
-                        var tablesAppointmentService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
-                        var appointmentService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
-                        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-                        var toBeAnnouncedTablesAppointments = await tablesAppointmentService.GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
-
-                        var notifications = new List<NotificationRequest>();
-                        foreach (var tableAppointment in toBeAnnouncedTablesAppointments)
-                        {
-                            var appointment = await appointmentService.GetAppointmentByIdAsync((int)tableAppointment.AppointmentId);
-                            var userId = appointment.UserId;
-
-                            string timeString = $"ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}, từ {tableAppointment.ScheduleTime.TimeOfDay} đến {tableAppointment.EndTime.TimeOfDay}";
-
-                            NotificationRequest notif = new()
-                            {
-                                ToUser = userId,
-                                Title = $"Các lời mời chơi cờ mà bạn đã gửi cho bàn {tableAppointment.TableId} đã bị từ chối!",
-                                Content = $"Toàn bộ các lời mời chơi cờ mà bạn đã gửi cho bàn {tableAppointment.TableId}, vào {timeString} (mã đơn #{tableAppointment.AppointmentId}) " +
-                                $"đều đã bị từ chối hoặc đã hết hạn. Bấm để xem chi tiết.",
-                                TablesAppointmentId = tableAppointment.Id,
-                                Type = StrateZone_Repository.Parameters.PostgreEnums.NotificationType.tables_appointment_invitations_timedout
-                            };
-
-                            notifications.Add(notif);
-                        }
-
-                        await notificationService.CreateNotificationsForRejectedTablesAppoimentsAsync(notifications);
-
-                        _logger.LogInformation($"ITablesAppointmentService executed: Sent notifications to " +
-                            $"{toBeAnnouncedTablesAppointments.Count} tables on appointment(s).");
-                    }
-                }
-                catch (Exception ex)
+                if (tableAppointment.Status == AppointmentStatus.incoming.ToString())
                 {
-                    _logger.LogError(ex, "Error occurred while updating appointment status.");
+                    await tablesAppointmentService.ForceCancelTablesAppointment(tableAppointment.Id, userId);
+                    cancelledCount++;
                 }
-            });
+            }
+
+            // Final operation
+            await notificationService.CreateNotificationsForRejectedTablesAppoimentsAsync(notifications);
+
+            _logger.LogInformation($"ITablesAppointmentService executed: Sent notifications to " +
+                $"{toBeAnnouncedTablesAppointments.Count} tables on appointment(s), force cancelled {cancelledCount}.");
         }
 
         public async Task StopAsync(CancellationToken stoppingToken)

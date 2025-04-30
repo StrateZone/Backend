@@ -8,6 +8,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Repository.Pagination;
 using StrateZone_Repository.Entities;
+using StrateZone_Service.Utils;
 
 namespace StrateZone.Tests.Controllers_Tests
 {
@@ -15,13 +16,14 @@ namespace StrateZone.Tests.Controllers_Tests
     {
         private readonly Mock<IAppointmentService> _appointmentServiceMock;
         private readonly Mock<ILogger<AppointmentController>> _loggerMock;
+        private readonly Mock<ScheduleTimeValidator> _scheduleTimeValidatorMock;
         private readonly AppointmentController _controller;
 
         public AppointmentControllerTests()
         {
             _appointmentServiceMock = new Mock<IAppointmentService>();
             _loggerMock = new Mock<ILogger<AppointmentController>>();
-            _controller = new AppointmentController(_appointmentServiceMock.Object, _loggerMock.Object);
+            _controller = new AppointmentController(_appointmentServiceMock.Object, _loggerMock.Object, _scheduleTimeValidatorMock.Object);
         }
 
         [Fact]

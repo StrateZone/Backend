@@ -142,7 +142,7 @@ public partial class StrateZoneDbContext : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();
         string connection = configuration["ConnectionStrings:DB"];
-        return "Host=centerbeam.proxy.rlwy.net;Port=16477;Database=railway;Username=postgres;Password=FSRdUxlJFvAfhkdvLNdgzEeNDZGiIrWx;SslMode=Disable";
+        return "Host=centerbeam.proxy.rlwy.net;Port=16477;Database=railway;Username=postgres;Password=FSRdUxlJFvAfhkdvLNdgzEeNDZGiIrWx;SslMode=Disable;Timeout=30;Command Timeout=30;Pooling=true;Minimum Pool Size=1;Maximum Pool Size=20;";
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

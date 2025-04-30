@@ -103,6 +103,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var requestsList = await _context.AppointmentRequests
+                                                .AsNoTracking()
                                                 .Where(ar => 
                                                     ar.FromUser == appointmentRequest.FromUser 
                                                     && ar.TableId == appointmentRequest.TableId
@@ -144,9 +145,8 @@ namespace StrateZone_Repository.Implements
                 var newAppointmentId = await createCmd.ExecuteScalarAsync();
                 await _context.SaveChangesAsync();
 
-                return await _context.AppointmentRequests.AsNoTracking()
-                    .Include(ar => ar.FromUserNavigation)
-                    .SingleOrDefaultAsync(ar => ar.Id == Convert.ToInt32(newAppointmentId));
+                appointmentRequest.Id = Convert.ToInt32(newAppointmentId);
+                return appointmentRequest;
             }
             catch (Exception ex)
             {
@@ -231,7 +231,8 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var existingAppointmentrequest = await _context.AppointmentRequests.AsNoTracking().SingleOrDefaultAsync(a => a.Id == id) ?? throw new Exception("Appointment request with this ID does not exist");
+                if (!await _context.AppointmentRequests.AsNoTracking().AnyAsync(a => a.Id == id)) 
+                    throw new Exception("Appointment request with this ID does not exist");
 
                 appointmentRequest.Id = id;
                 var parameters = new List<NpgsqlParameter>();
@@ -472,7 +473,7 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), new NpgsqlParameter("@id", id));
                 _context.Entry(toReject).State = EntityState.Detached;
 
-                return await _context.AppointmentRequests.AsNoTracking().Include(ar => ar.ToUserNavigation).SingleOrDefaultAsync(ar => ar.Id == id);
+                return toReject;
             }
             catch (Exception ex)
             {
@@ -490,6 +491,7 @@ namespace StrateZone_Repository.Implements
                         "SET status = 'cancelled' " +
                         "WHERE from_user = {0} AND status != 'expired' AND appointment_id IS NULL " +
                         "RETURNING *;", userId)
+                    .AsNoTracking()
                     .ToListAsync();
 
                 return updatedRequests;
@@ -498,6 +500,24 @@ namespace StrateZone_Repository.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task CancelAllSentRequestsFromTablesAppointmentIdAsync(int tablesAppointmentId)
+        {
+            var ta = await _context.TablesAppointments.AsNoTracking()
+                .FirstOrDefaultAsync(ta => ta.Id == tablesAppointmentId)
+                ?? throw new Exception($"Table appointment with ID {tablesAppointmentId} does not exist");
+    
+            await _context.Database.ExecuteSqlRawAsync(
+                "UPDATE appointment_requests " +
+                "SET status = CASE " +
+                "WHEN status = 'pending' THEN 'cancelled' " +
+                "WHEN status = 'accepted' THEN 'table_cancelled' " +
+                "ELSE status " +
+                "END " +
+                "WHERE appointment_id = {0} AND table_id = {1}", 
+                ta.AppointmentId, ta.TableId
+            );
         }
 
         public async Task<Appointmentrequest> DeleteAppointmentRequestAsync(int id)

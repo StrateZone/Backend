@@ -26,11 +26,18 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                User sender = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == friendrequest.FromUser);
+                if (sender.UserRole == PostgreEnums.UserRole.RegisteredUser) throw new Exception("Chỉ thành viên trong cộng đồng mới được gửi lời mời kết bạn.");
+
+                User receiver = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == friendrequest.ToUser);
+                if (receiver.UserRole == PostgreEnums.UserRole.RegisteredUser) throw new Exception("Chỉ thành viên trong cộng đồng mới được nhận lời mời kết bạn.");
+
                 if (_context.Friendlists.AsNoTracking().Any(fl => (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser) 
                                                     || (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser)))
                     throw new Exception($"You two are already friend with each other.");
 
-                var requestsList = await _context.Friendrequests.AsNoTracking()
+                var requestsList = await _context.Friendrequests
+                                    .AsNoTracking()
                                     .Where(ar => 
                                         (ar.FromUser == friendrequest.FromUser && ar.ToUser == friendrequest.ToUser) 
                                         || 
@@ -40,8 +47,6 @@ namespace StrateZone_Repository.Implements
 
                 if (requestsList != null && requestsList.Any(r => r.Status == PostgreEnums.RequestStatus.pending))
                     throw new Exception($"Friend request to this user already been sent.");
-
-                int newId;
 
                 var connection = _context.Database.GetDbConnection();
 
@@ -60,12 +65,9 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@createdAt", friendrequest.CreatedAt ?? DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)));
 
                 var executedResult = await cmd.ExecuteScalarAsync();
-                newId = Convert.ToInt32(executedResult);
+                friendrequest.Id = Convert.ToInt32(executedResult);
 
-                return await _context.Friendrequests.AsNoTracking()
-                                            .Include(fr => fr.FromUserNavigation)
-                                            .Include(fr => fr.ToUserNavigation)
-                                            .SingleOrDefaultAsync(fr => fr.Id == Convert.ToInt32(newId));
+                return friendrequest;
             }
             catch (Exception ex)
             {
@@ -198,8 +200,7 @@ namespace StrateZone_Repository.Implements
 
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
 
-                var updatedFriendRequest = await _context.Friendrequests.FindAsync(id);
-                return updatedFriendRequest;
+                return friendrequest;
             }
             catch (Exception ex)
             {
