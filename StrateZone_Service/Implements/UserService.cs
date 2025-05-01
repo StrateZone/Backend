@@ -440,5 +440,18 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<UserModel> GetUserByAppointmentIdAsync(int id)
+        {
+            try
+            {
+                var results = await _userRepository.GetUserByAppointmentIdAsync(id);
+                return _mapper.Map<UserModel>(results);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

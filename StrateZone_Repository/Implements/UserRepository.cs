@@ -502,6 +502,20 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<User> GetUserByAppointmentIdAsync(int id)
+        {
+            try
+            {
+                var appointment = await _context.Appointments.AsNoTracking().FirstOrDefaultAsync(a => a.AppointmentId == id);
+
+                return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == appointment.UserId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task AssignTopContributorsAsync()
         {
             using var transaction = await _context.Database.BeginTransactionAsync();

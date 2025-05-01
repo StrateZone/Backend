@@ -13,6 +13,7 @@ namespace StrateZone_Repository.Interfaces
         Task<TablesAppointment> DeleteTablesAppointmentAsync(int id);
         Task<PagedList<TablesAppointment>> GetAllTablesAppointmentAsync(TablesAppointmentParameters parameters);
         Task<TablesAppointment> GetByIdAsync(int id);
+        Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByTableIdAsync(int tableId);
         Task<PagedList<TablesAppointment>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters);
         Task<List<TablesAppointment>> GetAllTablesAppointmentByAppointmentIdAsync(int id);
         Task<decimal> GetAllPaidTablesAppointmentWithinAMonthInYearAsync(int month, int year);

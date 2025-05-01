@@ -10,6 +10,7 @@ using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -18,12 +19,14 @@ namespace StrateZone_Service.Implements
         private readonly ITableRepository _tableRepository;
         private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TableService(ITableRepository tableRepository, IPriceService priceService, IMapper mapper)
+        public TableService(ITableRepository tableRepository, IPriceService priceService, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
         {
             _tableRepository = tableRepository;
             _priceService = priceService;
             _mapper = mapper;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<PagedList<TableModel>> GetTablesAsync(TableParameters parameters)
@@ -286,6 +289,42 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _tableRepository.GetAvailableTablesAsync(StartTime, EndTime);
                 return _mapper.Map<List<TableResponse>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<TableResponse> DisableTableAsync(int id)
+        {
+            try
+            {
+                var result = await _tableRepository.GetTableByIdAsync(id);
+
+                if (result.Status == TableStatus.out_of_service) throw new Exception($"This table is already {result.Status}");
+
+                result.Status = TableStatus.out_of_service;
+                result.GameType = null;
+                result.Room = null;
+                await _tableRepository.UpdateTableAsync(result, id);
+                
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var notiService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    var tablesAppointmentService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
+                    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+
+                    var tablesAppointments = await tablesAppointmentService.GetAllActiveTablesAppointmentByTableIdAsync(id);
+                    foreach (var tablesAppointment in tablesAppointments)
+                    {
+                        var user = await userService.GetUserByAppointmentIdAsync((int)tablesAppointment.AppointmentId);
+                        await tablesAppointmentService.ForceCancelTablesAppointment(tablesAppointment.Id, user.UserId);
+                    }
+                });
+
+                return _mapper.Map<TableResponse>(result);
             }
             catch (Exception ex)
             {

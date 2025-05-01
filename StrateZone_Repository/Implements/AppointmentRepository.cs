@@ -4,12 +4,9 @@ using Npgsql;
 using NpgsqlTypes;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
-using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Data;
-using System.Linq;
 using System.Text;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Repository.Implements

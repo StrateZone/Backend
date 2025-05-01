@@ -23,6 +23,7 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<User>> GetUsersByUsernameAsync(UserListParameters parameters, string username);
         Task<User> UpdateUserAsync(User updatedUser, int id);
         Task<User> FindUserAcceptedToJoinTablesAppointment(TablesAppointment tablesAppointment);
+        Task<User> GetUserByAppointmentIdAsync(int id);
         Task<List<User>> GetNewUserWithinDayAsync(int day, int month, int year);
         Task AssignTopContributorsAsync();
         Task UpdateExpiredMemberships();

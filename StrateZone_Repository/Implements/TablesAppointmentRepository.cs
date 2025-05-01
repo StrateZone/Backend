@@ -383,6 +383,29 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByTableIdAsync(int tableId)
+        {
+            try
+            {
+                var matchingTAs = await _context.TablesAppointments
+                                            .FromSqlRaw(
+                                                @"
+                                                SELECT *
+                                                FROM tables_appointments
+                                                WHERE table_id = {0} AND status IN ('confirmed', 'pending', 'incoming');",
+                                                tableId
+                                            )
+                                            .AsNoTracking()
+                                            .ToListAsync();
+
+                return matchingTAs;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments()
         {
             try

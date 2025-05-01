@@ -20,6 +20,7 @@ namespace StrateZone_Service.Implements
         Task<PagedList<TableModel>> GetTablesAsync(TableParameters parameters);
         Task<PagedList<TableModel>> GetTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType);
         Task<TableModel> UpdateTableAsync(TableModel tableModel, int id);
+        Task<TableResponse> DisableTableAsync(int id);
         Task<PagedList<TableResponse>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, GameTypeEnum[] gameTypes, RoomType[] roomTypes);
         Task<Dictionary<GameTypeEnum, List<TableResponse>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount);
     }

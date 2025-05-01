@@ -23,7 +23,6 @@ namespace StrateZone_Service.Implements
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
-        private readonly ITransactionService _transactionService;
         private readonly IPriceService _priceService;
         private readonly INotificationService _notificationService;
         private readonly IUserRepository _userService;
@@ -32,14 +31,13 @@ namespace StrateZone_Service.Implements
         private readonly ISystemService _systemService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, ITransactionService transactionService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient, IServiceScopeFactory serviceProvider, ISystemService systemService)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient, IServiceScopeFactory serviceProvider, ISystemService systemService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
             _priceService = priceService;
             _paymentService = paymentService;
             _walletService = walletService;
-            _transactionService = transactionService;
             _requestRepository = repository;
             _notificationService = notificationService;
             _userService = userService;
@@ -790,6 +788,20 @@ namespace StrateZone_Service.Implements
                     TotalDays = dayInMonth,
                     TablesAppointmentsDailyResponse = taDailyResponses
                 };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<TablesAppointmentModel>> GetAllActiveTablesAppointmentByTableIdAsync(int id)
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.GetAllActiveTablesAppointmentByTableIdAsync(id);
+
+                return _mapper.Map<List<TablesAppointmentModel>>(result);
             }
             catch (Exception ex)
             {
