@@ -45,5 +45,19 @@ namespace StrateZone_Service.CustomModels.RequestModels
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$",
     ErrorMessage = "Mật khẩu phải dài ít nhất 8 kí tự, trong đó phải bao gồm ít nhất 1 chữ số, 1 kí tự đặc biệt, 1 kí tự in thường và 1 kí tự in hoa.")]
         public string NewPassword { get; set; }
+
+        [Required]
+        public string ConfirmPassword { get; set; }
+    }
+
+    public class UserForgotPasswordRequest
+    {
+        [Required]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$",
+    ErrorMessage = "Mật khẩu phải dài ít nhất 8 kí tự, trong đó phải bao gồm ít nhất 1 chữ số, 1 kí tự đặc biệt, 1 kí tự in thường và 1 kí tự in hoa.")]
+        public string NewPassword { get; set; }
+
+        [Required]
+        public string ConfirmPassword { get; set; }
     }
 }

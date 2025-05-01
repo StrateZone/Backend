@@ -29,7 +29,8 @@ namespace StrateZone_Service.Interfaces
         Task<UserResponse> FindUserAcceptedToJoinTablesAppointment(TablesAppointmentModel tablesAppointment);
         Task<bool> CheckUserNotification(int id);
         Task<UserMonthResponse> GetUsersJoinedInAMonth(int month, int year);
-        Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+        Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword, string confirmPassword);
+        Task<UserResponse> ForgotPasswordAsync(int userId, string newPassword, string confirmPassword);
         Task<UserModel> GetUserByAppointmentIdAsync(int id);
         Task AssignTopContributorsAsync();
         Task UpdateExpiredMemberships();

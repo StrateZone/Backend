@@ -424,10 +424,28 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        public async Task<UserResponse> ForgotPasswordAsync(int userId, string newPassword, string confirmPassword)
+        {
+            try
+            {
+                if (!newPassword.Equals(confirmPassword)) throw new Exception($"Confirm password doesn't match");
+
+                var user = await _userRepository.GetUserByIdAsync(userId);
+
+                return await UpdateUserAsync(new() { UserRole = user.UserRole, Password = newPassword }, userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword, string confirmPassword)
         {
            try
             {
+                if (!newPassword.Equals(confirmPassword)) throw new Exception($"Confirm password doesn't match");
+
                 var user = await _userRepository.GetUserByIdAsync(userId);
 
                 if (new PasswordHasher<string>().VerifyHashedPassword(null, user.Password, oldPassword) == PasswordVerificationResult.Failed)

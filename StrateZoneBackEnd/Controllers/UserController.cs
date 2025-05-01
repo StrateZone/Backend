@@ -220,7 +220,21 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var result = await _userService.ChangePasswordAsync(userId, userPasswordRequest.OldPassword, userPasswordRequest.NewPassword);
+                var result = await _userService.ChangePasswordAsync(userId, userPasswordRequest.OldPassword, userPasswordRequest.NewPassword, userPasswordRequest.ConfirmPassword);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("forgot-password/{userId}")]
+        public async Task<IActionResult> ChangeForgotPasswordAsync(int userId, [FromBody] UserForgotPasswordRequest userPasswordRequest)
+        {
+            try
+            {
+                var result = await _userService.ForgotPasswordAsync(userId, userPasswordRequest.NewPassword, userPasswordRequest.ConfirmPassword);
                 return Ok(result);
             }
             catch (Exception ex)
