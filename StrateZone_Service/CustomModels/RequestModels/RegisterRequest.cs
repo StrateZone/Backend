@@ -34,4 +34,16 @@ namespace StrateZone_Service.CustomModels.RequestModels
             ErrorMessage = "Mật khẩu phải dài ít nhất 8 kí tự, trong đó phải bao gồm ít nhất 1 chữ số, 1 kí tự đặc biệt, 1 kí tự in thường và 1 kí tự in hoa.")]
         public string Password { get; set; }
     }
+
+
+    public class UserPasswordRequest
+    {
+        [Required]
+        public string OldPassword { get; set; }
+
+        [Required]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$",
+    ErrorMessage = "Mật khẩu phải dài ít nhất 8 kí tự, trong đó phải bao gồm ít nhất 1 chữ số, 1 kí tự đặc biệt, 1 kí tự in thường và 1 kí tự in hoa.")]
+        public string NewPassword { get; set; }
+    }
 }

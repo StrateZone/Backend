@@ -248,7 +248,8 @@ namespace StrateZone_Service.Implements
 
                 if (find.Status == UserStatus.Suspended.ToString()) throw new Exception("This account is already suspended");
 
-                var result = await _userRepository.UpdateUserAsync(new() { Status = UserStatus.Suspended }, id);
+                var result = await _userRepository.UpdateUserAsync(new() 
+                    { UserRole = (UserRole) Enum.Parse(typeof(UserRole), find.UserRole), Status = UserStatus.Suspended }, id);
 
                 return _mapper.Map<UserResponse>(result);
             }

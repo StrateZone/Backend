@@ -257,10 +257,4 @@ namespace StrateZone_APIs.Controllers
             }
         }
     }
-
-    public class UserPasswordRequest
-    { 
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-    }
 }
