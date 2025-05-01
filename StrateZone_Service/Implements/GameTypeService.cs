@@ -14,13 +14,11 @@ namespace StrateZone_Service.Implements
     public class GameTypeService : IGameTypeService
     {
         private readonly IGameTypeRepository _gameTypeRepository;
-        private readonly IGameExtensionService _gameExtensionService;
         private readonly IMapper _mapper;
 
-        public GameTypeService(IGameTypeRepository gameTypeRepository, IGameExtensionService gameExtensionService, IMapper mapper)
+        public GameTypeService(IGameTypeRepository gameTypeRepository, IMapper mapper)
         {
             _gameTypeRepository = gameTypeRepository;
-            _gameExtensionService = gameExtensionService;
             _mapper = mapper;
         }
 
@@ -69,21 +67,6 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _gameTypeRepository.GetGameTypeWithExtensionsByIdAsync(id);
                 return _mapper.Map<GameTypeModel>(result);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<GameTypeModel> GetGameTypeByGameExtensionIdAsync(int id)
-        {
-            try
-            {
-                var extension = await _gameExtensionService.GetGameExtensionByIdAsync(id);
-                var result = await _gameTypeRepository.GetGameTypesByIdAsync((int) extension.TypeId) ?? throw new Exception("No game type for this game extension ID was found.");
-                
-                return _mapper.Map<GameTypeModel>(result); 
             }
             catch (Exception ex)
             {

@@ -47,7 +47,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.GameTypes.AsNoTracking().Include(gt => gt.GameExtensions).ToListAsync();
+                return await _context.GameTypes.AsNoTracking().ToListAsync();
             }
             catch (Exception ex)
             {
@@ -60,7 +60,6 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.GameTypes.AsNoTracking().Where(gt => gt.TypeId == id)
-                                               .Include(gt => gt.GameExtensions)
                                                .FirstOrDefaultAsync();
             }
             catch (Exception ex)

@@ -13,7 +13,5 @@ namespace StrateZone_Service.BusinessModels
 
         public string TypeName { get; set; }
 
-        public virtual ICollection<GameExtensionModel> GameExtensions { get; set; } = new List<GameExtensionModel>();
-
     }
 }

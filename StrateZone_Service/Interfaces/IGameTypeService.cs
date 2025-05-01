@@ -8,6 +8,5 @@ namespace StrateZone_Service.Interfaces
         Task<List<GameTypeModel>> GetGameTypesAsync();
         Task<List<GameTypeModel>> GetGameTypesWithExtensionsAsync();
         Task<GameTypeModel> GetGameTypeWithExtensionsByIdAsync(int id);
-        Task<GameTypeModel> GetGameTypeByGameExtensionIdAsync(int id);
     }
 }

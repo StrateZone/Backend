@@ -101,6 +101,22 @@ namespace StrateZone_Repository.Implements
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
+                                .Select(t => new Thread
+                                {
+                                    ThreadId = t.ThreadId,
+                                    CreatedBy = t.CreatedBy,
+                                    Title = t.Title,
+                                    ThumbnailUrl = t.ThumbnailUrl,
+                                    Rating = t.Rating,
+                                    Status = t.Status,
+                                    CreatedAt = t.CreatedAt,
+                                    UpdatedAt = t.UpdatedAt,
+                                    Comments = t.Comments,
+                                    CreatedByNavigation = t.CreatedByNavigation,
+                                    Images = t.Images,
+                                    Likes = t.Likes,
+                                    ThreadsTags = t.ThreadsTags
+                                })
                                 .AsQueryable();
 
                 threads = parameters.OrderBy switch
@@ -133,6 +149,22 @@ namespace StrateZone_Repository.Implements
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
+                                .Select(t => new Thread
+                                {
+                                    ThreadId = t.ThreadId,
+                                    CreatedBy = t.CreatedBy,
+                                    Title = t.Title,
+                                    ThumbnailUrl = t.ThumbnailUrl,
+                                    Rating = t.Rating,
+                                    Status = t.Status,
+                                    CreatedAt = t.CreatedAt,
+                                    UpdatedAt = t.UpdatedAt,
+                                    Comments = t.Comments,
+                                    CreatedByNavigation = t.CreatedByNavigation,
+                                    Images = t.Images,
+                                    Likes = t.Likes,
+                                    ThreadsTags = t.ThreadsTags
+                                })
                                 .AsQueryable();
 
                 threads = parameters.OrderBy switch
@@ -167,6 +199,22 @@ namespace StrateZone_Repository.Implements
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
+                                .Select(t => new Thread
+                                {
+                                    ThreadId = t.ThreadId,
+                                    CreatedBy = t.CreatedBy,
+                                    Title = t.Title,
+                                    ThumbnailUrl = t.ThumbnailUrl,
+                                    Rating = t.Rating,
+                                    Status = t.Status,
+                                    CreatedAt = t.CreatedAt,
+                                    UpdatedAt = t.UpdatedAt,
+                                    Comments = t.Comments,
+                                    CreatedByNavigation = t.CreatedByNavigation,
+                                    Images = t.Images,
+                                    Likes = t.Likes,
+                                    ThreadsTags = t.ThreadsTags
+                                })
                                 .AsQueryable();
 
                 if (parameters.OrderBy == "friends" && parameters.userId != null)
@@ -175,7 +223,6 @@ namespace StrateZone_Repository.Implements
                                             .Where(f => f.UserId == parameters.userId || f.FriendId == parameters.userId)
                                             .Select(f => f.UserId == parameters.userId ? f.FriendId : f.UserId)
                                             .ToHashSet();
-
                     threads = threads.Where(t => friendIds.Contains(t.CreatedBy))
                                     .OrderByDescending(t => t.CreatedAt);
                 }

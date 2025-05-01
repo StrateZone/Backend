@@ -48,10 +48,6 @@ namespace StrateZone_Service.Mapper
                 .ForMember(gtm => gtm.TypeName, gt => gt.MapFrom(src => src.TypeName.ToString()))
                 .ReverseMap();
 
-            CreateMap<GameExtension, GameExtensionModel>()
-                .ForMember(gtm => gtm.ExtensionName, gt => gt.MapFrom(src => src.ExtensionName.ToString()))
-                .ReverseMap();
-
             CreateMap<Room, RoomModel>().ReverseMap();
 
             CreateMap<Image, ImageModel>().ReverseMap();

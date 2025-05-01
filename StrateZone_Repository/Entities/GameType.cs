@@ -13,7 +13,5 @@ public partial class GameType
 
     public virtual ICollection<Table> Tables { get; set; } = new List<Table>();
 
-    public virtual ICollection<GameExtension> GameExtensions { get; set; } = new List<GameExtension>();
-
     public virtual ICollection<Price> Prices { get; set; } = new List<Price>();
 }

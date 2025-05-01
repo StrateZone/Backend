@@ -41,8 +41,6 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Friendrequest> Friendrequests { get; set; }
 
-    public virtual DbSet<Entities.GameExtension> GameExtensions { get; set; }
-
     public virtual DbSet<Entities.GameType> GameTypes { get; set; }
 
     public virtual DbSet<Image> Images { get; set; }
@@ -522,25 +520,6 @@ public partial class StrateZoneDbContext : DbContext
                 .HasForeignKey(d => d.AppointmentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("appointment_requests_to_appointment_fkey");
-        });
-
-        modelBuilder.Entity<Entities.GameExtension>(entity =>
-        {
-            entity.HasKey(e => e.ExtensionId).HasName("gameExtensions_pkey");
-
-            entity.ToTable("gameExtensions");
-
-            entity.Property(e => e.ExtensionId).HasColumnName("extension_id");
-            entity.Property(e => e.TypeId).HasColumnName("type_id");
-
-            entity.Property(e => e.ExtensionName).HasColumnName("extension_name").HasColumnType("game_extension").HasConversion(
-                    v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameExtensionEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameExtensionEnum), v)
-                    );
-
-            entity.HasOne(d => d.Type).WithMany(p => p.GameExtensions)
-                .HasForeignKey(d => d.TypeId)
-                .HasConstraintName("gameExtensions_type_id_fkey");
         });
 
         modelBuilder.Entity<Entities.GameType>(entity =>
