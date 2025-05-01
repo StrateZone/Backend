@@ -65,7 +65,7 @@ namespace StrateZone_Service.Implements
                     {
                         ToEmail = email,
                         Subject = "Account Verification",
-                        Content = $"<p>Mã OTP kích hoạt của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>OTP này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
+                        Content = $"<p>Mã xác thực của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>Mã này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
                     };
                 }
                 else
@@ -73,8 +73,8 @@ namespace StrateZone_Service.Implements
                     emailSending = new EmailRequest
                     {
                         ToEmail = email,
-                        Subject = "Login Verification",
-                        Content = $"<p>Mã OTP đăng nhập của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>OTP này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
+                        Subject = "OTP Verification",
+                        Content = $"<p>Mã xác thực của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>Mã này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
                     };
                 }
 
@@ -133,6 +133,51 @@ namespace StrateZone_Service.Implements
         {
             Random random = new Random();
             return random.Next((int)Math.Pow(10, length - 1), (int)Math.Pow(10, length)).ToString();
+        }
+
+        public async Task<ApiResponse<LoginResponse>> VerifyChangePasswordOTP(EmailLoginRequest loginRequest)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByEmailAsync(loginRequest.Email);
+                if (user == null)
+                {
+                    return new ApiResponse<LoginResponse> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
+                }
+
+                if (user.OTP != loginRequest.OTP || user.OTPExpiry < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
+                    return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid or expired OTP", Data = null };
+
+                if (user.Status == PostgreEnums.UserStatus.Suspended)
+                {
+                    return new ApiResponse<LoginResponse>
+                    {
+                        Success = false,
+                        StatusCode = 401,
+                        Message = "Tài khoản này hiện đang bị cấm do vi phạm tiêu chuẩn cộng đồng. " +
+                        "Mọi thắc mắc vui lòng liên hệ: stratezone.app@gmail.com",
+                        Data = null
+                    };
+                }
+
+                user.OTP = null;
+                user.OTPExpiry = null;
+
+                if (user.Status == PostgreEnums.UserStatus.Unactivated) user.Status = PostgreEnums.UserStatus.Active;
+
+
+                return new ApiResponse<LoginResponse>
+                {
+                    Success = true,
+                    StatusCode = 200,
+                    Message = "OTP verfified!",
+                    Data = null,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<ApiResponse<LoginResponse>> VerifyOTP(EmailLoginRequest loginRequest)
@@ -302,7 +347,6 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
-
 
         public async Task<ApiResponse<UserResponse>> RegisterAccount(RegisterRequest registerRequest)
         {

@@ -215,13 +215,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        /*
-        [HttpPut("password")]
-        public async Task<IActionResult> ass()
+        [HttpPut("password/{userId}")]
+        public async Task<IActionResult> ChangePasswordAsync(int userId, [FromBody] UserPasswordRequest userPasswordRequest)
         {
             try
             {
-                var result = await _userService.PasswordUserAsync();
+                var result = await _userService.ChangePasswordAsync(userId, userPasswordRequest.OldPassword, userPasswordRequest.NewPassword);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -229,7 +228,6 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        */
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
@@ -258,5 +256,11 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+    }
+
+    public class UserPasswordRequest
+    { 
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
     }
 }

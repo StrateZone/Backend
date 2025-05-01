@@ -29,6 +29,7 @@ namespace StrateZone_Service.Interfaces
         Task<UserResponse> FindUserAcceptedToJoinTablesAppointment(TablesAppointmentModel tablesAppointment);
         Task<bool> CheckUserNotification(int id);
         Task<UserMonthResponse> GetUsersJoinedInAMonth(int month, int year);
+        Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
         Task AssignTopContributorsAsync();
         Task UpdateExpiredMemberships();
     }

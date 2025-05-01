@@ -8,7 +8,6 @@
         public enum EventStatus { upcoming, ongoing, completed, cancelled }
         public enum TournamentStatus { upcoming, enrolling, ongoing, completed, cancelled }
         public enum EventType { tournament, promotion }
-        public enum GameExtensionEnum { bullet, lightning, flip, traditional }
         public enum GameTypeEnum { chess, xiangqi, go }
         public enum Gender { male, female }
         public enum MessageStatus { read, unread }

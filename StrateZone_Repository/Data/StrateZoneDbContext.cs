@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using StrateZone_Repository.Entities;
 using System.Reflection.Emit;
 using static StrateZone_Repository.Parameters.PostgreEnums;
-using GameExtensionEnum = StrateZone_Repository.Parameters.PostgreEnums.GameExtensionEnum;
 
 namespace StrateZone_Repository.Data;
 
@@ -109,7 +108,6 @@ public partial class StrateZoneDbContext : DbContext
                         dataSourceBuilder.MapEnum<CourseSlotStatus>("course_slot_status");
                         dataSourceBuilder.MapEnum<CourseStatus>("course_status");
                         dataSourceBuilder.MapEnum<EventStatus>("event_status");
-                        dataSourceBuilder.MapEnum<GameExtensionEnum>("game_extension");
                         dataSourceBuilder.MapEnum<GameTypeEnum>("game_type");
                         dataSourceBuilder.MapEnum<Gender>("gender");
                         dataSourceBuilder.MapEnum<MessageStatus>("message_status");
@@ -149,7 +147,6 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<CourseSlotStatus>();
         modelBuilder.HasPostgresEnum<CourseStatus>();
         modelBuilder.HasPostgresEnum<EventStatus>();
-        modelBuilder.HasPostgresEnum<GameExtensionEnum>();
         modelBuilder.HasPostgresEnum<GameTypeEnum>();
         modelBuilder.HasPostgresEnum<Gender>();
         modelBuilder.HasPostgresEnum<MessageStatus>();

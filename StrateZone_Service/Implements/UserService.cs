@@ -422,5 +422,22 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+           try
+            {
+                var user = await _userRepository.GetUserByIdAsync(userId);
+
+                if (new PasswordHasher<string>().VerifyHashedPassword(null, user.Password, oldPassword) == PasswordVerificationResult.Failed)
+                    throw new Exception($"Incorrect password");
+
+                return await UpdateUserAsync(new() { UserRole = user.UserRole, Password = newPassword }, userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }
