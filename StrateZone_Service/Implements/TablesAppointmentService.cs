@@ -478,6 +478,7 @@ namespace StrateZone_Service.Implements
                     await service.CreateNotificationAsync(notification);
                 });
 
+                tablesAppointment.Status = AppointmentStatus.cancelled.ToString();
                 return await UpdateTablesAppointmentAsync(_mapper.Map<TablesAppointmentModel>(tablesAppointment), tablesAppointmentId);
             }
             catch (Exception ex)
