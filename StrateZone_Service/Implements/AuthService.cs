@@ -27,6 +27,13 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly IWalletRepository _walletRepository;
 
+        private static readonly string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private static readonly string lowercase = "abcdefghijklmnopqrstuvwxyz";
+        private static readonly string digits = "0123456789";
+        private static readonly string specialChars = "!@#$%^&*.+=-";
+        private static readonly string allChars = lowercase + uppercase + digits + specialChars;
+        private static readonly Random random = new Random();
+
         public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService, IMapper mapper, IWalletRepository walletRepository)
         {
             _userRepository = userRepository;
@@ -35,6 +42,44 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
             _walletRepository = walletRepository;
         }
+
+        public static string GenerateSecureString(int length)
+        {
+            if (length < 8) length = 8;
+
+            var result = new StringBuilder();
+
+            result.Append(uppercase[random.Next(uppercase.Length)]);
+
+            char numberChar = digits[random.Next(digits.Length)];
+            char specialChar = specialChars[random.Next(specialChars.Length)];
+
+            for (int i = 0; i < length - 3; i++)
+            {
+                result.Append(allChars[random.Next(allChars.Length)]);
+            }
+
+            // Add guaranteed number and special char
+            result.Append(numberChar);
+            result.Append(specialChar);
+
+            char[] finalChars = result.ToString().ToCharArray();
+            Shuffle(finalChars, 1);
+
+            return new string(finalChars);
+        }
+
+        private static void Shuffle(char[] array, int startIndex)
+        {
+            for (int i = array.Length - 1; i > startIndex; i--)
+            {
+                int j = random.Next(startIndex, i + 1);
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
         public async Task<ApiResponse<MailMessage>> SendOTP(string email)
         {
             try
@@ -131,47 +176,39 @@ namespace StrateZone_Service.Implements
 
         private string GenerateOTP(int length = 6)
         {
-            Random random = new Random();
             return random.Next((int)Math.Pow(10, length - 1), (int)Math.Pow(10, length)).ToString();
         }
 
-        public async Task<ApiResponse<LoginResponse>> VerifyChangePasswordOTP(EmailLoginRequest loginRequest)
+        public async Task<ApiResponse<MailMessage>> SendNewPassword(string email)
         {
             try
             {
-                var user = await _userRepository.GetUserByEmailAsync(loginRequest.Email);
+                var user = await _userRepository.GetUserByEmailAsync(email);
                 if (user == null)
                 {
-                    return new ApiResponse<LoginResponse> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
+                    return new ApiResponse<MailMessage> { Success = false, StatusCode = 404, Message = "User doesnt exist", Data = null };
                 }
 
-                if (user.OTP != loginRequest.OTP || user.OTPExpiry < DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified))
-                    return new ApiResponse<LoginResponse> { Success = false, StatusCode = 401, Message = "Invalid or expired OTP", Data = null };
+                string newPassword = GenerateSecureString(24);
 
-                if (user.Status == PostgreEnums.UserStatus.Suspended)
+                user.Password = new PasswordHasher<string>().HashPassword(null, newPassword);
+                var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
+
+                EmailRequest emailSending= new EmailRequest
                 {
-                    return new ApiResponse<LoginResponse>
-                    {
-                        Success = false,
-                        StatusCode = 401,
-                        Message = "Tài khoản này hiện đang bị cấm do vi phạm tiêu chuẩn cộng đồng. " +
-                        "Mọi thắc mắc vui lòng liên hệ: stratezone.app@gmail.com",
-                        Data = null
-                    };
-                }
+                    ToEmail = email,
+                    Subject = "Khôi phục mật khẩu",
+                    Content = $"<p>Mật khẩu mới của bạn là:</p><h1 style=\"background-color:yellow\"><b>{newPassword}</b></h1><p>Sau khi đăng nhập thành công, vui lòng vào hồ sơ để đổi mật khẩu.</p>"
+                };
+                
+                var mailMessage = await _emailService.SendEmailAsync(emailSending);
 
-                user.OTP = null;
-                user.OTPExpiry = null;
-
-                if (user.Status == PostgreEnums.UserStatus.Unactivated) user.Status = PostgreEnums.UserStatus.Active;
-
-
-                return new ApiResponse<LoginResponse>
+                return new ApiResponse<MailMessage>
                 {
                     Success = true,
                     StatusCode = 200,
-                    Message = "OTP verfified!",
-                    Data = null,
+                    Message = "OTP sent",
+                    Data = mailMessage
                 };
             }
             catch (Exception ex)

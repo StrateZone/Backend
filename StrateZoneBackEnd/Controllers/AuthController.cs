@@ -67,12 +67,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost("verify-password-otp")]
-        public async Task<IActionResult> VerifyPasswordOTP([FromBody] StrateZone_Service.CustomModels.RequestModels.EmailLoginRequest loginRequest)
+        [HttpPost("recover-password")]
+        public async Task<IActionResult> VerifyPasswordOTP(string email)
         {
             try
             {
-                var result = await _authService.VerifyChangePasswordOTP(loginRequest);
+                var result = await _authService.SendNewPassword(email);
                 return Ok(result);
             }
             catch (Exception ex)
