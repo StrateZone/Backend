@@ -1371,6 +1371,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.IsSample).HasColumnName("is_sample");
             entity.Property(e => e.PointsCost).HasColumnName("points_cost");
+            entity.Property(e => e.ContributionPointsCost).HasColumnName("contributor_points_cost");
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),

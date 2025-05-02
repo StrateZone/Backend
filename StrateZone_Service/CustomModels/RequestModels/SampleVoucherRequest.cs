@@ -21,6 +21,9 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public int PointsCost {  get; set; }
 
         [Required]
+        public int ContributorPointsCost { get; set; }
+
+        [Required]
         public string Description { get; set; }
 
         [Required]

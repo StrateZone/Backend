@@ -223,12 +223,10 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                /*
                 List<int> vouchers = request.TablesAppointmentRequests
                                         .Where(ta => ta.VoucherId != null)
                                         .Select(ta => (int) ta.VoucherId).ToList();
                 if (vouchers.Count > 0) await _voucherService.UseVouchersAsync(vouchers, request.UserId);
-                */
 
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {

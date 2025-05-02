@@ -12,6 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -39,7 +40,9 @@ namespace StrateZone_Service.Implements
                     Description = request.Description,
                     MinPriceCondition = request.MinPriceCondition,
                     IsSample = true,
+                    UserId = null,
                     PointsCost = request.PointsCost,
+                    ContributionPointsCost = request.ContributorPointsCost,
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                 };
 
@@ -63,11 +66,13 @@ namespace StrateZone_Service.Implements
 
                 var user = await _userService.GetUserByIdAsync(voucher.UserId)
                     ?? throw new Exception("No user with this ID was found");
-                
-                if (user.Points < sample.PointsCost)
+
+                var pointsCost = user.UserLabel == UserLabel.top_contributor.ToString() ? sample.ContributionPointsCost : sample.PointsCost;
+
+                if (user.Points < pointsCost)
                     throw new Exception("You don't have enough points to exchange this voucher.");
 
-                user.Points -= sample.PointsCost;
+                user.Points -= pointsCost;
                 await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), user.UserId);
 
                 VoucherModel voucherModel = new()

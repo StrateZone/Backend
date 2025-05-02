@@ -6,12 +6,6 @@ using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using System.Buffers;
 
@@ -62,23 +56,12 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                string query =
-                    @"
-                        SELECT g.type_id FROM public.""gameTypes"" AS g 
-                        WHERE g.type_name = @p0::public.game_type
-                        LIMIT 1
-                    ";
-
                 var expectedId = await _context.GameTypes
-                    .FromSqlRaw(query, gameType.ToString())
                     .AsNoTracking()
-                    .Select(g => g.TypeId)
-                    .FirstOrDefaultAsync();
-
-                if (expectedId == null) throw new Exception("Game type not found.");
+                    .FirstOrDefaultAsync(gt => gt.TypeName == gameType) ?? throw new Exception("Game type not found.");
 
                 var tables = _context.Tables
-                                    .Where(t => t.GameTypeId == expectedId)
+                                    .Where(t => t.GameTypeId == expectedId.TypeId)
                                     .Include(t => t.GameType)
                                     .AsQueryable();
 
@@ -134,7 +117,7 @@ namespace StrateZone_Repository.Implements
                             SELECT t.*
                             FROM tables t
                             JOIN rooms r ON t.room_id = r.room_id
-                            JOIN ""gameTypes"" gt ON gt.type_name = @TypeName::game_type
+                            JOIN ""gameTypes"" gt ON gt.type_name = @TypeName
                             WHERE t.status = 'active' AND r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%')) 
                             AND gt.type_id = t.""gameType_id""
                             AND NOT EXISTS (
@@ -230,7 +213,7 @@ namespace StrateZone_Repository.Implements
                     JOIN rooms r ON t.room_id = r.room_id
                     JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
                     WHERE t.status = 'active' AND r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
-                    AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds::public.game_type[]))
+                    AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds))
                     AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds::public.room_type[]))
                     AND NOT EXISTS (
                         SELECT 1

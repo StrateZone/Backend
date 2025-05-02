@@ -58,6 +58,7 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var vouchers = _context.Vouchers
+                                    .AsNoTracking()
                                     .Where(v => v.Status == PostgreEnums.VoucherStatus.active && v.IsSample)
                                     .OrderByDescending(v => v.Value)
                                     .AsQueryable();

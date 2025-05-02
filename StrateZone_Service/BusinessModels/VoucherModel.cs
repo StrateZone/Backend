@@ -18,13 +18,15 @@ namespace StrateZone_Service.BusinessModels
 
         public bool IsSample { get; set; }
 
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
         public string? Description { get; set; }
 
         public decimal? MinPriceCondition { get; set; }
         
         public int? PointsCost { get; set; }
+
+        public int? ContributionPointsCost { get; set; }
 
         public DateOnly? ExpireDate { get; set; }
 
