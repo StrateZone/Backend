@@ -114,8 +114,9 @@ namespace StrateZone_Repository.Implements
             {
                 var ids = vouchers.Select(v => v.VoucherId).ToHashSet();
 
-                if (await _context.Vouchers.AsNoTracking().AnyAsync(v => !ids.Contains(v.VoucherId)))
-                    throw new Exception("One or more vouchers do not exist.");
+                var allIds = await _context.Vouchers.AsNoTracking().Select(v => v.VoucherId).ToHashSetAsync();
+                
+                if (!ids.IsProperSubsetOf(allIds)) throw new Exception("One or more vouchers do not exist.");
 
                 _context.Vouchers.UpdateRange(vouchers);
                 await _context.SaveChangesAsync();
