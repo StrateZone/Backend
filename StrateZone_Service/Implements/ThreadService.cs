@@ -430,7 +430,7 @@ namespace StrateZone_Service.Implements
                     await UpdateThreadAsync(toBeUpdated, toBeUpdated.ThreadId);
 
                     ThreadModel newRequest = new ThreadModel()
-                    { 
+                    {
                         CreatedBy = toBeUpdated.CreatedBy,
                         Title = threadModel.Title,
                         Content = threadModel.Content,
@@ -441,6 +441,7 @@ namespace StrateZone_Service.Implements
                         Comments = toBeUpdated.Comments,
                         Likes = toBeUpdated.Likes,
                         ThreadsTags = null,
+                        CreatedByNavigation = null,
                     };
 
                     var newThread = await _threadRepository.CreateThreadAsync(_mapper.Map<Thread>(newRequest));
