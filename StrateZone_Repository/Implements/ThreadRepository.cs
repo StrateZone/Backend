@@ -320,7 +320,8 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Threads.AsNoTracking()
+                return await _context.Threads
+                                .AsNoTracking()
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.Likes)
                                 .Include(t => t.Comments)

@@ -314,6 +314,8 @@ namespace StrateZone_Service.Implements
                     && toReject.Status != PostgreEnums.ThreadStatus.edit_pending.ToString())
                     throw new Exception($"This thread is already {toReject.Status}");
 
+                ThreadModel result = null;
+
                 if (toReject.Status == ThreadStatus.edit_pending.ToString() && toReject.UpdateOfThread != null)
                 {
                     var previousVersion = await GetThreadByIdAsync((int)toReject.UpdateOfThread);
@@ -321,28 +323,48 @@ namespace StrateZone_Service.Implements
                     await UpdateThreadAsync(previousVersion, previousVersion.ThreadId);
 
                     toReject.Status = PostgreEnums.ThreadStatus.deleted.ToString();
+                    result = await UpdateThreadAsync(toReject, toReject.ThreadId);
+                    
+                    _ = Task.Run(async () =>
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        NotificationRequest notification = new()
+                        {
+                            ToUser = (int)result.CreatedBy,
+                            Title = "Yêu cầu chỉnh sửa bài viết của bạn đã bị từ chối!",
+                            Content = $"Bài viết chỉnh sửa của bạn với chủ đề \"{result.Title}\" đã bị từ chối. " +
+                            $"Nội dung bài viết trước chỉnh sửa sẽ được giữ nguyên.",
+                            Type = PostgreEnums.NotificationType.thread,
+                        };
+
+                        await service.CreateNotificationAsync(notification);
+                    });
                 }
                 else
-                    toReject.Status = PostgreEnums.ThreadStatus.rejected.ToString();
-
-                var result = await UpdateThreadAsync(toReject, toReject.ThreadId);
-
-                _ = Task.Run(async () =>
                 {
-                    using var scope = _serviceScopeFactory.CreateScope();
-                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    toReject.Status = PostgreEnums.ThreadStatus.rejected.ToString();
+                    result = await UpdateThreadAsync(toReject, toReject.ThreadId);
 
-                    NotificationRequest notification = new()
+                    _ = Task.Run(async () =>
                     {
-                        ToUser = (int)result.CreatedBy,
-                        Title = "Bài viết của bạn đã bị từ chối!",
-                        Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã bị từ chối. " +
-                                $"Lưu ý: bài viết cần tuân thủ nghiêm ngặt các quy tắc của cộng đồng.",
-                        Type = PostgreEnums.NotificationType.thread,
-                    };
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-                    await service.CreateNotificationAsync(notification);
-                });
+
+                        NotificationRequest notification = new()
+                        {
+                            ToUser = (int)result.CreatedBy,
+                            Title = "Bài viết của bạn đã bị từ chối!",
+                            Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã bị từ chối. " +
+                                    $"Lưu ý: bài viết cần tuân thủ nghiêm ngặt các quy tắc của cộng đồng.",
+                            Type = PostgreEnums.NotificationType.thread,
+                        };
+
+                        await service.CreateNotificationAsync(notification);
+                    });
+                }
 
                 return _mapper.Map<ThreadModel>(result);
             }
@@ -427,24 +449,25 @@ namespace StrateZone_Service.Implements
                 if (userRole < UserRole.Staff && (toBeUpdated.Status == ThreadStatus.published.ToString() || toBeUpdated.Status == ThreadStatus.hidden.ToString()))
                 {
                     toBeUpdated.Status = ThreadStatus.deleted.ToString();
+                    toBeUpdated.CreatedByNavigation = null;
                     await UpdateThreadAsync(toBeUpdated, toBeUpdated.ThreadId);
 
-                    ThreadModel newRequest = new ThreadModel()
+                    Thread newRequest = new()
                     {
                         CreatedBy = toBeUpdated.CreatedBy,
                         Title = threadModel.Title,
                         Content = threadModel.Content,
-                        Status = ThreadStatus.edit_pending.ToString(),
+                        Status = ThreadStatus.edit_pending,
                         CreatedAt = toBeUpdated.CreatedAt,
                         ThumbnailUrl = toBeUpdated.ThumbnailUrl,
                         UpdateOfThread = toBeUpdated.ThreadId,
-                        Comments = toBeUpdated.Comments,
-                        Likes = toBeUpdated.Likes,
+                        Comments = null,
+                        Likes = null,
                         ThreadsTags = null,
                         CreatedByNavigation = null,
                     };
 
-                    var newThread = await _threadRepository.CreateThreadAsync(_mapper.Map<Thread>(newRequest));
+                    var newThread = await _threadRepository.CreateThreadAsync(newRequest);
 
                     var threadsTags = await _threadsTagService.CreateThreadsTagsAsync(threadModel.TagIds, newThread.ThreadId);
 
