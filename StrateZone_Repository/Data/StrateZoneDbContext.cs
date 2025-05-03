@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using StrateZone_Repository.Entities;
 using System.Reflection.Emit;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Thread = StrateZone_Repository.Entities.Thread;
 
 namespace StrateZone_Repository.Data;
 
@@ -1060,9 +1061,15 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnName("thumbnail_url");
             entity.Property(e => e.Title).HasColumnName("title");
 
+            entity.Property(e => e.UpdateOfThread).HasColumnName("update_of_thread");
+
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Threads)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("threads_created_by_fkey");
+
+            entity.HasOne(d => d.UpdateOfThreadNavigation).WithOne(p => p.InverseUpdateOfThreadNavigation)
+                .HasForeignKey<Thread>(d => d.UpdateOfThread)
+                .HasConstraintName("threads_update_of_thread_fkey");
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),

@@ -29,6 +29,8 @@ namespace StrateZone_Service.BusinessModels
 
         public bool IsUserLiked { get; set; } = false;
 
+        public int? UpdateOfThread { get; set; }
+
         public string Status { get; set; }
 
         public DateTime? CreatedAt { get; set; }

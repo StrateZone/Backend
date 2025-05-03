@@ -12,6 +12,7 @@ using StrateZone_Service.Interfaces;
 using System.Globalization;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using Thread = StrateZone_Repository.Entities.Thread;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -24,8 +25,10 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly ITagService _tagsService;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService, ITagService tagsService, IUserService userService)
+        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService, ITagService tagsService, IUserService userService, ISystemService systemService, IServiceScopeFactory serviceScopeFactory)
         {
             _threadRepository = threadRepository;
             _imageService = imageService;
@@ -34,6 +37,8 @@ namespace StrateZone_Service.Implements
             _threadsTagService = threadsTagService;
             _tagsService = tagsService;
             _userService = userService;
+            _systemService = systemService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<ThreadModel> CreateThreadAsync(ThreadRequest request)
@@ -250,32 +255,44 @@ namespace StrateZone_Service.Implements
                 if (prevStatus == ThreadStatus.pending.ToString())
                 {
                     var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
-                    threadPoster.Points += 10;
-                    threadPoster.ContributionPoints += 50;
-                    await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
+                    var contrP = await _systemService.GetContributionPointsPerThread(1);
+                    threadPoster.ContributionPoints += contrP;
 
-                    NotificationRequest notification = new()
+                    await _userService.UpdateUserAsync(_mapper.Map<UserModel>(threadPoster), threadPoster.UserId);
+                    
+                    _ = Task.Run(async () => 
                     {
-                        ToUser = (int)result.CreatedBy,
-                        Title = "Bài viết của bạn đã được phê duyệt!",
-                        Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt. Bạn được cộng 25 điểm cá nhân, " +
-                        $"điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp.",
-                        Type = PostgreEnums.NotificationType.thread,
-                    };
-                    await _notificationService.CreateNotificationAsync(notification);
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        NotificationRequest notification = new()
+                        {
+                            ToUser = (int)result.CreatedBy,
+                            Title = "Bài viết của bạn đã được phê duyệt!",
+                            Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt. Bạn được cộng {contrP} điểm đóng góp, " +
+                            $"điểm này dùng để thể hiện độ.",
+                            Type = PostgreEnums.NotificationType.thread,
+                        };
+                        await service.CreateNotificationAsync(notification);
+                    });
+
                 }
                 else if (prevStatus == ThreadStatus.edit_pending.ToString())
                 {
-                    var threadPoster = await _userService.GetUserByIdAsync((int)toApprove.CreatedBy);
-
-                    NotificationRequest notification = new()
+                    _ = Task.Run(async () =>
                     {
-                        ToUser = (int)result.CreatedBy,
-                        Title = "Bài viết của bạn đã được phê duyệt!",
-                        Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.",
-                        Type = PostgreEnums.NotificationType.thread,
-                    };
-                    await _notificationService.CreateNotificationAsync(notification);
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        NotificationRequest notification = new()
+                        {
+                            ToUser = (int)result.CreatedBy,
+                            Title = "Bài viết của bạn đã được phê duyệt!",
+                            Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã được quản trị viên phê duyệt.",
+                            Type = PostgreEnums.NotificationType.thread,
+                        };
+                        await service.CreateNotificationAsync(notification);
+                    });
                 }
 
                 return _mapper.Map<ThreadModel>(result);
@@ -297,18 +314,35 @@ namespace StrateZone_Service.Implements
                     && toReject.Status != PostgreEnums.ThreadStatus.edit_pending.ToString())
                     throw new Exception($"This thread is already {toReject.Status}");
 
-                toReject.Status = PostgreEnums.ThreadStatus.rejected.ToString();
+                if (toReject.Status == ThreadStatus.edit_pending.ToString() && toReject.UpdateOfThread != null)
+                {
+                    var previousVersion = await GetThreadByIdAsync((int)toReject.UpdateOfThread);
+                    previousVersion.Status = ThreadStatus.published.ToString();
+                    await UpdateThreadAsync(previousVersion, previousVersion.ThreadId);
+
+                    toReject.Status = PostgreEnums.ThreadStatus.deleted.ToString();
+                }
+                else
+                    toReject.Status = PostgreEnums.ThreadStatus.rejected.ToString();
+
                 var result = await UpdateThreadAsync(toReject, toReject.ThreadId);
 
-                NotificationRequest notification = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = (int)result.CreatedBy,
-                    Title = "Bài viết của bạn đã bị từ chối!",
-                    Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã bị từ chối. " +
-                    $"Lưu ý: bài viết cần tuân thủ nghiêm ngặt các quy tắc của cộng đồng.",
-                    Type = PostgreEnums.NotificationType.thread,
-                };
-                await _notificationService.CreateNotificationAsync(notification);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = (int)result.CreatedBy,
+                        Title = "Bài viết của bạn đã bị từ chối!",
+                        Content = $"Bài viết của bạn với chủ đề \"{result.Title}\" đã bị từ chối. " +
+                                $"Lưu ý: bài viết cần tuân thủ nghiêm ngặt các quy tắc của cộng đồng.",
+                        Type = PostgreEnums.NotificationType.thread,
+                    };
+
+                    await service.CreateNotificationAsync(notification);
+                });
 
                 return _mapper.Map<ThreadModel>(result);
             }
@@ -335,7 +369,7 @@ namespace StrateZone_Service.Implements
                 NotificationRequest notification = new()
                 {
                     ToUser = (int)result.CreatedBy,
-                    Title = "Bài viết của bạn đã ẩn thành công!",
+                    Title = "Ẩn bài viết thành công!",
                     Content = $"Bạn đã ẩn bài viết có chủ đề \"{result.Title}\". " +
                     $"Để hiện lại bài viết, vui lòng truy cập vào mục \"Bài viết của tôi\".",
                     Type = PostgreEnums.NotificationType.thread,
@@ -369,7 +403,6 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-
                 var toBeUpdated = await GetThreadByIdAsync(id)
                                 ?? throw new Exception("Thread with this ID does not exist");
 
@@ -391,18 +424,42 @@ namespace StrateZone_Service.Implements
                     throw new Exception($"Bạn không được phép gắn thẻ \"{bannedTag.TagName}\" vào trong bài đăng của mình.");
                 }
 
-                if (toBeUpdated.Status == ThreadStatus.published.ToString()
-                 || toBeUpdated.Status == ThreadStatus.hidden.ToString()) 
-                    toBeUpdated.Status = userRole >= UserRole.Staff ? ThreadStatus.published.ToString() : ThreadStatus.edit_pending.ToString();
+                if (userRole < UserRole.Staff && (toBeUpdated.Status == ThreadStatus.published.ToString() || toBeUpdated.Status == ThreadStatus.hidden.ToString()))
+                {
+                    toBeUpdated.Status = ThreadStatus.deleted.ToString();
+                    await UpdateThreadAsync(toBeUpdated, toBeUpdated.ThreadId);
 
-                toBeUpdated.Title = threadModel.Title;
-                toBeUpdated.Content = threadModel.Content;
+                    ThreadModel newRequest = new ThreadModel()
+                    { 
+                        CreatedBy = toBeUpdated.CreatedBy,
+                        Title = threadModel.Title,
+                        Content = threadModel.Content,
+                        Status = ThreadStatus.edit_pending.ToString(),
+                        CreatedAt = toBeUpdated.CreatedAt,
+                        ThumbnailUrl = toBeUpdated.ThumbnailUrl,
+                        UpdateOfThread = toBeUpdated.ThreadId,
+                        Comments = toBeUpdated.Comments,
+                        Likes = toBeUpdated.Likes,
+                        ThreadsTags = null,
+                    };
 
-                var result = await _threadRepository.UpdateThreadAsync(_mapper.Map<Thread>(toBeUpdated), id);
+                    var newThread = await _threadRepository.CreateThreadAsync(_mapper.Map<Thread>(newRequest));
 
-                await _threadsTagService.UpdateThreadsTagsAsync(threadModel.TagIds, toBeUpdated.ThreadId);
+                    var threadsTags = await _threadsTagService.CreateThreadsTagsAsync(threadModel.TagIds, newThread.ThreadId);
 
-                return _mapper.Map<ThreadModel>(result);
+                    return _mapper.Map<ThreadModel>(newThread);
+                }
+                else
+                {
+                    toBeUpdated.Title = threadModel.Title;
+                    toBeUpdated.Content = threadModel.Content;
+
+                    var result = await _threadRepository.UpdateThreadAsync(_mapper.Map<Thread>(toBeUpdated), id);
+
+                    await _threadsTagService.UpdateThreadsTagsAsync(threadModel.TagIds, toBeUpdated.ThreadId);
+
+                    return _mapper.Map<ThreadModel>(result);
+                }
             }
             catch (Exception ex)
             {

@@ -20,11 +20,17 @@ public partial class Thread
 
     public ThreadStatus Status { get; set; } 
 
+    public int? UpdateOfThread { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    public virtual Thread? UpdateOfThreadNavigation { get; set; }
+
+    public virtual Thread? InverseUpdateOfThreadNavigation { get; set; }
 
     public virtual User? CreatedByNavigation { get; set; }
 

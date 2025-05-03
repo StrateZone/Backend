@@ -329,7 +329,7 @@ namespace StrateZone_Repository.Implements
                                     .ThenInclude(c => c.User)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
-                                .SingleOrDefaultAsync(t => t.ThreadId == id && t.Status != PostgreEnums.ThreadStatus.deleted);
+                                .SingleOrDefaultAsync(t => t.ThreadId == id);
             }
             catch (Exception ex)
             {
