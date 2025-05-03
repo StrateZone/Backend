@@ -279,6 +279,9 @@ namespace StrateZone_Service.Implements
                 }
                 else if (prevStatus == ThreadStatus.edit_pending.ToString())
                 {
+                    if (toApprove.UpdateOfThread != null)
+                        await _threadRepository.LinkLikesAndCommentFromOldToNewThread(toApprove.UpdateOfThread.Value, toApprove.ThreadId);
+
                     _ = Task.Run(async () =>
                     {
                         using var scope = _serviceScopeFactory.CreateScope();

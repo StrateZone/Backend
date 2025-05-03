@@ -367,5 +367,25 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task LinkLikesAndCommentFromOldToNewThread(int oldThreadId, int newThreadId)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    @"UPDATE comments SET thread_id = {0} WHERE thread_id = {1};",
+                    newThreadId,
+                    oldThreadId);
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    @"UPDATE likes SET thread_id = {0} WHERE thread_id = {1};",
+                    newThreadId,
+                    oldThreadId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
