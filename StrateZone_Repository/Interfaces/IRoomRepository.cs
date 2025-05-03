@@ -8,7 +8,7 @@ namespace StrateZone_Repository.Interfaces
     public interface IRoomRepository
     {
         Task<PagedList<Room>> GetRoomsAsync(RoomParameters parameters);
-        Task<PagedList<Room>> GetRoomsByTypeAsync(RoomParameters parameters, RoomType roomType);
+        Task<PagedList<Room>> GetRoomsByTypeAsync(RoomParameters parameters, string roomType);
         Task<Room> GetRoomByIdAsync(int id);
         Task<Room> CreateRoomAsync(Room room);
         Task<Room> UpdateRoomAsync(Room room, int id);

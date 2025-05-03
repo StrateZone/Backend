@@ -40,7 +40,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("by-type")]
-        public async Task<IActionResult> GetRoomsByType([FromQuery] RoomParameters parameters, RoomType roomType)
+        public async Task<IActionResult> GetRoomsByType([FromQuery] RoomParameters parameters, string roomType)
         {
             try
             {

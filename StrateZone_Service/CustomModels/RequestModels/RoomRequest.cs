@@ -11,7 +11,7 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public string? RoomName { get; set; }
 
         [Required]
-        public RoomType Type { get; set; }
+        public string Type { get; set; }
 
         [Required]
         public string? Description { get; set; }

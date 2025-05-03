@@ -14,7 +14,7 @@ public partial class Course
 
     public int? InstructorId { get; set; }
 
-    public Parameters.PostgreEnums.GameTypeEnum GameType { get; set; }
+    public string GameType { get; set; }
 
     public SkillLevel SkillLevel { get; set; }
 

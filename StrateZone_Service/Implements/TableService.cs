@@ -79,7 +79,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TableModel>> GetTablesByGameTypeAsync(TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<TableModel>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TableResponse>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<TableResponse>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, string gameType)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<TableResponse>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum[] gameTypes, PostgreEnums.RoomType[] roomTypes)
+        public async Task<PagedList<TableResponse>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, string[] gameTypes, string[] roomTypes)
         {
             try
             {
@@ -164,12 +164,12 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<Dictionary<PostgreEnums.GameTypeEnum, List<TableResponse>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount)
+        public async Task<Dictionary<string, List<TableResponse>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount)
         {
             try
             {
                 var result = await _tableRepository.GetAvailableTablesForEachGameTypeInTimeRangeAsync(parameters, tableCount);
-                var tables = _mapper.Map<Dictionary<GameTypeEnum, List<TableResponse>>>(result);
+                var tables = _mapper.Map<Dictionary<string, List<TableResponse>>>(result);
 
                 foreach (var tableList in tables.Values)
                 {

@@ -19,7 +19,7 @@ public partial class Price
 
     public bool TeachingSalary { get; set; }
 
-    public RoomType? RoomType { get; set; }
+    public string? RoomType { get; set; }
 
     public decimal? Price1 { get; set; }
 

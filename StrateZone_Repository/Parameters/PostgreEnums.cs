@@ -8,7 +8,6 @@
         public enum EventStatus { upcoming, ongoing, completed, cancelled }
         public enum TournamentStatus { upcoming, enrolling, ongoing, completed, cancelled }
         public enum EventType { tournament, promotion }
-        public enum GameTypeEnum { chess, xiangqi, go }
         public enum Gender { male, female }
         public enum MessageStatus { read, unread }
         public enum NotificationType { appointment, order, tables_appointment, appointment_request_from, appointment_request_to, thread, friend, friend_request, community, tables_appointment_invitations_timedout, tables_appointment_ongoing }
@@ -18,7 +17,6 @@
         public enum Ranking { basic, silver, gold, platinum }
         public enum RequestStatus { pending, accepted, rejected, cancelled, expired, accepted_by_others, table_cancelled }
         public enum RoomStatus { available, unavailable, closed }
-        public enum RoomType { study, premium, basic, openspaced }
         public enum SkillLevel { beginner, intermediate, advanced }
         public enum ThreadStatus { published, rejected, pending, deleted, drafted, hidden, edit_pending }
         public enum TicketType { withdrawal, feedback, other }

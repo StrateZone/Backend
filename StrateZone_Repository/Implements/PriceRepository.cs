@@ -16,12 +16,10 @@ namespace StrateZone_Repository.Implements
     {
         private readonly StrateZoneDbContext _context;
         private readonly IUserRepository _userRepository;
-        private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
-        public PriceRepository(StrateZoneDbContext context, IUserRepository userRepository, ITablesAppointmentRepository tablesAppointmentRepository)
+        public PriceRepository(StrateZoneDbContext context, IUserRepository userRepository)
         {
             _context = context;
             _userRepository = userRepository;
-            _tablesAppointmentRepository = tablesAppointmentRepository;
         }
 
         public async Task<PagedList<Price>> GetServicePrices(PriceParameters parameters)
@@ -37,7 +35,15 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Price> GetPriceOfGameTypeAsync(GameTypeEnum gameType)
+        public async Task<Price> CreatePriceAsync(Price price)
+        {
+            await _context.Prices.AddAsync(price);
+            await _context.SaveChangesAsync();
+
+            return price;
+        }
+
+        public async Task<Price> GetPriceOfGameTypeAsync(string gameType)
         {
             try
             {
@@ -46,7 +52,7 @@ namespace StrateZone_Repository.Implements
                                         @"SELECT p.*
                                         FROM public.""prices"" p
                                         JOIN public.""gameTypes"" g ON p.game_type_id = g.type_id
-                                        WHERE g.type_name = @gt::game_type 
+                                        WHERE g.type_name = @gt 
                                             AND p.member_fee = false AND p.teaching_salary = false
                                         LIMIT 1",
                                         new NpgsqlParameter("@gt", gameType.ToString())
@@ -62,14 +68,14 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Price> GetPriceOfRoomTypeAsync(RoomType roomType)
+        public async Task<Price> GetPriceOfRoomTypeAsync(string roomType)
         {
             try
             {
                 var price = await _context.Prices
                                     .FromSqlRaw(
                                         @"SELECT * FROM prices 
-                                        WHERE room_type = @rt::room_type 
+                                        WHERE room_type = @rt 
                                             AND member_fee = false AND teaching_salary = false 
                                         LIMIT 1",
                                         new NpgsqlParameter("@rt", roomType.ToString())
@@ -155,8 +161,11 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@course_id", price.CourseId.Value));
                 }
 
-                sql.Append("room_type = @room_type::room_type, ");
-                parameters.Add(new NpgsqlParameter("@room_type", price.RoomType.ToString()));
+                if (price.RoomType != null)
+                {
+                    sql.Append("room_type = @room_type, ");
+                    parameters.Add(new NpgsqlParameter("@room_type", price.RoomType));
+                }
 
                 sql.Append("member_fee = @member_fee, ");
                 parameters.Add(new NpgsqlParameter("@member_fee", price.MemberFee));
@@ -381,10 +390,10 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var prices = await _context.Prices.AsNoTracking()
-                    .Where(p => p.RoomType.HasValue)
+                    .Where(p => p.RoomType != null)
                     .GroupBy(p => p.RoomType) // group by nullable
                     .ToDictionaryAsync(
-                        g => g.Key!.Value.ToString(), // safe because of the HasValue filter
+                        g => g.Key!.ToString(), // safe because of the HasValue filter
                         g => g.Average(p => (decimal)p.Price1)
                     );
 

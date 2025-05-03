@@ -18,7 +18,7 @@ namespace StrateZone_Service.BusinessModels
 
         public int? InstructorId { get; set; }
 
-        public StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum GameType { get; set; }
+        public string GameType { get; set; }
 
         public SkillLevel SkillLevel { get; set; }
 

@@ -36,7 +36,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PriceModel> GetPriceOfRoomTypeAsync(RoomType roomType)
+        public async Task<PriceModel> GetPriceOfRoomTypeAsync(string roomType)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PriceModel> GetPriceOfGameTypeAsync(GameTypeEnum gameType)
+        public async Task<PriceModel> GetPriceOfGameTypeAsync(string gameType)
         {
             try
             {
@@ -207,6 +207,21 @@ namespace StrateZone_Service.Implements
             try
             {
                 return await _priceRepository.GetPricesPerHourEachRoomTypeAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<PriceModel> CreatePriceAsync(PriceModel priceModel)
+        {
+            try
+            {
+                var price = _mapper.Map<Price>(priceModel);
+                var result = await _priceRepository.CreatePriceAsync(price);
+            
+                return _mapper.Map<PriceModel>(result);
             }
             catch (Exception ex)
             {

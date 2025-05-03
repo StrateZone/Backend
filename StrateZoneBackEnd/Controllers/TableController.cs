@@ -100,7 +100,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("gametype")]
-        public async Task<IActionResult> GetTablesByGameType([FromQuery] TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<IActionResult> GetTablesByGameType([FromQuery] TableParameters parameters, string gameType)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("available/gametype")]
-        public async Task<IActionResult> GetAvailableTablesByGameType([FromQuery] TableParameters parameters, StrateZone_Repository.Parameters.PostgreEnums.GameTypeEnum gameType)
+        public async Task<IActionResult> GetAvailableTablesByGameType([FromQuery] TableParameters parameters, string gameType)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace StrateZone_APIs.Controllers
         /// Get available tables within a time range, filtered by gametypes and roomtypes.
         /// </summary>
         [HttpGet("available/filter")]
-        public async Task<IActionResult> GetAvailableTablesByGameTypeAndRoomType([FromQuery] TableParameters parameters, [FromQuery] GameTypeEnum[] gameTypes, [FromQuery] RoomType[] roomTypes)
+        public async Task<IActionResult> GetAvailableTablesByGameTypeAndRoomType([FromQuery] TableParameters parameters, [FromQuery] string[] gameTypes, [FromQuery] string[] roomTypes)
         {
             try
             {

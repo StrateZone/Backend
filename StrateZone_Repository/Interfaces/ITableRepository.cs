@@ -13,11 +13,11 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<Table>> GetTablesAsync(TablesAppointmentParameters parameters, string? search);
         Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
         Task<PagedList<Table>> GetTablesAsync(TableParameters parameters);
-        Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType);
+        Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType);
         Task<PagedList<Table>> GetAvailableTablesAsync(TableParameters parameters);
-        Task<PagedList<Table>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType);
-        Task<PagedList<Table>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, GameTypeEnum[] gameTypes, RoomType[] roomTypes);
-        Task<Dictionary<GameTypeEnum, List<Table>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount);
+        Task<PagedList<Table>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, string gameType);
+        Task<PagedList<Table>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, string[] gameTypes, string[] roomTypes);
+        Task<Dictionary<string, List<Table>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount);
         Task<Table> UpdateTableAsync(Table table, int id);
     }
 }

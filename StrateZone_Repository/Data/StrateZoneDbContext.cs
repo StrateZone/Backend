@@ -109,7 +109,6 @@ public partial class StrateZoneDbContext : DbContext
                         dataSourceBuilder.MapEnum<CourseSlotStatus>("course_slot_status");
                         dataSourceBuilder.MapEnum<CourseStatus>("course_status");
                         dataSourceBuilder.MapEnum<EventStatus>("event_status");
-                        dataSourceBuilder.MapEnum<GameTypeEnum>("game_type");
                         dataSourceBuilder.MapEnum<Gender>("gender");
                         dataSourceBuilder.MapEnum<MessageStatus>("message_status");
                         dataSourceBuilder.MapEnum<PaymentStatus>("payment_status");
@@ -120,7 +119,6 @@ public partial class StrateZoneDbContext : DbContext
                         dataSourceBuilder.MapEnum<Ranking>("ranking");
                         dataSourceBuilder.MapEnum<RequestStatus>("request_status");
                         dataSourceBuilder.MapEnum<RoomStatus>("room_status");
-                        dataSourceBuilder.MapEnum<RoomType>("room_type");
                         dataSourceBuilder.MapEnum<SkillLevel>("skill_level");
                         dataSourceBuilder.MapEnum<ThreadStatus>("thread_status");
                         dataSourceBuilder.MapEnum<TicketType>("ticket_type");
@@ -148,7 +146,6 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<CourseSlotStatus>();
         modelBuilder.HasPostgresEnum<CourseStatus>();
         modelBuilder.HasPostgresEnum<EventStatus>();
-        modelBuilder.HasPostgresEnum<GameTypeEnum>();
         modelBuilder.HasPostgresEnum<Gender>();
         modelBuilder.HasPostgresEnum<MessageStatus>();
         modelBuilder.HasPostgresEnum<OrderStatus>();
@@ -159,7 +156,6 @@ public partial class StrateZoneDbContext : DbContext
         modelBuilder.HasPostgresEnum<Ranking>();
         modelBuilder.HasPostgresEnum<RequestStatus>();
         modelBuilder.HasPostgresEnum<RoomStatus>();
-        modelBuilder.HasPostgresEnum<RoomType>();
         modelBuilder.HasPostgresEnum<SkillLevel>();
         modelBuilder.HasPostgresEnum<ThreadStatus>();
         modelBuilder.HasPostgresEnum<TicketType>();
@@ -323,11 +319,7 @@ public partial class StrateZoneDbContext : DbContext
                   );
 
             entity.Property(e => e.GameType)
-                  .HasColumnName("chess_type")
-                  .HasConversion(
-                    v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameTypeEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameTypeEnum), v)
-                  );
+                  .HasColumnName("chess_type");
 
             entity.Property(e => e.SkillLevel).HasColumnName("skill_level")
                   .HasConversion(
@@ -527,10 +519,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.ToTable("gameTypes");
 
             entity.Property(e => e.TypeId).HasColumnName("type_id");
-            entity.Property(e => e.TypeName).HasColumnName("type_name").HasColumnType("game_type").HasConversion(
-                    v => v.ToString(),
-                    v => (Parameters.PostgreEnums.GameTypeEnum)Enum.Parse(typeof(Parameters.PostgreEnums.GameTypeEnum), v)
-                    );
+            entity.Property(e => e.TypeName).HasColumnName("type_name");
         });
 
         modelBuilder.Entity<Image>(entity =>
@@ -756,11 +745,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TeachingSalary)
                 .HasColumnType("boolean")
                 .HasColumnName("teaching_salary");
-            entity.Property(e => e.RoomType).HasColumnName("room_type")
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (RoomType) Enum.Parse(typeof(RoomType), v)
-                );
+            entity.Property(e => e.RoomType).HasColumnName("room_type");
             entity.Property(e => e.Unit)
                 .HasMaxLength(50)
                 .HasColumnName("unit");
@@ -882,10 +867,7 @@ public partial class StrateZoneDbContext : DbContext
                 .HasMaxLength(5)
                 .HasColumnName("room_name");
 
-            entity.Property(e => e.Type).HasColumnName("room_type").HasColumnType("room_type").HasConversion(
-                    v => v.ToString(),
-                    v => (RoomType)Enum.Parse(typeof(RoomType), v)
-                    );
+            entity.Property(e => e.Type).HasColumnName("room_type").HasColumnType("room_type");
 
             entity.Property(e => e.Description).HasColumnName("description")
                 .HasMaxLength(200)

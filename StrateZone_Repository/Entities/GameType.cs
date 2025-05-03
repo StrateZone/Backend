@@ -7,7 +7,7 @@ public partial class GameType
 {
     public int TypeId { get; set; }
 
-    public Parameters.PostgreEnums.GameTypeEnum TypeName { get; set; }
+    public string TypeName { get; set; }
 
     public virtual Image? Image { get; set; }
 

@@ -43,7 +43,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("roomtype")]
-        public async Task<IActionResult> GetPriceByRoomType(RoomType roomType)
+        public async Task<IActionResult> GetPriceByRoomType(string roomType)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("gametype")]
-        public async Task<IActionResult> GetPriceByGameType(GameTypeEnum gameType)
+        public async Task<IActionResult> GetPriceByGameType(string gameType)
         {
             try
             {

@@ -7,9 +7,10 @@ namespace StrateZone_Repository.Interfaces
 {
     public interface IPriceRepository
     {
+        Task<Price> CreatePriceAsync(Price price);
         Task<Price> GetMembershipPriceAsync();
-        Task<Price> GetPriceOfGameTypeAsync(GameTypeEnum gameType);
-        Task<Price> GetPriceOfRoomTypeAsync(RoomType roomType);
+        Task<Price> GetPriceOfGameTypeAsync(string gameType);
+        Task<Price> GetPriceOfRoomTypeAsync(string roomType);
         Task<decimal> GetPriceOfAppointmentAsync(int appointmentId);
         Task<Price> GetPriceOfCourseAsync(int courseId);
         Task<Price> GetProductPriceByIdAsync(int productId);

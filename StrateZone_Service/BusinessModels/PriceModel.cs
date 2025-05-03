@@ -19,7 +19,7 @@ namespace StrateZone_Service.BusinessModels
 
         public int? CourseId { get; set; }
 
-        public RoomType? RoomType { get; set; }
+        public string? RoomType { get; set; }
 
         public bool MemberFee { get; set; } = false;
 

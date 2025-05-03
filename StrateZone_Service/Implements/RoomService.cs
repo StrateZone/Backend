@@ -36,7 +36,7 @@ namespace StrateZone_Service.Implements
                 {
                     if (r == null) continue;
 
-                    RoomType rt = r.Type != null ? (RoomType)Enum.Parse(typeof(RoomType), r.Type) : RoomType.study;
+                    string rt = r.Type;
                     PriceModel priceModel = await _priceService.GetPriceOfRoomTypeAsync(rt);
 
                     if (priceModel != null)
@@ -54,7 +54,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<RoomResponse>> GetRoomsByRoomTypeAsync(RoomParameters parameters, RoomType roomType)
+        public async Task<PagedList<RoomResponse>> GetRoomsByRoomTypeAsync(RoomParameters parameters, string roomType)
         {
             try
             {
@@ -63,7 +63,7 @@ namespace StrateZone_Service.Implements
 
                 foreach (var r in rooms)
                 {
-                    RoomType rt = r.Type != null ? (RoomType)Enum.Parse(typeof(RoomType), r.Type) : RoomType.study;
+                    string rt = r.Type;
                     PriceModel priceModel = await _priceService.GetPriceOfRoomTypeAsync(rt);
 
                     if (priceModel != null)

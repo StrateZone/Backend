@@ -9,9 +9,10 @@ namespace StrateZone_Service.Interfaces
 {
     public interface IPriceService
     {
+        Task<PriceModel> CreatePriceAsync(PriceModel priceModel);
         Task<PriceModel> GetMembershipPriceAsync();
-        Task<PriceModel> GetPriceOfGameTypeAsync(PostgreEnums.GameTypeEnum gameType);
-        Task<PriceModel> GetPriceOfRoomTypeAsync(PostgreEnums.RoomType roomType);
+        Task<PriceModel> GetPriceOfGameTypeAsync(string gameType);
+        Task<PriceModel> GetPriceOfRoomTypeAsync(string roomType);
         Task<PriceModel> GetPriceOfCourseAsync(int courseId);
         Task<decimal> GetPriceOfAppointmentAsync(int appointmentId);
         Task<PriceModel> GetProductPriceByIdAsync(int productId);

@@ -14,7 +14,7 @@ namespace StrateZone_Service.BusinessModels
 
         public string? RoomName { get; set; }
 
-        public RoomType Type { get; set; }
+        public string Type { get; set; }
 
         public string? Description { get; set; }
 

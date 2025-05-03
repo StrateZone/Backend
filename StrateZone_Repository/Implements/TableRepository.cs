@@ -52,7 +52,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Table>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, PostgreEnums.GameTypeEnum gameType)
+        public async Task<PagedList<Table>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, string gameType)
         {
             try
             {
@@ -202,8 +202,8 @@ namespace StrateZone_Repository.Implements
 
         public async Task<PagedList<Table>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(
              TableParameters parameters,
-             GameTypeEnum[] gameTypes = null,
-             RoomType[] roomTypes = null)
+             string[] gameTypes = null,
+             string[] roomTypes = null)
         {
             try
             {
@@ -214,7 +214,7 @@ namespace StrateZone_Repository.Implements
                     JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
                     WHERE t.status = 'active' AND r.status = 'available' AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
                     AND (@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds))
-                    AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds::public.room_type[]))
+                    AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds))
                     AND NOT EXISTS (
                         SELECT 1
                         FROM tables_appointments ta
@@ -254,7 +254,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<Dictionary<GameTypeEnum, List<Table>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount)
+        public async Task<Dictionary<string, List<Table>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount)
         {
             try
             {

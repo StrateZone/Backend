@@ -33,7 +33,7 @@ namespace StrateZone_Repository.Implements
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
                     INSERT INTO rooms (room_name, room_type, description, capacity, status) 
-                    VALUES (@name, @type::room_type, @description, @capacity, @status::room_status)
+                    VALUES (@name, @type, @description, @capacity, @status::room_status)
                     RETURNING room_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@name", room.RoomName));
@@ -98,13 +98,13 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Room>> GetRoomsByTypeAsync(RoomParameters parameters, PostgreEnums.RoomType roomType)
+        public async Task<PagedList<Room>> GetRoomsByTypeAsync(RoomParameters parameters, string roomType)
         {
             try
             {
                 var rooms = _context.Rooms
                                     .FromSqlRaw(
-                                            @"SELECT * FROM rooms WHERE room_type = @room_type::room_type",
+                                            @"SELECT * FROM rooms WHERE room_type = @room_type",
                                         new NpgsqlParameter("@room_type", roomType.ToString())
                                     )
                                     .AsNoTracking()
@@ -150,7 +150,7 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@description", room.Description));
                 }
 
-                sql.Append("room_type = @room_type::room_type, ");
+                sql.Append("room_type = @room_type, ");
                 parameters.Add(new NpgsqlParameter("@room_type", room.Type.ToString()));
 
                 sql.Append("status = @status::room_status, ");

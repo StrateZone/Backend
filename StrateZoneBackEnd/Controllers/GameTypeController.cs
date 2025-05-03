@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 
@@ -40,6 +41,20 @@ namespace StrateZone_APIs.Controllers
 
                 var gametypes = await _gameTypeService.GetGameTypeWithExtensionsByIdAsync(id);
                 return Ok(gametypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddAsync([FromBody] GameTypeRequest gameTypeRequest)
+        {
+            try
+            {
+                var gametypes = await _gameTypeService.AddAsync(gameTypeRequest);
+                return Created("Gametype created!", gametypes);
             }
             catch (Exception ex)
             {
