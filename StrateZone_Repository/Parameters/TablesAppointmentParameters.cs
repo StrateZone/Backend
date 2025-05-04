@@ -8,5 +8,7 @@ namespace StrateZone_Repository.Parameters
 {
     public class TablesAppointmentParameters : PagedListParameters
     {
+        public int Year { get; set; }
+        public int Month { get; set; }
     }
 }

@@ -26,7 +26,10 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                var expenses = _context.Expenses.AsNoTracking().AsQueryable();
+                var expenses = _context.Expenses.AsNoTracking().
+                    Where(e => e.TransactionDate.Month == parameters.Month 
+                    && e.TransactionDate.Year == parameters.Year).
+                    AsQueryable();
 
                 expenses = parameters.OrderBy switch
                 {
