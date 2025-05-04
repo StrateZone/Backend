@@ -223,11 +223,6 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                List<int> vouchers = request.TablesAppointmentRequests
-                                        .Where(ta => ta.VoucherId != null)
-                                        .Select(ta => (int) ta.VoucherId).ToList();
-                if (vouchers.Count > 0) await _voucherService.UseVouchersAsync(vouchers, request.UserId);
-
                 var maxInvitedToTable = await _systemService.GetMaxUsersInvitedToTable(1);
 
                 if (request.TablesAppointmentRequests.Any(ta => ta.InvitedUsers.Count > maxInvitedToTable))
@@ -294,6 +289,15 @@ namespace StrateZone_Service.Implements
                     }
 
                     await service.CreateAppointmentRequestsAsync(appointmentRequests);
+
+                    List<int> vouchers = request.TablesAppointmentRequests
+                        .Where(ta => ta.VoucherId != null)
+                        .Select(ta => (int)ta.VoucherId).ToList();
+                    if (vouchers.Count > 0)
+                    {
+                        var voucherService = scope.ServiceProvider.GetRequiredService<IVoucherService>();
+                        await voucherService.UseVouchersAsync(vouchers, request.UserId);
+                    }
                 });
 
                 return result;
