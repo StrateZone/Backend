@@ -26,13 +26,15 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                User sender = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == friendrequest.FromUser);
+                var users = _context.Users.AsNoTracking().AsQueryable();
+
+                User sender = users.FirstOrDefault(u => u.UserId == friendrequest.FromUser) ?? throw new Exception("Sender does not exist");
                 if (sender.UserRole == PostgreEnums.UserRole.RegisteredUser) throw new Exception("Chỉ thành viên trong cộng đồng mới được gửi lời mời kết bạn.");
 
-                User receiver = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == friendrequest.ToUser);
+                User receiver = users.FirstOrDefault(u => u.UserId == friendrequest.ToUser) ?? throw new Exception("Receiver does not exist");
                 if (receiver.UserRole == PostgreEnums.UserRole.RegisteredUser) throw new Exception("Chỉ thành viên trong cộng đồng mới được nhận lời mời kết bạn.");
 
-                if (_context.Friendlists.AsNoTracking().Any(fl => (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser) 
+                if (await _context.Friendlists.AsNoTracking().AnyAsync(fl => (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser) 
                                                     || (fl.UserId == friendrequest.FromUser && fl.FriendId == friendrequest.ToUser)))
                     throw new Exception($"You two are already friend with each other.");
 
@@ -67,7 +69,7 @@ namespace StrateZone_Repository.Implements
                 var executedResult = await cmd.ExecuteScalarAsync();
                 friendrequest.Id = Convert.ToInt32(executedResult);
 
-                return friendrequest;
+                return await _context.Friendrequests.AsNoTracking().Include(f => f.FromUserNavigation).FirstOrDefaultAsync(f => f.Id == friendrequest.Id);
             }
             catch (Exception ex)
             {

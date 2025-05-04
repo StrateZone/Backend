@@ -37,6 +37,11 @@ namespace StrateZone_Repository.Implements
 
         public async Task<Price> CreatePriceAsync(Price price)
         {
+            var prices = await _context.Prices.AsNoTracking().ToListAsync();
+
+            if (price.RoomType != null && prices.Any(p => p.RoomType == price.RoomType)) throw new Exception("Price for this room type already exists");
+            if (price.GameTypeId != null && prices.Any(p => p.GameTypeId == price.GameTypeId)) throw new Exception("Price for this game type already exists");
+            
             await _context.Prices.AddAsync(price);
             await _context.SaveChangesAsync();
 

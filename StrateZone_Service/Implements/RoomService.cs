@@ -179,5 +179,17 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<List<string>> GetAllRoomtypesAsync()
+        {
+            try
+            {
+                return await _roomRepository.GetAllRoomtypesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

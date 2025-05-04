@@ -312,7 +312,6 @@ namespace StrateZone_Service.Implements
                 _ = Task.Run(async () =>
                 {
                     using var scope = _serviceScopeFactory.CreateScope();
-                    var notiService = scope.ServiceProvider.GetRequiredService<INotificationService>();
                     var tablesAppointmentService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
                     var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 

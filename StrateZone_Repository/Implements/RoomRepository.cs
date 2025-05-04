@@ -26,6 +26,9 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                if (!await _context.Prices.AsNoTracking().AnyAsync(p => p.RoomType == room.Type))
+                    throw new Exception("Room type does not exist, add a room type first.");
+
                 var connection = _context.Database.GetDbConnection();
 
                 if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
@@ -169,6 +172,15 @@ namespace StrateZone_Repository.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<List<string>> GetAllRoomtypesAsync()
+        {
+            return await _context.Prices.AsNoTracking()
+                            .Where(r => r.RoomType != null)
+                            .GroupBy(r => r.RoomType)
+                            .Select(r => r.Key)
+                            .ToListAsync();
         }
     }
 }

@@ -13,5 +13,6 @@ namespace StrateZone_Repository.Interfaces
         Task<Room> CreateRoomAsync(Room room);
         Task<Room> UpdateRoomAsync(Room room, int id);
         Task<Room> DeleteRoomAsync(int id);
+        Task<List<string>> GetAllRoomtypesAsync();
     }
 }
