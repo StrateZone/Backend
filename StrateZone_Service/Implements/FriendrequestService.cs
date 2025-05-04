@@ -221,15 +221,6 @@ namespace StrateZone_Service.Implements
                 var request = _mapper.Map<Friendrequest>(requestModel);
                 var result = await _friendRequestRepository.UpdateFriendrequestAsync(request, id);
 
-                NotificationRequest toUser_notification = new()
-                {
-                    ToUser = result.ToUser,
-                    Title = $"Từ chối lời mời kết bạn thành công!",
-                    Content = $"Bạn đã từ chối lời mời kết bạn đến từ {requestModel.FromUserNavigation.Username}.",
-                    Type = NotificationType.friend_request,
-                };
-                await _notificationService.CreateNotificationAsync(toUser_notification);
-
                 return _mapper.Map<FriendrequestModel>(result);
             }
             catch

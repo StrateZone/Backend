@@ -238,23 +238,29 @@ namespace StrateZone_Service.Implements
 
                 var result = await _appointmentRequestRepository.CreateAppointmentRequestsAsync(mappedRequests);
 
-                List<NotificationRequest> notificationRequests = new();
-
-                foreach (var request in result)
+                _ = Task.Run(async () =>
                 {
-                    NotificationRequest notification = new()
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    List<NotificationRequest> notificationRequests = new();
+
+                    foreach (var request in result)
                     {
-                        ToUser = request.ToUser,
-                        Title = $"Bạn có lời mời chơi cờ đến từ {request.FromUserNavigation.Username}!",
-                        Content = $"{request.FromUserNavigation.Username} đã gửi cho bạn 1 lời mời chơi cờ vào lúc {((DateTime)request.StartTime).TimeOfDay}, " +
-                        $"ngày {DateOnly.FromDateTime((DateTime)request.StartTime)}. Bấm để xem tất cả lời mời của bạn.",
-                        Type = NotificationType.appointment_request_from
-                    };
+                        NotificationRequest notification = new()
+                        {
+                            ToUser = request.ToUser,
+                            Title = $"Bạn có lời mời chơi cờ đến từ {request.FromUserNavigation.Username}!",
+                            Content = $"{request.FromUserNavigation.Username} đã gửi cho bạn 1 lời mời chơi cờ vào lúc {((DateTime)request.StartTime).TimeOfDay}, " +
+                            $"ngày {DateOnly.FromDateTime((DateTime)request.StartTime)}. Bấm để xem tất cả lời mời của bạn.",
+                            Type = NotificationType.appointment_request_from
+                        };
 
-                    notificationRequests.Add(notification);
-                }
+                        notificationRequests.Add(notification);
+                    }
 
-                _ = Task.Run(() => _notificationService.CreateNotificationsAsync(notificationRequests));
+                    await service.CreateNotificationsAsync(notificationRequests);
+                });
 
                 return _mapper.Map<List<AppointmentrequestModel>>(result);
             }
@@ -415,14 +421,20 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _appointmentRequestRepository.AcceptAppointmentrequestAsync(id);
 
-                NotificationRequest notification = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = result.FromUser,
-                    Title = "Lời mời đã được chấp nhận!",
-                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận! Bấm để xem chi tiết.",
-                    Type = NotificationType.appointment_request_to
-                };
-                await _notificationService.CreateNotificationAsync(notification);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = result.FromUser,
+                        Title = "Lời mời đã được chấp nhận!",
+                        Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã được chấp nhận! Bấm để xem chi tiết.",
+                        Type = NotificationType.appointment_request_to
+                    };
+                    await service.CreateNotificationAsync(notification);
+                });
 
                 return _mapper.Map<AppointmentrequestModel>(result);
             }
@@ -438,14 +450,20 @@ namespace StrateZone_Service.Implements
             {
                 var result = await _appointmentRequestRepository.RejectAppointmentrequestAsync(id);
 
-                NotificationRequest notification = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = result.FromUser,
-                    Title = "Lời mời đã bị từ chối!",
-                    Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã bị đối phương từ chối! Bấm để xem chi tiết.",
-                    Type = NotificationType.appointment_request_to
-                };
-                await _notificationService.CreateNotificationAsync(notification);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = result.FromUser,
+                        Title = "Lời mời đã bị từ chối!",
+                        Content = $"Lời mời tham gia chơi cờ của bạn gửi đến cho {result.ToUserNavigation.Username} đã bị đối phương từ chối! Bấm để xem chi tiết.",
+                        Type = NotificationType.appointment_request_to
+                    };
+                    await service.CreateNotificationAsync(notification);
+                });
 
                 return _mapper.Map<AppointmentrequestModel>(result);
             }

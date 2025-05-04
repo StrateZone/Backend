@@ -127,7 +127,7 @@ namespace StrateZone_Repository.Implements
                 await using var createCmd = connection.CreateCommand();
 
                 createCmd.CommandText = @"
-                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range) 
+                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, is_admin_cancelled) 
                     VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time))
                     RETURNING id;"
                 ;

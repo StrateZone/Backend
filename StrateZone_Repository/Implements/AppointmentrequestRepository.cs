@@ -445,7 +445,9 @@ namespace StrateZone_Repository.Implements
 
                 await transaction.CommitAsync(); // COMMIT only after all operations succeed
 
-                return toAccept;
+                return await _context.AppointmentRequests.AsNoTracking()
+                                .Include(a => a.ToUserNavigation)
+                                .FirstOrDefaultAsync(ar => ar.Id == id);
             }
             catch
             {
@@ -473,7 +475,9 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), new NpgsqlParameter("@id", id));
                 _context.Entry(toReject).State = EntityState.Detached;
 
-                return toReject;
+                return await _context.AppointmentRequests.AsNoTracking()
+                                .Include(a => a.ToUserNavigation)
+                                .FirstOrDefaultAsync(ar => ar.Id == id);
             }
             catch (Exception ex)
             {
