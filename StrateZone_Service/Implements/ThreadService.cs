@@ -263,7 +263,18 @@ namespace StrateZone_Service.Implements
                     _ = Task.Run(async () => 
                     {
                         using var scope = _serviceScopeFactory.CreateScope();
-                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                        var notiService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                        var pointService = scope.ServiceProvider.GetRequiredService<IPointsHistoryService>();
+
+                        PointsHistoryModel pointHistoryModel = new()
+                        {
+                            OfUser = threadPoster.UserId,
+                            Content = $"+{contrP} điểm đóng góp: Đăng bài viết với chủ đề \"{toApprove.Title}\"",
+                            Amount = contrP,
+                            PointType = "contribution_point",
+                            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        };
+                        await pointService.AddAsync(pointHistoryModel);
 
                         NotificationRequest notification = new()
                         {
@@ -273,7 +284,7 @@ namespace StrateZone_Service.Implements
                             $"điểm này dùng để thể hiện độ.",
                             Type = PostgreEnums.NotificationType.thread,
                         };
-                        await service.CreateNotificationAsync(notification);
+                        await notiService.CreateNotificationAsync(notification);
                     });
 
                 }
@@ -354,7 +365,6 @@ namespace StrateZone_Service.Implements
                     {
                         using var scope = _serviceScopeFactory.CreateScope();
                         var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
 
                         NotificationRequest notification = new()
                         {

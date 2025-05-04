@@ -15,7 +15,6 @@ namespace StrateZone_APIs.ServiceExtensions
         {
             services.AddSignalR();
 
-            // Add your application services here
             services
                 .AddRepositories()
                 .AddServices()
@@ -55,6 +54,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ILikeRepository, LikeRepository>();
             services.AddScoped<IProfanityRepository, ProfanityRepository>();
             services.AddScoped<IExpenseRepository, ExpenseRepository>();
+            services.AddScoped<IPointsHistoryRepository, PointsHistoryRepository>();
 
             return services;
         }
@@ -91,6 +91,7 @@ namespace StrateZone_APIs.ServiceExtensions
             services.AddScoped<ILikeService, LikeService>();
             services.AddScoped<IProfanityService, ProfanityService>();
             services.AddScoped<IExpenseService, ExpenseService>();  
+            services.AddScoped<IPointsHistoryService, PointsHistoryService>();
 
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddHttpClient<IGHNService, GHNService>();

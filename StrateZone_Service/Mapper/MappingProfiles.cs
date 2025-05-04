@@ -115,6 +115,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<Transaction, TransactionModel>().ReverseMap();
             CreateMap<StrateZone_Repository.Entities.System, SystemModel>().ReverseMap();
             CreateMap<AbnormalDay, AbnormalDayModel>().ReverseMap();
+            CreateMap<PointsHistory, PointsHistoryModel>().ReverseMap();
 
             CreateMap<StrateZone_Repository.Entities.Thread, ThreadModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
