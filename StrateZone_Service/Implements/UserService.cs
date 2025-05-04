@@ -471,5 +471,18 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<(int, int)> GetUserPointsAsync(int id)
+        {
+            try
+            {
+                var results = await GetUserByIdAsync(id);
+                return ((int) results.Points, (int) results.ContributionPoints);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

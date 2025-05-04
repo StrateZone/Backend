@@ -270,5 +270,25 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpGet("points/{id}")]
+        public async Task<IActionResult> GetUserPointsAsync(int id)
+        {
+            try
+            {
+                var result = await _userService.GetUserPointsAsync(id);
+                return Ok(new UserPointsResponse() { Points = result.Item1, ContributionPoints = result.Item2 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+    }
+
+    public class UserPointsResponse
+    {
+        public int Points { get; set; }
+        public int ContributionPoints { get; set; }
     }
 }
