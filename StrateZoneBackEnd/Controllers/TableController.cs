@@ -221,6 +221,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("enable/{id}")]
+        public async Task<IActionResult> EnableTable(int id)
+        {
+            try
+            {
+                var table = await _tableService.EnableTableAsync(id);
+                return Ok(table);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTable(int id)
         {

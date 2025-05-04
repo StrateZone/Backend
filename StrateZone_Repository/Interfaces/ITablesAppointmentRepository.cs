@@ -14,6 +14,8 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<TablesAppointment>> GetAllTablesAppointmentAsync(TablesAppointmentParameters parameters);
         Task<TablesAppointment> GetByIdAsync(int id);
         Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByTableIdAsync(int tableId);
+        Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByGameTypeIdAsync(int gameTypeId);
+        Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByRoomIdAsync(int roomId);
         Task<PagedList<TablesAppointment>> GetAllTablesAppointmentByTableIdAsync(int id, TablesAppointmentParameters parameters);
         Task<List<TablesAppointment>> GetAllTablesAppointmentByAppointmentIdAsync(int id);
         Task<decimal> GetAllPaidTablesAppointmentWithinAMonthInYearAsync(int month, int year);

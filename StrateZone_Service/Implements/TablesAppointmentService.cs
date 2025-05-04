@@ -825,5 +825,19 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<List<TablesAppointmentModel>> GetAllActiveTablesAppointmentByRoomIdAsync(int id)
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.GetAllActiveTablesAppointmentByRoomIdAsync(id);
+
+                return _mapper.Map<List<TablesAppointmentModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

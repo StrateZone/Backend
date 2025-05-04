@@ -15,5 +15,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<RoomResponse>> GetRoomsByRoomTypeAsync(RoomParameters parameters, string roomType);
         Task<RoomResponse> UpdateRoomAsync(RoomModel roomModel, int id);
         Task<List<string>> GetAllRoomtypesAsync();
+        Task<RoomModel> DisableRoomAsync(int id);
+        Task<RoomModel> EnableRoomAsync(int id);
     }
 }

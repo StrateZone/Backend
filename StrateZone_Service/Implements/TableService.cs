@@ -330,5 +330,26 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<TableResponse> EnableTableAsync(int id)
+        {
+            try
+            {
+                var result = await _tableRepository.GetTableByIdAsync(id);
+
+                if (result.Status == TableStatus.active) throw new Exception($"This table is already {result.Status}");
+
+                result.Status = TableStatus.active;
+                result.GameType = null;
+                result.Room = null;
+                await _tableRepository.UpdateTableAsync(result, id);
+
+                return _mapper.Map<TableResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

@@ -139,6 +139,34 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("disable/{id}")]
+        public async Task<IActionResult> DisableRoom(int id)
+        {
+            try
+            {
+                var result = await _roomService.DisableRoomAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("enable/{id}")]
+        public async Task<IActionResult> EnableRoom(int id)
+        {
+            try
+            {
+                var result = await _roomService.EnableRoomAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoom(int id)
         {
