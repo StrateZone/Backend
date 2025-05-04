@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Service.BusinessModels;
+using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using System;
@@ -134,7 +135,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<ThreadsTag, ThreadsTagModel>()
                 .ReverseMap();
             CreateMap<Like, LikeModel>().ReverseMap();  
-            CreateMap<Expense, ExpenseModel>().ReverseMap();   
+            CreateMap<Expense, ExpenseModel>().ReverseMap();
             // add other mappings here
         }
     }

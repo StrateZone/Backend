@@ -564,6 +564,8 @@ namespace StrateZone_Repository.Implements
                     SET label = 'none';
                 ");
 
+                var maxContributors = (await _context.Systems.AsNoTracking().FirstOrDefaultAsync(f => f.Id == 1))?.Numberof_TopContributors_PerWeek;
+
                 await _context.Database.ExecuteSqlRawAsync(@"
                     UPDATE users
                     SET label = 'top_contributor'
@@ -572,9 +574,9 @@ namespace StrateZone_Repository.Implements
                         FROM users
                         WHERE role = 'Member'
                         ORDER BY contribution_points DESC
-                        LIMIT 10
+                        LIMIT {0}
                     );
-                ");
+                ", maxContributors ?? 0);
 
                 await _context.Database.ExecuteSqlRawAsync(@"
                     UPDATE users

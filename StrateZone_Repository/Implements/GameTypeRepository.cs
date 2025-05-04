@@ -34,9 +34,9 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                INSERT INTO ""gameTypes"" (type_name) 
-                VALUES (@type_name)
-                RETURNING type_id;";
+                    INSERT INTO ""gameTypes"" (type_name) 
+                    VALUES (@type_name)
+                    RETURNING type_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@type_name", gameType.TypeName));
 

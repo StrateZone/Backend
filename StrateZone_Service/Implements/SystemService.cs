@@ -1,18 +1,11 @@
 ﻿using AutoMapper;
 using StrateZone_Repository.Pagination;
-using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace StrateZone_Service.Implements
 {
@@ -163,11 +156,59 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<float> GetMaxHoursUntilAppointmentRequestExpiration(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetMaxHoursUntilAppointmentRequestExpiration(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<int> GetMaxNumberOfTablesCancelPerWeek(int id)
         {
             try
             {
                 return await _systemRepository.GetMaxNumberOfTablesCancelPerWeek(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetMaxUsersInvitedToTable(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetMaxUsersInvitedToTable(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<float> GetMinHoursUntilAppointmentRequestExpiration(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetMinHoursUntilAppointmentRequestExpiration(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<int> GetNumberOfTopContributionsPerThread(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetNumberOfTopContributionsPerThread(id);
             }
             catch (Exception ex)
             {
@@ -284,9 +325,19 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public Task<SystemModel> UpdateSystemAsync(int id, SystemModel model)
+        public async Task<SystemModel> UpdateSystemAsync(int id, SystemModel model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var system = _mapper.Map<StrateZone_Repository.Entities.System>(model);
+                var result = await _systemRepository.UpdateSystemAsync(system, id);
+
+                return _mapper.Map<SystemModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
         }
 
         public async Task<SystemModel> UpdateSystemWorkingTimeAsync(int id, TimeOnly openTime, TimeOnly closeTime)

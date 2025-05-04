@@ -264,6 +264,25 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<ESystem> UpdateSystemAsync(ESystem system, int id)
+        {
+            try
+            {
+                var day = await _context.Systems.AsNoTracking().SingleOrDefaultAsync(a => a.Id == id)
+                            ?? throw new Exception("System with this ID does not exist.");
+
+                system.Id = id;
+                _context.Systems.Update(system);
+                await _context.SaveChangesAsync();
+
+                return system;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<PagedList<AbnormalDay>> GetAbnormalDaysAsync(int id, TablesAppointmentParameters parameters)
         {
             try
@@ -374,6 +393,42 @@ namespace StrateZone_Repository.Implements
             {
                 throw new Exception(ex.Message, ex);
             }
+        }
+
+        public async Task<int> GetNumberOfTopContributionsPerThread(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.Numberof_TopContributors_PerWeek;
+        }
+
+        public async Task<float> GetMaxHoursUntilAppointmentRequestExpiration(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.AppointmentRequest_MaxHours_UntilExpiration;
+        }
+
+        public async Task<float> GetMinHoursUntilAppointmentRequestExpiration(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.AppointmentRequest_MinHours_UntilExpiration;
+        }
+
+        public async Task<int> GetMaxUsersInvitedToTable(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.Max_NumberOfUsers_InvitedToTable;
         }
     }
 }

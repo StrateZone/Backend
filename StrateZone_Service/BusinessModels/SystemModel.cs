@@ -31,6 +31,14 @@ namespace StrateZone_Service.BusinessModels
 
         public float UserPoints_PerCheckinTable_ByPercentageOfTablesPrice { get; set; }
 
+        public int Numberof_TopContributors_PerWeek { get; set; }
+
+        public int Max_NumberOfUsers_InvitedToTable { get; set; }
+
+        public float AppointmentRequest_MaxHours_UntilExpiration { get; set; }
+
+        public float AppointmentRequest_MinHours_UntilExpiration { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }

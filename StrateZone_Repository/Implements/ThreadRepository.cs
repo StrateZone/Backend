@@ -338,6 +338,22 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<Thread> GetOriginalThreadByNewThreadIdAsync(int id)
+        {
+            try
+            {
+                return await _context.Threads
+                                .AsNoTracking()
+                                .Include(t => t.ThreadsTags)
+                                    .ThenInclude(tt => tt.Tag)
+                                .FirstOrDefaultAsync(t => t.UpdateOfThread != null && t.UpdateOfThread == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<Thread> GetThreadByIdForAdminDeleteAsync(int id)
         {
             try

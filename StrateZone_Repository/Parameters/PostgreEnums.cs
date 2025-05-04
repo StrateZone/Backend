@@ -10,7 +10,7 @@
         public enum EventType { tournament, promotion }
         public enum Gender { male, female }
         public enum MessageStatus { read, unread }
-        public enum NotificationType { appointment, order, tables_appointment, appointment_request_from, appointment_request_to, thread, friend, friend_request, community, tables_appointment_invitations_timedout, tables_appointment_ongoing }
+        public enum NotificationType { appointment, order, tables_appointment, appointment_request_from, appointment_request_to, thread, friend, friend_request, community, tables_appointment_invitations_timedout, tables_appointment_ongoing, points_history }
         public enum OrderStatus { pending, shipped, delivered, cancelled }
         public enum ParticipantStatus { enrolled, drop_out, in_progress, completed }
         public enum ProductStatus { available, out_of_stock, discontinued }

@@ -89,6 +89,7 @@ namespace StrateZone_Service.Implements
                     GameTypeId = result.TypeId,
                     Price1 = request.PricePerHour,
                     Unit = "per hour",
+                    Type = "game_type",
                     MemberFee = false,
                     TeachingSalary = false,
                 };

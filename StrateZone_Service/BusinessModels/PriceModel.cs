@@ -25,6 +25,8 @@ namespace StrateZone_Service.BusinessModels
 
         public bool TeachingSalary { get; set; } = false;
 
+        public string Type { get; set; }
+
         public decimal? Price1 { get; set; }
 
         public string? Unit { get; set; }

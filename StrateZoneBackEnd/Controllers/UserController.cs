@@ -4,6 +4,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
+using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 
@@ -295,6 +296,20 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _userService.GetUserPointsAsync(id);
                 return Ok(new UserPointsResponse() { Points = result.Item1, ContributionPoints = result.Item2 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("auto-assign-top-contributors")]
+        public async Task<IActionResult> AssignTopContributors()
+        {
+            try
+            {
+                await _userService.AssignTopContributorsAsync();
+                return Ok();
             }
             catch (Exception ex)
             {

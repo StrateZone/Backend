@@ -35,5 +35,9 @@ namespace StrateZone_Service.Interfaces
         Task<int> GetContributionPointsPerComment(int id);
         Task<float> GetUserPointsPerCheckedInTableInPercentageOfTablesPrice(int id);
         Task<int> GetUserPointsForCheckingInByTablesPrice(decimal price, int id);
+        Task<int> GetNumberOfTopContributionsPerThread(int id);
+        Task<float> GetMaxHoursUntilAppointmentRequestExpiration(int id);
+        Task<float> GetMinHoursUntilAppointmentRequestExpiration(int id);
+        Task<int> GetMaxUsersInvitedToTable(int id);
     }
 }

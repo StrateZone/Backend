@@ -192,6 +192,7 @@ namespace StrateZone_Service.Implements
                 string newPassword = GenerateSecureString(24);
 
                 user.Password = new PasswordHasher<string>().HashPassword(null, newPassword);
+                user.IsPasswordHashed = true;
                 var updatedUser = await _userRepository.UpdateUserAsync(user, user.UserId);
 
                 EmailRequest emailSending= new EmailRequest

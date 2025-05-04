@@ -25,6 +25,8 @@ public partial class Price
 
     public string? Unit { get; set; }
 
+    public string Type { get; set; }
+
     public DateTime? UpdatedAt { get; set; }
 
     public virtual Course? Course { get; set; }

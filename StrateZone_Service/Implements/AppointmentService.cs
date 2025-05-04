@@ -228,6 +228,11 @@ namespace StrateZone_Service.Implements
                                         .Select(ta => (int) ta.VoucherId).ToList();
                 if (vouchers.Count > 0) await _voucherService.UseVouchersAsync(vouchers, request.UserId);
 
+                var maxInvitedToTable = await _systemService.GetMaxUsersInvitedToTable(1);
+
+                if (request.TablesAppointmentRequests.Any(ta => ta.InvitedUsers.Count > maxInvitedToTable))
+                    throw new Exception($"Một bàn chỉ có thể mời tối đa {maxInvitedToTable} người");
+
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {
                     UserId = request.UserId,

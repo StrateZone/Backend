@@ -12,6 +12,7 @@ namespace StrateZone_Repository.Interfaces
         Task<TimeOnly> GetOpeningHourOnDateAsync(int id, DateOnly date);
         Task<List<Entities.System>> GetSystemsAsync();
         Task<Entities.System> GetSystemsByIdAsync(int id);
+        Task<Entities.System> UpdateSystemAsync(Entities.System system, int id);
         Task<Entities.System> UpdateSystemWorkingHoursAsync(int id, TimeOnly openTime, TimeOnly closeTime);
         Task<Entities.System> UpdateAppointmentTimeRulesAsync(int id, decimal refund100Time, decimal incomingTime, int minutesCheckin, int maxTablesCancelPerWeek);
         Task<Entities.System> UpdatePointsRulesAsync(int id, float userPointsPerCheckedinTableByTablePricesPercentage, int contributionPointsPerThread, int contributionPointsPerComment);
@@ -27,5 +28,9 @@ namespace StrateZone_Repository.Interfaces
         Task<int> GetContributionPointsPerComment(int id);
         Task<float> GetUserPointsPerCheckedInTableInPercentageOfTablesPrice(int id);
         Task<int> GetUserPointsForCheckingInByTablesPrice(decimal price, int id);
+        Task<int> GetNumberOfTopContributionsPerThread(int id);
+        Task<float> GetMaxHoursUntilAppointmentRequestExpiration(int id);
+        Task<float> GetMinHoursUntilAppointmentRequestExpiration(int id);
+        Task<int> GetMaxUsersInvitedToTable(int id);
     }
 }

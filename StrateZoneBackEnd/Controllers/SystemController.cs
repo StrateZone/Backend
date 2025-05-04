@@ -15,7 +15,7 @@ namespace StrateZone_APIs.Controllers
     {
         private readonly ISystemService _systemService;
         private readonly ILogger<SystemController> _logger;
-    
+
         public SystemController(ISystemService systemService, ILogger<SystemController> logger)
         {
             _systemService = systemService;
@@ -137,6 +137,48 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("{id}/appointment-requests/hours-until-expiration")]
+        public async Task<IActionResult> GetAppointmentRequestsTimes(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetSystemsByIdAsync(id);
+                return Ok(new AppointmentRequestTimeRules() { AppointmentRequests_MaxHours_UntilExpiration = result.AppointmentRequest_MaxHours_UntilExpiration, AppointmentRequests_MinHours_UntilExpiration = result.AppointmentRequest_MinHours_UntilExpiration });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/appointment-requests/max-invitations-to-table")]
+        public async Task<IActionResult> GetMaxUsersInvitedToTable(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetMaxUsersInvitedToTable(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/top-contributors/numbers-per-week")]
+        public async Task<IActionResult> GetNumberOfTopContributionsPerThread(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetNumberOfTopContributionsPerThread(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}/incoming/hours-before-schedule")]
         public async Task<IActionResult> GetSystemInComingHours(int id)
         {
@@ -223,6 +265,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> General(int id, [FromBody] SystemModel model)
+        {
+            try
+            {
+                var result = await _systemService.UpdateSystemAsync(id, model);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("abnormal-day/{id}")]
         public async Task<IActionResult> DeleteAbnormalDay(int id)
         {
@@ -251,5 +307,11 @@ namespace StrateZone_APIs.Controllers
         public float UserPoints_By_TablePricePercentage { get; set; }
         public int ContributionPoints_PerThread { get; set; }
         public int ContributionPoints_PerComment { get; set; }
+    }
+
+    public class AppointmentRequestTimeRules
+    {
+        public float AppointmentRequests_MaxHours_UntilExpiration { get; set; }
+        public float AppointmentRequests_MinHours_UntilExpiration { get; set; }
     }
 }

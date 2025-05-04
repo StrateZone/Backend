@@ -212,7 +212,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                if (userModel.Password != null)
+                if (userModel.Password != null && !userModel.IsPasswordHashed.Value)
                     userModel.Password = new PasswordHasher<string>().HashPassword(null, userModel.Password);
 
                 var user = _mapper.Map<User>(userModel);
@@ -281,7 +281,7 @@ namespace StrateZone_Service.Implements
 
                 if (find.UserRole == UserRole.RegisteredUser.ToString()) throw new Exception("This account is not a member of community");
 
-                var result = await _userRepository.UpdateUserAsync(new() { UserRole = UserRole.RegisteredUser }, id);
+                var result = await _userRepository.UpdateUserAsync(new() { UserRole = UserRole.RegisteredUser, UserLabel = UserLabel.none }, id);
 
                 return _mapper.Map<UserResponse>(result);
             }
@@ -446,7 +446,7 @@ namespace StrateZone_Service.Implements
 
                 var user = await _userRepository.GetUserByIdAsync(userId);
 
-                return await UpdateUserAsync(new() { UserRole = user.UserRole, Password = newPassword }, userId);
+                return await UpdateUserAsync(new() { UserRole = user.UserRole, IsPasswordHashed = false, Password = newPassword }, userId);
             }
             catch (Exception ex)
             {
@@ -465,7 +465,7 @@ namespace StrateZone_Service.Implements
                 if (new PasswordHasher<string>().VerifyHashedPassword(null, user.Password, oldPassword) == PasswordVerificationResult.Failed)
                     throw new Exception($"Incorrect password");
 
-                return await UpdateUserAsync(new() { UserRole = user.UserRole, Password = newPassword }, userId);
+                return await UpdateUserAsync(new() { UserRole = user.UserRole, IsPasswordHashed = false, Password = newPassword }, userId);
             }
             catch (Exception ex)
             {

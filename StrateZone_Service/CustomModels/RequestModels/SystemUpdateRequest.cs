@@ -4,14 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StrateZone_Repository.Entities
+namespace StrateZone_Service.CustomModels.RequestModels
 {
-    public class System
+    public class SystemUpdateRequest
     {
-        public int Id { get; set; }
-
-        public int AdminId { get; set; }
-
         public TimeOnly OpenTime { get; set; }
 
         public TimeOnly CloseTime { get; set; }
@@ -26,24 +22,18 @@ namespace StrateZone_Repository.Entities
 
         public int ContributionPoints_PerThread { get; set; }
 
-        public int ContributionPoints_PerComment {  get; set; }
+        public int ContributionPoints_PerComment { get; set; }
 
         public float UserPoints_PerCheckinTable_ByPercentageOfTablesPrice { get; set; }
 
         public int Numberof_TopContributors_PerWeek { get; set; }
 
-        public int Max_NumberOfUsers_InvitedToTable { get; set; }
+        public int Max_NumberOfUsers_InviteToTable { get; set; }
 
         public float AppointmentRequest_MaxHours_UntilExpiration { get; set; }
 
         public float AppointmentRequest_MinHours_UntilExpiration { get; set; }
 
         public string Status { get; set; }
-
-        public virtual User? User { get; set; }
-    
-        public virtual ICollection<AbnormalDay> AbnormalDays { get; set; } = new List<AbnormalDay>();
-
-        public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
     }
 }

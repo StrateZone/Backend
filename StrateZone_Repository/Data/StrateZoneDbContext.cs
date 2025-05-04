@@ -756,6 +756,8 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
 
+            entity.Property(e => e.Type).HasColumnName("type");
+
             entity.HasOne(d => d.Course).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.CourseId)
                 .HasConstraintName("prices_course_id_fkey");
@@ -922,6 +924,18 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.UserPoints_PerCheckinTable_ByPercentageOfTablesPrice)
                     .HasColumnName("user_points_per_checked_in_appointment_by_percentage_of_price");
+
+            entity.Property(e => e.AppointmentRequest_MaxHours_UntilExpiration)
+                    .HasColumnName("appointmentrequests_maxhours_untilexpiration");
+
+            entity.Property(e => e.AppointmentRequest_MinHours_UntilExpiration)
+                    .HasColumnName("appointmentrequests_minhours_untilexpiration");
+
+            entity.Property(e => e.Numberof_TopContributors_PerWeek)
+                    .HasColumnName("numberof_topcontributors_per_week");
+
+            entity.Property(e => e.Max_NumberOfUsers_InvitedToTable)
+                    .HasColumnName("max_users_invited_to_table");
 
             entity.Property(e => e.Status)
                   .HasColumnName("status")

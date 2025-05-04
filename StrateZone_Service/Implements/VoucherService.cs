@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
@@ -20,13 +21,15 @@ namespace StrateZone_Service.Implements
     {
         private readonly IVoucherRepository _voucherRepository;
         private readonly IUserService _userService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IMapper _mapper;
 
-        public VoucherService(IVoucherRepository voucherRepository, IMapper mapper, IUserService userService)
+        public VoucherService(IVoucherRepository voucherRepository, IMapper mapper, IUserService userService, IServiceScopeFactory serviceScopeFactory)
         {
             _voucherRepository = voucherRepository;
             _mapper = mapper;
             _userService = userService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<VoucherModel> CreateSampleVoucherAsync(SampleVoucherRequest request)
@@ -89,6 +92,32 @@ namespace StrateZone_Service.Implements
 
                 Voucher createdVoucher = _mapper.Map<Voucher>(voucherModel);
                 var result = await _voucherRepository.CreateVoucherAsync(createdVoucher);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var notiService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    var pointService = scope.ServiceProvider.GetRequiredService<IPointsHistoryService>();
+
+                    PointsHistoryModel pointHistoryModel = new()
+                    {
+                        OfUser = user.UserId,
+                        Content = $"-{pointsCost} điểm cá nhân: Đổi voucher {result.VoucherName}",
+                        Amount = pointsCost,
+                        PointType = "personal_point",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    };
+                    await pointService.AddAsync(pointHistoryModel);
+
+                    NotificationRequest notification = new()
+                    {
+                        ToUser = user.UserId,
+                        Title = "Đổi voucher thành công!",
+                        Content = $"Bạn đã đổi thành công voucher {result.VoucherName}.",
+                        Type = PostgreEnums.NotificationType.points_history,
+                    };
+                    await notiService.CreateNotificationAsync(notification);
+                });
 
                 return _mapper.Map<VoucherModel>(result);
             }
