@@ -39,6 +39,23 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("all/management")]
+        public async Task<IActionResult> GetAllUsersManagement([FromQuery] UserListManagementParameters parameters)
+        {
+            try
+            {
+                var user = await _userService.GetUsersManagementAsync(parameters);
+
+                var response = new PagedListResponse<UserManagementResponse>(user);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No user was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("all/dashboard")]
         public async Task<IActionResult> GetAllUsersDashboard()
         {

@@ -44,6 +44,20 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<PagedList<UserManagementResponse>> GetUsersManagementAsync(UserListManagementParameters parameters)
+        {
+            try
+            {
+                var results = await _userRepository.GetUsersManagementAsync(parameters);
+                var users = _mapper.Map<PagedList<UserManagementResponse>>(results);
+                return new PagedList<UserManagementResponse>(users, results.TotalCount, results.CurrentPage, results.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
         public async Task<List<UserDashboardResponse>> GetUsersDashboardAsync()
         {
             try

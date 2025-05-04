@@ -33,6 +33,39 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<PagedList<User>> GetUsersManagementAsync(UserListManagementParameters parameters)
+        {
+            try
+            {
+                var users = _context.Users.AsNoTracking().AsQueryable();
+
+                if (parameters.Type == "user")
+                {
+                    users = users.Where(u => u.UserRole == UserRole.RegisteredUser || u.UserRole == UserRole.Member);
+                }
+                else if (parameters.Type == "staff_admin")
+                {
+                    users = users.Where(u => u.UserRole == UserRole.Staff || u.UserRole == UserRole.Admin);
+                }
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
+                {
+                    string search = parameters.SearchValue.Trim().ToLower();
+
+                    users = users.Where(u =>
+                        u.UserId.ToString().ToLower().Contains(search) ||
+                        u.Email.ToLower().Contains(search) ||
+                        u.Username.ToLower().Contains(search) ||
+                        u.FullName.ToLower().Contains(search));
+                }
+                return await PagedList<User>.ToPagedList(users, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<List<User>> GetUsersDashboardAsync()
         {
             try

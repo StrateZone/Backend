@@ -24,6 +24,24 @@ namespace StrateZone_Service.Mapper
         }
     }
 
+    public class UserManagementResponseAvatarResolver : IValueResolver<User, UserManagementResponse, string>
+    {
+        private readonly IImageService _imageService;
+
+        public UserManagementResponseAvatarResolver(IImageService imageService)
+        {
+            _imageService = imageService;
+        }
+
+        public string? Resolve(User source, UserManagementResponse destination, string destMember, ResolutionContext context)
+        {
+            if (source.AvatarUrl != null) return source.AvatarUrl;
+
+            var result = _imageService.GetUserAvatarAsync(source.UserId).Result;
+            return result?.Url;
+        }
+    }
+
     public class UserAvatarResolver : IValueResolver<User, UserModel, string>
     {
         private readonly IImageService _imageService;

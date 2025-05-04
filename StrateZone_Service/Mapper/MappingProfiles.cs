@@ -28,6 +28,13 @@ namespace StrateZone_Service.Mapper
                     .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserResponseAvatarResolver>())
                     .ReverseMap();
 
+            CreateMap<User, UserManagementResponse>()
+                    .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
+                    .ForMember(ur => ur.UserLabel, u => u.MapFrom(src => src.UserLabel.ToString()))
+                    .ForMember(ur => ur.Status, u => u.MapFrom(src => src.Status.ToString()))
+                    .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserManagementResponseAvatarResolver>())
+                    .ReverseMap();
+
             CreateMap<User, UserDashboardResponse>()
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ReverseMap();
