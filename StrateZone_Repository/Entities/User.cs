@@ -123,4 +123,7 @@ public partial class User
     public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 
     public virtual ICollection<Voucher> Vouchers { get; set; } = new List<Voucher>();
+
+    public virtual ICollection<PointsHistory> PointsHistories { get; set; } = new List<PointsHistory>();
+
 }

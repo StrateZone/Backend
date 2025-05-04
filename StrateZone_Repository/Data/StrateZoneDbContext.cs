@@ -99,6 +99,8 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Profanity> Profanities { get; set; }
 
+    public virtual DbSet<PointsHistory> PointsHistories { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder
@@ -1435,6 +1437,41 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(p => p.Id).HasColumnName("id");
             entity.Property(p => p.Word).IsRequired().HasColumnName("word");
+        });
+
+        modelBuilder.Entity<PointsHistory>(entity =>
+        {
+            entity.ToTable("points_history");
+
+            entity.HasKey(e => e.Id).HasName("points_history_pkey");
+
+            entity.Property(e => e.Id)
+                  .HasColumnName("id");
+
+            entity.Property(e => e.OfUser)
+                  .HasColumnName("of_user");
+
+            entity.Property(e => e.Description)
+                  .HasColumnName("description");
+
+            entity.Property(e => e.Amount)
+                  .HasColumnName("amount");
+
+            entity.Property(e => e.Content)
+                  .HasColumnName("content");
+
+            entity.Property(e => e.PointType)
+                  .HasColumnName("point_type")
+                  .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                  .HasColumnName("created_at")
+                  .HasColumnType("timestamp");
+
+            entity.HasOne(d => d.OfUserNavigation)
+                  .WithMany(p => p.PointsHistories)
+                  .HasForeignKey(d => d.OfUser)
+                  .HasConstraintName("points_history_of_user_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

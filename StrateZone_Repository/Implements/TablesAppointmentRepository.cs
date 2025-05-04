@@ -406,6 +406,55 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByRoomIdAsync(int roomId)
+        {
+            try
+            {
+                var matchingTAs = await _context.TablesAppointments
+                                            .FromSqlRaw(
+                                                @"
+                                                SELECT ta.*
+                                                FROM tables_appointments ta
+                                                JOIN tables t ON t.table_id = ta.table_id
+                                                JOIN rooms r ON r.room_id = t.room_id
+                                                WHERE r.room_id = {0} AND ta.status IN ('confirmed', 'pending', 'incoming');",
+                                                roomId
+                                            )
+                                            .AsNoTracking()
+                                            .ToListAsync();
+
+                return matchingTAs;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByGameTypeIdAsync(int typeId)
+        {
+            try
+            {
+                var matchingTAs = await _context.TablesAppointments
+                                            .FromSqlRaw(
+                                                @"
+                                                SELECT ta.*
+                                                FROM tables_appointments ta
+                                                JOIN tables t ON t.table_id = ta.table_id
+                                                WHERE t.""gameType_id"" = {0} AND ta.status IN ('confirmed', 'pending', 'incoming');",
+                                                typeId
+                                            )
+                                            .AsNoTracking()
+                                            .ToListAsync();
+
+                return matchingTAs;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments()
         {
             try

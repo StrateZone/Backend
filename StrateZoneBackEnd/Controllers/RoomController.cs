@@ -14,12 +14,14 @@ namespace StrateZone_APIs.Controllers
     public class RoomController : ControllerBase
     {
         private IRoomService _roomService;
+        private IPriceService _priceService;
         private ILogger<RoomController> _logger;
 
-        public RoomController(IRoomService roomService, ILogger<RoomController> logger)
+        public RoomController(IRoomService roomService, ILogger<RoomController> logger, IPriceService priceService)
         {
             _roomService = roomService;
             _logger = logger;
+            _priceService = priceService;
         }
 
         [HttpGet("all")]
@@ -56,6 +58,21 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("roomtypes")]
+        public async Task<IActionResult> GetRoomTypes()
+        {
+            try
+            {
+                var result = await _roomService.GetAllRoomtypesAsync();
+
+                return result.Count > 0 ? Ok(result) : Ok("No room type was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRoomById(int id)
         {
@@ -84,12 +101,64 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpPost("room-type")]
+        public async Task<IActionResult> CreateRoomType([FromBody] RoomTypeRequest request)
+        {
+            try
+            {
+                var result = await _priceService.CreatePriceAsync(
+                    new() 
+                        { 
+                            RoomType = request.TypeName, 
+                            Price1 = request.PricePerHour,
+                            MemberFee = false,
+                            TeachingSalary = false,
+                            Unit = "per hour"
+                        }
+                    );
+
+                return Created("Room created!", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRoom([FromBody] RoomModel model, int id)
         {
             try
             {
                 var result = await _roomService.UpdateRoomAsync(model, id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("disable/{id}")]
+        public async Task<IActionResult> DisableRoom(int id)
+        {
+            try
+            {
+                var result = await _roomService.DisableRoomAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("enable/{id}")]
+        public async Task<IActionResult> EnableRoom(int id)
+        {
+            try
+            {
+                var result = await _roomService.EnableRoomAsync(id);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -111,5 +180,11 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+    }
+
+    public class RoomTypeRequest
+    { 
+        public string TypeName { get; set; }
+        public decimal PricePerHour { get; set; }
     }
 }

@@ -204,16 +204,33 @@ namespace StrateZone_Service.Implements
                 userCheckin.Points += pointsCalculate;
                 await _userService.UpdateUserAsync(userCheckin, userId);
 
-                NotificationRequest notificationRequest = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = userId,
-                    Title = $"Check-in cho bàn số {tablesAppointment.TableId} thành công!",
-                    Content = $"Check-in hoàn tất! Bạn được cộng {pointsCalculate} điểm cá nhân, điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp. " +
-                    $"Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!",
-                    TablesAppointmentId = tablesAppointmentId,
-                    Type = NotificationType.tables_appointment,
-                };
-                await _notificationService.CreateNotificationAsync(notificationRequest);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var notifyService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    var pointService = scope.ServiceProvider.GetRequiredService<IPointsHistoryService>();
+
+                    PointsHistoryModel pointHistoryModel = new()
+                    {
+                        OfUser = userId,
+                        Content = $"+{pointsCalculate} điểm cá nhân: Check-in cho bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId}",
+                        Amount = pointsCalculate,
+                        PointType = "personal_point",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    };
+                    await pointService.AddAsync(pointHistoryModel);
+
+                    NotificationRequest notificationRequest = new()
+                    {
+                        ToUser = userId,
+                        Title = $"Check-in cho bàn số {tablesAppointment.TableId} thành công!",
+                        Content = $"Check-in hoàn tất! Bạn được cộng {pointsCalculate} điểm cá nhân, điểm khi tích đủ có thể dùng để đổi sang vouchers giảm giá cho lần đặt hẹn kế tiếp. " +
+                        $"Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!",
+                        TablesAppointmentId = tablesAppointmentId,
+                        Type = NotificationType.tables_appointment,
+                    };
+                    await notifyService.CreateNotificationAsync(notificationRequest);
+                });
 
                 return result;
             }
@@ -800,6 +817,20 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllActiveTablesAppointmentByTableIdAsync(id);
+
+                return _mapper.Map<List<TablesAppointmentModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<TablesAppointmentModel>> GetAllActiveTablesAppointmentByRoomIdAsync(int id)
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.GetAllActiveTablesAppointmentByRoomIdAsync(id);
 
                 return _mapper.Map<List<TablesAppointmentModel>>(result);
             }

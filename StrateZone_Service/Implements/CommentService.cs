@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
+using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
@@ -16,17 +18,19 @@ namespace StrateZone_Service.Implements
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IUserService _userService;
-        private readonly INotificationService _notificationService;
         private readonly IProfanityService _profanityService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
 
-        public CommentService(ICommentRepository commentRepository, INotificationService notificationService, IMapper mapper, IUserService userService, IProfanityService profanityService)
+        public CommentService(ICommentRepository commentRepository, IMapper mapper, IUserService userService, IProfanityService profanityService, IServiceScopeFactory serviceScopeFactory, ISystemService systemService)
         {
             _commentRepository = commentRepository;
-            _notificationService = notificationService;
             _mapper = mapper;
             _userService = userService;
             _profanityService = profanityService;
+            _serviceScopeFactory = serviceScopeFactory;
+            _systemService = systemService;
         }
 
         public async Task<CommentModel> DeleteCommentAsync(int id)
@@ -108,8 +112,26 @@ namespace StrateZone_Service.Implements
                 var comment = _mapper.Map<Comment>(model);
                 var result = await _commentRepository.PostCommentAsync(comment);
 
-                user.ContributionPoints += 5;
+                var cpoint = await _systemService.GetContributionPointsPerComment(1);
+
+                user.ContributionPoints += cpoint;
                 await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), user.UserId);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var pointService = scope.ServiceProvider.GetRequiredService<IPointsHistoryService>();
+
+                    PointsHistoryModel pointHistoryModel = new()
+                    {
+                        OfUser = user.UserId,
+                        Content = $"+{cpoint} điểm đóng góp: Đăng bình luận.",
+                        Amount = cpoint,
+                        PointType = "contribution_point",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                    };
+                    await pointService.AddAsync(pointHistoryModel);
+                });
 
                 return _mapper.Map<CommentModel>(result);
             }

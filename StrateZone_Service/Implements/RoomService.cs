@@ -8,6 +8,8 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.Extensions.DependencyInjection;
+using StrateZone_Repository.Implements;
 
 namespace StrateZone_Service.Implements
 {
@@ -15,13 +17,15 @@ namespace StrateZone_Service.Implements
     {
         private readonly IRoomRepository _roomRepository;
         private readonly IPriceService _priceService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IMapper _mapper;
 
-        public RoomService(IRoomRepository roomRepository, IPriceService priceService, IMapper mapper)
+        public RoomService(IRoomRepository roomRepository, IPriceService priceService, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
         {
             _roomRepository = roomRepository;
             _priceService = priceService;
             _mapper = mapper;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<PagedList<RoomResponse>> GetRoomsAsync(RoomParameters parameters)
@@ -173,6 +177,72 @@ namespace StrateZone_Service.Implements
                 }
 
                 return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<string>> GetAllRoomtypesAsync()
+        {
+            try
+            {
+                return await _roomRepository.GetAllRoomtypesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<RoomModel> DisableRoomAsync(int id)
+        {
+            try
+            {
+                var result = await _roomRepository.GetRoomByIdAsync(id);
+
+                if (result.Status == RoomStatus.unavailable) throw new Exception($"This room is already {result.Status}");
+
+                result.Status = RoomStatus.unavailable;
+
+                var updated = await _roomRepository.UpdateRoomAsync(result, id);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var tablesAppointmentService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
+                    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+
+                    var tablesAppointments = await tablesAppointmentService.GetAllActiveTablesAppointmentByRoomIdAsync(id);
+                    foreach (var tablesAppointment in tablesAppointments)
+                    {
+                        var user = await userService.GetUserByAppointmentIdAsync((int)tablesAppointment.AppointmentId);
+                        await tablesAppointmentService.ForceCancelTablesAppointment(tablesAppointment.Id, user.UserId);
+                    }
+                });
+
+                return _mapper.Map<RoomModel>(updated);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<RoomModel> EnableRoomAsync(int id)
+        {
+            try
+            {
+                var result = await _roomRepository.GetRoomByIdAsync(id);
+
+                if (result.Status == RoomStatus.available) throw new Exception($"This room is already {result.Status}");
+
+                result.Status = RoomStatus.available;
+
+                var updated = await _roomRepository.UpdateRoomAsync(result, id);
+
+                return _mapper.Map<RoomModel>(updated);
             }
             catch (Exception ex)
             {

@@ -21,6 +21,7 @@ namespace StrateZone_Service.Implements
         Task<PagedList<TableModel>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType);
         Task<TableModel> UpdateTableAsync(TableModel tableModel, int id);
         Task<TableResponse> DisableTableAsync(int id);
+        Task<TableResponse> EnableTableAsync(int id);
         Task<PagedList<TableResponse>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(TableParameters parameters, string[] gameTypes, string[] roomTypes);
         Task<Dictionary<string, List<TableResponse>>> GetAvailableTablesForEachGameTypeInTimeRangeAsync(TableParameters parameters, int tableCount);
     }
