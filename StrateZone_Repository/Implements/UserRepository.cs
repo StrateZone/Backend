@@ -47,6 +47,10 @@ namespace StrateZone_Repository.Implements
                 {
                     users = users.Where(u => u.UserRole == UserRole.Staff || u.UserRole == UserRole.Admin);
                 }
+                else if (parameters.Type == "member")
+                {
+                    users = users.Where(u => u.UserRole == UserRole.Member);
+                }
 
                 if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
                 {
