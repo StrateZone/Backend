@@ -13,10 +13,10 @@ namespace StrateZone_Service.Implements
     {
         private readonly IImageRepository _imageRepository;
         private readonly ICloudinaryService _cloudinaryService;
-        private readonly IThreadService _threadService;
+        private readonly IThreadRepository _threadService;
         private readonly IMapper _mapper;
 
-        public ImageService(IImageRepository imageRepository, ICloudinaryService cloudinaryService, IMapper mapper, IThreadService threadService)
+        public ImageService(IImageRepository imageRepository, ICloudinaryService cloudinaryService, IMapper mapper, IThreadRepository threadService)
         {
             _imageRepository = imageRepository;
             _cloudinaryService = cloudinaryService;
@@ -63,7 +63,7 @@ namespace StrateZone_Service.Implements
                         imageModel.ThreadId = imageRequest.EntityId;
 
                         var thread = await _threadService.GetThreadByIdAsync((int)imageModel.ThreadId);
-                        if (thread != null && thread.Status == ThreadStatus.edit_pending.ToString())
+                        if (thread != null && thread.Status == ThreadStatus.edit_pending)
                         {
                             var newlyPost = await _threadService.GetNewlyCreatedThreadByOldThreadIdAsync(thread.ThreadId);
                             imageModel.ThreadId = newlyPost.ThreadId;
