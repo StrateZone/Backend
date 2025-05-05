@@ -39,6 +39,10 @@ namespace StrateZone_Service.BusinessModels
 
         public float AppointmentRequest_MinHours_UntilExpiration { get; set; }
 
+        public float PercentageRefund_IfNot100 { get; set; }
+
+        public float PercentageTimeRange_UntilRequestExpiration { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }

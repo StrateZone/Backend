@@ -240,6 +240,30 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<float> GetPercentageRefundIfNot100(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetPercentageRefundIfNot100(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<float> GetPercentageTimerangeUntilRequestExpiration(int id)
+        {
+            try
+            {
+                return await _systemRepository.GetPercentageTimerangeUntilRequestExpiration(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public Task<List<SystemModel>> GetSystemsAsync()
         {
             throw new NotImplementedException();

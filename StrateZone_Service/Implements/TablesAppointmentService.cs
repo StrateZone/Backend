@@ -611,12 +611,14 @@ namespace StrateZone_Service.Implements
                 }
                 else
                 {
+                    decimal refundPercentage = (decimal) await _systemService.GetPercentageRefundIfNot100(1);
+
                     return new TablesAppointmentRefundResponse()
                     {
                         TablesAppointmentModel = model,
-                        RefundAmount = (decimal) (tablesAppointment.Price / 2),
-                        RefundStatus = RefundStatus.refund_50_percentage_of_total,
-                        Message = "Refund 50%",
+                        RefundAmount = (decimal) (tablesAppointment.Price * refundPercentage),
+                        RefundStatus = RefundStatus.refund_partial_percentage_of_total,
+                        Message = $"Refund {refundPercentage * 100}%",
                         NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
@@ -643,16 +645,17 @@ namespace StrateZone_Service.Implements
                 };
             }
 
+            decimal refundPercentage2 = (decimal) await _systemService.GetPercentageRefundIfNot100(1);
+
             return new TablesAppointmentRefundResponse()
             {
                 TablesAppointmentModel = model,
-                RefundAmount = (decimal)(tablesAppointment.Price / 2),
-                RefundStatus = RefundStatus.refund_50_percentage_of_total,
-                Message = "Refund 50%",
+                RefundAmount = (decimal)(tablesAppointment.Price * refundPercentage2),
+                RefundStatus = RefundStatus.refund_partial_percentage_of_total,
+                Message = $"Refund {refundPercentage2 * 100}%",
                 NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                 CancellationTime = CancelTime,
                 Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
-                Cancellation_PartialRefund_TimeGate = TimeGate_Refund50_OnCancellation,
                 CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
                 InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
             };

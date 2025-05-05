@@ -113,7 +113,8 @@ namespace StrateZone_APIs.Controllers
                             Price1 = request.PricePerHour,
                             MemberFee = false,
                             TeachingSalary = false,
-                            Unit = "per hour"
+                            Unit = "per hour",
+                            Type = "room_type"
                         }
                     );
 

@@ -430,5 +430,23 @@ namespace StrateZone_Repository.Implements
 
             return system.Max_NumberOfUsers_InvitedToTable;
         }
+
+        public async Task<float> GetPercentageRefundIfNot100(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.PercentageRefund_IfNot100;
+        }
+
+        public async Task<float> GetPercentageTimerangeUntilRequestExpiration(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.PercentageTimeRange_UntilRequestExpiration;
+        }
     }
 }

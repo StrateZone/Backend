@@ -38,6 +38,10 @@ namespace StrateZone_Repository.Entities
 
         public float AppointmentRequest_MinHours_UntilExpiration { get; set; }
 
+        public float PercentageRefund_IfNot100 { get; set; }
+
+        public float PercentageTimeRange_UntilRequestExpiration { get; set; }
+
         public string Status { get; set; }
 
         public virtual User? User { get; set; }

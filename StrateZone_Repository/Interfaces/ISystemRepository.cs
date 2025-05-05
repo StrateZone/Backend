@@ -31,6 +31,8 @@ namespace StrateZone_Repository.Interfaces
         Task<int> GetNumberOfTopContributionsPerThread(int id);
         Task<float> GetMaxHoursUntilAppointmentRequestExpiration(int id);
         Task<float> GetMinHoursUntilAppointmentRequestExpiration(int id);
+        Task<float> GetPercentageRefundIfNot100(int id);
+        Task<float> GetPercentageTimerangeUntilRequestExpiration(int id);
         Task<int> GetMaxUsersInvitedToTable(int id);
     }
 }

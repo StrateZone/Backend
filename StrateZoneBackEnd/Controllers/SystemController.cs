@@ -193,6 +193,34 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("{id}/percentage-refund-ifnotfull")]
+        public async Task<IActionResult> GetPercentageRefundIfNot100(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetPercentageRefundIfNot100(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/percentage-timerange-until-requestexpiry")]
+        public async Task<IActionResult> GetPercentageTimerangeUntilRequestExpiration(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetPercentageTimerangeUntilRequestExpiration(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}/abnormal-days")]
         public async Task<IActionResult> GetAbnormalDays(int id, TablesAppointmentParameters parameters)
         {

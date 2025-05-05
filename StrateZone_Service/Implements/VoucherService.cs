@@ -73,7 +73,7 @@ namespace StrateZone_Service.Implements
                 var pointsCost = user.UserLabel == UserLabel.top_contributor.ToString() ? sample.ContributionPointsCost : sample.PointsCost;
 
                 if (user.Points < pointsCost)
-                    throw new Exception("You don't have enough points to exchange this voucher.");
+                    throw new Exception("Bạn không có đủ điểm cá nhân để đổi voucher này.");
 
                 user.Points -= pointsCost;
                 await _userService.UpdateUserAsync(_mapper.Map<UserModel>(user), user.UserId);
@@ -254,10 +254,10 @@ namespace StrateZone_Service.Implements
                 var vouchers = await _voucherRepository.GetVoucherByIdsAsync([.. voucherIds]);
 
                 if (vouchers.Any(v => v.UserId != userId))
-                    throw new Exception("One or more vouchers used do not belong to this user!");
+                    throw new Exception("Một hoặc nhiều voucher không thuộc sở hữu của người dùng này!");
 
                 if (vouchers.Any(v => v.Status == PostgreEnums.VoucherStatus.used))
-                    throw new Exception("One or more vouchers have been used!");
+                    throw new Exception("Một hoặc nhiều voucher đã được sử dụng trước đó!");
 
                 vouchers.ForEach(v =>
                 { 

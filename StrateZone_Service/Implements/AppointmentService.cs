@@ -34,7 +34,6 @@ namespace StrateZone_Service.Implements
         private readonly IWalletService _walletService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly INotificationService _notificationService;
-        private readonly IVoucherService _voucherService;
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
         private readonly ISystemService _systemService;
@@ -50,7 +49,6 @@ namespace StrateZone_Service.Implements
             ITransactionRepository transactionRepository, 
             ScheduleTimeValidator scheduleTimeValidator, 
             INotificationService notificationService,
-            IVoucherService voucherService,
             ISystemService systemService,
             IServiceScopeFactory serviceScopeFactory)
         {
@@ -64,7 +62,6 @@ namespace StrateZone_Service.Implements
             _transactionRepository = transactionRepository;
             _scheduleTimeValidator = scheduleTimeValidator;
             _notificationService = notificationService;
-            _voucherService = voucherService;
             _systemService = systemService;
             _serviceScopeFactory = serviceScopeFactory;
         }

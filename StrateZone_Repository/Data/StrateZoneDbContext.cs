@@ -938,6 +938,12 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Max_NumberOfUsers_InvitedToTable)
                     .HasColumnName("max_users_invited_to_table");
 
+            entity.Property(e => e.PercentageRefund_IfNot100)
+                    .HasColumnName("percentage_refund_ifnot100");
+            
+            entity.Property(e => e.PercentageTimeRange_UntilRequestExpiration)
+                    .HasColumnName("percentage_timerange_untilrequestexpiration");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");

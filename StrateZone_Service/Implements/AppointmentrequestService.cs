@@ -54,13 +54,15 @@ namespace StrateZone_Service.Implements
                 DateTime currentTime = DateTime.UtcNow.AddHours(7);
                 DateTime appointmentTime = request.StartTime;
 
+                var system = await _systemService.GetSystemsByIdAsync(1);
+
                 double timeUntilRequestExpiration =
                     Math.Max(
                         Math.Min(
-                            await _systemService.GetMaxHoursUntilAppointmentRequestExpiration(1),
-                            appointmentTime.Subtract(currentTime).TotalHours * 0.5f
+                            system.AppointmentRequest_MaxHours_UntilExpiration,
+                            appointmentTime.Subtract(currentTime).TotalHours * system.PercentageTimeRange_UntilRequestExpiration
                             )
-                        , await _systemService.GetMinHoursUntilAppointmentRequestExpiration(1)
+                        , system.AppointmentRequest_MinHours_UntilExpiration
                         );
 
                 AppointmentrequestModel model = new()
@@ -119,13 +121,15 @@ namespace StrateZone_Service.Implements
                 DateTime currentTime = DateTime.UtcNow.AddHours(7);
                 DateTime appointmentTime = appointmentRequestModel[0].StartTime;
 
+                var system = await _systemService.GetSystemsByIdAsync(1);
+
                 double timeUntilRequestExpiration =
                     Math.Max(
                         Math.Min(
-                            await _systemService.GetMaxHoursUntilAppointmentRequestExpiration(1),
-                            appointmentTime.Subtract(currentTime).TotalHours * 0.5f
+                            system.AppointmentRequest_MaxHours_UntilExpiration,
+                            appointmentTime.Subtract(currentTime).TotalHours * system.PercentageTimeRange_UntilRequestExpiration
                             )
-                        , await _systemService.GetMinHoursUntilAppointmentRequestExpiration(1)
+                        , system.AppointmentRequest_MinHours_UntilExpiration
                         );
 
                 List<Appointmentrequest> mappedRequests = new();
@@ -205,13 +209,15 @@ namespace StrateZone_Service.Implements
                 DateTime currentTime = DateTime.UtcNow.AddHours(7);
                 DateTime appointmentTime = appointmentRequestModel[0].StartTime;
 
+                var system = await _systemService.GetSystemsByIdAsync(1);
+
                 double timeUntilRequestExpiration =
                     Math.Max(
                         Math.Min(
-                            24 * 2,
-                            appointmentTime.Subtract(currentTime).TotalHours * 0.5f
+                            system.AppointmentRequest_MaxHours_UntilExpiration,
+                            appointmentTime.Subtract(currentTime).TotalHours * system.PercentageTimeRange_UntilRequestExpiration
                             )
-                        , 0.5f
+                        , system.AppointmentRequest_MinHours_UntilExpiration
                         );
 
                 List<Appointmentrequest> mappedRequests = new();
