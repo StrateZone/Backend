@@ -23,7 +23,21 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var gametypes = await _gameTypeService.GetGameTypesWithExtensionsAsync();
+                var gametypes = await _gameTypeService.GetActiveGameTypesAsync();
+                return Ok(gametypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("all-admin")]
+        public async Task<IActionResult> GetGameTypesAsync()
+        {
+            try
+            {
+                var gametypes = await _gameTypeService.GetGameTypesAsync();
                 return Ok(gametypes);
             }
             catch (Exception ex)
@@ -55,6 +69,34 @@ namespace StrateZone_APIs.Controllers
             {
                 var gametypes = await _gameTypeService.AddAsync(gameTypeRequest);
                 return Created("Gametype created!", gametypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("disable/{id}")]
+        public async Task<IActionResult> DisableAsync(int id)
+        {
+            try
+            {
+                var gametypes = await _gameTypeService.DisableAsync(id);
+                return Ok(gametypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("enable/{id}")]
+        public async Task<IActionResult> EnableAsync(int id)
+        {
+            try
+            {
+                var gametypes = await _gameTypeService.EnableAsync(id);
+                return Ok(gametypes);
             }
             catch (Exception ex)
             {

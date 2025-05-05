@@ -7,9 +7,11 @@ namespace StrateZone_Service.Interfaces
     {
         Task<GameTypeModel> AddAsync(GameTypeRequest request);
         Task<GameTypeModel> DeleteAsync(int id);
+        Task<GameTypeModel> EnableAsync(int id);
+        Task<GameTypeModel> DisableAsync(int id);
         Task<GameTypeModel> GetGameTypeByIdAsync(int id);
         Task<List<GameTypeModel>> GetGameTypesAsync();
-        Task<List<GameTypeModel>> GetGameTypesWithExtensionsAsync();
+        Task<List<GameTypeModel>> GetActiveGameTypesAsync();
         Task<GameTypeModel> GetGameTypeWithExtensionsByIdAsync(int id);
     }
 }

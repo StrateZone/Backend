@@ -13,5 +13,6 @@ namespace StrateZone_Service.BusinessModels
 
         public string TypeName { get; set; }
 
+        public string Status { get; set; }
     }
 }

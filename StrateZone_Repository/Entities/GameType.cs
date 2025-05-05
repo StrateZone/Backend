@@ -9,6 +9,8 @@ public partial class GameType
 
     public string TypeName { get; set; }
 
+    public string Status { get; set; }
+
     public virtual Image? Image { get; set; }
 
     public virtual ICollection<Table> Tables { get; set; } = new List<Table>();

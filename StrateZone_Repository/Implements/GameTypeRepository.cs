@@ -34,8 +34,8 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                    INSERT INTO ""gameTypes"" (type_name) 
-                    VALUES (@type_name)
+                    INSERT INTO ""gameTypes"" (type_name, status) 
+                    VALUES (@type_name, 'active')
                     RETURNING type_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@type_name", gameType.TypeName));
@@ -51,6 +51,18 @@ namespace StrateZone_Repository.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<GameType> UpdateAsync(GameType type, int id)
+        {
+            if (!await _context.GameTypes.AsNoTracking().AnyAsync(t => t.TypeId == id))
+                throw new Exception("Game type with this ID does not exist");
+
+            type.TypeId = id;
+            _context.GameTypes.Update(type);
+            await _context.SaveChangesAsync();
+
+            return type;
         }
 
         public async Task<GameType> DeleteAsync(int id)
@@ -70,11 +82,23 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-            public async Task<List<GameType>> GetGameTypesAsync()
+        public async Task<List<GameType>> GetGameTypesAsync()
         {
             try
             {
                 return await _context.GameTypes.AsNoTracking().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<GameType>> GetActiveGameTypesAsync()
+        {
+            try
+            {
+                return await _context.GameTypes.AsNoTracking().Where(gt => gt.Status == "active").ToListAsync();
             }
             catch (Exception ex)
             {
@@ -87,18 +111,6 @@ namespace StrateZone_Repository.Implements
             try
             {
                 return await _context.GameTypes.AsNoTracking().FirstOrDefaultAsync(g => g.TypeId == id);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<List<GameType>> GetGameTypesWithExtensionsAsync()
-        {
-            try
-            {
-                return await _context.GameTypes.AsNoTracking().ToListAsync();
             }
             catch (Exception ex)
             {

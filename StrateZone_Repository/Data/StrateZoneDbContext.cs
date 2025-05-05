@@ -522,6 +522,7 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.TypeId).HasColumnName("type_id");
             entity.Property(e => e.TypeName).HasColumnName("type_name");
+            entity.Property(e => e.Status).HasColumnName("status");
         });
 
         modelBuilder.Entity<Image>(entity =>

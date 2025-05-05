@@ -24,14 +24,12 @@ namespace StrateZone_Service.Implements
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly IPriceService _priceService;
-        private readonly INotificationService _notificationService;
         private readonly IUserRepository _userService;
         private readonly IMapper _mapper;
-        private readonly HttpClient _httpClient;
         private readonly ISystemService _systemService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, IAppointmentrequestRepository repository, INotificationService notificationService, IUserRepository userService, HttpClient httpClient, IServiceScopeFactory serviceProvider, ISystemService systemService)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, IAppointmentrequestRepository repository, IUserRepository userService, IServiceScopeFactory serviceProvider, ISystemService systemService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -39,9 +37,7 @@ namespace StrateZone_Service.Implements
             _paymentService = paymentService;
             _walletService = walletService;
             _requestRepository = repository;
-            _notificationService = notificationService;
             _userService = userService;
-            _httpClient = httpClient;
             _serviceScopeFactory = serviceProvider;
             _systemService = systemService;
         }
@@ -831,6 +827,20 @@ namespace StrateZone_Service.Implements
             try
             {
                 var result = await _tablesAppointmentRepository.GetAllActiveTablesAppointmentByRoomIdAsync(id);
+
+                return _mapper.Map<List<TablesAppointmentModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<List<TablesAppointmentModel>> GetAllActiveTablesAppointmentByGameTypeIdAsync(int gameTypeId)
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.GetAllActiveTablesAppointmentByGameTypeIdAsync(gameTypeId);
 
                 return _mapper.Map<List<TablesAppointmentModel>>(result);
             }
