@@ -556,7 +556,7 @@ namespace StrateZone_Repository.Implements
         public async Task AssignTopContributorsAsync()
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            
+
             try
             {
                 await _context.Database.ExecuteSqlRawAsync(@"
@@ -564,7 +564,8 @@ namespace StrateZone_Repository.Implements
                     SET label = 'none';
                 ");
 
-                var maxContributors = (await _context.Systems.AsNoTracking().FirstOrDefaultAsync(f => f.Id == 1))?.Numberof_TopContributors_PerWeek;
+                var maxContributors = (await _context.Systems.AsNoTracking()
+                    .FirstOrDefaultAsync(f => f.Id == 1))?.Numberof_TopContributors_PerWeek ?? 0;
 
                 await _context.Database.ExecuteSqlRawAsync(@"
                     UPDATE users
@@ -576,7 +577,50 @@ namespace StrateZone_Repository.Implements
                         ORDER BY contribution_points DESC
                         LIMIT {0}
                     );
-                ", maxContributors ?? 0);
+                ", maxContributors);
+
+                var usersWithPoints = await _context.Users
+                    .Select(u => new { u.UserId, u.ContributionPoints })
+                    .ToListAsync();
+
+                foreach (var user in usersWithPoints)
+                {
+                    var history = new PointsHistory
+                    {
+                        OfUser = user.UserId,
+                        Amount = -user.ContributionPoints,
+                        Content = $"-{user.ContributionPoints} điểm đóng góp: Làm mới điểm mỗi tuần.",
+                        PointType = "contribution_point",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)
+                    };
+
+                    await _context.PointsHistories.AddAsync(history);
+                }
+
+                await _context.SaveChangesAsync();
+
+                var topContributors = await _context.Users
+                    .Where(u => u.UserLabel == UserLabel.top_contributor)
+                    .Select(u => u.UserId)
+                    .ToListAsync();
+
+                foreach (var userId in topContributors)
+                {
+                    var notification = new Notification
+                    {
+                        ToUser = userId,
+                        Title = "Chúc mừng! Bạn là một trong những người đóng góp hàng đầu của StrateZone!",
+                        Content = "Bạn đã trở thành người đóng góp hàng đầu trong tuần này. " +
+                        "Tên và các bài viết của bạn sẽ được hiển thị nổi bật hơn trong cộng đồng, " +
+                        "và bạn sẽ được hưởng quyền lợi đổi các voucher với mức ưu đãi.",
+                        Type = PostgreEnums.NotificationType.community,
+                        Status = MessageStatus.unread,
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)
+                    };
+
+                    await _context.Notifications.AddAsync(notification);
+                }
+                await _context.SaveChangesAsync();
 
                 await _context.Database.ExecuteSqlRawAsync(@"
                     UPDATE users

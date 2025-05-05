@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet;
+using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Data;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StrateZone_Repository.Implements
@@ -35,6 +37,15 @@ namespace StrateZone_Repository.Implements
                 .Include(p => p.OfUserNavigation)
                 .AsQueryable();
 
+            result = parameters.OrderBy switch
+            {
+                "created-at" => result.OrderBy(a => a.CreatedAt),
+                "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                "amount" => result.OrderBy(a => a.Amount),
+                "amount-desc" => result.OrderByDescending(a => a.Amount),
+                _ => result.OrderByDescending(t => t.CreatedAt)
+            };
+
             return await PagedList<PointsHistory>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
         }
 
@@ -53,6 +64,15 @@ namespace StrateZone_Repository.Implements
                 .AsNoTracking()
                 .Where(p => p.OfUser == userId)
                 .AsQueryable();
+
+            result = parameters.OrderBy switch
+            {
+                "created-at" => result.OrderBy(a => a.CreatedAt),
+                "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                "amount" => result.OrderBy(a => a.Amount),
+                "amount-desc" => result.OrderByDescending(a => a.Amount),
+                _ => result.OrderByDescending(t => t.CreatedAt)
+            };
 
             return await PagedList<PointsHistory>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
         }

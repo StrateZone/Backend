@@ -103,7 +103,7 @@ namespace StrateZone_Service.Implements
                     {
                         OfUser = user.UserId,
                         Content = $"-{pointsCost} điểm cá nhân: Đổi voucher {result.VoucherName}",
-                        Amount = pointsCost,
+                        Amount = -pointsCost,
                         PointType = "personal_point",
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
                     };
