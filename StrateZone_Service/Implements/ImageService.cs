@@ -63,7 +63,7 @@ namespace StrateZone_Service.Implements
                         imageModel.ThreadId = imageRequest.EntityId;
 
                         var thread = await _threadService.GetThreadByIdAsync((int)imageModel.ThreadId);
-                        if (thread != null && thread.Status == ThreadStatus.edit_pending)
+                        if (thread != null && thread.Status == ThreadStatus.deleted)
                         {
                             var newlyPost = await _threadService.GetNewlyCreatedThreadByOldThreadIdAsync(thread.ThreadId);
                             imageModel.ThreadId = newlyPost.ThreadId;

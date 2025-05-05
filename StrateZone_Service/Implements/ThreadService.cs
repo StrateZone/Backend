@@ -20,7 +20,6 @@ namespace StrateZone_Service.Implements
     {
         private readonly IThreadRepository _threadRepository;
         private readonly INotificationService _notificationService;
-        private readonly IImageService _imageService;
         private readonly IThreadsTagService _threadsTagService;
         private readonly IMapper _mapper;
         private readonly ITagService _tagsService;
@@ -28,10 +27,9 @@ namespace StrateZone_Service.Implements
         private readonly ISystemService _systemService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public ThreadService(IThreadRepository threadRepository, IImageService imageService, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService, ITagService tagsService, IUserService userService, ISystemService systemService, IServiceScopeFactory serviceScopeFactory)
+        public ThreadService(IThreadRepository threadRepository, IMapper mapper, INotificationService notificationService, IThreadsTagService threadsTagService, ITagService tagsService, IUserService userService, ISystemService systemService, IServiceScopeFactory serviceScopeFactory)
         {
             _threadRepository = threadRepository;
-            _imageService = imageService;
             _mapper = mapper;
             _notificationService = notificationService;
             _threadsTagService = threadsTagService;
