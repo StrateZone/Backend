@@ -17,6 +17,7 @@ namespace StrateZone_Repository.Interfaces
         Task<Entities.Thread> GetThreadByIdForAdminDeleteAsync(int id);
         Task<Entities.Thread> UpdateThreadAsync(Entities.Thread thread, int id);
         Task<List<Entities.Thread>> GetThreadsWithinMonthAsync(int month, int year);
+        Task<Entities.Thread> GetOriginalThreadByNewThreadIdAsync(int id);
         Task<(int, bool, int)> GetThreadLikeAndCommentCount(int id);
         Task LinkLikesAndCommentFromOldToNewThread(int oldThreadId, int newThreadId);
     }

@@ -22,15 +22,17 @@ namespace StrateZone_Service.Implements
         private readonly IPaymentService _paymentService;
         private readonly IPriceService _priceService;
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
+        private readonly IVoucherService _voucherService;
         private readonly IMapper _mapper;
 
-        public TransactionService(ITransactionRepository transactionRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, ITablesAppointmentRepository tablesAppointmentService)
+        public TransactionService(ITransactionRepository transactionRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, ITablesAppointmentRepository tablesAppointmentService, IVoucherService voucherService)
         {
             _transactionRepository = transactionRepository;
             _mapper = mapper;
             _priceService = priceService;
             _paymentService = paymentService;
             _tablesAppointmentRepository = tablesAppointmentService;
+            _voucherService = voucherService;
         }
 
         public async Task<TransactionModel> GetById(int id)
@@ -98,7 +100,7 @@ namespace StrateZone_Service.Implements
                 var refunds = await _transactionRepository.GetTransactionsForRefundWithinAMonthAsync(month, year);
                 var deposits = await _transactionRepository.GetTransactionsForDepositWithinAMonthAsync(month, year);
                 var expenses = await _transactionRepository.GetExpensesWithinAMonthInYearAsync(month, year);
-
+                var vouchers = await _voucherService.GetAllVouchersUsedInAMonthAsync(month, year);
                 List<TransactionDayResponse> dailyResponses = new();
 
                 var membershipCost = await _priceService.GetMembershipPriceAsync();
@@ -111,7 +113,7 @@ namespace StrateZone_Service.Implements
                     decimal spendingDay = expenses.Where(r => r.CreatedAt.Day == i).Select(r => r.Amount).Sum();
                     decimal bookingDay = await _tablesAppointmentRepository.GetAllPaidTablesAppointmentWithinADayInYearAsync(i, month, year);
                     decimal membershipDay = (decimal)((await _paymentService.GetMembershipPaymentsWithinADayInYearAsync(i, month, year)).Count() * membershipCost.Price1);
-                    decimal voucherDay = 0;
+                    decimal voucherDay = vouchers.Where(r => r.DayOfUsage.Value.Day == i).Select(r => r.Value).Sum();
 
                     dailyResponses.Add(
                         new()
@@ -147,7 +149,8 @@ namespace StrateZone_Service.Implements
                 var refunds = await _transactionRepository.GetTransactionsForRefundWithinAMonthAsync(month, year);
                 var deposits = await _transactionRepository.GetTransactionsForDepositWithinAMonthAsync(month, year);
                 var expenses = await _transactionRepository.GetExpensesWithinAMonthInYearAsync(month, year);
-                
+                var vouchers = await _voucherService.GetAllVouchersUsedInAMonthAsync(month, year);
+
                 List<ProfitDailyResponse> dailyResponses = new();
 
                 int dayInMonth = DateTime.DaysInMonth(year, month);
@@ -156,7 +159,7 @@ namespace StrateZone_Service.Implements
                     decimal depositDay = deposits.Where(r => r.Amount != null && r.CreatedAt.Value.Day == i).Select(r => (decimal)r.Amount).Sum();
                     decimal refundDay = refunds.Where(r => r.Amount != null && r.CreatedAt.Value.Day == i).Select(r => (decimal)r.Amount).Sum();
                     decimal spendingDay = expenses.Where(r => r.CreatedAt.Day == i).Select(r => r.Amount).Sum();
-                    decimal voucherDay = 0; 
+                    decimal voucherDay = vouchers.Where(r => r.DayOfUsage.Value.Day == i).Select(r => r.Value).Sum();
 
                     dailyResponses.Add(
                         new() 

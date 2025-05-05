@@ -185,5 +185,21 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<List<Voucher>> GetAllVouchersUsedInAMonthAsync(int month, int year)
+        {
+            try
+            {
+                return await _context.Vouchers.AsNoTracking()
+                    .Where(v => v.Status == PostgreEnums.VoucherStatus.used 
+                            && v.DayOfUsage.HasValue 
+                            && v.DayOfUsage.Value.Month == month && v.DayOfUsage.Value.Year == year)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

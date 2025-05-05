@@ -22,7 +22,7 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
-        public async Task<PagedList<Expense>> GetExpensesAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<Expense>> GetExpensesAsync(ExpenseParameters parameters)
         {
             try
             {

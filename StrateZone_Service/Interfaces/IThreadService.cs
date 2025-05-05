@@ -28,6 +28,7 @@ namespace StrateZone_Service.Interfaces
         Task<ThreadModel> RejectThreadAsync(int id);
         Task<ThreadModel> HideThreadAsync(int id);
         Task<ThreadModel> ShowThreadAsync(int id);
+        Task<ThreadModel> GetOriginalThreadByNewThreadIdAsync(int id);
         Task<ThreadMonthResponse> GetAllThreadsWithinAMonthInYearAsync(int month, int year);
     }
 }

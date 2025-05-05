@@ -758,7 +758,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var result = await _tablesAppointmentRepository.GetAllPaidTablesAppointmentWithinAMonthInYearAsync(month, year);
+                var result = await _tablesAppointmentRepository.GetSumOfPaidTablesAppointmentWithinAMonthInYearAsync(month, year);
 
                 return result;
             }

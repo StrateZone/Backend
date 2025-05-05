@@ -557,7 +557,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<decimal> GetAllPaidTablesAppointmentWithinAMonthInYearAsync(int month, int year)
+        public async Task<decimal> GetSumOfPaidTablesAppointmentWithinAMonthInYearAsync(int month, int year)
         {
             try
             {
@@ -569,7 +569,7 @@ namespace StrateZone_Repository.Implements
                                     WHEN sub.paid_count >= 2 THEN ta.price * 2
                                     ELSE ta.price
                                 END
-                            ) AS ""Value""
+                            ), EXTRACT(DAY FROM ta.created_at) AS ""Value""
                             FROM tables_appointments ta
                             JOIN (
                                 SELECT tables_appointment_id, COUNT(*) AS paid_count
@@ -588,6 +588,8 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+
 
         public async Task<decimal> GetAllPaidTablesAppointmentWithinADayInYearAsync(int day, int month, int year)
         {

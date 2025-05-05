@@ -256,10 +256,14 @@ namespace StrateZone_Service.Implements
                 if (vouchers.Any(v => v.UserId != userId))
                     throw new Exception("One or more vouchers used do not belong to this user!");
 
-                if (vouchers.Any(v => v.Status == PostgreEnums.VoucherStatus.expired))
-                    throw new Exception("One or more vouchers have been expired!");
+                if (vouchers.Any(v => v.Status == PostgreEnums.VoucherStatus.used))
+                    throw new Exception("One or more vouchers have been used!");
 
-                vouchers.ForEach(v => v.Status = PostgreEnums.VoucherStatus.expired);
+                vouchers.ForEach(v =>
+                { 
+                    v.Status = PostgreEnums.VoucherStatus.used;
+                    v.DayOfUsage = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7));
+                });
                 
                 var result = await _voucherRepository.UpdateVouchersAsync(_mapper.Map<List<Voucher>>(vouchers));
 
@@ -269,6 +273,12 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<List<VoucherModel>> GetAllVouchersUsedInAMonthAsync(int month, int year)
+        {
+            var result = await _voucherRepository.GetAllVouchersUsedInAMonthAsync(month, year);
+            return _mapper.Map<List<VoucherModel>>(result);
         }
     }
 }

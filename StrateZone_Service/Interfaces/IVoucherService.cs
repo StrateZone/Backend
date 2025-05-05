@@ -19,5 +19,6 @@ namespace StrateZone_Service.Interfaces
         Task<VoucherModel> UpdateVoucherAsync(VoucherModel voucher, int id);
         Task<List<VoucherModel>> UpdateVouchersAsync(List<VoucherModel> vouchers);
         Task<List<VoucherModel>> UseVouchersAsync(List<int> voucherIds, int userId);
+        Task<List<VoucherModel>> GetAllVouchersUsedInAMonthAsync(int month, int year);
     }
 }

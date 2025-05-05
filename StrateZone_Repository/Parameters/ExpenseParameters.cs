@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace StrateZone_Repository.Parameters
 {
-    public class TablesAppointmentParameters : PagedListParameters
+    public class ExpenseParameters : PagedListParameters
     {
+        public int Year { get; set; }
+        public int Month { get; set; }
     }
 }

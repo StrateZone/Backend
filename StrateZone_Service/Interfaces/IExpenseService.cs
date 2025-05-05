@@ -17,7 +17,7 @@ namespace StrateZone_Service.Interfaces
         Task<List<ExpenseModel>> AddRangeAsync(List<ExpenseRequest> expense);
         Task<ExpenseModel> DeleteAsync(int id);
         Task<ExpenseModel> GetByIdAsync(int id);
-        Task<PagedList<ExpenseModel>> GetExpensesAsync(TablesAppointmentParameters parameters);
+        Task<PagedList<ExpenseModel>> GetExpensesAsync(ExpenseParameters parameters);
         Task<ExpenseModel> UpdateAsync(ExpenseModel expense, int id);
     }
 }

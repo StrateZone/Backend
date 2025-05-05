@@ -48,6 +48,20 @@ namespace StrateZone_API.Controllers
             }
         }
 
+        [HttpGet("original-of/{id}")]
+        public async Task<ActionResult> GetOGThreadById(int id)
+        {
+            try
+            {
+                var result = await _threadService.GetOriginalThreadByNewThreadIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("user/{id}")]
         public async Task<ActionResult> GetThreadByUserId([FromQuery] TablesAppointmentParameters parameters, int id)
         {

@@ -25,7 +25,7 @@
         public enum PaymentType { order, appointment, course, membership }
         public enum UserCourseResult { passed, failed }
         public enum UserRole { RegisteredUser, Member, Instructor, Staff, Admin }
-        public enum VoucherStatus { active, expired }
+        public enum VoucherStatus { active, used }
         public enum WalletStatus { active, closed }
         public enum TagStatus { active, hidden }
         public enum TableStatus { active, out_of_service }

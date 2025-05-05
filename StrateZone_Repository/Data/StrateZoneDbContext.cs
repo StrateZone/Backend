@@ -1364,11 +1364,12 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
                 .HasColumnName("description");
-            entity.Property(e => e.ExpireDate).HasColumnName("expire_date");
+            entity.Property(e => e.DayOfUsage).HasColumnName("day_of_usage");
             entity.Property(e => e.MinPriceCondition)
                 .HasPrecision(10, 2)
                 .HasDefaultValueSql("0")
                 .HasColumnName("min_price_condition");
+
             entity.Property(e => e.VoucherName)
                 .HasMaxLength(50)
                 .HasColumnName("voucher_name");

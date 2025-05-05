@@ -109,7 +109,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<ExpenseModel>> GetExpensesAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<ExpenseModel>> GetExpensesAsync(ExpenseParameters parameters)
         {
             try
             {

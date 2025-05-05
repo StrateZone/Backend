@@ -293,6 +293,7 @@ namespace StrateZone_Service.Implements
                     List<int> vouchers = request.TablesAppointmentRequests
                         .Where(ta => ta.VoucherId != null)
                         .Select(ta => (int)ta.VoucherId).ToList();
+
                     if (vouchers.Count > 0)
                     {
                         var voucherService = scope.ServiceProvider.GetRequiredService<IVoucherService>();

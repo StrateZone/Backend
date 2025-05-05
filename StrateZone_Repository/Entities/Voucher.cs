@@ -24,7 +24,7 @@ public partial class Voucher
 
     public int? ContributionPointsCost { get; set; }
 
-    public DateOnly? ExpireDate { get; set; }
+    public DateOnly? DayOfUsage { get; set; }
 
     public VoucherStatus Status { get; set; }
 

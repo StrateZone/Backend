@@ -22,7 +22,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(TablesAppointmentParameters parameters)
+        public async Task<IActionResult> GetAll(ExpenseParameters parameters)
         {
             try
             {

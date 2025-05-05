@@ -10,7 +10,7 @@ namespace StrateZone_Repository.Interfaces
         Task<List<Expense>> AddRangeAsync(List<Expense> expense);
         Task<Expense> DeleteAsync(int id);
         Task<Expense> GetByIdAsync(int id);
-        Task<PagedList<Expense>> GetExpensesAsync(TablesAppointmentParameters parameters);
+        Task<PagedList<Expense>> GetExpensesAsync(ExpenseParameters parameters);
         Task<Expense> UpdateAsync(Expense expense, int id);
     }
 }
