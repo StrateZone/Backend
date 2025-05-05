@@ -582,5 +582,19 @@ namespace StrateZone_Service.Implements
                 throw;
             }
         }
+
+        public async Task<ThreadModel> GetNewlyCreatedThreadByOldThreadIdAsync(int id)
+        {
+            try
+            {
+                var result = await _threadRepository.GetNewlyCreatedThreadByOldThreadIdAsync(id);
+
+                return _mapper.Map<ThreadModel>(result);
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

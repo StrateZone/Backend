@@ -342,11 +342,28 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                var newThread = await _context.Threads.AsNoTracking().SingleOrDefaultAsync(t => t.ThreadId == id);
+
                 return await _context.Threads
                                 .AsNoTracking()
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
-                                .FirstOrDefaultAsync(t => t.UpdateOfThread != null && t.UpdateOfThread == id);
+                                .FirstOrDefaultAsync(t => t.ThreadId == newThread.UpdateOfThread);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Thread> GetNewlyCreatedThreadByOldThreadIdAsync(int id)
+        {
+            try
+            {
+                return await _context.Threads
+                                .AsNoTracking()
+                                .OrderByDescending(t => t.CreatedAt)
+                                .FirstOrDefaultAsync(t => t.UpdateOfThread == id);
             }
             catch (Exception ex)
             {

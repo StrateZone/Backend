@@ -5,6 +5,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
+using static StrateZone_Repository.Parameters.PostgreEnums;
 
 namespace StrateZone_Service.Implements
 {
@@ -12,13 +13,15 @@ namespace StrateZone_Service.Implements
     {
         private readonly IImageRepository _imageRepository;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IThreadService _threadService;
         private readonly IMapper _mapper;
 
-        public ImageService(IImageRepository imageRepository, ICloudinaryService cloudinaryService, IMapper mapper)
+        public ImageService(IImageRepository imageRepository, ICloudinaryService cloudinaryService, IMapper mapper, IThreadService threadService)
         {
             _imageRepository = imageRepository;
             _cloudinaryService = cloudinaryService;
             _mapper = mapper;
+            _threadService = threadService;
         }
 
         public async Task<ImageModel> CreateImageAsync(ImageRequest imageRequest)
@@ -47,21 +50,32 @@ namespace StrateZone_Service.Implements
                         }
 
                         break;
+
                     case ImageType.game_type:
                         imageModel.GameTypeId = imageRequest.EntityId;
                         break;
+
                     case ImageType.product:
                         imageModel.ProductId = imageRequest.EntityId;
                         break;
+
                     case ImageType.thread:
                         imageModel.ThreadId = imageRequest.EntityId;
 
-                        ImageModel exsitingThreadThumbnail = await GetThreadImagesAsync((int) imageModel.ThreadId);
-                        if (exsitingThreadThumbnail != null)
+                        var thread = await _threadService.GetThreadByIdAsync((int)imageModel.ThreadId);
+                        if (thread != null && thread.Status == ThreadStatus.edit_pending.ToString())
                         {
-                            return await UpdateImageAsync(imageModel, exsitingThreadThumbnail.ImageId);
+                            var newlyPost = await _threadService.GetNewlyCreatedThreadByOldThreadIdAsync(thread.ThreadId);
+                            imageModel.ThreadId = newlyPost.ThreadId;
                         }
-
+                        else
+                        {
+                            ImageModel exsitingThreadThumbnail = await GetThreadImagesAsync((int)imageModel.ThreadId);
+                            if (exsitingThreadThumbnail != null)
+                            {
+                                return await UpdateImageAsync(imageModel, exsitingThreadThumbnail.ImageId);
+                            }
+                        }
                         break;
                     case ImageType.event_thumbnail:
                         imageModel.EventId = imageRequest.EntityId;

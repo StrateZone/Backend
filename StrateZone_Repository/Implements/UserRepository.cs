@@ -580,6 +580,7 @@ namespace StrateZone_Repository.Implements
                 ", maxContributors);
 
                 var usersWithPoints = await _context.Users
+                    .Where(u => u.ContributionPoints > 0)
                     .Select(u => new { u.UserId, u.ContributionPoints })
                     .ToListAsync();
 
