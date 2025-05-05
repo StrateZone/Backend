@@ -213,8 +213,10 @@ namespace StrateZone_Service.Implements
             try
             {
                 if (userModel.Password != null && !userModel.IsPasswordHashed.Value)
+                {
                     userModel.Password = new PasswordHasher<string>().HashPassword(null, userModel.Password);
-
+                    userModel.IsPasswordHashed = true;
+                }
                 var user = _mapper.Map<User>(userModel);
                 var result = await _userRepository.UpdateUserAsync(user, id);
 
