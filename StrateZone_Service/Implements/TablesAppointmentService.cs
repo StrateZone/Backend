@@ -98,6 +98,19 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<TablesAppointmentResponse> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId, DateTime startTime, DateTime endTime)
+        {
+            try
+            {
+                var result = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(tableId, appointmentId);
+                return _mapper.Map<TablesAppointmentResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<TablesAppointmentModel> CreateTablesAppointmentAsync(TablesAppointmentModel tablesAppointmentModel)
         {
             try

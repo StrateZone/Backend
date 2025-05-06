@@ -232,7 +232,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
+                var tableAppointment = await _tablesAppointmentRepository.GetByIdAsync(appointmentrequestModel.TableAppointmentId);
                 if (tableAppointment.Status != AppointmentStatus.confirmed && tableAppointment.Status != AppointmentStatus.pending && tableAppointment.Status != AppointmentStatus.incoming)
                 {
                     return new ApiResponse<AppointmentrequestModel>
