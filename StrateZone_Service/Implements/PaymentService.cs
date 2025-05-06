@@ -340,8 +340,8 @@ namespace StrateZone_Service.Implements
                     NotificationRequest notificationFromUser = new()
                     {
                         ToUser = appointmentrequestModel.FromUser,
-                        Title = $"{requestAcceptor.Username} đã hoàn thành thanh toán đơn mời!",
-                        Content = $"{requestAcceptor.Username} đã hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                        Title = $"{requestAcceptor.Username} đã chấp nhận lời mời chơi cờ của bạn!",
+                        Content = $"{requestAcceptor.Username} đã chấp nhận & hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
                         $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
                         $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
                         Type = NotificationType.appointment_request_to
