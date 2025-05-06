@@ -424,7 +424,9 @@ namespace StrateZone_Repository.Implements
                     new NpgsqlParameter("@id", id),
                     new NpgsqlParameter("@user_id", toAccept.FromUser),
                     new NpgsqlParameter("@table_id", toAccept.TableId),
-                    new NpgsqlParameter("@appointment_id", toAccept.AppointmentId ?? (object)DBNull.Value)
+                    new NpgsqlParameter("@appointment_id", toAccept.AppointmentId ?? (object)DBNull.Value),
+                    new NpgsqlParameter("@start_time", toAccept.StartTime),
+                    new NpgsqlParameter("@end_time", toAccept.EndTime),
                 };
 
                 var sql = new StringBuilder(
@@ -433,7 +435,8 @@ namespace StrateZone_Repository.Implements
                     "CASE " +
                         "WHEN id = @id THEN 'accepted' " +
                         "WHEN status = 'pending' AND id != @id AND from_user = @user_id " +
-                            "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) THEN 'accepted_by_others' " +
+                            "AND table_id = @table_id AND (appointment_id IS NULL OR appointment_id = @appointment_id) " +
+                            "AND start_time = @start_time AND end_time = @end_time THEN 'accepted_by_others' " +
                         "ELSE status " +
                     "END " +
                     "WHERE table_id = @table_id AND from_user = @user_id;"
