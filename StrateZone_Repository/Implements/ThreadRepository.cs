@@ -97,9 +97,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var threads = _context.Threads.AsNoTracking()
+                                .Where(t => t.Status != PostgreEnums.ThreadStatus.drafted)
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.ThreadsTags)
-                                    .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
                                 .Select(t => new Thread
                                 {
@@ -284,10 +284,14 @@ namespace StrateZone_Repository.Implements
 
         public async Task<(int, bool, int)> GetThreadLikeAndCommentCount(int id)
         {
-            var likes = await _context.Likes.AsNoTracking().Where(l => l.ThreadId == id).ToListAsync();
-            var cmtCount = await _context.Comments.AsNoTracking().CountAsync(cc => cc.ThreadId == id);
+            var result = await _context.Threads
+                .Where(t => t.ThreadId == id)
+                .Select(t => new {
+                    Likes = t.Likes.Count,
+                    Comments = t.Comments.Count
+                }).FirstOrDefaultAsync();
 
-            return (likes.Count, likes.Any(l => l.UserId == id), cmtCount);
+            return (result.Likes, false, result.Comments);
         }
 
         public async Task<PagedList<Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, PostgreEnums.ThreadStatus[] statuses, int id)
