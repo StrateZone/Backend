@@ -306,37 +306,49 @@ namespace StrateZone_Service.Implements
                                 + (requestAcceptor != null ? $"(chơi chung với {requestAcceptor.Username})" : "");
                 await UpdatePaymentAsync(invitorUserPayment, invitorUserPayment.Id);
 
-                var newTransaction = new StrateZone_Repository.Entities.Transaction
+                _ = Task.Run(async () =>
                 {
-                    OfUser = appointmentrequestModel.ToUser,
-                    Amount = tableAppointment.Price,
-                    Content = "Thanh toán cho đơn mời " + tableAppointment.AppointmentId + ": " + tableAppointment.Price + " VND",
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                    TransactionType = PostgreEnums.TransactionType.payment,
-                };
-                await _transactionRepository.SaveTransaction(newTransaction);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var repo = scope.ServiceProvider.GetRequiredService<ITransactionRepository>();
 
-                NotificationRequest notificationToUser = new()
-                {
-                    ToUser = appointmentrequestModel.ToUser,
-                    Title = $"Bạn đã hoàn thành thanh toán đơn mời của {requestSender.Username}!",
-                    Content = $"Bạn đã hoàn tất thanh toán cho đơn mời đến từ {requestSender.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
-                    $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
-                    $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
-                    Type = NotificationType.appointment_request_from
-                };
-                await _notificationService.CreateNotificationAsync(notificationToUser);
+                    var newTransaction = new StrateZone_Repository.Entities.Transaction
+                    {
+                        OfUser = appointmentrequestModel.ToUser,
+                        Amount = tableAppointment.Price,
+                        Content = "Thanh toán cho đơn mời " + tableAppointment.AppointmentId + ": " + tableAppointment.Price + " VND",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        TransactionType = PostgreEnums.TransactionType.payment,
+                    };
+                    await repo.SaveTransaction(newTransaction);
+                });
 
-                NotificationRequest notificationFromUser = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = appointmentrequestModel.FromUser,
-                    Title = $"{requestAcceptor.Username} đã hoàn thành thanh toán đơn mời!",
-                    Content = $"{requestAcceptor.Username} đã hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
-                    $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
-                    $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
-                    Type = NotificationType.appointment_request_to
-                };
-                await _notificationService.CreateNotificationAsync(notificationFromUser);
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    NotificationRequest notificationToUser = new()
+                    {
+                        ToUser = appointmentrequestModel.ToUser,
+                        Title = $"Bạn đã hoàn thành thanh toán đơn mời của {requestSender.Username}!",
+                        Content = $"Bạn đã hoàn tất thanh toán cho đơn mời đến từ {requestSender.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                        $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
+                        $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
+                        Type = NotificationType.appointment_request_from
+                    };
+
+                    NotificationRequest notificationFromUser = new()
+                    {
+                        ToUser = appointmentrequestModel.FromUser,
+                        Title = $"{requestAcceptor.Username} đã hoàn thành thanh toán đơn mời!",
+                        Content = $"{requestAcceptor.Username} đã hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                        $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
+                        $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
+                        Type = NotificationType.appointment_request_to
+                    };
+
+                    await service.CreateNotificationsAsync([notificationFromUser, notificationToUser]);
+                });
 
                 return new ApiResponse<AppointmentrequestModel>
                 {
