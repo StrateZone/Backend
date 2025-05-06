@@ -142,8 +142,15 @@ namespace StrateZone_Service.Implements
                     foreach (var tablesAppointment in tablesAppointments)
                     {
                         var user = await userService.GetUserByAppointmentIdAsync((int)tablesAppointment.AppointmentId);
-                        await tablesAppointmentService.ForceCancelTablesAppointment(tablesAppointment.Id, user.UserId);
+                        await tablesAppointmentService.ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointment.Id, user.UserId);
                     }
+                });
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var tablesService = scope.ServiceProvider.GetRequiredService<ITableService>();
+                    await tablesService.DisableTablesOnGametypeAsync(id);
                 });
 
                 return result;
@@ -164,6 +171,13 @@ namespace StrateZone_Service.Implements
 
                 toEnable.Status = "active";
                 var result = await UpdateAsync(toEnable, id);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var tablesService = scope.ServiceProvider.GetRequiredService<ITableService>();
+                    await tablesService.EnableTablesOnGametypeAsync(id);
+                });
 
                 return result;
             }

@@ -342,7 +342,70 @@ namespace StrateZone_Repository.Implements
 
                 return tables;
             }
-            catch (Exception ex)
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task DisableTablesOnRoomAsync(int id)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                        @"UPDATE tables SET status='out_of_service' WHERE room_id = {0};",
+                        id
+                    );
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task EnableTablesOnRoomAsync(int id)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                        @"UPDATE tables t SET status='active' WHERE room_id = {0} 
+                        AND EXISTS (
+                            SELECT 1 FROM ""gameTypes"" gt WHERE gt.type_id = t.""gameType_id"" AND gt.status = 'active'
+                        );",
+                        id
+                    );
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task DisableTablesOnGametypeAsync(int id)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                        @"UPDATE tables SET status='out_of_service' WHERE ""gameType_id"" = {0};",
+                        id
+                    );
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task EnableTablesOnGametypeAsync(int id)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                        @"UPDATE tables t SET status='active' WHERE t.""gameType_id"" = {0} AND EXISTS (SELECT 1 FROM rooms r WHERE r.room_id = t.room_id AND r.status='available');",
+                        id
+                    );
+            }
+            catch
             {
                 throw;
             }

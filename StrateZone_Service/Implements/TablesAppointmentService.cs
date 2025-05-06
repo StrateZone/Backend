@@ -498,6 +498,68 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<TablesAppointmentModel> ForceCancelTablesAppointmentDueToTableBecomesOFS(int tablesAppointmentId, int userId)
+        {
+            try
+            {
+                var tablesAppointment = await GetByIdAsync(tablesAppointmentId);
+                var refundAmount = tablesAppointment.Price;
+
+                string errorMessage = (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status) switch
+                {
+                    AppointmentStatus.cancelled => "This appointment has already been cancelled.",
+                    AppointmentStatus.refunded => "This appointment has already been cancelled and refunded.",
+                    AppointmentStatus.checked_in => "This appointment has already been checked-in.",
+                    AppointmentStatus.expired => "This appointment is expired.",
+                    AppointmentStatus.completed => "This appointment is already completed.",
+                    _ => string.Empty,
+                };
+
+                await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITransactionService>();
+
+                    var transaction = new TransactionModel
+                    {
+                        Amount = refundAmount,
+                        Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId} do bàn đã bị cho ngưng hoạt động.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = userId,
+                        TransactionType = TransactionType.refund,
+                    };
+
+                    await service.SaveTransaction(transaction);
+                });
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    var notification = new NotificationRequest
+                    {
+                        ToUser = userId,
+                        Title = "Bàn của bạn đã được tự động hủy!",
+                        Content = $"Hệ thống đã tự động hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId} do bàn này đã bị cho ngưng hoạt động. " +
+                        $"{refundAmount} VND đã được hoàn về ví của bạn!",
+                        Type = NotificationType.tables_appointment
+                    };
+
+                    await service.CreateNotificationAsync(notification);
+                });
+
+                tablesAppointment.Status = AppointmentStatus.refunded.ToString();
+                return await UpdateTablesAppointmentAsync(_mapper.Map<TablesAppointmentModel>(tablesAppointment), tablesAppointmentId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime)
         {
             var tablesAppointment = await _tablesAppointmentRepository.GetByIdAsync(tablesAppointmentId)

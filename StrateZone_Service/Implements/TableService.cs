@@ -319,7 +319,7 @@ namespace StrateZone_Service.Implements
                     foreach (var tablesAppointment in tablesAppointments)
                     {
                         var user = await userService.GetUserByAppointmentIdAsync((int)tablesAppointment.AppointmentId);
-                        await tablesAppointmentService.ForceCancelTablesAppointment(tablesAppointment.Id, user.UserId);
+                        await tablesAppointmentService.ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointment.Id, user.UserId);
                     }
                 });
 
@@ -350,6 +350,26 @@ namespace StrateZone_Service.Implements
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task EnableTablesOnRoomAsync(int id)
+        {
+            await _tableRepository.EnableTablesOnRoomAsync(id);
+        }
+
+        public async Task DisableTablesOnRoomAsync(int id)
+        {
+            await _tableRepository.DisableTablesOnRoomAsync(id);
+        }
+
+        public async Task EnableTablesOnGametypeAsync(int id)
+        {
+            await _tableRepository.EnableTablesOnGametypeAsync(id);
+        }
+
+        public async Task DisableTablesOnGametypeAsync(int id)
+        {
+            await _tableRepository.DisableTablesOnGametypeAsync(id);
         }
     }
 }

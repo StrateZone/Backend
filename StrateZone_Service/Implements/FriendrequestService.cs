@@ -7,22 +7,23 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Interfaces;
 using static StrateZone_Repository.Parameters.PostgreEnums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StrateZone_Service.Implements
 {
     public class FriendrequestService : IFriendrequestService
     {
         private readonly IFriendrequestRepository _friendRequestRepository;
-        private readonly INotificationService _notificationService;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly IFriendlistService _friendlistService;
         private readonly IMapper _mapper;
 
-        public FriendrequestService(IFriendrequestRepository friendRequestRepository, IMapper mapper, IFriendlistService friendlistService, INotificationService notificationService)
+        public FriendrequestService(IFriendrequestRepository friendRequestRepository, IMapper mapper, IFriendlistService friendlistService, IServiceScopeFactory serviceScopeFactory)
         {
             _friendRequestRepository = friendRequestRepository;
             _mapper = mapper;
             _friendlistService = friendlistService;
-            _notificationService = notificationService;
+            _scopeFactory = serviceScopeFactory;
         }
 
         public async Task<FriendrequestModel> CreateFriendrequestAsync(FriendrequestRequest request)
@@ -40,14 +41,20 @@ namespace StrateZone_Service.Implements
                 var friendrequest = _mapper.Map<Friendrequest>(model);
                 var result = await _friendRequestRepository.CreateFriendrequestAsync(friendrequest);
 
-                NotificationRequest toUser_notification = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = result.ToUser,
-                    Title = $"Bạn có một lời mời kết bạn đến từ {result.FromUserNavigation.Username}!",
-                    Content = $"{result.FromUserNavigation.Username} đã gửi cho bạn lời mời kết bạn. Bấm để xem chi tiết",
-                    Type = NotificationType.friend_request,
-                };
-                await _notificationService.CreateNotificationAsync(toUser_notification);
+                    using var scope = _scopeFactory.CreateScope();
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    NotificationRequest toUser_notification = new()
+                    {
+                        ToUser = result.ToUser,
+                        Title = $"Bạn có một lời mời kết bạn đến từ {result.FromUserNavigation.Username}!",
+                        Content = $"{result.FromUserNavigation.Username} đã gửi cho bạn lời mời kết bạn. Bấm để xem chi tiết",
+                        Type = NotificationType.friend_request,
+                    };
+                    await notificationService.CreateNotificationAsync(toUser_notification);
+                });
 
                 return _mapper.Map<FriendrequestModel>(result);
             }
@@ -179,25 +186,31 @@ namespace StrateZone_Service.Implements
                     FriendId = result.ToUser,
                 });
 
-                NotificationRequest fromUser_notification = new()
+                _ = Task.Run(async () =>
                 {
-                    ToUser = requestModel.FromUser,
-                    Title = "Lời mời kết bạn đã được chấp nhận",
-                    Content = $"{requestModel.ToUserNavigation.Username} đã " +
-                    $"chấp nhận lời mời kết bạn của bạn.",
-                    Type = NotificationType.friend,
-                };
-                await _notificationService.CreateNotificationAsync(fromUser_notification);
+                    using var scope = _scopeFactory.CreateScope();
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-                NotificationRequest toUser_notification = new()
-                {
-                    ToUser = requestModel.ToUser,
-                    Title = $"Chấp nhận lời mời kết bạn thành công!",
-                    Content = $"Bạn đã chấp nhận lời mời kết bạn đến từ {requestModel.FromUserNavigation.Username}. " +
-                    $"Cả hai bây giờ đã là bạn bè.",
-                    Type = NotificationType.friend,
-                };
-                await _notificationService.CreateNotificationAsync(toUser_notification);
+                    NotificationRequest fromUser_notification = new()
+                    {
+                        ToUser = requestModel.FromUser,
+                        Title = "Lời mời kết bạn đã được chấp nhận",
+                        Content = $"{requestModel.ToUserNavigation.Username} đã " +
+                        $"chấp nhận lời mời kết bạn của bạn.",
+                        Type = NotificationType.friend,
+                    };
+                    await notificationService.CreateNotificationAsync(fromUser_notification);
+
+                    NotificationRequest toUser_notification = new()
+                    {
+                        ToUser = requestModel.ToUser,
+                        Title = $"Chấp nhận lời mời kết bạn thành công!",
+                        Content = $"Bạn đã chấp nhận lời mời kết bạn đến từ {requestModel.FromUserNavigation.Username}. " +
+                        $"Cả hai bây giờ đã là bạn bè.",
+                        Type = NotificationType.friend,
+                    };
+                    await notificationService.CreateNotificationAsync(toUser_notification);
+                });
 
                 return _mapper.Map<FriendrequestModel>(result);
             }

@@ -218,8 +218,15 @@ namespace StrateZone_Service.Implements
                     foreach (var tablesAppointment in tablesAppointments)
                     {
                         var user = await userService.GetUserByAppointmentIdAsync((int)tablesAppointment.AppointmentId);
-                        await tablesAppointmentService.ForceCancelTablesAppointment(tablesAppointment.Id, user.UserId);
+                        await tablesAppointmentService.ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointment.Id, user.UserId);
                     }
+                });
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var tablesService = scope.ServiceProvider.GetRequiredService<ITableService>();
+                    await tablesService.DisableTablesOnRoomAsync(id);
                 });
 
                 return _mapper.Map<RoomModel>(updated);
@@ -241,6 +248,13 @@ namespace StrateZone_Service.Implements
                 result.Status = RoomStatus.available;
 
                 var updated = await _roomRepository.UpdateRoomAsync(result, id);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var tablesService = scope.ServiceProvider.GetRequiredService<ITableService>();
+                    await tablesService.EnableTablesOnRoomAsync(id);
+                });
 
                 return _mapper.Map<RoomModel>(updated);
             }

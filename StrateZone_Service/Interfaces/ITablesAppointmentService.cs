@@ -28,6 +28,7 @@ namespace StrateZone_Service.Interfaces
         Task<TablesAppointmentModel> CheckoutTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> ForceCancelTablesAppointment(int tablesAppointmentId, int userId);
+        Task<TablesAppointmentModel> ForceCancelTablesAppointmentDueToTableBecomesOFS(int tablesAppointmentId, int userId);
         Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime);
         Task<List<TablesAppointmentModel>> GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
         Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments();
