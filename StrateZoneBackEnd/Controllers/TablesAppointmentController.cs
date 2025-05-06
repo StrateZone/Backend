@@ -242,6 +242,48 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("active-count/by-table/{tableId}")]
+        public async Task<IActionResult> GetActiveCountByTableId(int tableId)
+        {
+            try
+            {
+                var result = await _services.GetNumberOfAllActiveTablesAppointmentByTableIdAsync(tableId);
+                return Ok(new { result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("active-count/by-room/{roomId}")]
+        public async Task<IActionResult> GetActiveCountByRoomId(int roomId)
+        {
+            try
+            {
+                var result = await _services.GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(roomId);
+                return Ok(new { result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("active-count/by-gametype/{typeId}")]
+        public async Task<IActionResult> GetActiveCountByTypeId(int typeId)
+        {
+            try
+            {
+                var result = await _services.GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(typeId);
+                return Ok(new { result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpPut("cancel/{tablesAppointmentId}/users/{userId}")]
         public async Task<IActionResult> CancelTablesAppointment(int tablesAppointmentId, int userId)
         {

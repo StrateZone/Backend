@@ -313,7 +313,6 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-
         public async Task<TablesAppointment> DeleteTablesAppointmentAsync(int id)
         {
             try
@@ -406,6 +405,27 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<int> GetNumberOfAllActiveTablesAppointmentByTableIdAsync(int tableId)
+        {
+            try
+            {
+                var result = await _context.Database
+                            .SqlQuery<int?>(
+                                $@"
+                                SELECT COUNT(*) AS ""Value""
+                                FROM tables_appointments
+                                WHERE table_id = {tableId} AND status IN ('confirmed', 'pending', 'incoming')"
+                            )
+                            .FirstOrDefaultAsync();
+
+                return result ?? 0;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByRoomIdAsync(int roomId)
         {
             try
@@ -431,6 +451,29 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<int> GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(int roomId)
+        {
+            try
+            {
+                var result = await _context.Database
+                            .SqlQuery<int?>(
+                                $@"
+                                SELECT COUNT(ta.*) AS ""Value""
+                                FROM tables_appointments ta
+                                JOIN tables t ON t.table_id = ta.table_id
+                                JOIN rooms r ON r.room_id = t.room_id
+                                WHERE r.room_id = {roomId} AND ta.status IN ('confirmed', 'pending', 'incoming')"
+                            )
+                            .FirstOrDefaultAsync();
+
+                return result ?? 0;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByGameTypeIdAsync(int typeId)
         {
             try
@@ -452,6 +495,28 @@ namespace StrateZone_Repository.Implements
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<int> GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(int roomId)
+        {
+            try
+            {
+                var result = await _context.Database
+                            .SqlQuery<int?>(
+                                $@"
+                                SELECT COUNT(ta.*) AS ""Value"" 
+                                FROM tables_appointments ta 
+                                JOIN tables t ON t.table_id = ta.table_id
+                                WHERE t.""gameType_id"" = {roomId} AND ta.status IN ('confirmed', 'pending', 'incoming')"
+                            )
+                            .FirstOrDefaultAsync();
+
+                return result ?? 0;
+            }
+            catch
+            {
+                throw;
             }
         }
 
@@ -588,8 +653,6 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
-
-
 
         public async Task<decimal> GetAllPaidTablesAppointmentWithinADayInYearAsync(int day, int month, int year)
         {

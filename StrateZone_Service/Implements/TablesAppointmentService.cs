@@ -914,5 +914,20 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<int> GetNumberOfAllActiveTablesAppointmentByTableIdAsync(int tableId)
+        {
+            return await _tablesAppointmentRepository.GetNumberOfAllActiveTablesAppointmentByTableIdAsync(tableId);
+        }
+
+        public async Task<int> GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(int tableId)
+        {
+            return await _tablesAppointmentRepository.GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(tableId);
+        }
+
+        public async Task<int> GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(int tableId)
+        {
+            return await _tablesAppointmentRepository.GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(tableId);
+        }
     }
 }

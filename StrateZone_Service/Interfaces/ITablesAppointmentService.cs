@@ -33,5 +33,8 @@ namespace StrateZone_Service.Interfaces
         Task<List<TablesAppointmentModel>> GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
         Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments();
         Task<TablesAppointmentsMonthResponse> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
+        Task<int> GetNumberOfAllActiveTablesAppointmentByTableIdAsync(int tableId);
+        Task<int> GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(int tableId);
+        Task<int> GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(int tableId);
     }
 }
