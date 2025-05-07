@@ -27,6 +27,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRooms([FromQuery] RoomParameters parameters)
         {
             try
@@ -44,6 +45,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("by-type")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRoomsByType([FromQuery] RoomParameters parameters, string roomType)
         {
             try
@@ -61,6 +63,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("roomtypes")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRoomTypes()
         {
             try
@@ -76,6 +79,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRoomById(int id)
         {
             try
