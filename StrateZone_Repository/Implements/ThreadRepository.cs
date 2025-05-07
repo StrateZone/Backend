@@ -101,9 +101,6 @@ namespace StrateZone_Repository.Implements
                                         && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
                                         && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
-                                .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.ThreadsTags)
-                                    .ThenInclude(tt => tt.Tag)
                                 .Select(t => new Thread
                                 {
                                     ThreadId = t.ThreadId,
@@ -114,10 +111,7 @@ namespace StrateZone_Repository.Implements
                                     Status = t.Status,
                                     CreatedAt = t.CreatedAt,
                                     UpdatedAt = t.UpdatedAt,
-                                    Comments = t.Comments,
                                     CreatedByNavigation = t.CreatedByNavigation,
-                                    Images = t.Images,
-                                    Likes = t.Likes,
                                     ThreadsTags = t.ThreadsTags
                                 })
                                 .AsQueryable();
@@ -152,9 +146,6 @@ namespace StrateZone_Repository.Implements
             {
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => statuses.Count() <= 0 || statuses.Contains(t.Status) && t.Status != PostgreEnums.ThreadStatus.deleted)
-                                .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.ThreadsTags)
-                                    .ThenInclude(tt => tt.Tag)
                                 .OrderByDescending(t => t.CreatedAt)
                                 .Select(t => new Thread
                                 {
@@ -166,10 +157,7 @@ namespace StrateZone_Repository.Implements
                                     Status = t.Status,
                                     CreatedAt = t.CreatedAt,
                                     UpdatedAt = t.UpdatedAt,
-                                    Comments = t.Comments,
                                     CreatedByNavigation = t.CreatedByNavigation,
-                                    Images = t.Images,
-                                    Likes = t.Likes,
                                     ThreadsTags = t.ThreadsTags
                                 })
                                 .AsQueryable();
@@ -203,9 +191,6 @@ namespace StrateZone_Repository.Implements
                                         && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
                                         && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
-                                .Include(t => t.CreatedByNavigation)
-                                .Include(t => t.ThreadsTags)
-                                    .ThenInclude(tt => tt.Tag)
                                 .Select(t => new Thread
                                 {
                                     ThreadId = t.ThreadId,
@@ -216,10 +201,7 @@ namespace StrateZone_Repository.Implements
                                     Status = t.Status,
                                     CreatedAt = t.CreatedAt,
                                     UpdatedAt = t.UpdatedAt,
-                                    Comments = t.Comments,
                                     CreatedByNavigation = t.CreatedByNavigation,
-                                    Images = t.Images,
-                                    Likes = t.Likes,
                                     ThreadsTags = t.ThreadsTags
                                 })
                                 .AsQueryable();
