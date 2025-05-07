@@ -109,7 +109,6 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/search-friends")]
-        [AllowAnonymous]
         public async Task<IActionResult> SearchForFriendsUsername([FromQuery] UserListParameters parameters, int id, string? username)
         {
             try
@@ -142,6 +141,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("opponents/{userId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRandomByRanking(int userId, [FromQuery] string? SearchTerm, [FromQuery] HashSet<int> excludedIds)
         {
             try
