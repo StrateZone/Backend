@@ -6,6 +6,7 @@ using StrateZone_Repository.Interfaces;
 using StrateZone_Repository.Parameters;
 using System.Threading;
 using Thread = StrateZone_Repository.Entities.Thread;
+using StrateZone_Repository.DTO;
 
 namespace StrateZone_Repository.Implements
 {
@@ -101,19 +102,6 @@ namespace StrateZone_Repository.Implements
                                         && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
                                         && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
-                                .Select(t => new Thread
-                                {
-                                    ThreadId = t.ThreadId,
-                                    CreatedBy = t.CreatedBy,
-                                    Title = t.Title,
-                                    ThumbnailUrl = t.ThumbnailUrl,
-                                    Rating = t.Rating,
-                                    Status = t.Status,
-                                    CreatedAt = t.CreatedAt,
-                                    UpdatedAt = t.UpdatedAt,
-                                    CreatedByNavigation = t.CreatedByNavigation,
-                                    ThreadsTags = t.ThreadsTags
-                                })
                                 .AsQueryable();
 
                 threads = threads.OrderBy(t =>
@@ -132,6 +120,20 @@ namespace StrateZone_Repository.Implements
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
+                threads = threads.Select(t => new Thread
+                {
+                    ThreadId = t.ThreadId,
+                    CreatedBy = t.CreatedBy,
+                    Title = t.Title,
+                    ThumbnailUrl = t.ThumbnailUrl,
+                    Rating = t.Rating,
+                    Status = t.Status,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    CreatedByNavigation = t.CreatedByNavigation,
+                    ThreadsTags = t.ThreadsTags,
+                });
+
                 return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
@@ -145,8 +147,8 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => statuses.Count() <= 0 || statuses.Contains(t.Status) && t.Status != PostgreEnums.ThreadStatus.deleted)
-                                .OrderByDescending(t => t.CreatedAt)
+                                .Where(t => (statuses.Count() <= 0 || statuses.Contains(t.Status)) && t.Status != PostgreEnums.ThreadStatus.deleted)
+                                .Include(t => t.ThreadsTags).ThenInclude(t => t.Tag)
                                 .Select(t => new Thread
                                 {
                                     ThreadId = t.ThreadId,
@@ -182,29 +184,23 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Thread>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters)
+        public async Task<PagedList<ThreadDTO>> GetAllThreadsByStatusesAndTagsAsync(ThreadParameters parameters)
         {
             try
             {
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => (parameters.statuses.Length <= 0 || parameters.statuses.Contains(t.Status))
+                                        && t.Status != PostgreEnums.ThreadStatus.deleted
                                         && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
                                         && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
-                                .Select(t => new Thread
-                                {
-                                    ThreadId = t.ThreadId,
-                                    CreatedBy = t.CreatedBy,
-                                    Title = t.Title,
-                                    ThumbnailUrl = t.ThumbnailUrl,
-                                    Rating = t.Rating,
-                                    Status = t.Status,
-                                    CreatedAt = t.CreatedAt,
-                                    UpdatedAt = t.UpdatedAt,
-                                    CreatedByNavigation = t.CreatedByNavigation,
-                                    ThreadsTags = t.ThreadsTags
-                                })
+                                .Include(t => t.ThreadsTags)
+                                .ThenInclude(t => t.Tag)
                                 .AsQueryable();
+
+                threads = threads.OrderBy(t =>
+                        t.ThreadsTags.Any(tt => tt.Tag.TagName == "quan trọng") ? 0 :
+                        t.ThreadsTags.Any(tt => tt.Tag.TagName == "thông báo") ? 1 : 2);
 
                 if (parameters.OrderBy == "friends" && parameters.userId != null)
                 {
@@ -232,7 +228,23 @@ namespace StrateZone_Repository.Implements
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
-                return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
+                var result = threads.Select(t => new ThreadDTO
+                {
+                    ThreadId = t.ThreadId,
+                    CreatedBy = t.CreatedBy,
+                    Title = t.Title,
+                    ThumbnailUrl = t.ThumbnailUrl,
+                    Rating = t.Rating,
+                    Status = t.Status,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    CreatedByNavigation = t.CreatedByNavigation,
+                    ThreadsTags = t.ThreadsTags,
+                    LikesCount = t.Likes.Count,
+                    CommentsCount = t.Comments.Count
+                });
+
+                return await PagedList<ThreadDTO>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -246,7 +258,6 @@ namespace StrateZone_Repository.Implements
             {
                 var threads = _context.Threads.AsNoTracking()
                                 .Where(t => t.CreatedBy == id && t.Status != PostgreEnums.ThreadStatus.deleted)
-                                .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.ThreadsTags)
                                     .ThenInclude(tt => tt.Tag)
                                 .AsQueryable();
@@ -262,6 +273,22 @@ namespace StrateZone_Repository.Implements
                     "popularity" => threads.OrderByDescending(a => a.Comments.Count * 3 + a.Likes.Count),
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
+
+                var result = threads.Select(t => new ThreadDTO
+                {
+                    ThreadId = t.ThreadId,
+                    CreatedBy = t.CreatedBy,
+                    Title = t.Title,
+                    ThumbnailUrl = t.ThumbnailUrl,
+                    Rating = t.Rating,
+                    Status = t.Status,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    CreatedByNavigation = t.CreatedByNavigation,
+                    ThreadsTags = t.ThreadsTags,
+                    LikesCount = t.Likes.Count,
+                    CommentsCount = t.Comments.Count
+                });
 
                 return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
             }

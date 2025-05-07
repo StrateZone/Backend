@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using StrateZone_Repository.DTO;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Interfaces;
 using StrateZone_Service.BusinessModels;
@@ -120,6 +121,11 @@ namespace StrateZone_Service.Mapper
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
                 .ForMember(ur => ur.ThumbnailUrl, u => u.MapFrom<ThreadThumbnailResolver>())
                 .ReverseMap();
+
+            CreateMap<ThreadDTO, ThreadModel>()
+                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                 .ForMember(ur => ur.ThumbnailUrl, u => u.MapFrom<ThreadDTOThumbnailResolver>())
+                 .ReverseMap();
 
             CreateMap<Comment, CommentModel>().ReverseMap();
             CreateMap<Tag, TagModel>().ReverseMap();
