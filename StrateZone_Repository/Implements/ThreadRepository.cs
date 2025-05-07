@@ -92,15 +92,18 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Thread>> GetAllThreadsAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<Thread>> GetAllThreadsAsync(ThreadParameters parameters)
         {
             try
             {
                 var threads = _context.Threads.AsNoTracking()
-                                .Where(t => t.Status != PostgreEnums.ThreadStatus.drafted)
+                                .Where(t => (parameters.statuses.Length <= 0 || parameters.statuses.Contains(t.Status))
+                                        && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
+                                        && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
+                                )
                                 .Include(t => t.CreatedByNavigation)
                                 .Include(t => t.ThreadsTags)
-                                .OrderByDescending(t => t.CreatedAt)
+                                    .ThenInclude(tt => tt.Tag)
                                 .Select(t => new Thread
                                 {
                                     ThreadId = t.ThreadId,
@@ -118,6 +121,10 @@ namespace StrateZone_Repository.Implements
                                     ThreadsTags = t.ThreadsTags
                                 })
                                 .AsQueryable();
+
+                threads = threads.OrderBy(t =>
+                        t.ThreadsTags.Any(tt => tt.Tag.TagName == "quan trọng") ? 0 :
+                        t.ThreadsTags.Any(tt => tt.Tag.TagName == "thông báo") ? 1 : 2);
 
                 threads = parameters.OrderBy switch
                 {

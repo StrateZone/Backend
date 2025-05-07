@@ -11,6 +11,7 @@ namespace StrateZone_API.Controllers
 {
     [ApiController]
     [Route("api/threads")]
+   // [Authorize(Policy = "ClubMember")]
     public class ThreadsController : ControllerBase
     {
         private readonly IThreadService _threadService;
@@ -49,6 +50,7 @@ namespace StrateZone_API.Controllers
         }
 
         [HttpGet("original-of/{id}")]
+     //   [Authorize(Policy = "StaffAndAbove")]
         public async Task<ActionResult> GetOGThreadById(int id)
         {
             try
@@ -95,7 +97,8 @@ namespace StrateZone_API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllThreads([FromQuery] TablesAppointmentParameters parameters)
+        //[Authorize(Policy = "StaffAndAbove")]
+        public async Task<ActionResult> GetAllThreads([FromQuery] ThreadParameters parameters)
         {
             try
             {
@@ -146,6 +149,7 @@ namespace StrateZone_API.Controllers
         }
 
         [HttpPut("{id}")]
+     //   [Authorize(Policy = "StaffAndAbove")]
         public async Task<ActionResult> UpdateThread(int id, [FromBody] ThreadModel model)
         {
             try
@@ -174,6 +178,7 @@ namespace StrateZone_API.Controllers
         }
 
         [HttpPut("approve/{id}")]
+     //   [Authorize(Policy = "StaffAndAbove")]
         public async Task<ActionResult> ApproveThread(int id)
         {
             try
@@ -202,6 +207,7 @@ namespace StrateZone_API.Controllers
         }
 
         [HttpPut("reject/{id}")]
+    //    [Authorize(Policy = "StaffAndAbove")]
         public async Task<ActionResult> RejectThread(int id)
         {
             try

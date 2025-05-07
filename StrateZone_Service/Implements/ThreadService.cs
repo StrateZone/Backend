@@ -96,7 +96,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<PagedList<ThreadModel>> GetAllThreadsAsync(TablesAppointmentParameters parameters)
+        public async Task<PagedList<ThreadModel>> GetAllThreadsAsync(ThreadParameters parameters)
         {
             try
             {
