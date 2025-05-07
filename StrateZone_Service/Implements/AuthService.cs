@@ -275,8 +275,6 @@ namespace StrateZone_Service.Implements
                         UserRole = updatedUser.UserRole.ToString(),
                         Status = updatedUser.Status.ToString(),
                         Gender = updatedUser.Gender.ToString(),
-                        SkillLevel = updatedUser.SkillLevel.ToString(),
-                        Ranking = updatedUser.Ranking.ToString(),
                         FullName = updatedUser.FullName,
                         Address = updatedUser.Address,
                         Bio = updatedUser.Bio,
@@ -364,8 +362,6 @@ namespace StrateZone_Service.Implements
                         UserRole = updatedUser.UserRole.ToString(),
                         Status = updatedUser.Status.ToString(),
                         Gender = updatedUser.Gender.ToString(),
-                        SkillLevel = updatedUser.SkillLevel.ToString(),
-                        Ranking = updatedUser.Ranking.ToString(),
                         FullName = updatedUser.FullName,
                         Address = updatedUser.Address,
                         Bio = updatedUser.Bio,
@@ -416,10 +412,8 @@ namespace StrateZone_Service.Implements
                     Address = registerRequest.Address,
                     FullName = registerRequest.FullName,
                     Password = new PasswordHasher<string>().HashPassword(null, registerRequest.Password),
-                    UserLabel = PostgreEnums.UserLabel.none,
+                    UserLabel = PostgreEnums.UserLabel.none.ToString(),
                     Gender = registerRequest.Gender,
-                    SkillLevel = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner,
-                    Ranking = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic,
                     Status = "Unactivated"
                 };
 

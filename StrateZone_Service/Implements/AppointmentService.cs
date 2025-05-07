@@ -256,8 +256,13 @@ namespace StrateZone_Service.Implements
                     result.TablesAppointments.Add(tablesAppointmentModel);
                 }
 
-                var tablesAppointments = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
-                result.TablesAppointments = tablesAppointments;
+                _ = Task.Run(async () => 
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
+
+                    var tablesAppointments = await service.CreateTablesAppointmentsFromAppointmentAsync(result);
+                });
 
                 _ = Task.Run(async () =>
                 {

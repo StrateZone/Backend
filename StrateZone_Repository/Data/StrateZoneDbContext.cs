@@ -23,17 +23,7 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Appointment> Appointments { get; set; }
 
-    public virtual DbSet<Cart> Carts { get; set; }
-
-    public virtual DbSet<CartItem> CartItems { get; set; }
-
     public virtual DbSet<Comment> Comments { get; set; }
-
-    public virtual DbSet<Course> Courses { get; set; }
-
-    public virtual DbSet<CoursesSlot> CoursesSlots { get; set; }
-
-    public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<Friendlist> Friendlists { get; set; }
 
@@ -47,19 +37,9 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<Like> Likes { get; set; }
 
-    public virtual DbSet<Message> Messages { get; set; }
-
-    public virtual DbSet<Order> Orders { get; set; }
-
-    public virtual DbSet<OrderDetail> OrderDetails { get; set; }
-
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<Price> Prices { get; set; }
-
-    public virtual DbSet<Product> Products { get; set; }
-
-    public virtual DbSet<ProductTag> ProductTags { get; set; }
 
     public virtual DbSet<Room> Rooms { get; set; }
 
@@ -73,17 +53,9 @@ public partial class StrateZoneDbContext : DbContext
 
     public virtual DbSet<ThreadsTag> ThreadsTags { get; set; }
 
-    public virtual DbSet<Ticket> Tickets { get; set; }
-
-    public virtual DbSet<Tournament> Tournaments { get; set; }
-
-    public virtual DbSet<TournamentsParticipants> TournamentsParticipants { get; set; }
-
     public virtual DbSet<Transaction> Transactions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    public virtual DbSet<UsersCourse> UsersCourses { get; set; }
 
     public virtual DbSet<Voucher> Vouchers { get; set; }
 
@@ -231,40 +203,6 @@ public partial class StrateZoneDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<Cart>(entity =>
-        {
-            entity.HasKey(e => e.CartId).HasName("carts_pkey");
-
-            entity.ToTable("carts");
-
-            entity.Property(e => e.CartId).HasColumnName("cart_id");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-        });
-
-        modelBuilder.Entity<CartItem>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("cart_items_pkey");
-
-            entity.ToTable("cart_items");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CartId).HasColumnName("cart_id");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.ProductQuantity)
-                .HasDefaultValue(1)
-                .HasColumnName("product_quantity");
-
-            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
-                .HasForeignKey(d => d.CartId)
-                .HasConstraintName("cart_items_cart_id_fkey");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.CartItems)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("cart_items_product_id_fkey");
-        });
-
         modelBuilder.Entity<Comment>(entity =>
         {
             entity.HasKey(e => e.CommentId).HasName("comments_pkey");
@@ -297,118 +235,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("comments_user_id_fkey");
-        });
-
-        modelBuilder.Entity<Course>(entity =>
-        {
-            entity.HasKey(e => e.CourseId).HasName("courses_pkey");
-
-            entity.ToTable("courses");
-
-            entity.Property(e => e.CourseId).HasColumnName("course_id");
-            entity.Property(e => e.CourseName)
-                .HasMaxLength(255)
-                .HasColumnName("course_name");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-
-            entity.Property(e => e.CourseStatus)
-                  .HasColumnName("status")
-                  .HasConversion(
-                    v => v.ToString(),
-                    v => (CourseStatus)Enum.Parse(typeof(CourseStatus), v)
-                  );
-
-            entity.Property(e => e.GameType)
-                  .HasColumnName("chess_type");
-
-            entity.Property(e => e.SkillLevel).HasColumnName("skill_level")
-                  .HasConversion(
-                    v => v.ToString(),
-                    v => (SkillLevel)Enum.Parse(typeof(SkillLevel), v)
-                  );
-
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.EndDate).HasColumnName("end_date");
-            entity.Property(e => e.InstructorId).HasColumnName("instructor_id");
-            entity.Property(e => e.MaxParticipants).HasColumnName("max_participants");
-            entity.Property(e => e.StartDate).HasColumnName("start_date");
-
-            entity.HasOne(d => d.Instructor).WithMany(p => p.Courses)
-                .HasForeignKey(d => d.InstructorId)
-                .HasConstraintName("courses_instructor_id_fkey");
-        });
-
-        modelBuilder.Entity<CoursesSlot>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("courses_slot_pkey");
-
-            entity.ToTable("courses_slot");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CourseId).HasColumnName("course_id");
-            entity.Property(e => e.EndAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("end_at");
-            entity.Property(e => e.InstructorId).HasColumnName("instructor_id");
-            entity.Property(e => e.OnDate)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("on_date");
-            entity.Property(e => e.RoomId).HasColumnName("room_id");
-            entity.Property(e => e.StartAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("start_at");
-
-            entity.Property(e => e.Status)
-                  .HasColumnName("status")
-                  .HasConversion(
-                    v => v.ToString(),
-                    v => (CourseSlotStatus)Enum.Parse(typeof(CourseSlotStatus), v)
-                    );
-
-            entity.HasOne(d => d.Course).WithMany(p => p.CoursesSlots)
-                .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("courses_slot_course_id_fkey");
-
-            entity.HasOne(d => d.Instructor).WithMany(p => p.CoursesSlots)
-                .HasForeignKey(d => d.InstructorId)
-                .HasConstraintName("courses_slot_instructor_id_fkey");
-
-            entity.HasOne(d => d.Room).WithMany(p => p.CoursesSlots)
-                .HasForeignKey(d => d.RoomId)
-                .HasConstraintName("courses_slot_room_id_fkey");
-        });
-
-        modelBuilder.Entity<Event>(entity =>
-        {
-            entity.HasKey(e => e.EventId).HasName("events_pkey");
-
-            entity.ToTable("events");
-
-            entity.Property(e => e.EventId).HasColumnName("event_id");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.EndDate).HasColumnName("end_date");
-            entity.Property(e => e.Name)
-                .HasMaxLength(100)
-                .HasColumnName("name");
-            entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
-                    v => v.ToString(),
-                    v => (EventStatus)Enum.Parse(typeof(EventStatus), v)
-                    );
-
-            entity.HasOne(d => d.User).WithMany(p => p.Events)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("events_user_id_fkey");
         });
 
         modelBuilder.Entity<Friendlist>(entity =>
@@ -553,18 +379,6 @@ public partial class StrateZoneDbContext : DbContext
                 .HasForeignKey<GameType>(d => d.TypeId)
                 .HasConstraintName("images_gametype_id_fkey");
 
-            entity.HasOne(d => d.Event).WithOne(p => p.Image)
-                .HasForeignKey<Event>(d => d.EventId)
-                .HasConstraintName("images_event_id_fkey");
-
-            entity.HasOne(d => d.Tournament).WithOne(p => p.Image)
-                .HasForeignKey<Tournament>(d => d.TournamentId)
-                .HasConstraintName("images_tournament_id_fkey");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.Images)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("images_product_id_fkey");
-
             entity.HasOne(d => d.Thread).WithMany(p => p.Images)
                 .HasForeignKey(d => d.ThreadId)
                 .HasConstraintName("images_thread_id_fkey");
@@ -597,89 +411,6 @@ public partial class StrateZoneDbContext : DbContext
                 .HasConstraintName("likes_user_id_fkey");
         });
 
-        modelBuilder.Entity<Message>(entity =>
-        {
-            entity.HasKey(e => e.MessageId).HasName("messages_pkey");
-
-            entity.ToTable("messages");
-
-            entity.Property(e => e.MessageId).HasColumnName("message_id");
-            entity.Property(e => e.Content).HasColumnName("content");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.ReceiverId).HasColumnName("receiver_id");
-            entity.Property(e => e.SenderId).HasColumnName("sender_id");
-
-            entity.HasOne(d => d.Receiver).WithMany(p => p.MessageReceivers)
-                .HasForeignKey(d => d.ReceiverId)
-                .HasConstraintName("messages_receiver_id_fkey");
-
-            entity.HasOne(d => d.Sender).WithMany(p => p.MessageSenders)
-                .HasForeignKey(d => d.SenderId)
-                .HasConstraintName("messages_sender_id_fkey");
-
-            entity.Property(e => e.Status).HasColumnName("status").HasColumnType("message_status").HasConversion(
-                    v => v.ToString(),
-                    v => (MessageStatus)Enum.Parse(typeof(MessageStatus), v)
-                    );
-        });
-
-        modelBuilder.Entity<Order>(entity =>
-        {
-            entity.HasKey(e => e.OrderId).HasName("orders_pkey");
-
-            entity.ToTable("orders");
-
-            entity.Property(e => e.OrderId).HasColumnName("order_id");
-            entity.Property(e => e.OrderDate)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("order_date");
-            entity.Property(e => e.TotalAmount)
-                .HasPrecision(10, 2)
-                .HasColumnName("total_amount");
-            entity.Property(e => e.TrackingNumber)
-                .HasMaxLength(22)
-                .HasDefaultValueSql("NULL::character varying")
-                .HasColumnName("tracking_number");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("orders_user_id_fkey");
-
-
-            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
-                    v => v.ToString(),
-                    v => (OrderStatus)Enum.Parse(typeof(OrderStatus), v)
-                    );
-        });
-
-        modelBuilder.Entity<OrderDetail>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("order_details_pkey");
-
-            entity.ToTable("order_details");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.OrderId).HasColumnName("order_id");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.Quantity)
-                .HasDefaultValue(1)
-                .HasColumnName("quantity");
-            entity.Property(e => e.Subtotal)
-                .HasPrecision(10, 2)
-                .HasColumnName("subtotal");
-
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails)
-                .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("order_details_order_id_fkey");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.OrderDetails)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("order_details_product_id_fkey");
-        });
-
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("payments_pkey");
@@ -708,17 +439,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.CourseId).HasColumnName("course_id");
             entity.Property(e => e.VoucherId).HasColumnName("voucher_id");
 
-            entity.HasOne(d => d.Order).WithOne(p => p.Payment)
-                .HasForeignKey<Order>(d => d.OrderId)
-                .HasConstraintName("payments_order_id_fkey");
-
             entity.HasOne(d => d.User).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("payments_user_id_fkey");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.Payments)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("payments_course_id_fkey");
 
             entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.UserId)
@@ -759,17 +482,9 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.Type).HasColumnName("type");
 
-            entity.HasOne(d => d.Course).WithMany(p => p.Prices)
-                .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("prices_course_id_fkey");
-
             entity.HasOne(d => d.GameType).WithMany(p => p.Prices)
                 .HasForeignKey(d => d.GameTypeId)
                 .HasConstraintName("prices_game_type_id_fkey");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.Prices)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("prices_product_id_fkey");
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -806,58 +521,6 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.TablesAppointment).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.TablesAppointmentId)
                 .HasConstraintName("notifications_tables_appointment_id_fkey");
-
-            entity.HasOne(d => d.Order).WithMany(p => p.Notifications)
-                .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("notifications_order_id_fkey");
-
-            entity.HasOne(d => d.Tournament).WithMany(p => p.Notifications)
-                .HasForeignKey(d => d.TournamentId)
-                .HasConstraintName("notifications_tournament_id_fkey");
-        });
-
-        modelBuilder.Entity<Product>(entity =>
-        {
-            entity.HasKey(e => e.ProductId).HasName("products_pkey");
-
-            entity.ToTable("products");
-
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(255)
-                .HasColumnName("image_url");
-            entity.Property(e => e.InventoryCount).HasColumnName("inventory_count");
-            entity.Property(e => e.ProductName)
-                .HasMaxLength(100)
-                .HasColumnName("product_name");
-
-            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
-                    v => v.ToString(),
-                    v => (ProductStatus)Enum.Parse(typeof(ProductStatus), v)
-                    );
-        });
-
-        modelBuilder.Entity<ProductTag>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("product_tags_pkey");
-
-            entity.ToTable("product_tags");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.TagId).HasColumnName("tag_id");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.ProductTags)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("product_tags_product_id_fkey");
-
-            entity.HasOne(d => d.Tag).WithMany(p => p.ProductTags)
-                .HasForeignKey(d => d.TagId)
-                .HasConstraintName("product_tags_tag_id_fkey");
         });
 
         modelBuilder.Entity<Room>(entity =>
@@ -1101,94 +764,6 @@ public partial class StrateZoneDbContext : DbContext
                 .HasConstraintName("threads_tags_thread_id_fkey");
         });
 
-        modelBuilder.Entity<Ticket>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("tickets_pkey");
-
-            entity.ToTable("tickets");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.AttachmentUrl)
-                .HasMaxLength(255)
-                .HasColumnName("attachment_url");
-            entity.Property(e => e.Reason).HasColumnName("reason");
-            entity.Property(e => e.SenderId).HasColumnName("sender_id");
-            entity.Property(e => e.SentAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("sent_at");
-
-            entity.HasOne(d => d.Sender).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.SenderId)
-                .HasConstraintName("tickets_sender_id_fkey");
-
-            entity.Property(e => e.TicketType).HasColumnName("ticket_type").HasConversion(
-                    v => v.ToString(),
-                    v => (TicketType)Enum.Parse(typeof(TicketType), v)
-                    );
-        });
-
-        modelBuilder.Entity<Tournament>(entity => 
-        {
-            entity.HasKey(e => e.TournamentId).HasName("tournaments_pkey");
-
-            entity.ToTable("tournaments");
-
-            entity.Property(e => e.TournamentId).HasColumnName("tournament_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Name)
-                .HasMaxLength(100)
-                .HasColumnName("name");
-            entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.EndDate).HasColumnName("end_date");
-
-            entity.Property(e => e.TargetedRanking).HasColumnName("targeted_ranking").HasConversion(
-                    v => v.ToString(),
-                    v => (Ranking) Enum.Parse(typeof(Ranking), v)
-                );
-
-            entity.Property(e => e.MaxParticipants).HasColumnName("max_participants");
-
-            entity.Property(e => e.Status).HasColumnName("status").HasConversion(
-                    v => v.ToString(),
-                    v => (TournamentStatus) Enum.Parse(typeof(TournamentStatus), v)
-                    );
-
-            entity.HasOne(d => d.User).WithMany(p => p.Tournaments)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("tournaments_user_id_fkey");
-        });
-
-        modelBuilder.Entity<TournamentsParticipants>(entity => 
-        {
-            entity.HasKey(e => e.Id).HasName("tournaments_participants_pkey");
-
-            entity.ToTable("tournaments_participants");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.TournamentId).HasColumnName("tournament_id");
-            entity.Property(e => e.ParticipantId).HasColumnName("participant_id");
-
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-
-            entity.HasOne(d => d.Tournament).WithMany(p => p.TournamentsParticipants)
-                .HasForeignKey(d => d.TournamentId)
-                .HasConstraintName("tournament_participants_tournament_id_fkey");
-
-            entity.HasOne(d => d.Participant).WithMany(p => p.TournamentsParticipants)
-                .HasForeignKey(d => d.ParticipantId)
-                .HasConstraintName("tournament_participants_participant_id_fkey");
-        });
-
         modelBuilder.Entity<Transaction>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("transactions_pkey");
@@ -1257,24 +832,14 @@ public partial class StrateZoneDbContext : DbContext
                     v => (Gender)Enum.Parse(typeof(Gender), v)
                 );
 
-            entity.Property(e => e.SkillLevel).HasColumnName("skill_level").HasColumnType("skill_level").HasConversion(
-                    v => v.ToString(),
-                    v => (SkillLevel) Enum.Parse(typeof(SkillLevel), v)
-                );
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (UserStatus)Enum.Parse(typeof(UserStatus), v)
                 );
 
-            entity.Property(e => e.Ranking).HasColumnName("ranking").HasColumnType("ranking").HasConversion(
-                    v => v.ToString(),
-                    v => (Ranking)Enum.Parse(typeof(Ranking), v)
-                );
-
             entity.Property(e => e.AvatarUrl).HasColumnName("avatar_url");
 
-            entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
@@ -1319,40 +884,6 @@ public partial class StrateZoneDbContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("username");
 
-            entity.HasOne(d => d.Cart).WithOne(p => p.User)
-                .HasForeignKey<Cart>(d => d.CartId)
-                .HasConstraintName("users_cart_id_fkey")
-                .OnDelete(DeleteBehavior.Cascade);
-
-        });
-
-        modelBuilder.Entity<UsersCourse>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("users_courses_pkey");
-
-            entity.ToTable("users_courses");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CourseId).HasColumnName("course_id");
-            entity.Property(e => e.EnrolledAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("enrolled_at");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.Result).HasColumnName("result").HasConversion(
-                    v => v.ToString(),
-                    v => (UserCourseResult)Enum.Parse(typeof(UserCourseResult), v)
-                    );
-            entity.Property(e => e.ParticipantStatus).HasColumnName("participant_status").HasConversion(
-                    v => v.ToString(),
-                    v => (ParticipantStatus)Enum.Parse(typeof(ParticipantStatus), v)
-                    );
-            entity.HasOne(d => d.Course).WithMany(p => p.UsersCourses)
-                .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("users_courses_course_id_fkey");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UsersCourses)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("users_courses_user_id_fkey");
         });
 
         modelBuilder.Entity<Voucher>(entity =>

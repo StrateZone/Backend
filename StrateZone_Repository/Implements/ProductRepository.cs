@@ -20,6 +20,7 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
+        /*
         public async Task<PagedList<Product>> GetProductsAsync(TablesAppointmentParameters parameters, string? searchTerm)
         {
             try
@@ -79,5 +80,6 @@ namespace StrateZone_Repository.Implements
                 throw;
             }
         }
+        */
     }
 }

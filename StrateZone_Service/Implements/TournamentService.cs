@@ -19,7 +19,7 @@ namespace StrateZone_Service.Implements
             _tournamentRepository = tournamentRepository;
         }
 
-
+        /*
         public Task<Tournament> DeleteTournamentAsync(int id)
         {
             throw new NotImplementedException();
@@ -44,5 +44,6 @@ namespace StrateZone_Service.Implements
         {
             throw new NotImplementedException();
         }
+        */
     }
 }

@@ -28,11 +28,7 @@ public partial class Payment
 
     public virtual User? User { get; set; }
 
-    public virtual Order? Order { get; set; }
-
     public virtual TablesAppointment? TablesAppointment { get; set; }
-
-    public virtual Course? Course { get; set; }
 
     public virtual Voucher? Voucher { get; set; }
 }

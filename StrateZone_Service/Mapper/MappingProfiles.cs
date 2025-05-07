@@ -17,13 +17,13 @@ namespace StrateZone_Service.Mapper
         {   
             CreateMap<User, UserModel>()
                 .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserAvatarResolver>())
+                .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
+                .ForMember(ur => ur.UserLabel, u => u.MapFrom(src => src.UserLabel.ToString()))
                 .ReverseMap();
 
             CreateMap<User, UserResponse>()
                     .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
-                    .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
-                    .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
                     .ForMember(ur => ur.UserLabel, u => u.MapFrom(src => src.UserLabel.ToString()))
                     .ForMember(ur => ur.Status, u => u.MapFrom(src => src.Status.ToString()))
                     .ForMember(ur => ur.AvatarUrl, u => u.MapFrom<UserResponseAvatarResolver>())
@@ -44,12 +44,8 @@ namespace StrateZone_Service.Mapper
             CreateMap<UserResponse, FriendResponse>();
 
             CreateMap<UserModel, UserResponse>()
-                    .ForMember(ur => ur.UserRole, u => u.MapFrom(src => src.UserRole.ToString()))
                     .ForMember(ur => ur.Gender, u => u.MapFrom(src => src.Gender.ToString()))
-                    .ForMember(ur => ur.SkillLevel, u => u.MapFrom(src => src.SkillLevel.ToString()))
-                    .ForMember(ur => ur.Ranking, u => u.MapFrom(src => src.Ranking.ToString()))
                     .ForMember(ur => ur.Status, u => u.MapFrom(src => src.Status.ToString()))
-                    .ForMember(ur => ur.UserLabel, u => u.MapFrom(src => src.UserLabel.ToString()))
                 .ReverseMap();
 
             CreateMap<GameType, GameTypeModel>()
@@ -90,11 +86,6 @@ namespace StrateZone_Service.Mapper
             CreateMap<TablesAppointmentModel, TablesAppointmentResponse>().ReverseMap();
 
             CreateMap<TableModel, TableResponse>().ReverseMap();
-
-            CreateMap<Message, MessageModel>().ReverseMap();
-            CreateMap<Message, MessageResponse>()
-                .ForMember(mr => mr.SenderName, u => u.MapFrom(src => src.Sender.Username))
-                .ForMember(mr => mr.ReceiverName, u => u.MapFrom(src => src.Receiver.Username));
 
             CreateMap<Image, ImageModel>().ReverseMap();    
             CreateMap<Price, PriceModel>().ReverseMap();

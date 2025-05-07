@@ -19,6 +19,7 @@ namespace StrateZone_Service.Implements
             _mapper = mapper;
         }
 
+        /*
         public async Task<MessageModel> SendMessageAsync(MessageRequest request)
         {
             try
@@ -83,5 +84,6 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+        */
     }
 }

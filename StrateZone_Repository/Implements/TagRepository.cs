@@ -52,7 +52,7 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Tags.AsNoTracking().Where(tag => tag.ProductTags.Any()).ToListAsync();
+                return await _context.Tags.AsNoTracking().ToListAsync();
             }
             catch (Exception ex)
             {

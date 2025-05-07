@@ -33,7 +33,5 @@ namespace StrateZone_Service.BusinessModels
         // public virtual Order? Order { get; set; }
 
         public virtual TablesAppointmentModel? TablesAppointment { get; set; }
-
-        public virtual CourseModel? Course { get; set; }
     }
 }

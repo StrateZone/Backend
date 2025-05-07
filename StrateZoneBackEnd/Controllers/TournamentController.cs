@@ -7,6 +7,7 @@ using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
 {
+    /*
     [Route("api/tournament")]
     [ApiController]
     public class TournamentController : ControllerBase
@@ -19,7 +20,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost("create-tournament")]
-        public async Task<TournamentModel> CreateTournament([FromBody] CreateTournamentRequest createTounamentRequest, [FromForm] ImageRequest imageRequest /*temp cuz IFormFile doesnt work*/) 
+        public async Task<TournamentModel> CreateTournament([FromBody] CreateTournamentRequest createTounamentRequest, [FromForm] ImageRequest imageRequest) 
         {
             try
             {
@@ -31,4 +32,5 @@ namespace StrateZone_APIs.Controllers
             }
         }
     }
+    */
 }

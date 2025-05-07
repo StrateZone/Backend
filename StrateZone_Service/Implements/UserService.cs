@@ -180,8 +180,7 @@ namespace StrateZone_Service.Implements
                     Phone = userRequest.PhoneNumber,
                     Address = userRequest.Address,
                     Gender = (StrateZone_Repository.Parameters.PostgreEnums.Gender)userRequest.Gender,
-                    SkillLevel = (StrateZone_Repository.Parameters.PostgreEnums.SkillLevel)userRequest.SkillLevel,
-                    UserLabel = UserLabel.none,
+                    UserLabel = UserLabel.none.ToString(),
                     CreatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                     Status = "Unactivated"
                 };
@@ -217,8 +216,24 @@ namespace StrateZone_Service.Implements
                     userModel.Password = new PasswordHasher<string>().HashPassword(null, userModel.Password);
                     userModel.IsPasswordHashed = true;
                 }
+
                 var user = _mapper.Map<User>(userModel);
                 var result = await _userRepository.UpdateUserAsync(user, id);
+
+                return _mapper.Map<UserResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<UserResponse> EditUserProfileAsync(UserModel userModel, int id)
+        {
+            try
+            {
+                var user = _mapper.Map<User>(userModel);
+                var result = await _userRepository.EditUserProfileAsync(user, id);
 
                 return _mapper.Map<UserResponse>(result);
             }
@@ -448,7 +463,7 @@ namespace StrateZone_Service.Implements
 
                 var user = await _userRepository.GetUserByIdAsync(userId);
 
-                return await UpdateUserAsync(new() { UserRole = user.UserRole, IsPasswordHashed = false, Password = newPassword }, userId);
+                return await UpdateUserAsync(new() { UserRole = user.UserRole.ToString(), IsPasswordHashed = false, Password = newPassword }, userId);
             }
             catch (Exception ex)
             {
@@ -467,7 +482,7 @@ namespace StrateZone_Service.Implements
                 if (new PasswordHasher<string>().VerifyHashedPassword(null, user.Password, oldPassword) == PasswordVerificationResult.Failed)
                     throw new Exception($"Incorrect password");
 
-                return await UpdateUserAsync(new() { UserRole = user.UserRole, IsPasswordHashed = false, Password = newPassword }, userId);
+                return await UpdateUserAsync(new() { UserRole = user.UserRole.ToString(), IsPasswordHashed = false, Password = newPassword }, userId);
             }
             catch (Exception ex)
             {

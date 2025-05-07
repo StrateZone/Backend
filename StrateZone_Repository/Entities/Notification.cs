@@ -31,10 +31,6 @@ namespace StrateZone_Repository.Entities
 
         public virtual User? ToUserNavigation { get;set; }
 
-        public virtual Order? Order { get; set; }
-
         public virtual TablesAppointment? TablesAppointment { get; set; }
-
-        public virtual Tournament? Tournament {  get; set; }
     }
 }

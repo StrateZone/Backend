@@ -15,6 +15,7 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
+        /*
         public async Task<List<Message>> GetMessagesFromUserIdAsync(int id)
         {
             try
@@ -50,9 +51,6 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        /**
-         * Retrieves a list of messages between user 1 and user 2, ordered by date and time
-        **/
         public async Task<List<Message>> GetConversationMessagesAsync(int user_1_Id, int user_2_Id)
         {
             try
@@ -119,5 +117,6 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+        */
     }
 }

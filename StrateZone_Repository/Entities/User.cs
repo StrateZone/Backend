@@ -9,8 +9,6 @@ public partial class User
 {
     public int UserId { get; set; }
 
-    public int? CartId { get; set; }
-
     public string? Username { get; set; }
 
     [Column(TypeName = "user_role")]
@@ -33,11 +31,6 @@ public partial class User
 
     [Column(TypeName = "gender")]
     public Gender Gender { get; set; }
-
-    [Column(TypeName = "skill_level")]
-    public SkillLevel SkillLevel { get; set; }
-
-    public Ranking Ranking { get; set; }
 
     public UserLabel UserLabel { get; set; }
 
@@ -68,19 +61,11 @@ public partial class User
 
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 
-    public virtual Cart? Cart { get; set; }
-
     public virtual Image? Image { get; set; }
 
     public virtual Wallet? Wallet { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
-
-    public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
-
-    public virtual ICollection<CoursesSlot> CoursesSlots { get; set; } = new List<CoursesSlot>();
-
-    public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
     public virtual ICollection<Friendlist> FriendlistFriends { get; set; } = new List<Friendlist>();
 
@@ -96,25 +81,11 @@ public partial class User
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
-    public virtual ICollection<Message> MessageReceivers { get; set; } = new List<Message>();
-
-    public virtual ICollection<Message> MessageSenders { get; set; } = new List<Message>();
-
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual ICollection<Thread> Threads { get; set; } = new List<Thread>();
 
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
-
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
-
-    public virtual ICollection<UsersCourse> UsersCourses { get; set; } = new List<UsersCourse>();
-
-    public virtual ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
-
-    public virtual ICollection<TournamentsParticipants> TournamentsParticipants { get; set; } = new List<TournamentsParticipants>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 

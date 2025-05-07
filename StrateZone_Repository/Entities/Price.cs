@@ -29,9 +29,5 @@ public partial class Price
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual Course? Course { get; set; }
-
     public virtual GameType? GameType { get; set; }
-
-    public virtual Product? Product { get; set; }
 }

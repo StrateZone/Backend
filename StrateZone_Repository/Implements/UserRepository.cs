@@ -203,8 +203,8 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                        INSERT INTO users (username, email, phone, full_name, password, gender, role, skill_level, label, status, created_at, is_hashed_password) 
-                        VALUES (@username, @email, @phone, @fullname, @password, @gender::gender, @role::user_role, @skillLevel::skill_level, @label, @status, @createdAt, true)
+                        INSERT INTO users (username, email, phone, full_name, password, gender, role, label, status, created_at, is_hashed_password) 
+                        VALUES (@username, @email, @phone, @fullname, @password, @gender::gender, @role::user_role, @label, @status, @createdAt, true)
                         RETURNING user_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@username", user.Username));
@@ -214,7 +214,6 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@password", user.Password));
                 cmd.Parameters.Add(new NpgsqlParameter("@gender", user.Gender.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@role", user.UserRole.ToString()));
-                cmd.Parameters.Add(new NpgsqlParameter("@skillLevel", user.SkillLevel.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@label", user.UserLabel.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", user.Status.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@createdAt", user.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
@@ -243,12 +242,6 @@ namespace StrateZone_Repository.Implements
 
                 var parameters = new List<NpgsqlParameter>();
                 var sql = new StringBuilder("UPDATE users SET ");
-
-                if (updatedUser.CartId.HasValue)
-                {
-                    sql.Append("cart_id = @cartId, ");
-                    parameters.Add(new NpgsqlParameter("@cartId", updatedUser.CartId.Value));
-                }
 
                 if (!string.IsNullOrEmpty(updatedUser.Username))
                 {
@@ -297,12 +290,6 @@ namespace StrateZone_Repository.Implements
 
                 sql.Append("gender = @gender::gender, ");
                 parameters.Add(new NpgsqlParameter("@gender", updatedUser.Gender.ToString()));
-
-                sql.Append("skill_level = @skillLevel::skill_level, ");
-                parameters.Add(new NpgsqlParameter("@skillLevel", updatedUser.SkillLevel.ToString()));
-
-                sql.Append("ranking = @ranking::ranking, ");
-                parameters.Add(new NpgsqlParameter("@ranking", updatedUser.Ranking.ToString()));
 
                 if (!string.IsNullOrEmpty(updatedUser.Address))
                 {
@@ -478,7 +465,6 @@ namespace StrateZone_Repository.Implements
                                     ?? throw new Exception("User with this ID does not exist");
 
                 if (toRemove.Wallet != null) _context.Wallets.Remove(toRemove.Wallet);
-                if (toRemove.Cart != null) _context.Carts.Remove(toRemove.Cart);
                 _context.Users.Remove(toRemove);
                 await _context.SaveChangesAsync();
 
@@ -525,7 +511,6 @@ namespace StrateZone_Repository.Implements
                         a.Status == UserStatus.Unactivated &&
                         (a.CreatedAt == null || ((DateTime)a.CreatedAt).AddDays(daysAfterAccountCreate) < currentDay))
                     .Include(a => a.Wallet)
-                    .Include(a => a.Cart)
                     .ToListAsync();
 
                 if (accounts.Count > 0)

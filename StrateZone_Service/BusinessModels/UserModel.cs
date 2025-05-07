@@ -8,8 +8,6 @@ namespace StrateZone_Service.BusinessModels
     {
         public int UserId { get; set; }
 
-        public int? CartId { get; set; }
-
         public string? Username { get; set; }
 
         public string? Email { get; set; }
@@ -32,19 +30,15 @@ namespace StrateZone_Service.BusinessModels
 
         public int? ContributionPoints { get; set; }
 
-        public UserLabel UserLabel { get; set; }
+        public string? UserLabel { get; set; }
         
         public bool? IsPasswordHashed { get; set; }
 
-        public StrateZone_Repository.Parameters.PostgreEnums.UserRole UserRole { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.UserRole.RegisteredUser;
+        public string? UserRole { get; set; }
 
         public DateTime? MembershipExpiry { get; set; }
 
         public StrateZone_Repository.Parameters.PostgreEnums.Gender Gender { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Gender.male;
-
-        public StrateZone_Repository.Parameters.PostgreEnums.SkillLevel SkillLevel { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.SkillLevel.beginner;
-
-        public StrateZone_Repository.Parameters.PostgreEnums.Ranking Ranking { get; set; } = StrateZone_Repository.Parameters.PostgreEnums.Ranking.basic;
 
         public DateTime? CreatedAt { get; set; }
 

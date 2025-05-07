@@ -27,11 +27,5 @@ public partial class Image
 
     public virtual GameType? GameType { get; set; }
 
-    public virtual Tournament? Tournament { get; set; }
-
-    public virtual Event? Event { get; set; }
-
-    public virtual Product? Product { get; set; }
-
     public virtual Thread? Thread { get; set; }
 }

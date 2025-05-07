@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -7,7 +8,10 @@ using StrateZone_Service.Interfaces;
 
 namespace StrateZone_APIs.Controllers
 {
+    /*
+    [ApiController]
     [Route("api/messages")]
+    [Authorize(Policy = "ClubMember")]
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;
@@ -20,6 +24,7 @@ namespace StrateZone_APIs.Controllers
             _logger = logger;
             _chatHub = chatHub;
         }
+
 
         [HttpGet("users/{id}")]
         public async Task<IActionResult> GetConversation(int id)
@@ -85,4 +90,5 @@ namespace StrateZone_APIs.Controllers
             }
         }
     }
+    */
 }

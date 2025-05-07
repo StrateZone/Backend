@@ -20,6 +20,7 @@ namespace StrateZone_Repository.Implements
             _context = context;
         }
 
+        /*
         public async Task<Tournament> DeleteTournamentAsync(int id)
         {
             try
@@ -166,5 +167,6 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+        */
     }
 }
