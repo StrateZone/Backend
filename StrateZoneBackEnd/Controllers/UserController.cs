@@ -109,6 +109,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/search-friends")]
+        [AllowAnonymous]
         public async Task<IActionResult> SearchForFriendsUsername([FromQuery] UserListParameters parameters, int id, string? username)
         {
             try
