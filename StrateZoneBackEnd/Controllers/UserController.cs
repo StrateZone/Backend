@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -12,6 +13,7 @@ namespace StrateZone_APIs.Controllers
 {
     [Route("api/users")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -24,6 +26,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllUsers([FromQuery] UserListParameters parameters)
         {
             try
@@ -41,6 +44,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all/management")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllUsersManagement([FromQuery] UserListManagementParameters parameters)
         {
             try
@@ -58,6 +62,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("all/dashboard")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllUsersDashboard()
         {
             try
@@ -178,6 +183,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> AddUser([FromBody] UserRequest user)
         {
             try
@@ -192,6 +198,20 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("{id}")]
+        public async Task<IActionResult> EditUser([FromBody] UserModel user, int id)
+        {
+            try
+            {
+                var result = await _userService.EditUserProfileAsync(user, id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateUser([FromBody] UserModel user, int id)
         {
             try
@@ -206,6 +226,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("suspend/{userId}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> SuspendUser(int userId)
         {
             try
@@ -220,6 +241,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("kick/{userId}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> KickUser(int userId)
         {
             try
@@ -262,6 +284,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
@@ -304,6 +327,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("auto-assign-top-contributors")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> AssignTopContributors()
         {
             try

@@ -23,6 +23,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<UserResponse>> GetUsersByRankingAsync(UserListParameters parameters, Ranking ranking, int up, int down);
         Task<SearchedOpponentsResponse> GetRandomOpponentsAsync(int userId, string? SearchTerm, HashSet<int> excludedIds);
         Task<UserResponse> UpdateUserAsync(UserModel userModel, int id);
+        Task<UserResponse> EditUserProfileAsync(UserModel userModel, int id);
         Task<UserResponse> SuspendUserAccount(int id);
         Task<List<UserResponse>> PasswordUserAsync();
         Task<UserResponse> KickUserFromCommunityAsync(int id);

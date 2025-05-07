@@ -292,6 +292,9 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@cp", updatedUser.ContributionPoints.Value));
                 }
 
+                sql.Append("label = @user_label, ");
+                parameters.Add(new NpgsqlParameter("@user_label", updatedUser.UserLabel.ToString()));
+
                 sql.Append("gender = @gender::gender, ");
                 parameters.Add(new NpgsqlParameter("@gender", updatedUser.Gender.ToString()));
 
@@ -374,6 +377,90 @@ namespace StrateZone_Repository.Implements
                 await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
                 _context.Entry(updatedUser).State = EntityState.Detached;
                 
+                return updatedUser;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating user: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<User> EditUserProfileAsync(User updatedUser, int id)
+        {
+            try
+            {
+                var existingUser = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserId == id) ?? throw new Exception("User with this ID does not exist");
+
+                if (await _context.Users.AsNoTracking().AnyAsync(u => u != existingUser && u.Username == updatedUser.Username))
+                    throw new Exception("Duplicated username detected.");
+
+                updatedUser.UserId = id;
+
+                var parameters = new List<NpgsqlParameter>();
+                var sql = new StringBuilder("UPDATE users SET ");
+
+                if (!string.IsNullOrEmpty(updatedUser.Username))
+                {
+                    sql.Append("username = @username, ");
+                    parameters.Add(new NpgsqlParameter("@username", updatedUser.Username));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.Email))
+                {
+                    sql.Append("email = @email, ");
+                    parameters.Add(new NpgsqlParameter("@email", updatedUser.Email));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.Phone))
+                {
+                    sql.Append("phone = @phone, ");
+                    parameters.Add(new NpgsqlParameter("@phone", updatedUser.Phone));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.Password))
+                {
+                    sql.Append("password = @password, ");
+                    parameters.Add(new NpgsqlParameter("@password", updatedUser.Password));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.FullName))
+                {
+                    sql.Append("full_name = @fullname, ");
+                    parameters.Add(new NpgsqlParameter("@fullname", updatedUser.FullName));
+                }
+
+                if (updatedUser.ContributionPoints.HasValue)
+                {
+                    sql.Append("contribution_points = @cp, ");
+                    parameters.Add(new NpgsqlParameter("@cp", updatedUser.ContributionPoints.Value));
+                }
+
+                sql.Append("gender = @gender::gender, ");
+                parameters.Add(new NpgsqlParameter("@gender", updatedUser.Gender.ToString()));
+
+                if (!string.IsNullOrEmpty(updatedUser.Address))
+                {
+                    sql.Append("address = @address, ");
+                    parameters.Add(new NpgsqlParameter("@address", updatedUser.Address));
+                }
+
+                if (!string.IsNullOrEmpty(updatedUser.Bio))
+                {
+                    sql.Append("bio = @bio, ");
+                    parameters.Add(new NpgsqlParameter("@bio", updatedUser.Bio));
+                }
+
+                updatedUser.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Utc);
+                sql.Append("updated_at = @updatedAt, ");
+                parameters.Add(new NpgsqlParameter("@updatedAt", updatedUser.UpdatedAt));
+
+                sql.Remove(sql.Length - 2, 2);
+                sql.Append(" WHERE user_id = @userId");
+                parameters.Add(new NpgsqlParameter("@userId", id));
+
+                await _context.Database.ExecuteSqlRawAsync(sql.ToString(), parameters.ToArray());
+                _context.Entry(updatedUser).State = EntityState.Detached;
+
                 return updatedUser;
             }
             catch (Exception ex)
