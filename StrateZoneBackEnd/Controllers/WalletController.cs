@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
 
@@ -6,6 +7,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/wallets")]
+    [Authorize]
     public class WalletController : ControllerBase
     {
         private readonly IWalletService _walletService;
@@ -18,6 +20,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Post([FromBody] WalletModel walletModel)
         {
             try
@@ -60,6 +63,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update([FromBody] WalletModel walletModel, int id)
         {
             try
@@ -74,6 +78,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("deposit/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Deposit([FromQuery] int amount, int id)
         {
             try
@@ -89,6 +94,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("withdrawal/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Withdrawal([FromQuery] int amount, int id)
         {
             try

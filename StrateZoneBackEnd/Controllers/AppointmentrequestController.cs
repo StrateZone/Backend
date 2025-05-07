@@ -6,11 +6,13 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_APIs.Controllers
 {
     [ApiController]
-    [Route("api/appointmentrequests")] 
+    [Route("api/appointmentrequests")]
+    [Authorize]
     public class AppointmentrequestController : ControllerBase
     {
         private readonly IAppointmentrequestService _appointmentrequestService;

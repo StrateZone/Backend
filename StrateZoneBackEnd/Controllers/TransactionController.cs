@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.ResponseModels;
@@ -9,6 +10,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/transactions")]
+    [Authorize(Policy = "AdminOnly")]
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;

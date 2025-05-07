@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -11,6 +12,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/system")]
+    [Authorize(Policy = "AdminOnly")]
     public class SystemController : ControllerBase
     {
         private readonly ISystemService _systemService;
@@ -23,6 +25,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/open-hour")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOpenHour(int id)
         {
             try
@@ -37,6 +40,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/close-hour")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCloseHour(int id)
         {
             try
@@ -51,6 +55,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/open-hour/date")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOpenHour(int id, DateOnly date)
         {
             try
@@ -65,6 +70,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/close-hour/date")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCloseHour(int id, DateOnly date)
         {
             try
@@ -96,6 +102,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSystem(int id)
         {
             try
@@ -110,6 +117,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/check-in/minutes-before-schedule")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSystemCheckinHours(int id)
         {
             try
@@ -124,6 +132,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/refund-100/hours-before-schedule")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSystemRefundHours(int id)
         {
             try
@@ -138,6 +147,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/appointment-requests/hours-until-expiration")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAppointmentRequestsTimes(int id)
         {
             try
@@ -152,6 +162,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/appointment-requests/max-invitations-to-table")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetMaxUsersInvitedToTable(int id)
         {
             try
@@ -166,6 +177,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/top-contributors/numbers-per-week")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetNumberOfTopContributionsPerThread(int id)
         {
             try
@@ -180,6 +192,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/incoming/hours-before-schedule")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSystemInComingHours(int id)
         {
             try
@@ -194,6 +207,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/percentage-refund-ifnotfull")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPercentageRefundIfNot100(int id)
         {
             try
@@ -208,6 +222,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/percentage-timerange-until-requestexpiry")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPercentageTimerangeUntilRequestExpiration(int id)
         {
             try
@@ -222,6 +237,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("{id}/abnormal-days")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAbnormalDays(int id, TablesAppointmentParameters parameters)
         {
             try

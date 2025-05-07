@@ -4,11 +4,13 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/analytics")]
+    [Authorize(Policy = "AdminOnly")]
     public class AnalyticController : Controller
     {
         private readonly ITransactionService _transactionService;

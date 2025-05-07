@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -11,6 +12,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/rooms")]
+    [Authorize]
     public class RoomController : ControllerBase
     {
         private IRoomService _roomService;
@@ -88,6 +90,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> CreateRoom([FromBody] RoomRequest request)
         {
             try
@@ -102,6 +105,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost("room-type")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> CreateRoomType([FromBody] RoomTypeRequest request)
         {
             try
@@ -127,6 +131,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateRoom([FromBody] RoomModel model, int id)
         {
             try
@@ -141,6 +146,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("disable/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DisableRoom(int id)
         {
             try
@@ -155,6 +161,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("enable/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> EnableRoom(int id)
         {
             try
@@ -169,6 +176,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DeleteRoom(int id)
         {
             try

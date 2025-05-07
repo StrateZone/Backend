@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.CustomModels.ResponseModels;
@@ -8,6 +9,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/profanities")]
+    [Authorize]
     public class ProfanitiesController : ControllerBase
     {
         private readonly IProfanityService _service;
@@ -48,6 +50,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] string word)
         {
@@ -62,6 +65,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

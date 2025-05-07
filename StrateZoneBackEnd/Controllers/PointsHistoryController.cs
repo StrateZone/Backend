@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -9,6 +10,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/points-history")]
+    [Authorize]
     public class PointsHistoryController : ControllerBase
     {
         private readonly IPointsHistoryService _pointsHistoryService;

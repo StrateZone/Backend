@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -13,6 +14,7 @@ namespace StrateZone_APIs.Controllers
 { 
     [ApiController]
     [Route("api/payments")]
+    [Authorize]
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;

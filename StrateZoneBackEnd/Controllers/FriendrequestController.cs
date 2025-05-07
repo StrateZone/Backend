@@ -7,11 +7,13 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/friendrequests")]
+    [Authorize(Policy = "ClubMember")]
     public class FriendrequestController : ControllerBase
     {
         private readonly IFriendrequestService _friendrequestService;

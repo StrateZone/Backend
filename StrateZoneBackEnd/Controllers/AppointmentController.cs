@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -10,6 +11,7 @@ namespace StrateZone_APIs.Controllers
 {
     [Route("api/appointments")]
     [ApiController]
+    [Authorize]
     public class AppointmentController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
@@ -23,6 +25,7 @@ namespace StrateZone_APIs.Controllers
             _scheduleTimeValidator = scheduleTimeValidator;
         }
 
+        [Authorize(Policy = "StaffAndAbove")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAppointments([FromQuery] AppointmentParameters parameters)
         {
@@ -40,6 +43,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "StaffAndAbove")]
         [HttpGet("all/admin")]
         public async Task<IActionResult> GetAllAppointments([FromQuery] AppointmentAdminParameters parameters)
         {
@@ -57,6 +61,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "StaffAndAbove")]
         [HttpGet("all/checkin")]
         public async Task<IActionResult> GetAllCheckinAppointments([FromQuery] AppointmentAdminParameters parameters)
         {
@@ -74,6 +79,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "StaffAndAbove")]
         [HttpPut("cancel/admin")]
         public async Task<IActionResult> RefundAppointment100Async(int tableAppointmentId, int userId)
         {
@@ -87,7 +93,6 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAppointmentById(int id)

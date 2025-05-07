@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -10,6 +11,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/expenses")]
+    [Authorize(Policy = "AdminOnly")]
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseService _expenseService;

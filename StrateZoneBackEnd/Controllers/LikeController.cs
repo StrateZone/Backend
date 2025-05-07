@@ -4,11 +4,13 @@ using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_API.Controllers
 {
     [ApiController]
     [Route("api/likes")]
+    [Authorize(Policy = "ClubMember")]
     public class LikesController : ControllerBase
     {
         private readonly ILikeService _likeService;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -175,6 +176,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> CreateTable([FromBody] TableRequest request)
         {
             try
@@ -189,6 +191,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateTable([FromBody] TableModel tableModel, int id)
         {
             try
@@ -203,6 +206,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("disable/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DisableTable(int id)
         {
             try
@@ -217,6 +221,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("enable/{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> EnableTable(int id)
         {
             try
@@ -231,6 +236,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DeleteTable(int id)
         {
             try

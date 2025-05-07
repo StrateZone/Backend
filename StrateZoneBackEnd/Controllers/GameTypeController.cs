@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
@@ -7,6 +8,7 @@ namespace StrateZone_APIs.Controllers
 {
     [Route("api/game_types")]
     [ApiController]
+    [Authorize]
     public class GameTypeController : ControllerBase
     {
         private readonly IGameTypeService _gameTypeService;
@@ -18,6 +20,7 @@ namespace StrateZone_APIs.Controllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpGet("all")]
         public async Task<IActionResult> GetAllGameTypesWithExtensions()
         {
@@ -32,6 +35,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet("all-admin")]
         public async Task<IActionResult> GetGameTypesAsync()
         {
@@ -62,6 +66,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> AddAsync([FromBody] GameTypeRequest gameTypeRequest)
         {
@@ -76,6 +81,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("disable/{id}")]
         public async Task<IActionResult> DisableAsync(int id)
         {
@@ -90,6 +96,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("enable/{id}")]
         public async Task<IActionResult> EnableAsync(int id)
         {

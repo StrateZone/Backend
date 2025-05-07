@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
@@ -8,7 +9,8 @@ using StrateZone_Service.Interfaces;
 namespace StrateZone_APIs.Controllers
 {
     [Route("api/tables-appointment")]
-    [ApiController] 
+    [ApiController]
+    [Authorize]
     public class TablesAppointmentController : ControllerBase
     {
         private readonly ITablesAppointmentService _services;
@@ -143,6 +145,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateTablesAppointment([FromBody] TablesAppointmentModel model, int id)
         {
             try
@@ -173,6 +176,7 @@ namespace StrateZone_APIs.Controllers
         */
 
         [HttpPut("check-in/{tablesAppointmentId}/users/{userId}")]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> CheckinTablesAppointment(int tablesAppointmentId, int userId)
         {
             try
@@ -187,6 +191,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("check-out/{tablesAppointmentId}/users/{userId}")]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> CheckoutTablesAppointment(int tablesAppointmentId, int userId)
         {
             try
@@ -207,34 +212,6 @@ namespace StrateZone_APIs.Controllers
             {
                 var result = await _services.CalculateRefundAmountOnAppointmentCancellation(userId, tablesAppointmentId, CancelTime);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("check-in/{tablesAppointmentId}/users/{userId}")]
-        public async Task<IActionResult> ScanCheckinTablesAppointment(int tablesAppointmentId, int userId)
-        {
-            try
-            {
-                var result = await _services.CheckInTablesAppointment(tablesAppointmentId, userId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("check-in-qr/{tablesAppointmentId}/users/{userId}")]
-        public async Task<IActionResult> CreateCheckinQrCode(int tablesAppointmentId, int userId)
-        {
-            try
-            {
-                var result = await _services.CreateCheckinQrCode(userId, tablesAppointmentId);
-                return Ok(new { result });
             }
             catch (Exception ex)
             {
@@ -299,6 +276,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DeleteTablesAppointment(int id)
         {
             try

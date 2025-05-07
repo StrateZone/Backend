@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
 using System;
@@ -9,6 +10,7 @@ namespace StrateZone_Api.Controllers
 {
     [ApiController]
     [Route("api/threadstags")]
+    [Authorize(Policy = "ClubMember")]
     public class ThreadsTagController : ControllerBase
     {
         private readonly IThreadsTagService _threadsTagService;

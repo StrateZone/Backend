@@ -5,11 +5,13 @@ using StrateZone_Service.BusinessModels;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StrateZone_API.Controllers
 {
     [ApiController]
     [Route("api/comments")]
+    [Authorize(Policy = "ClubMember")]
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;

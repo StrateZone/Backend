@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -10,6 +11,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/notifications")]
+    [Authorize]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
@@ -52,6 +54,7 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [Authorize(Policy = "StaffAndAbove")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] NotificationRequest request)
         {

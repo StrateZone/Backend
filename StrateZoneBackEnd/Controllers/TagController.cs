@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
 using System;
@@ -10,6 +11,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/tags")]
+    [Authorize(Policy = "ClubMember")]
     public class TagController : ControllerBase
     {
         private readonly ITagService _tagService;
@@ -22,6 +24,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> GetTagsAsync()
         {
             try
@@ -100,6 +103,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("admin/activate/{id}")]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> AdminActivateTagAsync(int id)
         {
             try
@@ -114,6 +118,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPut("admin/hide/{id}")]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> AdminHideTagAsync(int id)
         {
             try
@@ -143,6 +148,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> CreateTagAsync([FromBody] TagModel tagModel)
         {
             try
@@ -158,6 +164,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> DeleteTagAsync(int id)
         {
             try
