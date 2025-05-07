@@ -24,7 +24,6 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "StaffAndAbove")]
         public async Task<IActionResult> GetTagsAsync()
         {
             try
