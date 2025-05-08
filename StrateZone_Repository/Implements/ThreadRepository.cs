@@ -102,6 +102,8 @@ namespace StrateZone_Repository.Implements
                                         && (parameters.TagIds.Count <= 0 || parameters.TagIds.All(tagId => t.ThreadsTags.Any(tt => tt.TagId == tagId)))
                                         && (parameters.Search == string.Empty || t.Title.Contains(parameters.Search) || t.Content.Contains(parameters.Search))
                                 )
+                                .Include(t => t.ThreadsTags)
+                                .ThenInclude(t => t.Tag)
                                 .AsQueryable();
 
                 threads = threads.OrderBy(t =>
