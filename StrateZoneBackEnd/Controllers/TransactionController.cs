@@ -10,7 +10,7 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/transactions")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize]
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
@@ -23,6 +23,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Get(TransactionParameters parameters)
         {
             try
@@ -39,6 +40,7 @@ namespace StrateZone_APIs.Controllers
         }
 
         [HttpGet("by-type")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetTypes(TransactionParameters parameters, [FromQuery] TransactionType[] transactionTypes)
         {
             try
