@@ -130,7 +130,7 @@ namespace StrateZone_Service.Implements
                     Success = true,
                     StatusCode = 200,
                     Message = "OTP sent",
-                    Data = mailMessage
+                    Data = null,
                 };
             }
             catch (Exception ex)
@@ -202,14 +202,14 @@ namespace StrateZone_Service.Implements
                     Content = $"<p>Mật khẩu mới của bạn là:</p><h1 style=\"background-color:yellow\"><b>{newPassword}</b></h1><p>Sau khi đăng nhập thành công, vui lòng vào hồ sơ để đổi mật khẩu.</p>"
                 };
                 
-                var mailMessage = await _emailService.SendEmailAsync(emailSending);
+                await _emailService.SendEmailAsync(emailSending);
 
                 return new ApiResponse<MailMessage>
                 {
                     Success = true,
                     StatusCode = 200,
                     Message = "OTP sent",
-                    Data = mailMessage
+                    Data = null,
                 };
             }
             catch (Exception ex)
