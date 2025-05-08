@@ -39,7 +39,7 @@ namespace StrateZone_Service.Implements
                 issuer: _config["JwtSettings:Issuer"],
                 audience: _config["JwtSettings:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["Jwt:AccessTokenExpirationMinutes"])),
+                expires: DateTime.UtcNow.AddHours(7).AddMinutes(Convert.ToInt32(_config["Jwt:AccessTokenExpirationMinutes"])),
                 signingCredentials: credentials
             );
 
