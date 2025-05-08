@@ -148,15 +148,6 @@ namespace StrateZone_Service.Implements
                 var threads = await _threadRepository.GetThreadsByUserIdAsync(parameters, id);
                 var mapped = _mapper.Map<PagedList<ThreadModel>>(threads);
 
-                foreach (var m in mapped)
-                {
-                    var counts = await _threadRepository.GetThreadLikeAndCommentCount(m.ThreadId);
-
-                    m.LikesCount = counts.Item1;
-                    m.IsUserLiked = counts.Item2;
-                    m.CommentsCount = counts.Item3;
-                }
-
                 return new PagedList<ThreadModel>(mapped, threads.TotalCount, threads.CurrentPage, threads.PageSize);
             }
             catch (Exception ex)

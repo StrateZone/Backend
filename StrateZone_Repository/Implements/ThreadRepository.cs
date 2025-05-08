@@ -254,7 +254,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<PagedList<Thread>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id)
+        public async Task<PagedList<ThreadDTO>> GetThreadsByUserIdAsync(TablesAppointmentParameters parameters, int id)
         {
             try
             {
@@ -292,7 +292,7 @@ namespace StrateZone_Repository.Implements
                     CommentsCount = t.Comments.Count
                 });
 
-                return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
+                return await PagedList<ThreadDTO>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
@@ -330,7 +330,23 @@ namespace StrateZone_Repository.Implements
                     _ => threads.OrderByDescending(t => t.CreatedAt)
                 };
 
-                return await PagedList<Entities.Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
+                var result = threads.Select(t => new ThreadDTO
+                {
+                    ThreadId = t.ThreadId,
+                    CreatedBy = t.CreatedBy,
+                    Title = t.Title,
+                    ThumbnailUrl = t.ThumbnailUrl,
+                    Rating = t.Rating,
+                    Status = t.Status,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    CreatedByNavigation = t.CreatedByNavigation,
+                    ThreadsTags = t.ThreadsTags,
+                    LikesCount = t.Likes.Count,
+                    CommentsCount = t.Comments.Count
+                });
+
+                return await PagedList<Thread>.ToPagedList(threads, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception ex)
             {
