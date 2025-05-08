@@ -502,6 +502,8 @@ namespace StrateZone_Service.Implements
                     await service.CreateNotificationAsync(notification);
                 });
 
+                await CancelAppointmentRequests(tablesAppointmentId);
+
                 tablesAppointment.Status = AppointmentStatus.refunded.ToString();
                 return await UpdateTablesAppointmentAsync(_mapper.Map<TablesAppointmentModel>(tablesAppointment), tablesAppointmentId);
             }
@@ -574,6 +576,8 @@ namespace StrateZone_Service.Implements
 
                     await service.CreateNotificationAsync(notification);
                 });
+
+                await CancelAppointmentRequests(tablesAppointmentId);
 
                 tablesAppointment.Status = AppointmentStatus.refunded.ToString();
                 return await UpdateTablesAppointmentAsync(_mapper.Map<TablesAppointmentModel>(tablesAppointment), tablesAppointmentId);
