@@ -545,6 +545,17 @@ namespace StrateZone_Service.Implements
                     };
 
                     await service.SaveTransaction(transaction);
+
+                    var system_transaction = new TransactionModel
+                    {
+                        Amount = refundAmount,
+                        Content = $"Hoàn tiền cho người dùng có ID {userId}: {refundAmount} VND, đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId} do bàn đã bị cho ngưng hoạt động.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = null,
+                        TransactionType = TransactionType.refund,
+                    };
+
+                    await service.SaveTransaction(system_transaction);
                 });
 
                 _ = Task.Run(async () =>
