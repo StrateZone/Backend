@@ -11,7 +11,7 @@ namespace StrateZone_API.Controllers
 {
     [ApiController]
     [Route("api/comments")]
-    [Authorize(Policy = "ClubMember")]
+ //   [Authorize(Policy = "ClubMember")]
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
