@@ -287,6 +287,7 @@ namespace StrateZone_Repository.Implements
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt,
                     CreatedByNavigation = t.CreatedByNavigation,
+                    Content = t.Content,
                     ThreadsTags = t.ThreadsTags,
                     LikesCount = t.Likes.Count,
                     CommentsCount = t.Comments.Count
