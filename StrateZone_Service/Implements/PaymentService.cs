@@ -579,14 +579,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<PaymentModel>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year)
+        public async Task<int> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year)
         {
             try
             {
-                var result = await _paymentRepository.GetMembershipPaymentsWithinAMonthInYearAsync(month, year);
-                var mapped = _mapper.Map<List<PaymentModel>>(result);
-
-                return mapped;
+                return await _paymentRepository.GetMembershipPaymentsWithinAMonthInYearAsync(month, year);
             }
             catch (Exception ex)
             {
@@ -594,14 +591,13 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<PaymentModel>> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year)
+        public async Task<int> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year)
         {
             try
             {
                 var result = await _paymentRepository.GetMembershipPaymentsWithinADayInYearAsync(day, month, year);
-                var mapped = _mapper.Map<List<PaymentModel>>(result);
 
-                return mapped;
+                return result;
             }
             catch (Exception ex)
             {
@@ -609,26 +605,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<MembershipMonthResponse> GetReportMembershipPaymentsWithinADayInYearAsync(int month, int year)
+        public async Task<int> GetReportMembershipPaymentsWithinADayInYearAsync(int month, int year)
         {
             try
             {
-                List<MembershipDailyResponse> membershipDailyResponses = new();
-
-                int dayInMonth = DateTime.DaysInMonth(year, month);
-                for (int i = 1; i <= dayInMonth; ++i)
-                {
-                    int userJoined = (await _paymentRepository.GetMembershipPaymentsWithinADayInYearAsync(i, month, year)).Count();
-
-                    membershipDailyResponses.Add(new() { DayOfMonth = i, MembershipsPurchased = userJoined });
-                }
-
-                return new()
-                {
-                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
-                    TotalDays = dayInMonth,
-                    MembershipDailyResponse = membershipDailyResponses
-                };
+                return await _paymentRepository.GetMembershipPaymentsWithinAMonthInYearAsync(month, year);
             }
             catch (Exception ex)
             {

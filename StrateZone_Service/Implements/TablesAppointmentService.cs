@@ -857,43 +857,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<TablesAppointmentsMonthResponse> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year)
+        public async Task<int> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year)
         {
             try
             {
-                var allTAs = await _tablesAppointmentRepository.GetAllBookedTablesAppointmentWithinAMonthInYearAsync(month, year);
-                List<TablesAppointmentsDailyResponse> taDailyResponses = new();
-
-                int dayInMonth = DateTime.DaysInMonth(year, month);
-                for (int i = 1; i <= dayInMonth; ++i)
-                {
-                    int booked = allTAs.Where(ta => ta.CreatedAt.Value.Day == i).Count();
-                    int cancelled = allTAs.Where(ta => ta.Status == AppointmentStatus.cancelled && ta.CreatedAt.Value.Day == i).Count();
-                    int completed = allTAs.Where(ta => ta.Status == AppointmentStatus.completed && ta.CreatedAt.Value.Day == i).Count();
-                    int expired = allTAs.Where(ta => ta.Status == AppointmentStatus.expired && ta.CreatedAt.Value.Day == i).Count();
-                    int others = allTAs.Where(ta =>
-                                        ta.Status != AppointmentStatus.cancelled 
-                                        && ta.Status != AppointmentStatus.completed 
-                                        && ta.Status != AppointmentStatus.expired
-                                        && ta.CreatedAt.Value.Day == i).Count();
-
-                    taDailyResponses.Add(new() 
-                    { 
-                        DayOfMonth = i, 
-                        TablesAppointmentBooked = booked, 
-                        CancelledCount = cancelled,
-                        CompletedCount = completed,
-                        ExpiredCount = expired,
-                        FutureCount = others
-                    });
-                }
-
-                return new()
-                {
-                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
-                    TotalDays = dayInMonth,
-                    TablesAppointmentsDailyResponse = taDailyResponses
-                };
+                return await _tablesAppointmentRepository.GetCountAllBookedTablesAppointmentWithinAMonthInYearAsync(month, year);
             }
             catch (Exception ex)
             {

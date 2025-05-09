@@ -752,6 +752,22 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<int> GetNewUserWithinMonthAsync(int month, int year)
+        {
+            try
+            {
+                return await _context.Users.AsNoTracking()
+                                        .Where(u => u.CreatedAt.HasValue
+                                            && u.CreatedAt.Value.Year == year
+                                            && u.CreatedAt.Value.Month == month)
+                                        .CountAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<string> GetUserRole(int id)
         {
             var result = await _context.Users.AsNoTracking().Where(u => u.UserId == id).Select(u => u.UserRole).FirstOrDefaultAsync();

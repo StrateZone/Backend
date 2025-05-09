@@ -97,10 +97,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var refunds = await _transactionRepository.GetTransactionsForRefundWithinAMonthAsync(month, year);
                 var deposits = await _transactionRepository.GetTransactionsForDepositWithinAMonthAsync(month, year);
-                var expenses = await _transactionRepository.GetExpensesWithinAMonthInYearAsync(month, year);
-                var vouchers = await _voucherService.GetAllVouchersUsedInAMonthAsync(month, year);
                 List<TransactionDayResponse> dailyResponses = new();
 
                 var membershipCost = await _priceService.GetMembershipPriceAsync();
@@ -109,11 +106,8 @@ namespace StrateZone_Service.Implements
                 for (int i = 1; i <= dayInMonth; ++i)
                 {
                     decimal depositDay = deposits.Where(r => r.Amount != null && r.CreatedAt.Value.Day == i).Select(r => (decimal)r.Amount).Sum();
-                    decimal refundDay = refunds.Where(r => r.Amount != null && r.CreatedAt.Value.Day == i).Select(r => (decimal)r.Amount).Sum();
-                    decimal spendingDay = expenses.Where(r => r.CreatedAt.Day == i).Select(r => r.Amount).Sum();
                     decimal bookingDay = await _tablesAppointmentRepository.GetAllPaidTablesAppointmentWithinADayInYearAsync(i, month, year);
-                    decimal membershipDay = (decimal)((await _paymentService.GetMembershipPaymentsWithinADayInYearAsync(i, month, year)).Count() * membershipCost.Price1);
-                    decimal voucherDay = vouchers.Where(r => r.DayOfUsage.Value.Day == i).Select(r => r.Value).Sum();
+                    decimal membershipDay = (decimal)((await _paymentService.GetMembershipPaymentsWithinADayInYearAsync(i, month, year)) * membershipCost.Price1);
 
                     dailyResponses.Add(
                         new()
@@ -121,10 +115,10 @@ namespace StrateZone_Service.Implements
                             DayOfMonth = i,
                             Deposit = depositDay,
                             Booking = bookingDay,
-                            Refund = refundDay,
-                            Spending = spendingDay,
+                            Refund = 0,
+                            Spending = 0,
                             MemberShip = membershipDay,
-                            Voucher = voucherDay
+                            Voucher = 0
                         }
                     );
                 }

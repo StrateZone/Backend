@@ -33,7 +33,7 @@ namespace StrateZone_Service.Interfaces
         Task<TablesAppointmentRefundResponse> CalculateRefundAmountOnAppointmentCancellation(int userId, int tablesAppointmentId, DateTime CancelTime);
         Task<List<TablesAppointmentModel>> GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
         Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments();
-        Task<TablesAppointmentsMonthResponse> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
+        Task<int> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
         Task<int> GetNumberOfAllActiveTablesAppointmentByTableIdAsync(int tableId);
         Task<int> GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(int tableId);
         Task<int> GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(int tableId);

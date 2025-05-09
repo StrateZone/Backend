@@ -488,42 +488,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<ThreadMonthResponse> GetAllThreadsWithinAMonthInYearAsync(int month, int year)
+        public async Task<int> GetAllThreadsWithinAMonthInYearAsync(int month, int year)
         {
             try
             {
-                var allThreads = await _threadRepository.GetThreadsWithinMonthAsync(month, year);
-                List<ThreadDailyResponse> threadDailyResponses = new();
-
-                int dayInMonth = DateTime.DaysInMonth(year, month);
-                for (int i = 1; i <= dayInMonth; ++i)
-                {
-                    int created = allThreads.Where(ta => ta.CreatedAt.Value.Day == i).Count();
-
-                    int pending = allThreads.Where(ta => (ta.Status == ThreadStatus.pending || ta.Status == ThreadStatus.edit_pending) && ta.CreatedAt.Value.Day == i).Count();
-                    int published = allThreads.Where(ta => ta.Status == ThreadStatus.published && ta.CreatedAt.Value.Day == i).Count();
-                    int rejected = allThreads.Where(ta => ta.Status == ThreadStatus.rejected && ta.CreatedAt.Value.Day == i).Count();
-                    int deleted = allThreads.Where(ta => ta.Status == ThreadStatus.deleted && ta.CreatedAt.Value.Day == i).Count();
-                    int hidden = allThreads.Where(ta => ta.Status == ThreadStatus.hidden && ta.CreatedAt.Value.Day == i).Count();
-
-                    threadDailyResponses.Add(new()
-                    {
-                        DayOfMonth = i,
-                        ThreadsCreated = created,
-                        PendingCount = pending,
-                        RejectedCount = rejected,
-                        DeletedCount = deleted,
-                        HiddenCount = hidden,
-                        PublishedCount = published,
-                    });
-                }
-
-                return new()
-                {
-                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
-                    TotalDays = dayInMonth,
-                    ThreadDailyResponse = threadDailyResponses
-                };
+                return await _threadRepository.GetThreadsWithinMonthAsync(month, year);
             }
             catch (Exception ex)
             {

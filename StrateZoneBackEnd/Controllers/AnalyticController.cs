@@ -65,9 +65,9 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var result = await _paymentService.GetReportMembershipPaymentsWithinADayInYearAsync(month, year);
+                var result = await _paymentService.GetMembershipPaymentsWithinAMonthInYearAsync(month, year);
 
-                return result != null ? Ok(result) : NotFound("No membership purchased was found.");
+                return result > 0 ? Ok(result) : NotFound("No membership purchased was found.");
             }
             catch (Exception ex)
             {

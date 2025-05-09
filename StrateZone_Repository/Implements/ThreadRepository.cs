@@ -423,16 +423,17 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Thread>> GetThreadsWithinMonthAsync(int month, int year)
+        public async Task<int> GetThreadsWithinMonthAsync(int month, int year)
         {
             try
             {
                 return await _context.Threads.AsNoTracking()
                                         .Where(u => u.Status != PostgreEnums.ThreadStatus.drafted 
+                                            && u.Status != PostgreEnums.ThreadStatus.deleted
                                             && u.CreatedAt.HasValue
                                             && u.CreatedAt.Value.Year == year
                                             && u.CreatedAt.Value.Month == month)
-                                        .ToListAsync();
+                                        .CountAsync();
             }
             catch (Exception ex)
             {

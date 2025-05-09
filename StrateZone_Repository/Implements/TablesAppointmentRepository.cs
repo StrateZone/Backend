@@ -704,5 +704,22 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message, ex);
             }
         }
+
+        public async Task<int> GetCountAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year)
+        {
+            try
+            {
+                return await _context.TablesAppointments.AsNoTracking()
+                                        .Where(u => u.CreatedAt.HasValue
+                                            && u.CreatedAt.Value.Year == year
+                                            && u.CreatedAt.Value.Month == month
+                                            )
+                                        .CountAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

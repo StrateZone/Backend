@@ -268,7 +268,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Payment>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year)
+        public async Task<int> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year)
         {
             try
             {
@@ -287,7 +287,7 @@ namespace StrateZone_Repository.Implements
                                     { Value = month }
                                 )
                                 .AsNoTracking()
-                                .ToListAsync();
+                                .CountAsync();
 
                 return result;
             }
@@ -297,7 +297,7 @@ namespace StrateZone_Repository.Implements
             }
         }
 
-        public async Task<List<Payment>> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year)
+        public async Task<int> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year)
         {
             try
             {
@@ -320,7 +320,7 @@ namespace StrateZone_Repository.Implements
                                     { Value = day }
                                 )
                                 .AsNoTracking()
-                                .ToListAsync();
+                                .CountAsync();
 
                 return result;
             }

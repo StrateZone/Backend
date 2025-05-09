@@ -30,5 +30,6 @@ namespace StrateZone_Repository.Interfaces
         Task<List<TablesAppointment>> GetConfirmedTablesAppointmentsWithRejectedOrExpiredAppointmentRequests();
         Task<int> UpdateStatusForExpiredAndIncomingTablesAppointments();
         Task<List<TablesAppointment>> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
+        Task<int> GetCountAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
     }
 }

@@ -18,8 +18,8 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<PaymentModel>> GetPaymentsByUserIdAsync(int id, StrateZone_Repository.Parameters.PaymentParameters parameters);
         Task<PaymentModel> UpdatePaymentAsync(PaymentModel payment, int id);
         Task<ApiResponse<UserResponse>> CreateMembershipPaymentAsync(int userId);
-        Task<List<PaymentModel>> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year);
-        Task<List<PaymentModel>> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year);
-        Task<MembershipMonthResponse> GetReportMembershipPaymentsWithinADayInYearAsync(int month, int year);
+        Task<int> GetMembershipPaymentsWithinAMonthInYearAsync(int month, int year);
+        Task<int> GetMembershipPaymentsWithinADayInYearAsync(int day, int month, int year);
+        Task<int> GetReportMembershipPaymentsWithinADayInYearAsync(int month, int year);
     }
 }
