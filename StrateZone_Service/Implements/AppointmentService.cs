@@ -353,7 +353,7 @@ namespace StrateZone_Service.Implements
 
                 await _transactionRepository.SaveTransaction(newAdminTransaction);
 
-                if(ownerPayment != null && ownerPayment.PaymentStatus == PaymentStatus.paid.ToString())
+                if (ownerPayment != null && ownerPayment.PaymentStatus == PaymentStatus.paid.ToString())
                 {
                     var fromUserWallet = await _walletService.GetWalletByUserIdAsync(userId);
                     fromUserWallet.Balance += tableAppointment.Price;
@@ -390,6 +390,14 @@ namespace StrateZone_Service.Implements
                 tableAppointment.Status = AppointmentStatus.refunded.ToString();
                 var model = _mapper.Map<TablesAppointmentModel>(tableAppointment);
                 var updatedTableAppointment = await _tablesAppointmentService.UpdateTablesAppointmentAsync(model, model.Id);
+
+                _ = Task.Run(async () => 
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
+
+                    await service.CancelAppointmentRequests(tableAppointmentId);
+                });
 
                 return _mapper.Map<TablesAppointmentModel>(updatedTableAppointment);
             }
