@@ -445,7 +445,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        private async Task CancelAppointmentRequests(int tablesAppointmentId)
+        public async Task CancelAppointmentRequests(int tablesAppointmentId)
         {
             await _requestRepository.CancelAllSentRequestsFromTablesAppointmentIdAsync(tablesAppointmentId);
         }
