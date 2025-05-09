@@ -192,6 +192,7 @@ namespace StrateZone_Repository.Implements
                                             && t.CreatedAt.Value.Month == month
                                             && t.CreatedAt.Value.Year == year
                                     )
+                                    .Select(t => new Transaction { Amount = t.Amount, CreatedAt = t.CreatedAt })
                                     .ToListAsync();
             }
             catch (Exception ex)
