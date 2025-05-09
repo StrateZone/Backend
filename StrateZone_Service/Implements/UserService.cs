@@ -433,26 +433,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<UserMonthResponse> GetUsersJoinedInAMonth(int month, int year)
+        public async Task<int> GetUsersJoinedInAMonth(int month, int year)
         {
             try
             {
-                List<UserDailyResponse> userDailyResponses = new();
-
-                int dayInMonth = DateTime.DaysInMonth(year, month);
-                for (int i = 1; i <= dayInMonth; ++i)
-                {
-                    int userJoined = (await _userRepository.GetNewUserWithinDayAsync(i, month, year)).Count();
-
-                    userDailyResponses.Add(new() { DayOfMonth = i, UsersJoined = userJoined });
-                }
-
-                return new()
-                {
-                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month),
-                    TotalDays = dayInMonth,
-                    UserDailyResponses = userDailyResponses
-                };
+                return await _userRepository.GetNewUserWithinMonthAsync(month, year);
             }
             catch (Exception ex)
             {
