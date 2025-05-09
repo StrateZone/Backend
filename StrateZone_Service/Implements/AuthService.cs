@@ -24,6 +24,7 @@ namespace StrateZone_Service.Implements
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
+        private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
         private readonly IWalletRepository _walletRepository;
 
@@ -34,13 +35,14 @@ namespace StrateZone_Service.Implements
         private static readonly string allChars = lowercase + uppercase + digits + specialChars;
         private static readonly Random random = new Random();
 
-        public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService, IMapper mapper, IWalletRepository walletRepository)
+        public AuthService(IUserRepository userRepository, ITokenService tokenService, IEmailService emailService, IMapper mapper, IWalletRepository walletRepository, ISystemService systemService)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
             _mapper = mapper;
             _walletRepository = walletRepository;
+            _systemService = systemService;
         }
 
         public static string GenerateSecureString(int length)
@@ -93,9 +95,10 @@ namespace StrateZone_Service.Implements
                 //var newAccessToken = _tokenService.GenerateAccessToken(user);
                 var newRefreshToken = _tokenService.GenerateRefreshToken();
                 string otp = GenerateOTP();
-
+                int otpDurationInMinutes = await _systemService.GetVerificationOTPDuration(1);
+                
                 user.OTP = otp;
-                user.OTPExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddSeconds(5 * 60); // OTP valid for 5 minutes
+                user.OTPExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddMinutes(otpDurationInMinutes); // OTP valid for 5 minutes
 
                 user.RefreshToken = newRefreshToken;
                 user.RefreshTokenExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddDays(7);
@@ -110,7 +113,7 @@ namespace StrateZone_Service.Implements
                     {
                         ToEmail = email,
                         Subject = "Account Verification",
-                        Content = $"<p>Mã xác thực của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>Mã này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
+                        Content = $"<p>Mã xác thực của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>Mã này có hiệu lực trong vòng {otpDurationInMinutes} phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
                     };
                 }
                 else
@@ -119,7 +122,7 @@ namespace StrateZone_Service.Implements
                     {
                         ToEmail = email,
                         Subject = "OTP Verification",
-                        Content = $"<p>Mã xác thực của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>Mã này có hiệu lực trong vòng 5 phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
+                        Content = $"<p>Mã xác thực của bạn là:</p><h1><b>{updatedUser.OTP}</b></h1><p>Mã này có hiệu lực trong vòng {otpDurationInMinutes} phút.<br>Vui lòng không chia sẻ mã này cho bất kì ai. Nếu mã này không phải do bạn yêu cầu, vui lòng bỏ qua.</p>"
                     };
                 }
 

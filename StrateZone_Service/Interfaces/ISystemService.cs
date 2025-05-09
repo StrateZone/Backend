@@ -41,5 +41,6 @@ namespace StrateZone_Service.Interfaces
         Task<float> GetPercentageRefundIfNot100(int id);
         Task<float> GetPercentageTimerangeUntilRequestExpiration(int id);
         Task<int> GetMaxUsersInvitedToTable(int id);
+        Task<int> GetVerificationOTPDuration(int id);
     }
 }

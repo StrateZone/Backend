@@ -448,5 +448,14 @@ namespace StrateZone_Repository.Implements
 
             return system.PercentageTimeRange_UntilRequestExpiration;
         }
+
+        public async Task<int> GetVerificationOTPDuration(int id)
+        {
+            var system = await _context.Systems
+                            .AsNoTracking()
+                            .SingleOrDefaultAsync(s => s.Id == id);
+
+            return system.Verification_OTP_Duration;
+        }
     }
 }

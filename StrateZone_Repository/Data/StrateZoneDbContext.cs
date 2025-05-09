@@ -607,6 +607,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.PercentageTimeRange_UntilRequestExpiration)
                     .HasColumnName("percentage_timerange_untilrequestexpiration");
 
+            entity.Property(e => e.Verification_OTP_Duration)
+                    .HasColumnName("verification_otp_duration_inminutes");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");

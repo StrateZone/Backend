@@ -306,6 +306,11 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<int> GetVerificationOTPDuration(int id)
+        {
+            return await _systemRepository.GetVerificationOTPDuration(id);
+        }
+
         public async Task<AbnormalDayModel> UpdateAbnormalDayAsync(AbnormalDayModel abnormalDayModel, int id)
         {
             try
