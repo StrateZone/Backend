@@ -43,6 +43,8 @@ namespace StrateZone_Service.BusinessModels
 
         public float PercentageTimeRange_UntilRequestExpiration { get; set; }
 
+        public int Verification_OTP_Duration { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }

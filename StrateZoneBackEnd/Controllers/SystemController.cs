@@ -69,6 +69,21 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("{id}/otp-duration")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetOTPDuration(int id)
+        {
+            try
+            {
+                var result = await _systemService.GetVerificationOTPDuration(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}/close-hour/date")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCloseHour(int id, DateOnly date)
