@@ -280,7 +280,12 @@ namespace StrateZone_Service.Implements
                 if (find.Status == UserStatus.Suspended.ToString()) throw new Exception("This account is already suspended");
 
                 var result = await _userRepository.UpdateUserAsync(new() 
-                    { UserRole = (UserRole) Enum.Parse(typeof(UserRole), find.UserRole), UserLabel = UserLabel.none, Status = UserStatus.Suspended }, id);
+                    { 
+                        RefreshTokenExpiry = DateTime.UtcNow.AddDays(-1), 
+                        RefreshToken = null,
+                        UserRole = (UserRole) Enum.Parse(typeof(UserRole), find.UserRole), 
+                        UserLabel = UserLabel.none, Status = UserStatus.Suspended 
+                    }, id);
 
                 return _mapper.Map<UserResponse>(result);
             }
@@ -509,6 +514,18 @@ namespace StrateZone_Service.Implements
             {
                 var results = await GetUserByIdAsync(id);
                 return ((int) results.Points, (int) results.ContributionPoints);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<string> GetUserRole(int id)
+        {
+            try
+            {
+                return await _userRepository.GetUserRole(id);
             }
             catch (Exception ex)
             {

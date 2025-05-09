@@ -751,5 +751,11 @@ namespace StrateZone_Repository.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<string> GetUserRole(int id)
+        {
+            var result = await _context.Users.AsNoTracking().Where(u => u.UserId == id).Select(u => u.UserRole).FirstOrDefaultAsync();
+            return result.ToString();
+        }
     }
 }

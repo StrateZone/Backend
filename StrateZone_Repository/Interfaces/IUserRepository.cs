@@ -29,5 +29,6 @@ namespace StrateZone_Repository.Interfaces
         Task<List<User>> GetNewUserWithinDayAsync(int day, int month, int year);
         Task AssignTopContributorsAsync();
         Task UpdateExpiredMemberships();
+        Task<string> GetUserRole(int id);
     }
 }

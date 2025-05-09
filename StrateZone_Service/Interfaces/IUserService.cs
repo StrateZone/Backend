@@ -37,5 +37,6 @@ namespace StrateZone_Service.Interfaces
         Task AssignTopContributorsAsync();
         Task UpdateExpiredMemberships();
         Task<(int, int)> GetUserPointsAsync(int id);
+        Task<string> GetUserRole(int id);
     }
 }

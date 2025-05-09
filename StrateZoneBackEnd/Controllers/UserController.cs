@@ -169,6 +169,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("{id}/role")]
+        public async Task<IActionResult> GetRoleById(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserRole(id);
+                return user != null ? Ok(user) : NotFound("No user with this ID was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("phone/{phone}")]
         public async Task<IActionResult> GetByPhone(string phone)
         {
