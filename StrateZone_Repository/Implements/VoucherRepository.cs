@@ -178,7 +178,16 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
-                return await _context.Vouchers.AsNoTracking().Where(v => voucherIds.Contains(v.VoucherId)).ToListAsync();
+                var vouchers = await _context.Vouchers
+                    .AsNoTracking()
+                    .Where(v => voucherIds.Contains(v.VoucherId))
+                    .ToListAsync();
+
+                var foundIds = vouchers.Select(v => v.VoucherId).ToHashSet();
+                if (foundIds.Count != voucherIds.Count || !foundIds.SetEquals(voucherIds))
+                    throw new Exception("One or more vouchers do not exist");
+
+                return vouchers;
             }
             catch (Exception ex)
             {

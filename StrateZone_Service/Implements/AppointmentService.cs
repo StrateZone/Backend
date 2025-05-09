@@ -1,8 +1,5 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using StrateZone_Repository.Pagination;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StrateZone_Repository.Entities;
 using StrateZone_Repository.Implements;
@@ -13,12 +10,6 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 using static StrateZone_Repository.Parameters.PostgreEnums;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,6 +28,7 @@ namespace StrateZone_Service.Implements
         private readonly IMapper _mapper;
         private readonly ScheduleTimeValidator _scheduleTimeValidator;
         private readonly ISystemService _systemService;
+        private readonly IVoucherService _voucherService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public AppointmentService(IAppointmentRepository appointmentRepository, 
@@ -50,6 +42,7 @@ namespace StrateZone_Service.Implements
             ScheduleTimeValidator scheduleTimeValidator, 
             INotificationService notificationService,
             ISystemService systemService,
+            IVoucherService voucherService,
             IServiceScopeFactory serviceScopeFactory)
         {
             _appointmentRepository = appointmentRepository;
@@ -64,6 +57,7 @@ namespace StrateZone_Service.Implements
             _notificationService = notificationService;
             _systemService = systemService;
             _serviceScopeFactory = serviceScopeFactory;
+            _voucherService = voucherService;
         }
 
         public async Task<PagedList<AppointmentResponse>> GetAppointmentsAsync(AppointmentParameters parameters)
@@ -225,6 +219,15 @@ namespace StrateZone_Service.Implements
                 if (request.TablesAppointmentRequests.Any(ta => ta.InvitedUsers.Count > maxInvitedToTable))
                     throw new Exception($"Một bàn chỉ có thể mời tối đa {maxInvitedToTable} người");
 
+                List<int> vouchers = request.TablesAppointmentRequests
+                    .Where(ta => ta.VoucherId != null)
+                    .Select(ta => (int)ta.VoucherId).ToList();
+
+                if (vouchers.Count > 0)
+                {
+                    await _voucherService.UseVouchersAsync(vouchers, request.UserId);
+                }
+
                 AppointmentModel appointmentModel = new AppointmentModel()
                 {
                     UserId = request.UserId,
@@ -285,16 +288,6 @@ namespace StrateZone_Service.Implements
                     }
 
                     await service.CreateAppointmentRequestsAsync(appointmentRequests);
-
-                    List<int> vouchers = request.TablesAppointmentRequests
-                        .Where(ta => ta.VoucherId != null)
-                        .Select(ta => (int)ta.VoucherId).ToList();
-
-                    if (vouchers.Count > 0)
-                    {
-                        var voucherService = scope.ServiceProvider.GetRequiredService<IVoucherService>();
-                        await voucherService.UseVouchersAsync(vouchers, request.UserId);
-                    }
                 });
 
                 return result;
