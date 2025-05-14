@@ -115,10 +115,7 @@ namespace StrateZone_Service.Implements
                             DayOfMonth = i,
                             Deposit = depositDay,
                             Booking = bookingDay,
-                            Refund = 0,
-                            Spending = 0,
                             MemberShip = membershipDay,
-                            Voucher = 0
                         }
                     );
                 }

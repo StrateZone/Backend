@@ -310,6 +310,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.TotalPrice)
                 .HasColumnName("estimated_price");
 
+            entity.Property(e => e.IsPaid)
+                .HasColumnName("is_paid");
+
             entity.Property(e => e.FromUser).HasColumnName("from_user");
             entity.Property(e => e.ToUser).HasColumnName("to_user");
             entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
@@ -663,6 +666,8 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.EndTime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("end_time");
+
+            entity.Property(e => e.PaidForOpponent).HasColumnName("paid_for_opponent");
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),

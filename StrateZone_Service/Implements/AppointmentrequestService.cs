@@ -148,6 +148,7 @@ namespace StrateZone_Service.Implements
                         EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
                         ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddHours(timeUntilRequestExpiration),
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        IsPaid = request.IsPaid,
                     };
 
                     mappedRequests.Add(_mapper.Map<Appointmentrequest>(model));

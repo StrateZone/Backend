@@ -31,5 +31,7 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public decimal TotalPrice { get; set; }
+
+        public bool IsPaid { get; set; }
     }
 }

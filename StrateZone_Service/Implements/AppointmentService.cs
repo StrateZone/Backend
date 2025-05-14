@@ -254,6 +254,7 @@ namespace StrateZone_Service.Implements
                                 ? AppointmentStatus.incoming.ToString()
                                 : AppointmentStatus.confirmed.ToString(),
                         Price = tablesAppointmentRequest.Price,
+                        PaidForOpponent = tablesAppointmentRequest.PaidForOpponent,
                     };
 
                     result.TablesAppointments.Add(tablesAppointmentModel);
@@ -281,6 +282,7 @@ namespace StrateZone_Service.Implements
                                 EndTime = tableAppointment.EndTime,
                                 TableId = tableAppointment.TableId,
                                 AppointmentId = result.AppointmentId,
+                                IsPaid = tableAppointment.PaidForOpponent,
                             };
 
                             appointmentRequests.Add(newAR);

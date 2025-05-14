@@ -306,6 +306,10 @@ namespace StrateZone_Service.Implements
                 {
                     await HandleInvitedUserRefund(tablesAppointment, userId, (int) refundCalculation.InvitedUserId);
                 }
+                else if (refundCalculation.RefundStatus == RefundStatus.no_refund_while_refund_for_owner)
+                {
+                    await HandleOwnerRefund(tablesAppointment, userId, (int)refundCalculation.InvitedUserId);
+                }
                 else
                 {
                     await HandleUserRefund(tablesAppointment, userId, refundCalculation.RefundAmount);
@@ -433,6 +437,62 @@ namespace StrateZone_Service.Implements
                         Title = $"{cancellingUser.Username} đã hủy đơn đặt bàn!",
                         Content = $"{cancellingUser.Username} đã hủy đơn đặt bàn mà bạn đã chấp nhận tham gia trước đó. {appointment.Price} VND đã tự động được hoàn về ví của bạn!",
                         Type = NotificationType.appointment_request_from
+                    };
+
+                    await service.CreateNotificationsAsync(new() { notificationToInvitedUser, notificationToCancellingUser });
+                });
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        private async Task HandleOwnerRefund(TablesAppointmentModel appointment, int cancellingUserId, int ownerId)
+        {
+            try
+            {
+                await _walletService.DepositWalletByUserIdAsync((int)appointment.Price, ownerId);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITransactionService>();
+
+                    var transaction = new TransactionModel
+                    {
+                        Amount = appointment.Price,
+                        Content = $"Hoàn tiền {appointment.Price} VND cho đơn ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        OfUser = ownerId,
+                        TransactionType = TransactionType.refund,
+                    };
+
+                    await service.SaveTransaction(transaction);
+                });
+
+                var cancellingUser = await _userService.GetUserByIdAsync(cancellingUserId);
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    var notificationToCancellingUser = new NotificationRequest
+                    {
+                        ToUser = cancellingUserId,
+                        Title = "Hủy đơn đặt bàn thành công!",
+                        Content = $"Bạn đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}.",
+                        Type = NotificationType.appointment_request_from
+                    };
+
+                    var notificationToInvitedUser = new NotificationRequest
+                    {
+                        ToUser = ownerId,
+                        Title = $"{cancellingUser.Username} đã hủy đơn đặt bàn!",
+                        Content = $"{cancellingUser.Username} đã hủy đơn đặt bàn mà bạn đã mời họ trước đó. {appointment.Price} VND đã tự động được hoàn về ví của bạn!",
+                        Type = NotificationType.appointment_request_to
                     };
 
                     await service.CreateNotificationsAsync(new() { notificationToInvitedUser, notificationToCancellingUser });
@@ -610,16 +670,31 @@ namespace StrateZone_Service.Implements
 
             var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
             var paymentForUser = bookingPayments.SingleOrDefault(p => p.UserId == userId);
-            if (paymentForUser == null || paymentForUser.PaymentStatus == PaymentStatus.unpaid.ToString())
+            if (paymentForUser == null && tablesAppointment.PaidForOpponent)
+            {
+                return new TablesAppointmentRefundResponse()
+                {
+                    TablesAppointmentModel = model,
+                    RefundAmount = 0,
+                    RefundStatus = RefundStatus.no_refund_while_refund_for_owner,
+                    Message = "Hoàn tiền cho chủ đơn.",
+                    CancelUserId = userId,
+                    InvitedUserId = bookingPayments.FirstOrDefault()?.UserId,
+                    NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
+                    CancellationTime = CancelTime,
+                    Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
+                };
+            }
+            else if (paymentForUser == null)
             {
                 return new TablesAppointmentRefundResponse()
                 {
                     TablesAppointmentModel = model,
                     RefundAmount = 0,
                     RefundStatus = RefundStatus.no_refund,
-                    Message = "Không được hoàn tiền. Lí do: Đơn đặt bàn này chưa thanh toán.",
-                    CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
-                    InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
+                    Message = "Không hoàn tiền do đơn chưa được thanh toán.",
+                    CancelUserId = userId,
+                    InvitedUserId = bookingPayments.FirstOrDefault()?.UserId,
                     NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                     CancellationTime = CancelTime,
                     Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,

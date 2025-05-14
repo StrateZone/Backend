@@ -23,6 +23,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         public int? VoucherId { get; set; } = null;
 
+        public bool PaidForOpponent { get; set; } = false;
+
         [Required]
         public List<int> InvitedUsers { get; set; } = new();
 

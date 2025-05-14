@@ -185,8 +185,8 @@ namespace StrateZone_Repository.Implements
                 createCmd.Transaction = transaction;
 
                 createCmd.CommandText = @"
-                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, estimated_price, status, start_time, end_time, expire_at, created_at) 
-                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @estimated_price, @status::request_status, @start_time, @end_time, @expire_at, @created_at)
+                    INSERT INTO appointment_requests (from_user, to_user, table_id, appointment_id, estimated_price, status, start_time, end_time, expire_at, created_at, is_paid) 
+                    VALUES (@from_user, @to_user, @table_id, @appointment_id, @estimated_price, @status::request_status, @start_time, @end_time, @expire_at, @created_at, @is_paid)
                     RETURNING id;"
                 ;
 
@@ -205,6 +205,7 @@ namespace StrateZone_Repository.Implements
                     createCmd.Parameters.Add(new NpgsqlParameter("@end_time", request.EndTime));
                     createCmd.Parameters.Add(new NpgsqlParameter("@expire_at", request.ExpireAt));
                     createCmd.Parameters.Add(new NpgsqlParameter("@created_at", request.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
+                    createCmd.Parameters.Add(new NpgsqlParameter("@is_paid", request.IsPaid));
 
                     var newId = await createCmd.ExecuteScalarAsync();
                     createdIds.Add(Convert.ToInt32(newId));
@@ -288,6 +289,9 @@ namespace StrateZone_Repository.Implements
                     sql.Append("created_at = @created_at, ");
                     parameters.Add(new NpgsqlParameter("@created_at", appointmentRequest.CreatedAt.Value));
                 }
+
+                sql.Append("is_paid = @is_paid, ");
+                parameters.Add(new NpgsqlParameter("@is_paid", appointmentRequest.IsPaid));
 
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(" WHERE id = @id");

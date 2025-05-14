@@ -269,94 +269,140 @@ namespace StrateZone_Service.Implements
                     };
                 }
 
-                var requestAcceptor = await _userRepository.GetUserByIdAsync(appointmentrequestModel.ToUser);
-                var requestSender = await _userRepository.GetUserByIdAsync(appointmentrequestModel.FromUser);
-                var userWallet = await _walletRepository.GetWalletByUserIdAsync(requestAcceptor.UserId);
-
-                if (userWallet.Balance < tableAppointment.Price)
+                if (tableAppointment.PaidForOpponent)
                 {
+                    var requestAcceptor = await _userRepository.GetUserByIdAsync(appointmentrequestModel.ToUser);
+                    var requestSender = await _userRepository.GetUserByIdAsync(appointmentrequestModel.FromUser);
+
+                    await _appointmentrequestRepository.AcceptAppointmentrequestAsync(appointment_request.Id);
+
+                    _ = Task.Run(async () =>
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        NotificationRequest notificationToUser = new()
+                        {
+                            ToUser = appointmentrequestModel.ToUser,
+                            Title = $"Bạn đã chấp nhận lời mời từ {requestSender.Username}!",
+                            Content = $"Bạn đã chấp nhận lời mời chơi cờ đến từ {requestSender.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                            $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
+                            $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
+                            Type = NotificationType.appointment_request_from
+                        };
+
+                        NotificationRequest notificationFromUser = new()
+                        {
+                            ToUser = appointmentrequestModel.FromUser,
+                            Title = $"{requestAcceptor.Username} đã chấp nhận lời mời chơi cờ của bạn!",
+                            Content = $"{requestAcceptor.Username} đã chấp nhận lời mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                            $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
+                            $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
+                            Type = NotificationType.appointment_request_to
+                        };
+
+                        await service.CreateNotificationsAsync([notificationFromUser, notificationToUser]);
+                    });
+
                     return new ApiResponse<AppointmentrequestModel>
                     {
-                        Success = false,
-                        StatusCode = 500,
-                        Message = "Balance is not enough",
+                        Success = true,
+                        StatusCode = 201,
+                        Message = "Request accepted",
                         Data = null
                     };
                 }
-
-                await _appointmentrequestRepository.AcceptAppointmentrequestAsync(appointment_request.Id);
-                await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
-
-                var invitedUserPayment = new Payment()
+                else
                 {
-                    UserId = appointmentrequestModel.ToUser,
-                    TablesAppointmentId = tableAppointment.Id,
-                    PaymentStatus = PostgreEnums.PaymentStatus.paid,
-                    Description = $"Thanh toán cho bàn {tableAppointment.Id}"
-                                + (requestSender != null ? $"(chơi chung với {requestSender.Username})" : ""),
-                    PaymentType = PostgreEnums.PaymentType.appointment
-                };
+                    var requestAcceptor = await _userRepository.GetUserByIdAsync(appointmentrequestModel.ToUser);
+                    var requestSender = await _userRepository.GetUserByIdAsync(appointmentrequestModel.FromUser);
+                    var userWallet = await _walletRepository.GetWalletByUserIdAsync(requestAcceptor.UserId);
 
-                await _paymentRepository.CreatePaymentAsync(invitedUserPayment);
-
-                var invitorUserPayment = (await GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id))
-                                        .SingleOrDefault(p => p.UserId == requestSender.UserId);
-
-                invitorUserPayment.Description = $"Thanh toán cho bàn {tableAppointment.Id}"
-                                + (requestAcceptor != null ? $"(chơi chung với {requestAcceptor.Username})" : "");
-                await UpdatePaymentAsync(invitorUserPayment, invitorUserPayment.Id);
-
-                _ = Task.Run(async () =>
-                {
-                    using var scope = _serviceScopeFactory.CreateScope();
-                    var repo = scope.ServiceProvider.GetRequiredService<ITransactionRepository>();
-
-                    var newTransaction = new StrateZone_Repository.Entities.Transaction
+                    if (userWallet.Balance < tableAppointment.Price)
                     {
-                        OfUser = appointmentrequestModel.ToUser,
-                        Amount = tableAppointment.Price,
-                        Content = "Thanh toán cho đơn mời " + tableAppointment.AppointmentId + ": " + tableAppointment.Price + " VND",
-                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
-                        TransactionType = PostgreEnums.TransactionType.payment,
-                    };
-                    await repo.SaveTransaction(newTransaction);
-                });
+                        return new ApiResponse<AppointmentrequestModel>
+                        {
+                            Success = false,
+                            StatusCode = 500,
+                            Message = "Balance is not enough",
+                            Data = null
+                        };
+                    }
 
-                _ = Task.Run(async () =>
-                {
-                    using var scope = _serviceScopeFactory.CreateScope();
-                    var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    await _appointmentrequestRepository.AcceptAppointmentrequestAsync(appointment_request.Id);
+                    await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
 
-                    NotificationRequest notificationToUser = new()
+                    var invitedUserPayment = new Payment()
                     {
-                        ToUser = appointmentrequestModel.ToUser,
-                        Title = $"Bạn đã hoàn thành thanh toán đơn mời của {requestSender.Username}!",
-                        Content = $"Bạn đã hoàn tất thanh toán cho đơn mời đến từ {requestSender.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
-                        $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
-                        $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
-                        Type = NotificationType.appointment_request_from
+                        UserId = appointmentrequestModel.ToUser,
+                        TablesAppointmentId = tableAppointment.Id,
+                        PaymentStatus = PostgreEnums.PaymentStatus.paid,
+                        Description = $"Thanh toán cho bàn {tableAppointment.Id}"
+                                    + (requestSender != null ? $"(chơi chung với {requestSender.Username})" : ""),
+                        PaymentType = PostgreEnums.PaymentType.appointment
                     };
 
-                    NotificationRequest notificationFromUser = new()
+                    await _paymentRepository.CreatePaymentAsync(invitedUserPayment);
+
+                    var invitorUserPayment = (await GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id))
+                                            .SingleOrDefault(p => p.UserId == requestSender.UserId);
+
+                    invitorUserPayment.Description = $"Thanh toán cho bàn {tableAppointment.Id}"
+                                    + (requestAcceptor != null ? $"(chơi chung với {requestAcceptor.Username})" : "");
+                    await UpdatePaymentAsync(invitorUserPayment, invitorUserPayment.Id);
+
+                    _ = Task.Run(async () =>
                     {
-                        ToUser = appointmentrequestModel.FromUser,
-                        Title = $"{requestAcceptor.Username} đã chấp nhận lời mời chơi cờ của bạn!",
-                        Content = $"{requestAcceptor.Username} đã chấp nhận & hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
-                        $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
-                        $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
-                        Type = NotificationType.appointment_request_to
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var repo = scope.ServiceProvider.GetRequiredService<ITransactionRepository>();
+
+                        var newTransaction = new StrateZone_Repository.Entities.Transaction
+                        {
+                            OfUser = appointmentrequestModel.ToUser,
+                            Amount = tableAppointment.Price,
+                            Content = "Thanh toán cho đơn mời " + tableAppointment.AppointmentId + ": " + tableAppointment.Price + " VND",
+                            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                            TransactionType = PostgreEnums.TransactionType.payment,
+                        };
+                        await repo.SaveTransaction(newTransaction);
+                    });
+
+                    _ = Task.Run(async () =>
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                        NotificationRequest notificationToUser = new()
+                        {
+                            ToUser = appointmentrequestModel.ToUser,
+                            Title = $"Bạn đã hoàn thành thanh toán đơn mời của {requestSender.Username}!",
+                            Content = $"Bạn đã hoàn tất thanh toán cho đơn mời đến từ {requestSender.Username} (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                            $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
+                            $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
+                            Type = NotificationType.appointment_request_from
+                        };
+
+                        NotificationRequest notificationFromUser = new()
+                        {
+                            ToUser = appointmentrequestModel.FromUser,
+                            Title = $"{requestAcceptor.Username} đã chấp nhận lời mời chơi cờ của bạn!",
+                            Content = $"{requestAcceptor.Username} đã chấp nhận & hoàn tất thanh toán cho đơn mời của bạn gửi đến họ (đơn #{tableAppointment.AppointmentId}, bàn {tableAppointment.TableId}). " +
+                            $"Lịch hẹn của hai bạn sẽ diễn ra vào lúc {tableAppointment.ScheduleTime.TimeOfDay}, ngày {DateOnly.FromDateTime(tableAppointment.ScheduleTime)}. " +
+                            $"Chúc hai bạn có một trải nghiệm chơi cờ vui vẻ!",
+                            Type = NotificationType.appointment_request_to
+                        };
+
+                        await service.CreateNotificationsAsync([notificationFromUser, notificationToUser]);
+                    });
+
+                    return new ApiResponse<AppointmentrequestModel>
+                    {
+                        Success = true,
+                        StatusCode = 201,
+                        Message = "Payment success",
+                        Data = null
                     };
-
-                    await service.CreateNotificationsAsync([notificationFromUser, notificationToUser]);
-                });
-
-                return new ApiResponse<AppointmentrequestModel>
-                {
-                    Success = true,
-                    StatusCode = 201,
-                    Message = "Payment success",
-                    Data = null
-                };
+                }
             }
             catch (Exception ex)
             {

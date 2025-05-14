@@ -37,6 +37,8 @@ namespace StrateZone_Service.BusinessModels
 
         public DateTime? CreatedAt { get; set; }
 
+        public bool IsPaid { get; set; }
+
         public virtual UserModel FromUserNavigation { get; set; } = null!;
 
         public virtual UserModel ToUserNavigation { get; set; } = null!;
