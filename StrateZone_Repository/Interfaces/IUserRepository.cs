@@ -26,6 +26,7 @@ namespace StrateZone_Repository.Interfaces
         Task<User> EditUserProfileAsync(User updatedUser, int id);
         Task<User> FindUserAcceptedToJoinTablesAppointment(TablesAppointment tablesAppointment);
         Task<User> GetUserByAppointmentIdAsync(int id);
+        Task<User> GetPaidAcceptedUserByTablesAppointmentIdAsync(int id);
         Task<List<User>> GetNewUserWithinDayAsync(int day, int month, int year);
         Task<int> GetNewUserWithinMonthAsync(int month, int year);
         Task AssignTopContributorsAsync();

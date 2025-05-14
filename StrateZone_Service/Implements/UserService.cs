@@ -493,6 +493,19 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<UserModel> GetAcceptedUserByTablesAppointmentIdAsync(int id)
+        {
+            try
+            {
+                var results = await _userRepository.GetPaidAcceptedUserByTablesAppointmentIdAsync(id);
+                return _mapper.Map<UserModel>(results);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<(int, int)> GetUserPointsAsync(int id)
         {
             try

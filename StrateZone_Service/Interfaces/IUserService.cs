@@ -34,6 +34,7 @@ namespace StrateZone_Service.Interfaces
         Task<UserResponse> ChangePasswordAsync(int userId, string oldPassword, string newPassword, string confirmPassword);
         Task<UserResponse> ForgotPasswordAsync(int userId, string newPassword, string confirmPassword);
         Task<UserModel> GetUserByAppointmentIdAsync(int id);
+        Task<UserModel> GetAcceptedUserByTablesAppointmentIdAsync(int id);
         Task AssignTopContributorsAsync();
         Task UpdateExpiredMemberships();
         Task<(int, int)> GetUserPointsAsync(int id);

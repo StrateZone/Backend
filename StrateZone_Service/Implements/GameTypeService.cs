@@ -142,7 +142,12 @@ namespace StrateZone_Service.Implements
                     foreach (var tablesAppointment in tablesAppointments)
                     {
                         var user = await userService.GetUserByAppointmentIdAsync((int)tablesAppointment.AppointmentId);
-                        await tablesAppointmentService.ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointment.Id, user.UserId);
+                        var invitedUser = await userService.GetAcceptedUserByTablesAppointmentIdAsync(tablesAppointment.Id);
+
+                        if (invitedUser == null)
+                            await tablesAppointmentService.ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointment.Id, user.UserId);
+                        else
+                            await tablesAppointmentService.ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointment.Id, user.UserId, invitedUser.UserId);
                     }
                 });
 

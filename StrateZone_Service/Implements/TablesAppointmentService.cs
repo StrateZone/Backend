@@ -575,6 +575,11 @@ namespace StrateZone_Service.Implements
 
         public async Task<TablesAppointmentModel> ForceCancelTablesAppointmentDueToTableBecomesOFS(int tablesAppointmentId, int userId)
         {
+            return await ForceCancelTablesAppointmentDueToTableBecomesOFS(tablesAppointmentId, userId, null);
+        }
+
+        public async Task<TablesAppointmentModel> ForceCancelTablesAppointmentDueToTableBecomesOFS(int tablesAppointmentId, int userId, int? user2Id)
+        {
             try
             {
                 var tablesAppointment = await GetByIdAsync(tablesAppointmentId);
@@ -591,6 +596,7 @@ namespace StrateZone_Service.Implements
                 };
 
                 await _walletService.DepositWalletByUserIdAsync((int)refundAmount, userId);
+                if (user2Id != null) await _walletService.DepositWalletByUserIdAsync((int)refundAmount, (int) user2Id);
 
                 _ = Task.Run(async () =>
                 {
@@ -618,6 +624,31 @@ namespace StrateZone_Service.Implements
                     };
 
                     await service.SaveTransaction(system_transaction);
+
+                    if (user2Id != null)
+                    {
+                        var transaction2 = new TransactionModel
+                        {
+                            Amount = refundAmount,
+                            Content = $"Hoàn tiền {refundAmount} VND cho đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId} do bàn đã bị cho ngưng hoạt động.",
+                            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                            OfUser = user2Id,
+                            TransactionType = TransactionType.refund,
+                        };
+
+                        await service.SaveTransaction(transaction2);
+
+                        var system_transaction2 = new TransactionModel
+                        {
+                            Amount = refundAmount,
+                            Content = $"Hoàn tiền cho người dùng có ID {user2Id}: {refundAmount} VND, đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId} do bàn đã bị cho ngưng hoạt động.",
+                            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                            OfUser = null,
+                            TransactionType = TransactionType.refund,
+                        };
+
+                        await service.SaveTransaction(system_transaction2);
+                    }
                 });
 
                 _ = Task.Run(async () =>
@@ -635,6 +666,20 @@ namespace StrateZone_Service.Implements
                     };
 
                     await service.CreateNotificationAsync(notification);
+
+                    if (user2Id != null)
+                    {
+                        var notification2 = new NotificationRequest
+                        {
+                            ToUser = (int)user2Id,
+                            Title = "Bàn của bạn đã được tự động hủy!",
+                            Content = $"Hệ thống đã tự động hủy đơn đặt ở bàn số {tablesAppointment.TableId}, đơn #{tablesAppointment.AppointmentId} do bàn này đã bị cho ngưng hoạt động. " +
+                                $"{refundAmount} VND đã được hoàn về ví của bạn!",
+                            Type = NotificationType.tables_appointment
+                        };
+
+                        await service.CreateNotificationAsync(notification2);
+                    }
                 });
 
                 await CancelAppointmentRequests(tablesAppointmentId);

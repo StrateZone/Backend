@@ -625,6 +625,27 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<User> GetPaidAcceptedUserByTablesAppointmentIdAsync(int id)
+        {
+            try
+            {
+                var ta = await _context.TablesAppointments.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+
+                var acceptedRequest = await _context.AppointmentRequests.AsNoTracking().Where(ar =>
+                    ar.TableId == ta.TableId && ar.AppointmentId == ta.AppointmentId && ar.StartTime == ta.ScheduleTime && ar.EndTime == ta.EndTime).ToListAsync();
+
+                var find = acceptedRequest.FirstOrDefault(a => a.Status == RequestStatus.accepted && a.IsPaid);
+
+                if (find == null) return null;
+
+                return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == find.ToUser);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task AssignTopContributorsAsync()
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
