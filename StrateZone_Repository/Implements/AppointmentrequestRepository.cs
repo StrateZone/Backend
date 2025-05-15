@@ -415,7 +415,8 @@ namespace StrateZone_Repository.Implements
                 SELECT * FROM appointment_requests
                 WHERE appointment_id = {0} AND table_id = {1} AND start_time = {2} AND end_time = {3} AND from_user = {4}
                 FOR UPDATE",
-                        toAccept.AppointmentId, toAccept.TableId, toAccept.StartTime, toAccept.EndTime, toAccept.FromUser)
+                        toAccept.AppointmentId, toAccept.TableId, DateTime.SpecifyKind((DateTime)toAccept.StartTime, DateTimeKind.Utc), 
+                        DateTime.SpecifyKind((DateTime)toAccept.EndTime, DateTimeKind.Utc), toAccept.FromUser)
                     .ToListAsync();
 
                 if (invtList.Any(i => i.Status == RequestStatus.accepted))
