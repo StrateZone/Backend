@@ -413,7 +413,7 @@ namespace StrateZone_Repository.Implements
                 var invtList = await _context.AppointmentRequests
                     .FromSqlRaw(@"
                 SELECT * FROM appointment_requests
-                WHERE appointment_id = {0} AND table_id = {1} AND start_time = {3} AND end_time = {4} AND from_user = {5}
+                WHERE appointment_id = {0} AND table_id = {1} AND start_time = {2} AND end_time = {3} AND from_user = {4}
                 FOR UPDATE",
                         toAccept.AppointmentId, toAccept.TableId, toAccept.StartTime, toAccept.EndTime, toAccept.FromUser)
                     .ToListAsync();
