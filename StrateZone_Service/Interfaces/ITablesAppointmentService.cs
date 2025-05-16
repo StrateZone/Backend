@@ -25,6 +25,7 @@ namespace StrateZone_Service.Interfaces
         Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters);
         Task<TablesAppointmentResponse> GetByIdAsync(int id);
         Task<TablesAppointmentResponse> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId);
+        Task<TablesAppointmentResponse> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId, DateTime startTime, DateTime endTime);
         Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> CheckoutTablesAppointment(int tablesAppointmentId, int userId);
         Task<TablesAppointmentModel> CancelTablesAppointment(int tablesAppointmentId, int userId);

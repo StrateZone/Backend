@@ -224,6 +224,8 @@ namespace StrateZone_Service.Implements
                 List<Appointmentrequest> mappedRequests = new();
                 List<Notification> mappedNotifications = new();
 
+                var tablesAppointment = await _tablesAppointmentService.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentRequestModel[0].TableId, appointmentRequestModel[0].AppointmentId, appointmentRequestModel[0].StartTime, appointmentRequestModel[0].EndTime);
+
                 foreach (var request in appointmentRequestModel)
                 {
                     AppointmentrequestModel model = new()
@@ -238,6 +240,7 @@ namespace StrateZone_Service.Implements
                         EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Unspecified),
                         ExpireAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified).AddHours(timeUntilRequestExpiration),
                         CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        IsPaid = tablesAppointment.PaidForOpponent,
                     };
 
                     mappedRequests.Add(_mapper.Map<Appointmentrequest>(model));

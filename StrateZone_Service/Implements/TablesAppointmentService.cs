@@ -102,7 +102,7 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var result = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(tableId, appointmentId);
+                var result = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(tableId, appointmentId, startTime, endTime);
                 return _mapper.Map<TablesAppointmentResponse>(result);
             }
             catch (Exception ex)
@@ -365,6 +365,26 @@ namespace StrateZone_Service.Implements
                         };
 
                         await service.CreateNotificationAsync(notification);
+
+                        if (appointment.PaidForOpponent)
+                        {
+                            var requestService = scope.ServiceProvider.GetRequiredService<IAppointmentrequestService>();
+                            var acceptedInvitation = (await requestService.GetAppointmentRequestsFromUserByUserAndTablesAppointmentIdAsync(userId, appointment.Id)).FirstOrDefault(ar => ar.Status == RequestStatus.accepted.ToString());
+                            if (acceptedInvitation != null)
+                            {
+                                var owner = await _userService.GetUserByIdAsync(acceptedInvitation.FromUser);
+
+                                var notificationToInvitedUser = new NotificationRequest
+                                {
+                                    ToUser = acceptedInvitation.ToUser,
+                                    Title = $"{owner.Username} đã hủy bàn mà bạn đã chấp nhận tham gia!",
+                                    Content = $"{owner.Username} đã hủy đơn đặt ở bàn số {appointment.TableId}, đơn #{appointment.AppointmentId}!",
+                                    Type = NotificationType.appointment
+                                };
+
+                                await service.CreateNotificationAsync(notificationToInvitedUser);
+                            }
+                        }
                     });
                 }
                 else

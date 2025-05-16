@@ -107,8 +107,24 @@ namespace StrateZone_Repository.Implements
                 return await _context.TablesAppointments.AsNoTracking()
                                     .Include(ta => ta.Table)
                                         .ThenInclude(t => t.GameType)
-                                    .SingleOrDefaultAsync(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId);
+                                    .FirstOrDefaultAsync(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId);
                                     
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<TablesAppointment> GetTablesAppointmentByTableIdAndAppointmentIdAsync(int tableId, int appointmentId, DateTime startTime, DateTime endTime)
+        {
+            try
+            {
+                return await _context.TablesAppointments.AsNoTracking()
+                                    .Include(ta => ta.Table)
+                                        .ThenInclude(t => t.GameType)
+                                    .SingleOrDefaultAsync(ta => ta.TableId == tableId && ta.AppointmentId == appointmentId && ta.ScheduleTime == startTime && ta.EndTime == endTime);
+
             }
             catch (Exception ex)
             {
