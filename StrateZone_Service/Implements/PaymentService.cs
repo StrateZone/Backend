@@ -434,6 +434,16 @@ namespace StrateZone_Service.Implements
                 }
 
                 var oldTableAppointment = await _tablesAppointmentRepository.GetByIdAsync(request.OldTablesAppointmentId);
+                if (oldTableAppointment.Status != AppointmentStatus.checked_in)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = "Bàn chưa được check-in không được phép gia hạn thêm giờ chơi.",
+                        Data = null
+                    };
+                }
 
                 var userWallet = await _walletRepository.GetWalletByUserIdAsync(request.UserId);
 
@@ -465,6 +475,7 @@ namespace StrateZone_Service.Implements
                     );
 
                 oldTableAppointment.Note = $"Khách đã yêu cầu thêm giờ chơi. Mã đơn bàn mới: {tablesAppointment.Id} (đơn số #{tablesAppointment.AppointmentId}, bàn {tablesAppointment.TableId})";
+                oldTableAppointment.Status = AppointmentStatus.completed;
                 await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(oldTableAppointment, oldTableAppointment.Id);
 
                 _ = Task.Run(async () =>

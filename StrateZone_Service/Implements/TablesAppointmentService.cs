@@ -898,9 +898,16 @@ namespace StrateZone_Service.Implements
             if (durationInMinutes < 5) throw new Exception("Thời gian mở rộng tối thiểu là 5 phút.");
 
             var currentTA = await GetByIdAsync(tableAppointmentId);
+            if (currentTA.Status != AppointmentStatus.checked_in.ToString())
+                throw new Exception("Chỉ có thể gia hạn thêm giờ chơi cho bàn đã được check-in");
 
             DateTime newStartTime = currentTA.EndTime, 
                     newEndTime = currentTA.EndTime.AddMinutes(durationInMinutes);
+
+            if (newStartTime.Date != newEndTime.Date) throw new Exception("Thời gian kết thúc của bàn mở rộng đã vượt qua thời gian hoạt động trong ngày.");
+
+            var closeHour = await _systemService.GetClosingHourOnDateAsync(1, DateOnly.FromDateTime(newEndTime));
+            if (TimeOnly.FromDateTime(newEndTime) > closeHour) throw new Exception("Thời gian kết thúc của bàn mở rộng đã vượt qua thời gian hoạt động trong ngày.");
 
             TableResponse newTable = await _tableService.GetSimilarTableByIdAsync(newStartTime, newEndTime, (int)currentTA.TableId);
             newTable.TotalPrice = Math.Round((decimal)newTable.TotalPrice);
