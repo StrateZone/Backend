@@ -29,6 +29,8 @@ namespace StrateZone_Service.BusinessModels
 
         public bool PaidForOpponent { get; set; }
 
+        public string? Note { get; set; }
+
         // public virtual AppointmentModel? Appointment { get; set; }
     }
 }

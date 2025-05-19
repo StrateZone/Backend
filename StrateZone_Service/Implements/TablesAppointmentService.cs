@@ -21,6 +21,7 @@ namespace StrateZone_Service.Implements
     {
         private readonly IAppointmentrequestRepository _requestRepository;
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
+        private readonly ITableService _tableService;
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly IPriceService _priceService;
@@ -29,7 +30,7 @@ namespace StrateZone_Service.Implements
         private readonly ISystemService _systemService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, IAppointmentrequestRepository repository, IUserRepository userService, IServiceScopeFactory serviceProvider, ISystemService systemService)
+        public TablesAppointmentService(ITablesAppointmentRepository tablesAppointmentRepository, IMapper mapper, IPriceService priceService, IPaymentService paymentService, IWalletService walletService, IAppointmentrequestRepository repository, IUserRepository userService, IServiceScopeFactory serviceProvider, ISystemService systemService, ITableService table)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _mapper = mapper;
@@ -40,6 +41,7 @@ namespace StrateZone_Service.Implements
             _userService = userService;
             _serviceScopeFactory = serviceProvider;
             _systemService = systemService;
+            _tableService = table;
         }
 
         public async Task<PagedList<TablesAppointmentResponse>> GetAllTablesAppointmentsAsync(TablesAppointmentParameters parameters)
@@ -889,6 +891,32 @@ namespace StrateZone_Service.Implements
                 CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
                 InvitedUserId = bookingPayments.FirstOrDefault(p => p.UserId != userId)?.UserId,
             };
+        }
+
+        public async Task<TablesAppointmentExtendResponse> ExtendTablesAppointmentAsync(int tableAppointmentId, int durationInMinutes)
+        {
+            if (durationInMinutes < 5) throw new Exception("Thời gian mở rộng tối thiểu là 5 phút.");
+
+            var currentTA = await GetByIdAsync(tableAppointmentId);
+
+            DateTime newStartTime = currentTA.EndTime, 
+                    newEndTime = currentTA.EndTime.AddMinutes(durationInMinutes);
+
+            TableResponse newTable = await _tableService.GetSimilarTableByIdAsync(newStartTime, newEndTime, (int)currentTA.TableId);
+            newTable.TotalPrice = Math.Round((decimal)newTable.TotalPrice);
+
+            TablesAppointmentExtendResponse returnTA = new()
+            {
+                OldId = currentTA.Id,
+                ScheduleTime = newStartTime,
+                EndTime = newEndTime,
+                Table = newTable,
+                Note = currentTA.TableId == newTable.TableId 
+                    ? $"Mở rộng giờ chơi thêm {durationInMinutes} phút tại bàn cũ" 
+                    : $"Mở rộng giờ chơi thêm {durationInMinutes} phút. Cần dời qua bàn mới: bàn số {newTable.TableId}, phòng {newTable.RoomId}.",
+            };
+
+            return returnTA;
         }
 
         public async Task<TablesAppointmentModel> UpdateTablesAppointmentAsync(TablesAppointmentModel appointmentModel, int id)

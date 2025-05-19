@@ -29,6 +29,25 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public DateTime? CreatedAt { get; set; }
 
+        public string? Note { get; set; }
+
+        public virtual TableResponse? Table { get; set; }
+    }
+
+    public class TablesAppointmentExtendResponse
+    {
+        public int Id { get; set; }
+
+        public int? OldId { get; set; }
+
+        public DateTime ScheduleTime { get; set; }
+
+        public DateTime EndTime { get; set; }
+
+        public double DurationInHours => EndTime.Subtract(ScheduleTime).TotalHours;
+
+        public string? Note { get; set; }
+
         public virtual TableResponse? Table { get; set; }
     }
 }

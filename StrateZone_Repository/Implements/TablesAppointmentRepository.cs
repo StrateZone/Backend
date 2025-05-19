@@ -143,8 +143,8 @@ namespace StrateZone_Repository.Implements
                 await using var createCmd = connection.CreateCommand();
 
                 createCmd.CommandText = @"
-                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, paid_for_opponent) 
-                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time), @paid_for_opponent)
+                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, paid_for_opponent, note) 
+                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time), @paid_for_opponent, @note)
                     RETURNING id;"
                 ;
 
@@ -156,6 +156,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@status", tablesAppointment.Status.ToString()));
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", tablesAppointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
                 createCmd.Parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
+                createCmd.Parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
 
                 var newTablesAppointmentId = await createCmd.ExecuteScalarAsync();
                 tablesAppointment.Id = Convert.ToInt32(newTablesAppointmentId);
@@ -234,6 +235,12 @@ namespace StrateZone_Repository.Implements
                 {
                     sql.Append("created_at = @created_at, ");
                     parameters.Add(new NpgsqlParameter("@created_at", tablesAppointment.CreatedAt));
+                }
+
+                if (!string.IsNullOrEmpty(tablesAppointment.Note))
+                {
+                    sql.Append("note = @note, ");
+                    parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
                 }
 
                 sql.Append("status = @status::appointment_status, ");

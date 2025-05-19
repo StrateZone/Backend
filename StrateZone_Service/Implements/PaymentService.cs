@@ -27,6 +27,7 @@ namespace StrateZone_Service.Implements
         private readonly INotificationService _notificationService;
         private readonly IPriceService _priceService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ITableRepository _tableRepository;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -38,7 +39,8 @@ namespace StrateZone_Service.Implements
             IUserRepository userRepository,
             INotificationService notificationService,
             IPriceService priceService,
-            IServiceScopeFactory serviceScopeFactory)
+            IServiceScopeFactory serviceScopeFactory,
+            ITableRepository tableRepository)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -50,6 +52,7 @@ namespace StrateZone_Service.Implements
             _notificationService = notificationService;
             _priceService = priceService;
             _serviceScopeFactory = serviceScopeFactory;
+            _tableRepository = tableRepository;
         }
 
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
@@ -411,42 +414,92 @@ namespace StrateZone_Service.Implements
         }
 
         // method only used when the appointment owner chooses to pay the rest of the price
-        public async Task<ApiResponse<TablesAppointmentModel>> CreateTablesAppointmentPaymentBooking(TablesAppointmentPaymentRequest appointmentrequestModel)
+        public async Task<ApiResponse<TablesAppointmentModel>> CreateExtendedTablesAppointmentPaymentBooking(TablesAppointmentPaymentRequest request)
         {
             try
             {
-                var tableAppointment = await _tablesAppointmentRepository.GetTablesAppointmentByTableIdAndAppointmentIdAsync(appointmentrequestModel.TableId, (int)appointmentrequestModel.AppointmentId);
+                double durationInMinutes = request.EndTime.Subtract(request.StartTime).TotalMinutes;
+                if (durationInMinutes < 5) throw new Exception("Thời gian mở rộng tối thiểu là 5 phút.");
 
-                var userWallet = await _walletRepository.GetWalletByUserIdAsync(appointmentrequestModel.UserId);
-
-                if (userWallet.Balance < tableAppointment.Price)
+                var avTables = (await _tableRepository.GetAvailableTablesAsync(request.StartTime, request.EndTime)).Select(t => t.TableId);
+                if (!avTables.Contains(request.TableId))
                 {
                     return new ApiResponse<TablesAppointmentModel>
                     {
                         Success = false,
-                        StatusCode = 500,
+                        StatusCode = 400,
+                        Message = "Bàn không khả dụng.",
+                        Data = null
+                    };
+                }
+
+                var oldTableAppointment = await _tablesAppointmentRepository.GetByIdAsync(request.OldTablesAppointmentId);
+
+                var userWallet = await _walletRepository.GetWalletByUserIdAsync(request.UserId);
+
+                if (userWallet.Balance < request.Price)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
                         Message = "Balance is not enough",
                         Data = null
                     };
                 }
 
-                await _walletRepository.WithdrawalWalletAsync((int)tableAppointment.Price, userWallet.WalletId);
+                await _walletRepository.WithdrawalWalletAsync((int)request.Price, userWallet.WalletId);
 
-                var payment = (await _paymentRepository.GetPaymentsByTablesAppointmentIdAsync(tableAppointment.Id)).SingleOrDefault(p => p.UserId == appointmentrequestModel.UserId && p.PaymentStatus == PaymentStatus.unpaid);
-                
-                if (payment == null)
+                var tablesAppointment = await _tablesAppointmentRepository.CreateTablesAppointmentAsync(
+                        new()
+                        { 
+                            AppointmentId = request.AppointmentId,
+                            TableId = request.TableId,
+                            Price = request.Price,
+                            ScheduleTime = request.StartTime,
+                            EndTime = request.EndTime,
+                            PaidForOpponent = false,
+                            Status = AppointmentStatus.checked_in,
+                            Note = $"Đơn mở rộng cho đơn bàn {oldTableAppointment.TableId} (đơn số #{oldTableAppointment.AppointmentId}, bàn {oldTableAppointment.TableId})",
+                        }
+                    );
+
+                oldTableAppointment.Note = $"Khách đã yêu cầu thêm giờ chơi. Mã đơn bàn mới: {tablesAppointment.Id} (đơn số #{tablesAppointment.AppointmentId}, bàn {tablesAppointment.TableId})";
+                await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(oldTableAppointment, oldTableAppointment.Id);
+
+                _ = Task.Run(async () =>
                 {
-                    return new ApiResponse<TablesAppointmentModel>
-                    {
-                        Success = false,
-                        StatusCode = 500,
-                        Message = "No payment was found",
-                        Data = null
-                    };
-                }
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IPaymentService>();
 
-                payment.PaymentStatus = PostgreEnums.PaymentStatus.paid;
-                await _paymentRepository.UpdatePaymentAsync(payment, payment.Id);
+                    PaymentModel paymentModel = new()
+                    {
+                        UserId = request.UserId,
+                        TablesAppointmentId = tablesAppointment.Id,
+                        PaymentStatus = PostgreEnums.PaymentStatus.paid.ToString(),
+                        Description = $"Thanh toán cho bàn {tablesAppointment.Id}",
+                        PaymentType = PostgreEnums.PaymentType.appointment.ToString()
+                    };
+
+                    await service.CreatePaymentAsync(paymentModel);
+                });
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITransactionRepository>();
+
+                    var newTransaction = new StrateZone_Repository.Entities.Transaction
+                    {
+                        OfUser = request.UserId,
+                        Amount = tablesAppointment.Price,
+                        Content = "Đã thanh toán đơn mở rộng " + tablesAppointment.Id + ": " + tablesAppointment.Price,
+                        CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified),
+                        TransactionType = PostgreEnums.TransactionType.payment
+                    };
+
+                    await service.SaveTransaction(newTransaction);
+                });
 
                 return new ApiResponse<TablesAppointmentModel>
                 {

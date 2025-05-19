@@ -18,5 +18,6 @@ namespace StrateZone_Service.Interfaces
         Task<WalletModel> UpdateWalletAsync(WalletModel wallet, int id);
         Task<WalletModel> WithdrawalWalletAsync(int amount, int id);
         Task<WalletModel> WithdrawalWalletByUserIdAsync(int amount, int userId);
+        Task WithdrawalBalanceToOtherUserAsync(int amount, string msg, int fromUser, int toUser);
     }
 }

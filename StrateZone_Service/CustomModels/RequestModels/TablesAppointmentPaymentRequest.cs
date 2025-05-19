@@ -13,9 +13,21 @@ namespace StrateZone_Service.CustomModels.RequestModels
         public int UserId { get; set; }
 
         [Required]
+        public int OldTablesAppointmentId { get; set; }
+
+        [Required]
         public int TableId { get; set; }
 
         [Required]
         public int AppointmentId { get; set; }
+
+        [Required]
+        public DateTime StartTime { get; set; }
+
+        [Required]
+        public DateTime EndTime { get; set; }
+
+        [Required]
+        public decimal Price { get; set; }
     }
 }

@@ -112,12 +112,12 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost("tables-appointment-payment")]
+        [HttpPost("extend-tables-appointment-payment")]
         public async Task<IActionResult> ConfirmTablesAppointmentPayment(TablesAppointmentPaymentRequest request)
         {
             try
             {
-                var result = await _paymentService.CreateTablesAppointmentPaymentBooking(request);
+                var result = await _paymentService.CreateExtendedTablesAppointmentPaymentBooking(request);
                 return Ok(result);
             }
             catch (Exception ex)

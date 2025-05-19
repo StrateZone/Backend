@@ -219,6 +219,20 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
+        [HttpGet("extend-check/{tablesAppointmentId}")]
+        public async Task<IActionResult> ExtendTablesAppointment(int tablesAppointmentId, int durationInMinutes)
+        {
+            try
+            {
+                var result = await _services.ExtendTablesAppointmentAsync(tablesAppointmentId, durationInMinutes);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [HttpGet("active-count/by-table/{tableId}")]
         public async Task<IActionResult> GetActiveCountByTableId(int tableId)
         {

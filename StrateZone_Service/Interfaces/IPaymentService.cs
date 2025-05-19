@@ -11,7 +11,7 @@ namespace StrateZone_Service.Interfaces
     {
         Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment);
         Task<ApiResponse<AppointmentrequestModel>> CreateAppointmentRequestPaymentBooking(AppointmentrequestPaymentRequest appointmentrequestModel);
-        Task<ApiResponse<TablesAppointmentModel>> CreateTablesAppointmentPaymentBooking(TablesAppointmentPaymentRequest appointmentrequestModel);
+        Task<ApiResponse<TablesAppointmentModel>> CreateExtendedTablesAppointmentPaymentBooking(TablesAppointmentPaymentRequest appointmentrequestModel);
         Task<PaymentModel> CreatePaymentAsync(PaymentModel payment);
         Task<List<PaymentModel>> GetPaymentsByTablesAppointmentIdAsync(int id);
         Task<PagedList<PaymentModel>> GetPaymentsAsync(StrateZone_Repository.Parameters.PaymentParameters parameters);

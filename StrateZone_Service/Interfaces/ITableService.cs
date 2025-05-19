@@ -17,6 +17,7 @@ namespace StrateZone_Service.Implements
         Task<List<TableResponse>> GetAllAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
         Task<PagedList<TableResponse>> GetAvailableTablesByGameTypeAsync(TableParameters parameters, string gameType);
         Task<TableResponse> GetTableByIdAsync(DateTime StartTime, DateTime EndTime, int id);
+        Task<TableResponse> GetSimilarTableByIdAsync(DateTime StartTime, DateTime EndTime, int sampleId);
         Task<PagedList<TableModel>> GetTablesAsync(TableParameters parameters);
         Task<PagedList<TableModel>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType);
         Task<TableModel> UpdateTableAsync(TableModel tableModel, int id);

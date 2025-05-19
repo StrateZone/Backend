@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -107,5 +108,28 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPut("bank/from/{transfererId}/to/{receiverId}")]
+        public async Task<IActionResult> Bank([FromBody] BankRequest bankRequest, int transfererId, int receiverId)
+        {
+            try
+            {
+                await _walletService.WithdrawalBalanceToOtherUserAsync(bankRequest.Amount, bankRequest.Message, transfererId, receiverId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+    }
+
+    public class BankRequest
+    {
+        [Required]
+        public int Amount { get; set; }
+
+        [Required]
+        public string Message { get; set; } = "";
     }
 }

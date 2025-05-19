@@ -52,6 +52,53 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<Table> GetSimilarTableByIdAsync(DateTime startTime, DateTime endTime, int id)
+        {
+            try
+            {
+                var availableTables = await GetAvailableTablesAsync(startTime, endTime);
+
+                // Get the original table to find its GameType and Room
+                var originalTable = await _context.Tables
+                    .Include(t => t.Room)
+                    .Include(t => t.GameType)
+                    .FirstOrDefaultAsync(t => t.TableId == id) 
+                    ?? throw new Exception("Original table not found.");
+
+                if (availableTables.Contains(originalTable)) return originalTable;
+
+                var gameTypeId = originalTable.GameTypeId;
+                var roomId = originalTable.RoomId;
+                var roomType = originalTable.Room?.Type;
+
+                // Try to find a table in the same room and same game type
+                var sameRoomTable = availableTables
+                    .Where(t => t.TableId != id && t.RoomId == roomId && t.GameTypeId == gameTypeId)
+                    .FirstOrDefault();
+
+                if (sameRoomTable != null)
+                    return sameRoomTable;
+
+                // If not found, try to find table in rooms with the same room type and same game type
+                var sameRoomTypeTable = availableTables
+                    .Where(t => t.TableId != id &&
+                                t.GameTypeId == gameTypeId &&
+                                t.Room != null &&
+                                t.Room.Type == roomType)
+                    .FirstOrDefault();
+
+                if (sameRoomTypeTable != null)
+                    return sameRoomTypeTable;
+
+                throw new Exception("Không còn bàn tương tự hiện đang khả dụng. Vui lòng tìm bàn khác.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error in GetSimilarTableByIdAsync: {ex.Message}", ex);
+            }
+        }
+
+
         public async Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType)
         {
             try

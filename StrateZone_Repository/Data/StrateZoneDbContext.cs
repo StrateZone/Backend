@@ -667,6 +667,8 @@ public partial class StrateZoneDbContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("end_time");
 
+            entity.Property(e => e.Note).HasColumnName("note");
+
             entity.Property(e => e.PaidForOpponent).HasColumnName("paid_for_opponent");
 
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(

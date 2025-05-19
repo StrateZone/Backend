@@ -24,6 +24,8 @@ public partial class TablesAppointment
 
     public bool PaidForOpponent { get; set; }
 
+    public string? Note { get; set; }
+
     public virtual Appointment? Appointment { get; set; }
 
     public virtual Table? Table { get; set; }

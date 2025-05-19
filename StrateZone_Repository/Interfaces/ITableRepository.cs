@@ -10,6 +10,7 @@ namespace StrateZone_Repository.Interfaces
         Task<Table> CreateTableAsync(Table table);
         Task<Table> DeleteTableAsync(int id);
         Task<Table> GetTableByIdAsync(int id);
+        Task<Table> GetSimilarTableByIdAsync(DateTime startTime, DateTime endTime, int id);
         Task<PagedList<Table>> GetTablesAsync(TablesAppointmentParameters parameters, string? search);
         Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
         Task<PagedList<Table>> GetTablesAsync(TableParameters parameters);
