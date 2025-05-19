@@ -255,6 +255,7 @@ namespace StrateZone_Service.Implements
                                 : AppointmentStatus.confirmed.ToString(),
                         Price = tablesAppointmentRequest.Price,
                         PaidForOpponent = tablesAppointmentRequest.PaidForOpponent,
+                        Note = "",
                     };
 
                     result.TablesAppointments.Add(tablesAppointmentModel);
