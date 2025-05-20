@@ -310,6 +310,24 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<Appointment> UpdateAppointmentPriceAsync(int id)
+        {
+            try
+            {
+                Appointment ToUpdate = await _context.Appointments.Include(a => a.TablesAppointments).FirstOrDefaultAsync(a => a.AppointmentId == id) ?? throw new Exception("Appointment with this ID does not exist");
+
+                ToUpdate.TotalPrice = (decimal)ToUpdate.TablesAppointments.Sum(ta => ta.Price);
+
+                await UpdateAppointmentAsync(ToUpdate, id);
+
+                return ToUpdate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<Appointment> DeleteAppointmentAsync(int id)
         {
             try

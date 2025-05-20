@@ -481,6 +481,14 @@ namespace StrateZone_Service.Implements
                 _ = Task.Run(async () =>
                 {
                     using var scope = _serviceScopeFactory.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+
+                    await service.UpdateAppointmentPriceAsync((int)tablesAppointment.AppointmentId);
+                });
+
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
                     var service = scope.ServiceProvider.GetRequiredService<IPaymentService>();
 
                     PaymentModel paymentModel = new()

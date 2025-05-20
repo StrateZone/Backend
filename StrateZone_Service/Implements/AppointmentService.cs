@@ -316,6 +316,20 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<AppointmentModel> UpdateAppointmentPriceAsync(int id)
+        {
+            try
+            {
+                var result = await _appointmentRepository.UpdateAppointmentPriceAsync(id);
+
+                return _mapper.Map<AppointmentModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<AppointmentModel> DeleteAppointmentAsync(int id)
         {
             try
