@@ -31,6 +31,10 @@ namespace StrateZone_Service.BusinessModels
 
         public string? Note { get; set; }
 
+        public bool IsExtended { get; set; }
+
+        public int? ExtendedOf { get; set; }
+
         // public virtual AppointmentModel? Appointment { get; set; }
     }
 }

@@ -31,6 +31,10 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? Note { get; set; }
 
+        public bool IsExtended { get; set; }
+
+        public int? ExtendedOf { get; set; }
+
         public virtual TableResponse? Table { get; set; }
     }
 

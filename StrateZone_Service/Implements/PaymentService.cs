@@ -28,6 +28,7 @@ namespace StrateZone_Service.Implements
         private readonly IPriceService _priceService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ITableRepository _tableRepository;
+        private readonly ISystemService _systemService;
 
         public PaymentService(
             ITablesAppointmentRepository tablesAppointmentRepository,
@@ -40,7 +41,8 @@ namespace StrateZone_Service.Implements
             INotificationService notificationService,
             IPriceService priceService,
             IServiceScopeFactory serviceScopeFactory,
-            ITableRepository tableRepository)
+            ITableRepository tableRepository,
+            ISystemService systemService)
         {
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
@@ -53,6 +55,7 @@ namespace StrateZone_Service.Implements
             _priceService = priceService;
             _serviceScopeFactory = serviceScopeFactory;
             _tableRepository = tableRepository;
+            _systemService = systemService;
         }
 
         public async Task<ApiResponse<AppointmentModel>> CreatePaymentBooking(AppointmentModel appointment)
@@ -418,8 +421,33 @@ namespace StrateZone_Service.Implements
         {
             try
             {
+                DateTime Now = DateTime.UtcNow.AddHours(7);
+
+                var system = await _systemService.GetSystemsByIdAsync(1);
+
                 double durationInMinutes = request.EndTime.Subtract(request.StartTime).TotalMinutes;
-                if (durationInMinutes < 5) throw new Exception("Thời gian mở rộng tối thiểu là 5 phút.");
+                int Min_ExtendTime = system.Min_Minutes_For_TablesExtend;
+                int Max_ExtendTime = system.Max_Minutes_For_TablesExtend;
+                if (durationInMinutes < Min_ExtendTime)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"Thời gian mở rộng tối thiểu là {Min_ExtendTime} phút.",
+                        Data = null
+                    };
+                }
+                else if (durationInMinutes > Max_ExtendTime)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"Thời gian mở rộng tối đa là {Max_ExtendTime} phút.",
+                        Data = null
+                    };
+                }
 
                 var avTables = (await _tableRepository.GetAvailableTablesAsync(request.StartTime, request.EndTime)).Select(t => t.TableId);
                 if (!avTables.Contains(request.TableId))
@@ -441,6 +469,16 @@ namespace StrateZone_Service.Implements
                         Success = false,
                         StatusCode = 400,
                         Message = "Bàn chưa được check-in không được phép gia hạn thêm giờ chơi.",
+                        Data = null
+                    };
+                }
+                else if (Now.AddMinutes(system.ExtendAllow_BeforeMinutes_FromTableComplete) < oldTableAppointment.EndTime)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"Gia hạn thêm giờ chơi chỉ mở {system.ExtendAllow_BeforeMinutes_FromTableComplete} phút trước giờ kết thúc của giờ hiện tại.",
                         Data = null
                     };
                 }
@@ -469,13 +507,15 @@ namespace StrateZone_Service.Implements
                             ScheduleTime = request.StartTime,
                             EndTime = request.EndTime,
                             PaidForOpponent = false,
-                            Status = AppointmentStatus.checked_in,
+                            Status = AppointmentStatus.confirmed,
+                            IsExtended = true,
+                            ExtendedOf = oldTableAppointment.Id,
                             Note = $"Đơn mở rộng cho đơn bàn {oldTableAppointment.TableId} (đơn số #{oldTableAppointment.AppointmentId}, bàn {oldTableAppointment.TableId})",
                         }
                     );
 
-                oldTableAppointment.Note = $"Khách đã yêu cầu thêm giờ chơi. Mã đơn bàn mới: {tablesAppointment.Id} (đơn số #{tablesAppointment.AppointmentId}, bàn {tablesAppointment.TableId})";
-                oldTableAppointment.Status = AppointmentStatus.completed;
+                oldTableAppointment.Note = $"Khách đã yêu cầu thêm giờ chơi. Mã đặt bàn mới: {tablesAppointment.Id} (đơn số #{tablesAppointment.AppointmentId}, bàn {tablesAppointment.TableId})";
+                oldTableAppointment.IsExtended = true;
                 await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(oldTableAppointment, oldTableAppointment.Id);
 
                 _ = Task.Run(async () =>

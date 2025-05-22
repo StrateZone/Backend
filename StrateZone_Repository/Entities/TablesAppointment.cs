@@ -26,6 +26,10 @@ public partial class TablesAppointment
 
     public string? Note { get; set; }
 
+    public bool IsExtended { get; set; }
+
+    public int? ExtendedOf { get; set; }
+
     public virtual Appointment? Appointment { get; set; }
 
     public virtual Table? Table { get; set; }

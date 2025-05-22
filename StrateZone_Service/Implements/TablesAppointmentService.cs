@@ -722,6 +722,7 @@ namespace StrateZone_Service.Implements
 
             if (CancelTime < tablesAppointment.CreatedAt) throw new Exception("Cancel time must the later than created_time.");
 
+            var system = await _systemService.GetSystemsByIdAsync(1);
             var model = _mapper.Map<TablesAppointmentModel>(tablesAppointment);
 
             var cancelledTablesAppointmentsWithinThisWeek = await _tablesAppointmentRepository.GetNumberOfTablesAppointmentCancelledByUserInAWeekSpanAsync(userId, CancelTime);
@@ -729,13 +730,45 @@ namespace StrateZone_Service.Implements
             DateTime ScheduleTime = tablesAppointment.ScheduleTime;
             DateTime CreatedTime = (DateTime)tablesAppointment.CreatedAt;
 
-            decimal refund100_hours = await _systemService.GetAppointmentRefund100TimeInHoursAsync(1),
-                    incoming_hours = await _systemService.GetAppointmentIncomingTimeInHoursAsync(1);
+            decimal refund100_hours = system.Appointment_Refund100_HoursFromScheduleTime,
+                    incoming_hours = system.Appointment_Incoming_HoursFromScheduleTime;
 
             DateTime TimeGate_BlockAppointmentCancellation = ScheduleTime.AddHours((double)(incoming_hours * -1)),
                      TimeGate_Refund50_OnCancellation = ScheduleTime.AddHours((double)(refund100_hours * -1));
 
             var bookingPayments = await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId);
+
+            if (model.IsExtended)
+            {
+                var minBeforeCancel = system.ExtendCancel_BeforeMinutes_FromPlayTime;
+                if (CancelTime.AddMinutes(minBeforeCancel) >= tablesAppointment.ScheduleTime)
+                {
+                    return new TablesAppointmentRefundResponse()
+                    {
+                        TablesAppointmentModel = model,
+                        RefundAmount = 0,
+                        RefundStatus = RefundStatus.cancellation_fail,
+                        Message = $"Không được phép hủy đơn mở rộng trong vòng {minBeforeCancel} phút trước giờ hẹn.",
+                    };
+                }
+                else
+                {
+                    return new TablesAppointmentRefundResponse()
+                    {
+                        TablesAppointmentModel = model,
+                        RefundAmount = (decimal)tablesAppointment.Price,
+                        RefundStatus = RefundStatus.refund_100_percentage_of_total,
+                        Message = "Hoàn tiền 100% do là đơn mở rộng.",
+                        NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
+                        CancellationTime = CancelTime,
+                        Cancellation_Block_TimeGate = null,
+                        Cancellation_PartialRefund_TimeGate = null,
+                        CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
+                        InvitedUserId = null,
+                    };
+                }
+            }
+
             var paymentForUser = bookingPayments.SingleOrDefault(p => p.UserId == userId);
             if (paymentForUser == null && tablesAppointment.PaidForOpponent)
             {
@@ -832,7 +865,7 @@ namespace StrateZone_Service.Implements
                         TablesAppointmentModel = model,
                         RefundAmount = (decimal) tablesAppointment.Price,
                         RefundStatus = RefundStatus.refund_100_percentage_of_total,
-                        Message = "Refund 100%",
+                        Message = "Hoàn tiền 100%",
                         NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,
@@ -850,7 +883,7 @@ namespace StrateZone_Service.Implements
                         TablesAppointmentModel = model,
                         RefundAmount = (decimal) (tablesAppointment.Price * refundPercentage),
                         RefundStatus = RefundStatus.refund_partial_percentage_of_total,
-                        Message = $"Refund {refundPercentage * 100}%",
+                        Message = $"Hoàn tiền {refundPercentage * 100}%",
                         NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,
                         Cancellation_Block_TimeGate = TimeGate_BlockAppointmentCancellation,

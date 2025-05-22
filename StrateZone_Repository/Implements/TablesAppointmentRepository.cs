@@ -143,8 +143,8 @@ namespace StrateZone_Repository.Implements
                 await using var createCmd = connection.CreateCommand();
 
                 createCmd.CommandText = @"
-                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, paid_for_opponent, note) 
-                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time), @paid_for_opponent, @note)
+                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, paid_for_opponent, note, is_extended, extended_of_id) 
+                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time), @paid_for_opponent, @note, @is_extended, @extended_of_id)
                     RETURNING id;"
                 ;
 
@@ -157,6 +157,8 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", tablesAppointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
                 createCmd.Parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
                 createCmd.Parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
+                createCmd.Parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended == null ? DBNull.Value : false));
+                createCmd.Parameters.Add(new NpgsqlParameter("@extended_of_id", tablesAppointment.ExtendedOf == null ? DBNull.Value : tablesAppointment.ExtendedOf));
 
                 var newTablesAppointmentId = await createCmd.ExecuteScalarAsync();
                 tablesAppointment.Id = Convert.ToInt32(newTablesAppointmentId);
@@ -241,6 +243,24 @@ namespace StrateZone_Repository.Implements
                 {
                     sql.Append("note = @note, ");
                     parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
+                }
+
+                if (tablesAppointment.IsExtended != null)
+                {
+                    sql.Append("paid_for_opponent = @paid_for_opponent, ");
+                    parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
+                }
+
+                if (tablesAppointment.ExtendedOf.HasValue)
+                {
+                    sql.Append("extended_of_id = @extended_of_id, ");
+                    parameters.Add(new NpgsqlParameter("@extended_of_id", tablesAppointment.ExtendedOf));
+                }
+
+                if (tablesAppointment.IsExtended != null)
+                {
+                    sql.Append("is_extended = @is_extended, ");
+                    parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.ExtendedOf));
                 }
 
                 sql.Append("status = @status::appointment_status, ");

@@ -613,6 +613,18 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Verification_OTP_Duration)
                     .HasColumnName("verification_otp_duration_inminutes");
 
+            entity.Property(e => e.ExtendCancel_BeforeMinutes_FromPlayTime)
+                    .HasColumnName("extend_cancellation_minutes_before_playtime");
+
+            entity.Property(e => e.Min_Minutes_For_TablesExtend)
+                   .HasColumnName("min_minutes_for_tables_extend");
+
+            entity.Property(e => e.Max_Minutes_For_TablesExtend)
+                    .HasColumnName("max_minutes_for_tables_extend");
+
+            entity.Property(e => e.ExtendAllow_BeforeMinutes_FromTableComplete)
+                    .HasColumnName("extend_allow_minutes_before_table_complete");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");
@@ -671,6 +683,10 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.PaidForOpponent).HasColumnName("paid_for_opponent");
 
+            entity.Property(e => e.IsExtended).HasColumnName("is_extended");
+
+            entity.Property(e => e.ExtendedOf).HasColumnName("extended_of_id");
+
             entity.Property(e => e.Status).HasColumnName("status").HasConversion(
                     v => v.ToString(),
                     v => (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), v)
@@ -683,6 +699,7 @@ public partial class StrateZoneDbContext : DbContext
             entity.HasOne(d => d.Table).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.TableId)
                 .HasConstraintName("tables_appointments_table_id_fkey");
+
         });
 
         modelBuilder.Entity<Tag>(entity =>

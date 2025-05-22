@@ -45,6 +45,14 @@ namespace StrateZone_Service.BusinessModels
 
         public int Verification_OTP_Duration { get; set; }
 
+        public int Min_Minutes_For_TablesExtend { get; set; }
+
+        public int Max_Minutes_For_TablesExtend { get; set; }
+
+        public int ExtendAllow_BeforeMinutes_FromTableComplete { get; set; }
+
+        public int ExtendCancel_BeforeMinutes_FromPlayTime { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }
