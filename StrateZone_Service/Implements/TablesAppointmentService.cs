@@ -928,19 +928,41 @@ namespace StrateZone_Service.Implements
 
         public async Task<TablesAppointmentExtendResponse> ExtendTablesAppointmentAsync(int tableAppointmentId, int durationInMinutes)
         {
-            if (durationInMinutes < 5) throw new Exception("Thời gian mở rộng tối thiểu là 5 phút.");
+            var system = await _systemService.GetSystemsByIdAsync(1);
+
+            int Min_ExtendTime = system.Min_Minutes_For_TablesExtend;
+            int Max_ExtendTime = system.Max_Minutes_For_TablesExtend;
+
+            if (durationInMinutes < Min_ExtendTime)
+            {
+                throw new Exception($"Thời gian mở rộng tối thiểu là {Min_ExtendTime} phút.");
+            }
+            else if (durationInMinutes > Max_ExtendTime)
+            {
+                throw new Exception($"Thời gian mở rộng tối đa là {Max_ExtendTime} phút.");
+            }
 
             var currentTA = await GetByIdAsync(tableAppointmentId);
+
             if (currentTA.Status != AppointmentStatus.checked_in.ToString())
                 throw new Exception("Chỉ có thể gia hạn thêm giờ chơi cho bàn đã được check-in");
+
+            if (currentTA.IsExtended)
+                throw new Exception("Mỗi bàn chỉ có thể gia hạn thêm giờ chơi 1 lần.");
+
+            if (DateTime.UtcNow.AddHours(7).AddMinutes(system.ExtendAllow_BeforeMinutes_FromTableComplete) 
+                < currentTA.EndTime)
+            {
+                throw new Exception($"Gia hạn thêm giờ chơi chỉ mở {system.ExtendAllow_BeforeMinutes_FromTableComplete} phút trước giờ kết thúc của giờ hiện tại.");
+            }
 
             DateTime newStartTime = currentTA.EndTime, 
                     newEndTime = currentTA.EndTime.AddMinutes(durationInMinutes);
 
-            if (newStartTime.Date != newEndTime.Date) throw new Exception("Thời gian kết thúc của bàn mở rộng đã vượt qua thời gian hoạt động trong ngày.");
-
             var closeHour = await _systemService.GetClosingHourOnDateAsync(1, DateOnly.FromDateTime(newEndTime));
-            if (TimeOnly.FromDateTime(newEndTime) > closeHour) throw new Exception("Thời gian kết thúc của bàn mở rộng đã vượt qua thời gian hoạt động trong ngày.");
+
+            if (newStartTime.Date != newEndTime.Date || TimeOnly.FromDateTime(newEndTime) > closeHour) 
+                throw new Exception($"Bàn mở rộng cần phải kết thúc trước giờ đóng cửa của CLB là {closeHour}.");
 
             TableResponse newTable = await _tableService.GetSimilarTableByIdAsync(newStartTime, newEndTime, (int)currentTA.TableId);
             newTable.TotalPrice = Math.Round((decimal)newTable.TotalPrice);

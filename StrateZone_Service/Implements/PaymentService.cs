@@ -482,6 +482,16 @@ namespace StrateZone_Service.Implements
                         Data = null
                     };
                 }
+                else if (oldTableAppointment.IsExtended)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"Mỗi bàn chỉ có thể gia hạn giờ chơi tối đa 1 lần.",
+                        Data = null
+                    };
+                }
 
                 var userWallet = await _walletRepository.GetWalletByUserIdAsync(request.UserId);
 
