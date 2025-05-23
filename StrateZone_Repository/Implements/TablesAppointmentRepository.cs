@@ -334,22 +334,22 @@ namespace StrateZone_Repository.Implements
                         parameters.Add(new NpgsqlParameter($"@created_at_{index}", ta.CreatedAt));
                     }
 
-                    if (tablesAppointment.PaidForOpponent != null)
+                    if (ta.PaidForOpponent != null)
                     {
                         sql.Append("paid_for_opponent = @paid_for_opponent, ");
-                        parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
+                        parameters.Add(new NpgsqlParameter("@paid_for_opponent", ta.PaidForOpponent));
                     }
 
-                    if (tablesAppointment.ExtendedOf.HasValue)
+                    if (ta.ExtendedOf.HasValue)
                     {
                         sql.Append("extended_of_id = @extended_of_id, ");
-                        parameters.Add(new NpgsqlParameter("@extended_of_id", tablesAppointment.ExtendedOf));
+                        parameters.Add(new NpgsqlParameter("@extended_of_id", ta.ExtendedOf));
                     }
 
-                    if (tablesAppointment.IsExtended != null)
+                    if (ta.IsExtended != null)
                     {
                         sql.Append("is_extended = @is_extended, ");
-                        parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended));
+                        parameters.Add(new NpgsqlParameter("@is_extended", ta.IsExtended));
                     }
 
                     sql.Append($"status = @status_{index}::appointment_status, ");
