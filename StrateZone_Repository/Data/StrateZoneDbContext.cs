@@ -625,6 +625,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.ExtendAllow_BeforeMinutes_FromTableComplete)
                     .HasColumnName("extend_allow_minutes_before_table_complete");
 
+            entity.Property(e => e.Percentage_Refund_On_ExtendedTables)
+                    .HasColumnName("percentage_refund_on_extended_tables");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");

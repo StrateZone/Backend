@@ -53,6 +53,8 @@ namespace StrateZone_Service.BusinessModels
 
         public int ExtendCancel_BeforeMinutes_FromPlayTime { get; set; }
 
+        public float Percentage_Refund_On_ExtendedTables { get; set; }
+
         public string Status { get; set; }
 
         // public virtual UserModel? User { get; set; }

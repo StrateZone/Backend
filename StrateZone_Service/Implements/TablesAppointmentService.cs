@@ -759,12 +759,12 @@ namespace StrateZone_Service.Implements
                     return new TablesAppointmentRefundResponse()
                     {
                         TablesAppointmentModel = model,
-                        RefundAmount = (decimal)tablesAppointment.Price,
+                        RefundAmount = (decimal)(tablesAppointment.Price * (decimal) system.Percentage_Refund_On_ExtendedTables),
                         RefundStatus = RefundStatus.refund_100_percentage_of_total,
-                        Message = "Hoàn tiền 100% do là đơn mở rộng.",
+                        Message = $"Hoàn tiền {system.Percentage_Refund_On_ExtendedTables * 100}% do là đơn mở rộng.",
                         NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,
-                        Cancellation_Block_TimeGate = null,
+                        Cancellation_Block_TimeGate = tablesAppointment.ScheduleTime.AddMinutes(minBeforeCancel * -1),
                         Cancellation_PartialRefund_TimeGate = null,
                         CancelUserId = bookingPayments.FirstOrDefault(p => p.UserId == userId)?.UserId,
                         InvitedUserId = null,

@@ -52,6 +52,8 @@ namespace StrateZone_Repository.Entities
 
         public int ExtendCancel_BeforeMinutes_FromPlayTime { get; set; }
 
+        public float Percentage_Refund_On_ExtendedTables {  get; set; }
+
         public string Status { get; set; }
 
         public virtual User? User { get; set; }
