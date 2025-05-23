@@ -157,7 +157,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@created_at", tablesAppointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
                 createCmd.Parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
                 createCmd.Parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
-                createCmd.Parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended == null ? DBNull.Value : false));
+                createCmd.Parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended == null ? DBNull.Value : tablesAppointment.IsExtended));
                 createCmd.Parameters.Add(new NpgsqlParameter("@extended_of_id", tablesAppointment.ExtendedOf == null ? DBNull.Value : tablesAppointment.ExtendedOf));
 
                 var newTablesAppointmentId = await createCmd.ExecuteScalarAsync();
