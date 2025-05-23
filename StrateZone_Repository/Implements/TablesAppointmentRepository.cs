@@ -245,7 +245,7 @@ namespace StrateZone_Repository.Implements
                     parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
                 }
 
-                if (tablesAppointment.IsExtended != null)
+                if (tablesAppointment.PaidForOpponent != null)
                 {
                     sql.Append("paid_for_opponent = @paid_for_opponent, ");
                     parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
@@ -260,7 +260,7 @@ namespace StrateZone_Repository.Implements
                 if (tablesAppointment.IsExtended != null)
                 {
                     sql.Append("is_extended = @is_extended, ");
-                    parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.ExtendedOf));
+                    parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended));
                 }
 
                 sql.Append("status = @status::appointment_status, ");
@@ -332,6 +332,24 @@ namespace StrateZone_Repository.Implements
                     {
                         sql.Append($"created_at = @created_at_{index}, ");
                         parameters.Add(new NpgsqlParameter($"@created_at_{index}", ta.CreatedAt));
+                    }
+
+                    if (tablesAppointment.PaidForOpponent != null)
+                    {
+                        sql.Append("paid_for_opponent = @paid_for_opponent, ");
+                        parameters.Add(new NpgsqlParameter("@paid_for_opponent", tablesAppointment.PaidForOpponent));
+                    }
+
+                    if (tablesAppointment.ExtendedOf.HasValue)
+                    {
+                        sql.Append("extended_of_id = @extended_of_id, ");
+                        parameters.Add(new NpgsqlParameter("@extended_of_id", tablesAppointment.ExtendedOf));
+                    }
+
+                    if (tablesAppointment.IsExtended != null)
+                    {
+                        sql.Append("is_extended = @is_extended, ");
+                        parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended));
                     }
 
                     sql.Append($"status = @status_{index}::appointment_status, ");
