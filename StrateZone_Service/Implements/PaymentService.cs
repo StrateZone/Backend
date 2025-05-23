@@ -520,7 +520,7 @@ namespace StrateZone_Service.Implements
                             Status = AppointmentStatus.confirmed,
                             IsExtended = true,
                             ExtendedOf = oldTableAppointment.Id,
-                            Note = $"Đơn mở rộng cho đơn bàn {oldTableAppointment.TableId} (đơn số #{oldTableAppointment.AppointmentId}, bàn {oldTableAppointment.TableId})",
+                            Note = $"Đơn mở rộng cho bàn có mã đặt {oldTableAppointment.Id} (đơn số #{oldTableAppointment.AppointmentId}, bàn {oldTableAppointment.TableId})",
                         }
                     );
 
