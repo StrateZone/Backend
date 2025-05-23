@@ -288,17 +288,20 @@ namespace StrateZone_Service.Implements
                 var status = (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status);
                 if (status is AppointmentStatus.cancelled or AppointmentStatus.refunded or AppointmentStatus.checked_in or AppointmentStatus.expired or AppointmentStatus.completed or AppointmentStatus.incoming)
                 {
-                    string errorMessage = status switch
+                    if (status != AppointmentStatus.incoming || (status == AppointmentStatus.incoming && !tablesAppointment.IsExtended && !tablesAppointment.ExtendedOf.HasValue))
                     {
-                        AppointmentStatus.cancelled => "This appointment has already been cancelled.",
-                        AppointmentStatus.refunded => "This appointment has already been cancelled and refunded.",
-                        AppointmentStatus.checked_in => "This appointment has already been checked-in.",
-                        AppointmentStatus.expired => "This appointment is expired.",
-                        AppointmentStatus.completed => "This appointment is already completed.",
-                        AppointmentStatus.incoming => "Cannot cancel incoming appointments.",
-                        _ => "Invalid appointment status."
-                    };
-                    throw new Exception($"Cancellation failed: {errorMessage}");
+                        string errorMessage = status switch
+                        {
+                            AppointmentStatus.cancelled => "This appointment has already been cancelled.",
+                            AppointmentStatus.refunded => "This appointment has already been cancelled and refunded.",
+                            AppointmentStatus.checked_in => "This appointment has already been checked-in.",
+                            AppointmentStatus.expired => "This appointment is expired.",
+                            AppointmentStatus.completed => "This appointment is already completed.",
+                            AppointmentStatus.incoming => "Cannot cancel incoming appointments.",
+                            _ => "Invalid appointment status."
+                        };
+                        throw new Exception($"Cancellation failed: {errorMessage}");
+                    }
                 }
 
                 if (refundCalculation.RefundStatus == RefundStatus.cancellation_fail)
