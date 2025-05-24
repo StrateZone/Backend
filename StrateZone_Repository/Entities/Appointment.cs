@@ -16,6 +16,8 @@ public partial class Appointment
 
     public DateTime? CreatedAt { get; set; }
 
+    public bool IsMonthlyAppointment { get; set; }
+
     public virtual ICollection<TablesAppointment> TablesAppointments { get; set; } = new List<TablesAppointment>();
 
     public virtual ICollection<Appointmentrequest> Appointmentrequests { get; set; } = new List<Appointmentrequest>();

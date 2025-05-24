@@ -155,6 +155,8 @@ public partial class StrateZoneDbContext : DbContext
 
             entity.Property(e => e.TotalPrice).HasColumnName("total_price");
 
+            entity.Property(e => e.IsMonthlyAppointment).HasColumnName("is_monthly_appointment");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasConversion(
@@ -543,6 +545,8 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Description).HasColumnName("description")
                 .HasMaxLength(200)
                 .HasColumnName("description");
+
+            entity.Property(e => e.IsForMonthlyBooking).HasColumnName("is_for_monthly_booking");
 
             entity.Property(e => e.Status).HasColumnName("status").HasColumnType("room_status").HasConversion(
                     v => v.ToString(),

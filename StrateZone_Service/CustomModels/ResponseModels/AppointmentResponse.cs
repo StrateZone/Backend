@@ -23,6 +23,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public UserResponse? User { get; set; }
 
+        public bool IsMonthlyAppointment { get; set; }
+
         public virtual ICollection<TablesAppointmentResponse> TablesAppointments { get; set; } = [];
 
         public virtual ICollection<AppointmentrequestResponse>? Appointmentrequests { get; set; } = [];

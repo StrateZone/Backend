@@ -253,6 +253,15 @@ namespace StrateZone_Repository.Implements
              string[] gameTypes = null,
              string[] roomTypes = null)
         {
+            return await GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(parameters, false, gameTypes, roomTypes);
+        }
+
+        public async Task<PagedList<Table>> GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(
+             TableParameters parameters,
+             bool MonthlyRoomOnly,
+             string[] gameTypes = null,
+             string[] roomTypes = null)
+        {
             try
             {
                 var query = @"
@@ -260,7 +269,7 @@ namespace StrateZone_Repository.Implements
                     FROM tables t
                     JOIN rooms r ON t.room_id = r.room_id
                     JOIN ""gameTypes"" gt ON gt.type_id = t.""gameType_id""
-                    WHERE t.status = 'active' AND r.status = 'available' 
+                    WHERE t.status = 'active' AND r.status = 'available' AND r.is_for_monthly_booking = @MonthlyRoomFilter
                     AND (@RoomName IS NULL OR r.room_name LIKE CONCAT('%', @RoomName, '%'))
                     AND ((@GameTypeIds IS NULL OR gt.type_name = ANY(@GameTypeIds)) AND gt.status = 'active')
                     AND (@RoomTypeIds IS NULL OR r.room_type = ANY(@RoomTypeIds))
@@ -288,7 +297,8 @@ namespace StrateZone_Repository.Implements
                         { Value = string.IsNullOrEmpty(parameters.RoomName) ? DBNull.Value : parameters.RoomName },
 
                         new NpgsqlParameter("@StartTime", parameters.StartTime),
-                        new NpgsqlParameter("@EndTime", parameters.EndTime))
+                        new NpgsqlParameter("@EndTime", parameters.EndTime),
+                        new NpgsqlParameter("@MonthlyRoomFilter", MonthlyRoomOnly))
                     .AsNoTracking()
                     .Include(t => t.GameType)
                     .Include(t => t.Room)
@@ -394,6 +404,41 @@ namespace StrateZone_Repository.Implements
                 throw;
             }
         }
+
+        public async Task<List<Table>> GetTablesWithinASpecificTimeRangeInMonthAsync(
+            List<(DateTime StartTime, DateTime EndTime)> times,
+            string GameType,
+            string RoomType)
+        {
+            var result = new List<Table>();
+
+            foreach (var (StartTime, EndTime) in times)
+            {
+                var parameters = new TableParameters
+                {
+                    PageNumber = 1,
+                    PageSize = 1, // only need the first available table
+                    StartTime = StartTime,
+                    EndTime = EndTime,
+                    RoomName = null // no filtering by room name
+                };
+
+                var availableTables = await GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(
+                    parameters,
+                    true,
+                    gameTypes: new[] { GameType },
+                    roomTypes: new[] { RoomType });
+
+                var firstAvailable = availableTables.FirstOrDefault();
+                if (firstAvailable != null)
+                {
+                    result.Add(firstAvailable);
+                }
+            }
+
+            return result;
+        }
+
 
         public async Task DisableTablesOnRoomAsync(int id)
         {

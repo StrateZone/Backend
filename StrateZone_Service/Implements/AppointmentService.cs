@@ -234,6 +234,7 @@ namespace StrateZone_Service.Implements
                     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Local),
                     Status = AppointmentStatus.incompleted.ToString(),
                     TotalPrice = request.TotalPrice,
+                    IsMonthlyAppointment = request.IsMonthlyAppointment,
                 };
 
                 var mappedAppointment = _mapper.Map<Appointment>(appointmentModel);

@@ -2,7 +2,7 @@
 
 namespace StrateZone_Service.CustomModels.ResponseModels
 {
-    public enum RefundStatus { cancellation_fail, no_refund, no_refund_while_refund_for_invited_user, refund_partial_percentage_of_total, refund_100_percentage_of_total, no_refund_while_refund_for_owner };
+    public enum RefundStatus { cancellation_fail, no_refund, no_refund_while_refund_for_invited_user, refund_partial_percentage_of_total, refund_100_percentage_of_total, no_refund_while_refund_for_owner, extended_table_refund };
 
     public class TablesAppointmentRefundResponse
     {

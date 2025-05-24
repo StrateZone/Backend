@@ -35,8 +35,8 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                    INSERT INTO rooms (room_name, room_type, description, capacity, status) 
-                    VALUES (@name, @type, @description, @capacity, @status::room_status)
+                    INSERT INTO rooms (room_name, room_type, description, capacity, status, is_for_monthly_booking) 
+                    VALUES (@name, @type, @description, @capacity, @status::room_status, @is_for_monthly_booking)
                     RETURNING room_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@name", room.RoomName));
@@ -44,6 +44,7 @@ namespace StrateZone_Repository.Implements
                 cmd.Parameters.Add(new NpgsqlParameter("@description", room.Description));
                 cmd.Parameters.Add(new NpgsqlParameter("@capacity", room.Capacity));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", room.Status.ToString()));
+                cmd.Parameters.Add(new NpgsqlParameter("@is_for_monthly_booking", room.IsForMonthlyBooking));
 
                 var newRoomId = await cmd.ExecuteScalarAsync();
                 room.RoomId = Convert.ToInt32(newRoomId);
@@ -158,6 +159,9 @@ namespace StrateZone_Repository.Implements
 
                 sql.Append("status = @status::room_status, ");
                 parameters.Add(new NpgsqlParameter("@status", room.Status.ToString()));
+
+                sql.Append("is_for_monthly_booking = @is_for_monthly_booking, ");
+                parameters.Add(new NpgsqlParameter("@is_for_monthly_booking", room.IsForMonthlyBooking));
 
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(" WHERE room_id = @id");

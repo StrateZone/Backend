@@ -22,6 +22,8 @@ namespace StrateZone_Service.BusinessModels
 
         public RoomStatus Status { get; set; }
 
+        public bool IsForMonthlyBooking { get; set; }
+
         public virtual ICollection<TableModel> Tables { get; set; } = new List<TableModel>();
     }
 }

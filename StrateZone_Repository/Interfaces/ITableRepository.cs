@@ -13,6 +13,7 @@ namespace StrateZone_Repository.Interfaces
         Task<Table> GetSimilarTableByIdAsync(DateTime startTime, DateTime endTime, int id);
         Task<PagedList<Table>> GetTablesAsync(TablesAppointmentParameters parameters, string? search);
         Task<List<Table>> GetAvailableTablesAsync(DateTime StartTime, DateTime EndTime);
+        Task<List<Table>> GetTablesWithinASpecificTimeRangeInMonthAsync(List<(DateTime StartTime, DateTime EndTime)> times, string GameType, string RoomType);
         Task<PagedList<Table>> GetTablesAsync(TableParameters parameters);
         Task<PagedList<Table>> GetTablesByGameTypeAsync(TableParameters parameters, string gameType);
         Task<PagedList<Table>> GetAvailableTablesAsync(TableParameters parameters);

@@ -21,5 +21,8 @@ namespace StrateZone_Service.CustomModels.RequestModels
 
         [Required]
         public RoomStatus Status { get; set; } = RoomStatus.available;
+
+        [Required]
+        public bool IsForMonthlyBooking { get; set; } = false;
     }
 }

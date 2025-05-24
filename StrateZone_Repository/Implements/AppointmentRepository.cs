@@ -241,14 +241,15 @@ namespace StrateZone_Repository.Implements
 
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-                    INSERT INTO appointments (user_id, total_price, status, created_at) 
-                    VALUES (@user_id, @total_price, @status::appointment_status, @created_at)
+                    INSERT INTO appointments (user_id, total_price, status, created_at, is_monthly_appointment) 
+                    VALUES (@user_id, @total_price, @status::appointment_status, @created_at, @is_monthly_appointment)
                     RETURNING appointment_id;";
 
                 cmd.Parameters.Add(new NpgsqlParameter("@user_id", appointment.UserId));
                 cmd.Parameters.Add(new NpgsqlParameter("@total_price", appointment.TotalPrice));
                 cmd.Parameters.Add(new NpgsqlParameter("@status", appointment.Status.ToString()));
                 cmd.Parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt ?? DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified)));
+                cmd.Parameters.Add(new NpgsqlParameter("@is_monthly_appointment", appointment.IsMonthlyAppointment));
 
                 var newAppointmentId = await cmd.ExecuteScalarAsync();
                 int appointmentId = Convert.ToInt32(newAppointmentId);
@@ -294,6 +295,9 @@ namespace StrateZone_Repository.Implements
                     sql.Append("created_at = @created_at, ");
                     parameters.Add(new NpgsqlParameter("@created_at", appointment.CreatedAt.Value));
                 }
+
+                sql.Append("is_monthly_appointment = @is_monthly_appointment, ");
+                parameters.Add(new NpgsqlParameter("@is_monthly_appointment", appointment.IsMonthlyAppointment));
 
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(" WHERE appointment_id = @id");

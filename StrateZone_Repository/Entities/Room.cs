@@ -18,5 +18,7 @@ public partial class Room
 
     public RoomStatus Status { get; set; }
 
+    public bool IsForMonthlyBooking { get; set; }
+
     public virtual ICollection<Table> Tables { get; set; } = new List<Table>();
 }

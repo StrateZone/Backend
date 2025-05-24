@@ -760,7 +760,7 @@ namespace StrateZone_Service.Implements
                     {
                         TablesAppointmentModel = model,
                         RefundAmount = (decimal)(tablesAppointment.Price * (decimal) system.Percentage_Refund_On_ExtendedTables),
-                        RefundStatus = RefundStatus.refund_100_percentage_of_total,
+                        RefundStatus = RefundStatus.extended_table_refund,
                         Message = $"Hoàn tiền {system.Percentage_Refund_On_ExtendedTables * 100}% do là đơn mở rộng.",
                         NumerOfTablesCancelledThisWeek = cancelledTablesAppointmentsWithinThisWeek,
                         CancellationTime = CancelTime,

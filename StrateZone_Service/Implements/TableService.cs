@@ -20,13 +20,15 @@ namespace StrateZone_Service.Implements
         private readonly IPriceService _priceService;
         private readonly IMapper _mapper;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ScheduleTimeValidator _scheduleTimeValidator;
 
-        public TableService(ITableRepository tableRepository, IPriceService priceService, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
+        public TableService(ITableRepository tableRepository, IPriceService priceService, IMapper mapper, IServiceScopeFactory serviceScopeFactory, ScheduleTimeValidator scheduleTimeValidator)
         {
             _tableRepository = tableRepository;
             _priceService = priceService;
             _mapper = mapper;
             _serviceScopeFactory = serviceScopeFactory;
+            _scheduleTimeValidator = scheduleTimeValidator;
         }
 
         public async Task<PagedList<TableModel>> GetTablesAsync(TableParameters parameters)
@@ -374,6 +376,61 @@ namespace StrateZone_Service.Implements
                 table.TotalPrice = prices.ElementAt(3);
 
                 return table;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<TableResponse>> GetTablesWithinASpecificTimeRangeInMonthAsync(int Year, int Month, DayOfWeek dayOfWeek, TimeOnly StartTime, TimeOnly EndTime, string RoomType, string GameType)
+        {
+            try
+            {
+                List<(DateTime Start, DateTime End)> dates = new();
+
+                int daysInMonth = DateTime.DaysInMonth(Year, Month);
+                for (int day = 1; day <= daysInMonth; day++)
+                {
+                    DateTime date = new DateTime(Year, Month, day);
+
+                    if (date.DayOfWeek != dayOfWeek) continue;
+
+                    DateTime startDateTime = date.Add(StartTime.ToTimeSpan());
+                    DateTime endDateTime = date.Add(EndTime.ToTimeSpan());
+
+                    if (date < DateTime.UtcNow.AddHours(7)) continue;
+
+                    dates.Add((startDateTime, endDateTime));
+                }
+
+                var result = await _tableRepository.GetTablesWithinASpecificTimeRangeInMonthAsync(dates, GameType, RoomType);
+                var tables = _mapper.Map<List<TableResponse>>(result);
+                
+                for (int i = 0; i < tables.Count; ++i)
+                {
+                    var table = tables[i];
+                    DateTime ScheduleTime = dates[i].Start;
+                    DateTime tEndTime = dates[i].End;
+
+                    var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(ScheduleTime, tEndTime, false);
+                    if (!isValid)
+                    {
+                        tables.Remove(table);
+                        continue;
+                    }
+
+                    List<decimal> prices = await _priceService.GetDetailedPriceOfTableFromTimeRangeAsync(table.TableId, ScheduleTime, tEndTime);
+
+                    table.StartDate = ScheduleTime;
+                    table.EndDate = tEndTime;
+                    table.GameTypePrice = prices.ElementAt(0);
+                    table.RoomTypePrice = prices.ElementAt(1);
+                    table.DurationInHours = (float?)prices.ElementAt(2);
+                    table.TotalPrice = prices.ElementAt(3);
+                }
+
+                return tables;
             }
             catch (Exception ex)
             {

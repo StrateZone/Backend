@@ -28,6 +28,8 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public string? Unit { get; set; }
 
+        public bool IsForMonthlyBooking { get; set; }
+
         public virtual ICollection<TableModel> Tables { get; set; } = new List<TableModel>();
     }
 }

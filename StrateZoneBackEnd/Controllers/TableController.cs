@@ -6,6 +6,7 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Utils;
+using System.ComponentModel.DataAnnotations;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -167,6 +168,20 @@ namespace StrateZone_APIs.Controllers
                 if (!isValid) return BadRequest(new { message = errorMessage });
 
                 var tables = await _tableService.GetAvailableTablesForEachGameTypeInTimeRangeAsync(parameters, tableCount);
+                return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("available/monthly")]
+        public async Task<IActionResult> GetAvailableTablesForMonthlyBookingType([FromQuery] TableMonthlyRequest parameters)
+        {
+            try
+            {
+                var tables = await _tableService.GetTablesWithinASpecificTimeRangeInMonthAsync(parameters.Year, parameters.Month, parameters.dayOfWeek, parameters.StartTime, parameters.EndTime, parameters.RoomType, parameters.GameType);
                 return tables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
             }
             catch (Exception ex)
