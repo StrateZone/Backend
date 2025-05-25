@@ -68,6 +68,38 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                var result = await _roomService.GetRegularRoomtypesAsync();
+
+                return result.Count > 0 ? Ok(result) : Ok("No room type was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("roomtypes/for-monthly-booking")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetMonthlyRoomTypes()
+        {
+            try
+            {
+                var result = await _roomService.GetMonthlyRoomtypes();
+
+                return result.Count > 0 ? Ok(result) : Ok("No room type was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("roomtypes/admin")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetRoomTypesAdmin()
+        {
+            try
+            {
                 var result = await _roomService.GetAllRoomtypesAsync();
 
                 return result.Count > 0 ? Ok(result) : Ok("No room type was found.");

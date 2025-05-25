@@ -383,7 +383,7 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<List<TableResponse>> GetTablesWithinASpecificTimeRangeInMonthAsync(int Year, int Month, DayOfWeek dayOfWeek, TimeOnly StartTime, TimeOnly EndTime, string RoomType, string GameType)
+        public async Task<TablesMonthlyResponse> GetTablesWithinASpecificTimeRangeInMonthAsync(int Year, int Month, DayOfWeek dayOfWeek, TimeOnly StartTime, TimeOnly EndTime, string RoomType, string GameType)
         {
             try
             {
@@ -406,7 +406,8 @@ namespace StrateZone_Service.Implements
 
                 var result = await _tableRepository.GetTablesWithinASpecificTimeRangeInMonthAsync(dates, GameType, RoomType);
                 var tables = _mapper.Map<List<TableResponse>>(result);
-                
+
+                Dictionary<DateOnly, TableResponse> response = new();
                 for (int i = 0; i < tables.Count; ++i)
                 {
                     var table = tables[i];
@@ -416,7 +417,7 @@ namespace StrateZone_Service.Implements
                     var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(ScheduleTime, tEndTime, false);
                     if (!isValid)
                     {
-                        tables.Remove(table);
+                        response.Add(new DateOnly(ScheduleTime.Year, ScheduleTime.Month, ScheduleTime.Day), null);
                         continue;
                     }
 
@@ -428,9 +429,16 @@ namespace StrateZone_Service.Implements
                     table.RoomTypePrice = prices.ElementAt(1);
                     table.DurationInHours = (float?)prices.ElementAt(2);
                     table.TotalPrice = prices.ElementAt(3);
+
+                    response.Add(new DateOnly(ScheduleTime.Year, ScheduleTime.Month, ScheduleTime.Day), table);
                 }
 
-                return tables;
+                return new()
+                { 
+                    DatesAndTables = response,
+                    DayOfWeek = dayOfWeek.ToString(),
+
+                };
             }
             catch (Exception ex)
             {

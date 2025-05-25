@@ -118,6 +118,7 @@ namespace StrateZone_Service.Implements
                     Description = request.Description,
                     Type = request.Type,
                     Status = request.Status,
+                    IsForMonthlyBooking = request.IsForMonthlyBooking
                 };
 
                 Room room = _mapper.Map<Room>(roomModel);
@@ -189,6 +190,30 @@ namespace StrateZone_Service.Implements
             try
             {
                 return await _roomRepository.GetAllRoomtypesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<string>> GetRegularRoomtypesAsync()
+        {
+            try
+            {
+                return await _roomRepository.GetRegularRoomtypesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<string>> GetMonthlyRoomtypes()
+        {
+            try
+            {
+                return await _roomRepository.GetMonthlyRoomtypes();
             }
             catch (Exception ex)
             {

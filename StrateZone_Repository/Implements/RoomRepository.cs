@@ -17,7 +17,7 @@ namespace StrateZone_Repository.Implements
     {
         private readonly StrateZoneDbContext _context;
 
-        public RoomRepository( StrateZoneDbContext context )
+        public RoomRepository(StrateZoneDbContext context)
         {
             _context = context;
         }
@@ -185,6 +185,42 @@ namespace StrateZone_Repository.Implements
                             .GroupBy(r => r.RoomType)
                             .Select(r => r.Key)
                             .ToListAsync();
+        }
+
+        public async Task<List<string>> GetRegularRoomtypesAsync()
+        {
+            var regularRoomTypes = await _context.Rooms
+                .AsNoTracking()
+                .Where(r => !r.IsForMonthlyBooking && r.Tables.Count > 0 && r.Status == PostgreEnums.RoomStatus.available)
+                .Select(r => r.Type)
+                .Distinct()
+                .ToListAsync();
+
+            return await _context.Prices
+                .AsNoTracking()
+                .Where(p => regularRoomTypes.Contains(p.RoomType))
+                .GroupBy(r => r.RoomType)
+                .Select(r => r.Key)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetMonthlyRoomtypes()
+        {
+            var regularRoomTypes = await _context.Rooms
+                .AsNoTracking()
+                .Where(r => r.IsForMonthlyBooking && r.Tables.Count > 0 && r.Status == PostgreEnums.RoomStatus.available)
+                .Select(r => r.Type)
+                .Distinct()
+                .ToListAsync();
+
+            return await _context.Prices
+                .AsNoTracking()
+                .Where(p => regularRoomTypes.Contains(p.RoomType))
+                .GroupBy(r => r.RoomType)
+                .Select(r => r.Key)
+                .Distinct()
+                .ToListAsync();
         }
     }
 }
