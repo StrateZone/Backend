@@ -568,7 +568,7 @@ namespace StrateZone_Repository.Implements
                                     WHEN accepted_requests = 0 AND total_requests > 0 THEN 0
                                     ELSE -1
                                 END AS status
-                            FROM appt_data;
+                            FROM appt_data
                     ")
                     .FirstOrDefaultAsync();
 
