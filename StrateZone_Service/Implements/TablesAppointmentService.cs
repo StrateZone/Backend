@@ -172,6 +172,18 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<(bool, string)> CheckTablesAppointmentPaymentStatus(int tablesAppointmentId)
+        {
+            var checkResult = await _tablesAppointmentRepository.GetPaymentStatusForTablesAppointments(tablesAppointmentId);
+
+            return checkResult switch
+            {
+                0 => (false, "Những lời mời chơi cờ bạn đã gửi cho bàn này vẫn chưa được phản hồi!"),
+                1 => (true, "Ok!"),
+                _ => (false, "Bàn này chưa được thanh toán!"),
+            };
+        }
+
         public async Task<TablesAppointmentModel> CheckInTablesAppointment(int tablesAppointmentId, int userId)
         {
             try
@@ -179,12 +191,10 @@ namespace StrateZone_Service.Implements
                 var tablesAppointmentResponse = await GetByIdAsync(tablesAppointmentId);
                 var tablesAppointment = _mapper.Map<TablesAppointmentModel>(tablesAppointmentResponse);
 
-                var payment = (await _paymentService.GetPaymentsByTablesAppointmentIdAsync(tablesAppointmentId))
-                            .SingleOrDefault(p => p.UserId == userId) 
-                            ?? throw new Exception("No payment was found for this tables appointment.");
-
-                if ((PaymentStatus) Enum.Parse(typeof(PaymentStatus), payment.PaymentStatus) == PaymentStatus.unpaid)
-                    throw new Exception($"Check-in failed: Unpaid appointment. Please proceed with the payment first!");
+                var checkResult = await CheckTablesAppointmentPaymentStatus(tablesAppointmentId);
+                
+                if (!checkResult.Item1)
+                    throw new Exception($"Check-in thất bại: {checkResult.Item2}!");
 
                 string errorMessage = (AppointmentStatus) Enum.Parse(typeof(AppointmentStatus), tablesAppointment.Status) switch
                 {
@@ -197,7 +207,7 @@ namespace StrateZone_Service.Implements
                     _ => string.Empty,
                 };
 
-                if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Check-in failed: {errorMessage}");
+                if (!string.IsNullOrEmpty(errorMessage)) throw new Exception($"Check-in thất bại: {errorMessage}");
 
                 int minutes_beforeCheckin = await _systemService.GetAppointmentCheckinTimeInMinuesAsync(1);
 

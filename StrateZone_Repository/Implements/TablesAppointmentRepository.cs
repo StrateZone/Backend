@@ -536,6 +536,51 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<short> GetPaymentStatusForTablesAppointments(int tables_appointment_id)
+        {
+            try
+            {
+                var result = await _context.Database
+                    .SqlQuery<short?>($@"
+                            WITH appt_data AS (
+                                SELECT 
+                                    ta.id AS appointment_id,
+                                    ta.paid_for_opponent,
+                                    COUNT(DISTINCT CASE WHEN ar.status = 'accepted' THEN ar.id END) AS accepted_requests,
+                                    COUNT(DISTINCT ar.id) AS total_requests,
+                                    COUNT(DISTINCT CASE WHEN p.status = 'paid' THEN p.id END) AS paid_payments
+                                FROM tables_appointments ta
+                                LEFT JOIN appointment_requests ar 
+                                    ON ar.table_id = ta.table_id
+                                    AND ar.appointment_id = ta.appointment_id
+                                    AND ar.start_time = ta.schedule_time
+                                    AND ar.end_time = ta.end_time
+                                LEFT JOIN payments p ON p.tables_appointment_id = ta.id
+                                WHERE ta.id = {tables_appointment_id}
+                                GROUP BY ta.id, ta.paid_for_opponent
+                            )
+                            SELECT
+                                CASE
+                                    WHEN paid_payments = 0 THEN -1
+                                    WHEN total_requests = 0 AND paid_payments = 1 THEN 1
+                                    WHEN accepted_requests = 1 AND paid_for_opponent = TRUE AND paid_payments = 1 THEN 1
+                                    WHEN accepted_requests = 1 AND paid_for_opponent = FALSE AND paid_payments = 2 THEN 1
+                                    WHEN accepted_requests = 0 AND total_requests > 0 THEN 0
+                                    ELSE -1
+                                END AS status
+                            FROM appt_data;
+                    ")
+                    .FirstOrDefaultAsync();
+
+                return result ?? -1;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+
         public async Task<List<TablesAppointment>> GetAllActiveTablesAppointmentByGameTypeIdAsync(int typeId)
         {
             try
