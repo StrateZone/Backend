@@ -632,12 +632,16 @@ namespace StrateZone_Repository.Implements
                                               FROM appointment_requests ar
                                               WHERE ar.appointment_id = ta.appointment_id
                                                 AND ar.table_id = ta.table_id
+                                                AND ta.schedule_time = ar.start_time 
+                                                AND ta.end_time = ar.end_time
                                           )
                                           AND NOT EXISTS (
                                               SELECT 1
                                               FROM appointment_requests ar
                                               WHERE ar.appointment_id = ta.appointment_id
                                                 AND ar.table_id = ta.table_id
+                                                AND ta.schedule_time = ar.start_time 
+                                                AND ta.end_time = ar.end_time
                                                 AND ar.status NOT IN ('expired', 'cancelled', 'rejected')
                                           )
                                       );

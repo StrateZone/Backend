@@ -613,12 +613,12 @@ namespace StrateZone_Repository.Implements
             {
                 var ta = await _context.TablesAppointments.AsNoTracking()
                                 .Where(ta => ta.Id == tablesAppointmentId)
-                                .Select(ta => new { ta.AppointmentId, ta.TableId })
+                                .Select(ta => new { ta.AppointmentId, ta.TableId, ta.ScheduleTime, ta.EndTime })
                                 .FirstOrDefaultAsync();
 
                 return await _context.AppointmentRequests
                                     .AsNoTracking()
-                                    .Where(ar => ar.TableId == ta.TableId && ar.AppointmentId == ar.AppointmentId)
+                                    .Where(ar => ar.TableId == ta.TableId && ar.AppointmentId == ar.AppointmentId && ar.StartTime == ta.ScheduleTime && ar.EndTime == ta.EndTime)
                                     .ToListAsync();
             }
             catch (Exception ex)
@@ -685,6 +685,8 @@ namespace StrateZone_Repository.Implements
                                     JOIN payments p ON p.tables_appointment_id = ta.id
                                     WHERE ta.table_id = ar.table_id
                                       AND ta.appointment_id = ar.appointment_id
+                                      AND ta.schedule_time = ar.start_time 
+                                      AND ta.end_time = ar.end_time
                                       AND p.status = 'unpaid'
                                 )
                             )
