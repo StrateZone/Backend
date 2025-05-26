@@ -103,6 +103,57 @@ namespace StrateZone_Repository.Implements
             }
         }
 
+        public async Task<PagedList<Appointment>> GetAllMonthlyAppointmentsAsync(AppointmentAdminParameters parameters)
+        {
+            try
+            {
+                AppointmentStatus? status = parameters.Status;
+
+                var statusParam = status.HasValue
+                    ? new NpgsqlParameter("@st", status.Value.ToString()) { NpgsqlDbType = NpgsqlDbType.Text }
+                    : new NpgsqlParameter("@st", DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Text };
+
+                var result = _context.Appointments
+                                            .FromSqlRaw(@"
+                                                SELECT DISTINCT a.* 
+                                                FROM appointments a 
+                                                JOIN tables_appointments ta 
+                                                ON ta.appointment_id = a.appointment_id 
+                                                AND (@st IS NULL OR ta.status = @st::appointment_status) 
+                                                WHERE a.is_monthly_appointment = TRUE
+                                            ", statusParam)
+                                            .AsNoTracking()
+                                            .Include(a => a.User)
+                                            .AsQueryable();
+
+                result = parameters.OrderBy switch
+                {
+                    "created-at" => result.OrderBy(a => a.CreatedAt),
+                    "created-at-desc" => result.OrderByDescending(a => a.CreatedAt),
+                    "total-price" => result.OrderBy(a => a.TotalPrice),
+                    "total-price-desc" => result.OrderByDescending(a => a.TotalPrice),
+                    "tables-count" => result.OrderBy(a => a.TablesAppointments.Count),
+                    "tables-count-desc" => result.OrderByDescending(a => a.TablesAppointments.Count),
+                    _ => result
+                };
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchValue))
+                {
+                    string search = parameters.SearchValue.Trim().ToLower();
+
+                    result = result.Where(a =>
+                        a.AppointmentId.ToString().ToLower().Contains(search) ||
+                        a.User.Email.ToLower().Contains(search));
+                }
+
+                return await PagedList<Appointment>.ToPagedList(result, parameters.PageNumber, parameters.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<PagedList<Appointment>> GetAllAppointmentsCheckinAsync(AppointmentAdminParameters parameters)
         {
             try

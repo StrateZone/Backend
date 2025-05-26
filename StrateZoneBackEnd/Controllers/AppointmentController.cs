@@ -62,6 +62,25 @@ namespace StrateZone_APIs.Controllers
         }
 
         [Authorize(Policy = "StaffAndAbove")]
+        [HttpGet("all-monthly/admin")]
+        public async Task<IActionResult> GetAllMonthlyAppointments([FromQuery] AppointmentAdminParameters parameters)
+        {
+            try
+            {
+                var appointments = await _appointmentService.GetAllMonthlyAppointmentsAsync(parameters);
+
+                var response = new PagedListResponse<AppointmentResponse>(appointments);
+
+                return response.TotalCount > 0 ? Ok(response) : Ok("No appointment was found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
+        [Authorize(Policy = "StaffAndAbove")]
         [HttpGet("all/checkin")]
         public async Task<IActionResult> GetAllCheckinAppointments([FromQuery] AppointmentAdminParameters parameters)
         {

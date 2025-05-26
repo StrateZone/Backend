@@ -105,6 +105,35 @@ namespace StrateZone_Service.Implements
             }
         }
 
+        public async Task<PagedList<AppointmentResponse>> GetAllMonthlyAppointmentsAsync(AppointmentAdminParameters parameters)
+        {
+            try
+            {
+                var result = await _appointmentRepository.GetAllMonthlyAppointmentsAsync(parameters);
+
+                if (parameters.Status != null)
+                {
+                    foreach (var a in result)
+                    {
+                        a.TablesAppointments = a.TablesAppointments.Where(ta => ta.Status == parameters.Status).ToList();
+                    }
+                }
+
+                var appointments = _mapper.Map<PagedList<AppointmentResponse>>(result);
+
+                foreach (var a in appointments)
+                {
+                    a.TablesCount = await _appointmentRepository.GetTablesCountForAppointment(a.AppointmentId);
+                }
+
+                return new PagedList<AppointmentResponse>(appointments, result.TotalCount, result.CurrentPage, result.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<PagedList<AppointmentResponse>> GetAllAppointmentsCheckinAsync(AppointmentAdminParameters parameters)
         {
             try
