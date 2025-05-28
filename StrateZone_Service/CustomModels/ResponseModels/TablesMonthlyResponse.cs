@@ -9,7 +9,7 @@ namespace StrateZone_Service.CustomModels.ResponseModels
     public class TablesMonthlyResponse
     {
         public int ExpectedTablesCount => DatesAndTables.Sum(t => t.Value.Count);
-        public int ActualTablesCount => DatesAndTables.Sum(t => t.Value.Count(tr => tr != null));
+        public int ActualTablesCount => DatesAndTables.Sum(t => t.Value.Count(tr => tr.TableResponse != null));
         public Dictionary<DayOfWeek, List<TableDateResponse>> DatesAndTables { get; set; } = new();
     }
 
