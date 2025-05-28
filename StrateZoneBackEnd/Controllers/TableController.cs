@@ -181,7 +181,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                var tables = await _tableService.GetTablesWithinASpecificTimeRangeInMonthAsync(parameters.Year, parameters.Month, parameters.dayOfWeek, parameters.StartTime, parameters.EndTime, parameters.RoomType, parameters.GameType);
+                var tables = await _tableService.GetTablesWithinASpecificTimeRangeInMonthAsync(parameters);
                 return tables.DatesAndTables.Count > 0 ? Ok(tables) : Ok("No available table was found for this gametype and roomtype.");
             }
             catch (Exception ex)

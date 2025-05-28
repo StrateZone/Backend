@@ -383,41 +383,46 @@ namespace StrateZone_Service.Implements
             }
         }
 
-        public async Task<TablesMonthlyResponse> GetTablesWithinASpecificTimeRangeInMonthAsync(int Year, int Month, DayOfWeek dayOfWeek, TimeOnly StartTime, TimeOnly EndTime, string RoomType, string GameType)
+        public async Task<TablesMonthlyResponse> GetTablesWithinASpecificTimeRangeInMonthAsync(TableMonthlyRequest tableMonthlyRequest)
         {
             try
             {
-                List<(DateTime Start, DateTime End)> dates = new();
+                if (tableMonthlyRequest.FromDate > tableMonthlyRequest.ToDate)
+                    throw new Exception("Ngày kết thúc phải lớn hơn ngày bắt đầu");
 
-                int daysInMonth = DateTime.DaysInMonth(Year, Month);
-                for (int day = 1; day <= daysInMonth; day++)
+                List<(DateTime start, DateTime end)> dates = new();
+                DateOnly Start = tableMonthlyRequest.FromDate, End = tableMonthlyRequest.ToDate;
+
+                while (Start < End)
                 {
-                    DateTime date = new DateTime(Year, Month, day);
+                    DateTime Current = new(Start.Year, Start.Month, Start.Day);
 
-                    if (date.DayOfWeek != dayOfWeek) continue;
+                    if (tableMonthlyRequest.DaysOfWeek.Contains(Current.DayOfWeek))
+                    {
+                        dates.Add(new (
+                            Current.Add(tableMonthlyRequest.StartTime.ToTimeSpan()), 
+                            Current.Add(tableMonthlyRequest.EndTime.ToTimeSpan())) 
+                        );
+                    }
 
-                    DateTime startDateTime = date.Add(StartTime.ToTimeSpan());
-                    DateTime endDateTime = date.Add(EndTime.ToTimeSpan());
-
-                    if (date < DateTime.UtcNow.AddHours(7)) continue;
-
-                    dates.Add((startDateTime, endDateTime));
+                    Start = Start.AddDays(1);
                 }
 
-                var result = await _tableRepository.GetTablesWithinASpecificTimeRangeInMonthAsync(dates, GameType, RoomType);
+                var result = await _tableRepository.GetTablesWithinASpecificTimeRangeInMonthAsync(dates, tableMonthlyRequest.GameType, tableMonthlyRequest.RoomType);
                 var tables = _mapper.Map<List<TableResponse>>(result);
 
-                Dictionary<DateOnly, TableResponse> response = new();
+                List<TableDateResponse> tablesDic = new();
                 for (int i = 0; i < tables.Count; ++i)
                 {
                     var table = tables[i];
-                    DateTime ScheduleTime = dates[i].Start;
-                    DateTime tEndTime = dates[i].End;
+                    DateTime ScheduleTime = dates[i].start;
+                    DateTime tEndTime = dates[i].end;
+                    DayOfWeek dayOfWeek = ScheduleTime.DayOfWeek;
 
                     var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(ScheduleTime, tEndTime, false);
                     if (!isValid)
                     {
-                        response.Add(new DateOnly(ScheduleTime.Year, ScheduleTime.Month, ScheduleTime.Day), null);
+                        tablesDic.Add(new() { DayOfWeek = dayOfWeek, OnDate = DateOnly.FromDateTime(ScheduleTime), TableResponse = null });
                         continue;
                     }
 
@@ -430,14 +435,16 @@ namespace StrateZone_Service.Implements
                     table.DurationInHours = (float?)prices.ElementAt(2);
                     table.TotalPrice = prices.ElementAt(3);
 
-                    response.Add(new DateOnly(ScheduleTime.Year, ScheduleTime.Month, ScheduleTime.Day), table);
+                    tablesDic.Add(new() { DayOfWeek = dayOfWeek, OnDate = DateOnly.FromDateTime(ScheduleTime), TableResponse = table});
                 }
 
                 return new()
                 { 
-                    DatesAndTables = response,
-                    DayOfWeek = dayOfWeek.ToString(),
-
+                    DatesAndTables = tablesDic.GroupBy(t => t.DayOfWeek)
+                                                .ToDictionary(
+                                                    g => g.Key, 
+                                                    g => g.ToList()
+                                                )
                 };
             }
             catch (Exception ex)

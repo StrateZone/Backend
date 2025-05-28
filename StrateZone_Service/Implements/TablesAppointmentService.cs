@@ -966,7 +966,7 @@ namespace StrateZone_Service.Implements
             if (DateTime.UtcNow.AddHours(7).AddMinutes(system.ExtendAllow_BeforeMinutes_FromTableComplete) 
                 < currentTA.EndTime)
             {
-                throw new Exception($"Gia hạn thêm giờ chơi chỉ mở {system.ExtendAllow_BeforeMinutes_FromTableComplete} phút trước giờ kết thúc của giờ hiện tại.");
+                throw new Exception($"Gia hạn thêm giờ chơi chỉ mở {system.ExtendAllow_BeforeMinutes_FromTableComplete} phút trước giờ kết thúc của bàn hiện tại.");
             }
 
             DateTime newStartTime = currentTA.EndTime, 

@@ -10,13 +10,13 @@ namespace StrateZone_Service.CustomModels.RequestModels
     public class TableMonthlyRequest
     {
         [Required]
-        public int Year { get; set; }
+        public DateOnly FromDate { get; set; }
 
         [Required]
-        public int Month { get; set; }
+        public DateOnly ToDate { get; set; }
 
         [Required]
-        public DayOfWeek dayOfWeek { get; set; }
+        public DayOfWeek[] DaysOfWeek { get; set; }
 
         [Required]
         public TimeOnly StartTime { get; set; }
