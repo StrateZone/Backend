@@ -35,6 +35,10 @@ namespace StrateZone_Service.CustomModels.ResponseModels
 
         public int? ExtendedOf { get; set; }
 
+        public int ExtendedCount { get; set; }
+
+        public bool AllowExtend { get; set; }
+
         public virtual TableResponse? Table { get; set; }
     }
 
@@ -47,6 +51,10 @@ namespace StrateZone_Service.CustomModels.ResponseModels
         public DateTime ScheduleTime { get; set; }
 
         public DateTime EndTime { get; set; }
+
+        public int NumberOfExtends { get; set; }
+
+        public int MaxNumberOfExtends { get; set; }
 
         public double DurationInHours => EndTime.Subtract(ScheduleTime).TotalHours;
 

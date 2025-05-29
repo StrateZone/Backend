@@ -30,6 +30,8 @@ public partial class TablesAppointment
 
     public int? ExtendedOf { get; set; }
 
+    public int ExtendedCount { get; set; }
+
     public virtual Appointment? Appointment { get; set; }
 
     public virtual Table? Table { get; set; }

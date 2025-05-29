@@ -201,6 +201,12 @@ namespace StrateZone_Repository.Implements
         {
             try
             {
+                var rooms = await _context.Rooms.AsNoTracking().Include(r => r.Tables).FirstOrDefaultAsync(r => r.RoomId == table.RoomId)
+                        ?? throw new Exception("Phòng không tồn tại");
+
+                if (rooms.Tables.Count >= rooms.Capacity)
+                    throw new Exception("Phòng đã đầy, không thể tiếp tục thêm bàn");
+
                 await _context.Tables.AddAsync(table);
                 await _context.SaveChangesAsync();
 
@@ -236,6 +242,9 @@ namespace StrateZone_Repository.Implements
             try
             {
                 var toDelete = await _context.Tables.FindAsync(id) ?? throw new Exception("Table with this ID does not exist");
+
+                if (toDelete.Status != TableStatus.out_of_service)
+                    throw new Exception("Chỉ có thể xóa những bàn đã bị cho ngưng hoạt động.");
 
                 _context.Tables.Remove(toDelete);
                 await _context.SaveChangesAsync();
@@ -417,10 +426,10 @@ namespace StrateZone_Repository.Implements
                 var parameters = new TableParameters
                 {
                     PageNumber = 1,
-                    PageSize = 1, // only need the first available table
+                    PageSize = 1, 
                     StartTime = StartTime,
                     EndTime = EndTime,
-                    RoomName = null // no filtering by room name
+                    RoomName = null 
                 };
 
                 var availableTables = await GetAvailableTableByGameTypesAndRoomTypesInTimeRangeAsync(

@@ -40,5 +40,6 @@ namespace StrateZone_Service.Interfaces
         Task<int> GetNumberOfAllActiveTablesAppointmentByRoomIdAsync(int tableId);
         Task<int> GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(int tableId);
         Task<TablesAppointmentExtendResponse> ExtendTablesAppointmentAsync(int tableAppointmentId, int durationInMinutes);
+        Task<bool> CheckAllowTablesAppointmentExtend(int id);
     }
 }

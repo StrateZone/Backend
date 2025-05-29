@@ -55,7 +55,12 @@ namespace StrateZone_Service.BusinessModels
 
         public float Percentage_Refund_On_ExtendedTables { get; set; }
 
+        public int Max_Tables_Extends_Count { get; set; }
+        
+        public int Min_Tables_For_MonthlyAppointment { get; set; }
+
         public string Status { get; set; }
+
 
         // public virtual UserModel? User { get; set; }
 

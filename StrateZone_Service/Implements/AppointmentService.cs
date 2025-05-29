@@ -243,10 +243,14 @@ namespace StrateZone_Service.Implements
         {
             try
             {
-                var maxInvitedToTable = await _systemService.GetMaxUsersInvitedToTable(1);
+                var system = await _systemService.GetSystemsByIdAsync(1);
+                var maxInvitedToTable = system.Max_NumberOfUsers_InvitedToTable;
 
                 if (request.TablesAppointmentRequests.Any(ta => ta.InvitedUsers.Count > maxInvitedToTable))
-                    throw new Exception($"Một bàn chỉ có thể mời tối đa {maxInvitedToTable} người");
+                    throw new Exception($"Mỗi bàn chỉ có thể mời tối đa {maxInvitedToTable} người");
+
+                if (request.IsMonthlyAppointment && request.TablesAppointmentRequests.Count < system.Min_Tables_For_MonthlyAppointment)
+                    throw new Exception($"Mỗi lịch tháng phải bao gồm tối thiểu {system.Min_Tables_For_MonthlyAppointment} đơn bàn.");
 
                 List<int> vouchers = request.TablesAppointmentRequests
                     .Where(ta => ta.VoucherId != null)

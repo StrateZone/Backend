@@ -960,8 +960,8 @@ namespace StrateZone_Service.Implements
             if (currentTA.Status != AppointmentStatus.checked_in.ToString())
                 throw new Exception("Chỉ có thể gia hạn thêm giờ chơi cho bàn đã được check-in");
 
-            if (currentTA.IsExtended)
-                throw new Exception("Mỗi bàn chỉ có thể gia hạn thêm giờ chơi 1 lần.");
+            if (currentTA.IsExtended && currentTA.ExtendedCount >= system.Max_Tables_Extends_Count)
+                throw new Exception($"Mỗi bàn chỉ có thể gia hạn thêm giờ chơi tối đa {system.Max_Tables_Extends_Count} lần.");
 
             if (DateTime.UtcNow.AddHours(7).AddMinutes(system.ExtendAllow_BeforeMinutes_FromTableComplete) 
                 < currentTA.EndTime)
@@ -969,6 +969,9 @@ namespace StrateZone_Service.Implements
                 throw new Exception($"Gia hạn thêm giờ chơi chỉ mở {system.ExtendAllow_BeforeMinutes_FromTableComplete} phút trước giờ kết thúc của bàn hiện tại.");
             }
 
+            if (!await _tablesAppointmentRepository.CheckAllowTablesAppointmentExtend(tableAppointmentId))
+                throw new Exception("Bàn này hiện không được phép gia hạn");
+            
             DateTime newStartTime = currentTA.EndTime, 
                     newEndTime = currentTA.EndTime.AddMinutes(durationInMinutes);
 
@@ -986,6 +989,8 @@ namespace StrateZone_Service.Implements
                 ScheduleTime = newStartTime,
                 EndTime = newEndTime,
                 Table = newTable,
+                NumberOfExtends = currentTA.ExtendedCount,
+                MaxNumberOfExtends = system.Max_Tables_Extends_Count,
                 Note = currentTA.TableId == newTable.TableId 
                     ? $"Mở rộng giờ chơi thêm {durationInMinutes} phút tại bàn cũ" 
                     : $"Mở rộng giờ chơi thêm {durationInMinutes} phút. Cần dời qua bàn mới: bàn số {newTable.TableId}, phòng {newTable.RoomId}.",
@@ -1167,6 +1172,11 @@ namespace StrateZone_Service.Implements
         public async Task<int> GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(int tableId)
         {
             return await _tablesAppointmentRepository.GetNumberOfAllActiveTablesAppointmentByGametypeIdAsync(tableId);
+        }
+
+        public async Task<bool> CheckAllowTablesAppointmentExtend(int id)
+        {
+            return await _tablesAppointmentRepository.CheckAllowTablesAppointmentExtend(id);
         }
     }
 }

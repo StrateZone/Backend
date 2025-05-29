@@ -63,6 +63,11 @@ namespace StrateZone_Repository.Implements
             {
                 var toDelete = await _context.Rooms.FindAsync(id) ?? throw new Exception("No room with this ID was found");
 
+                if (toDelete.Status == PostgreEnums.RoomStatus.available)
+                {
+                    throw new Exception("Chỉ có thể xóa những phòng đã bị cho ngưng hoạt động.");
+                }
+
                 _context.Remove(toDelete);
                 await _context.SaveChangesAsync();
 

@@ -482,13 +482,13 @@ namespace StrateZone_Service.Implements
                         Data = null
                     };
                 }
-                else if (oldTableAppointment.IsExtended)
+                else if (oldTableAppointment.IsExtended && oldTableAppointment.ExtendedCount >= system.Max_Tables_Extends_Count)
                 {
                     return new ApiResponse<TablesAppointmentModel>
                     {
                         Success = false,
                         StatusCode = 400,
-                        Message = $"Mỗi bàn chỉ có thể gia hạn giờ chơi tối đa 1 lần.",
+                        Message = $"Mỗi bàn chỉ có thể gia hạn giờ chơi tối đa {system.Max_Tables_Extends_Count} lần.",
                         Data = null
                     };
                 }
@@ -508,6 +508,9 @@ namespace StrateZone_Service.Implements
 
                 await _walletRepository.WithdrawalWalletAsync((int)request.Price, userWallet.WalletId);
 
+                oldTableAppointment.ExtendedCount++;
+                oldTableAppointment.IsExtended = true;
+
                 var tablesAppointment = await _tablesAppointmentRepository.CreateTablesAppointmentAsync(
                         new()
                         { 
@@ -520,12 +523,12 @@ namespace StrateZone_Service.Implements
                             Status = AppointmentStatus.confirmed,
                             IsExtended = true,
                             ExtendedOf = oldTableAppointment.Id,
+                            ExtendedCount = oldTableAppointment.ExtendedCount,
                             Note = $"Đơn mở rộng cho bàn có mã đặt {oldTableAppointment.Id} (đơn số #{oldTableAppointment.AppointmentId}, bàn {oldTableAppointment.TableId})",
                         }
                     );
 
                 oldTableAppointment.Note = $"Khách đã yêu cầu thêm giờ chơi. Mã đặt bàn mới: {tablesAppointment.Id} (đơn số #{tablesAppointment.AppointmentId}, bàn {tablesAppointment.TableId})";
-                oldTableAppointment.IsExtended = true;
                 await _tablesAppointmentRepository.UpdateTablesAppointmentAsync(oldTableAppointment, oldTableAppointment.Id);
 
                 _ = Task.Run(async () =>

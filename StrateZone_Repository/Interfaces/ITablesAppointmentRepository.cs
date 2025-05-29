@@ -33,5 +33,6 @@ namespace StrateZone_Repository.Interfaces
         Task<List<TablesAppointment>> GetAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
         Task<int> GetCountAllBookedTablesAppointmentWithinAMonthInYearAsync(int month, int year);
         Task<short> GetPaymentStatusForTablesAppointments(int tables_appointment_id);
+        Task<bool> CheckAllowTablesAppointmentExtend(int id);
     }
 }

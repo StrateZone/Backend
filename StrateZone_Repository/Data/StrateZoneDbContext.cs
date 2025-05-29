@@ -632,6 +632,12 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Percentage_Refund_On_ExtendedTables)
                     .HasColumnName("percentage_refund_on_extended_tables");
 
+            entity.Property(e => e.Max_Tables_Extends_Count)
+                    .HasColumnName("max_tables_extends_count");
+
+            entity.Property(e => e.Min_Tables_For_MonthlyAppointment)
+                    .HasColumnName("min_tables_for_monthly_booking");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");
@@ -698,6 +704,8 @@ public partial class StrateZoneDbContext : DbContext
                     v => v.ToString(),
                     v => (AppointmentStatus)Enum.Parse(typeof(AppointmentStatus), v)
                 );
+
+            entity.Property(e => e.ExtendedCount).HasColumnName("extended_times");
 
             entity.HasOne(d => d.Appointment).WithMany(p => p.TablesAppointments)
                 .HasForeignKey(d => d.AppointmentId)

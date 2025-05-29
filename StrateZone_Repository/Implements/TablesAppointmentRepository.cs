@@ -143,8 +143,8 @@ namespace StrateZone_Repository.Implements
                 await using var createCmd = connection.CreateCommand();
 
                 createCmd.CommandText = @"
-                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, paid_for_opponent, note, is_extended, extended_of_id) 
-                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time), @paid_for_opponent, @note, @is_extended, @extended_of_id)
+                    INSERT INTO tables_appointments (table_id, appointment_id, schedule_time, end_time, price, status, created_at, schedule_range, paid_for_opponent, note, is_extended, extended_of_id, extended_times) 
+                    VALUES (@table_id, @appointment_id, @schedule_time, @end_time, @price, @status::appointment_status, @created_at, tstzrange(@schedule_time, @end_time), @paid_for_opponent, @note, @is_extended, @extended_of_id, @extended_times)
                     RETURNING id;"
                 ;
 
@@ -159,6 +159,7 @@ namespace StrateZone_Repository.Implements
                 createCmd.Parameters.Add(new NpgsqlParameter("@note", tablesAppointment.Note));
                 createCmd.Parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended == null ? DBNull.Value : tablesAppointment.IsExtended));
                 createCmd.Parameters.Add(new NpgsqlParameter("@extended_of_id", tablesAppointment.ExtendedOf == null ? DBNull.Value : tablesAppointment.ExtendedOf));
+                createCmd.Parameters.Add(new NpgsqlParameter("@extended_times", tablesAppointment.ExtendedCount));
 
                 var newTablesAppointmentId = await createCmd.ExecuteScalarAsync();
                 tablesAppointment.Id = Convert.ToInt32(newTablesAppointmentId);
@@ -261,6 +262,12 @@ namespace StrateZone_Repository.Implements
                 {
                     sql.Append("is_extended = @is_extended, ");
                     parameters.Add(new NpgsqlParameter("@is_extended", tablesAppointment.IsExtended));
+                }
+
+                if (tablesAppointment.ExtendedCount != null)
+                {
+                    sql.Append("extended_times = @extended_times, ");
+                    parameters.Add(new NpgsqlParameter("@extended_times", tablesAppointment.ExtendedCount));
                 }
 
                 sql.Append("status = @status::appointment_status, ");
@@ -831,6 +838,20 @@ namespace StrateZone_Repository.Implements
             {
                 throw new Exception(ex.Message, ex);
             }
+        }
+
+        public async Task<bool> CheckAllowTablesAppointmentExtend(int id)
+        {
+            int maxTimes = (await _context.Systems.AsNoTracking().SingleOrDefaultAsync(s => s.Id == 1))
+                        .Max_Tables_Extends_Count;
+
+            var currentTA = await _context.TablesAppointments.AsNoTracking().SingleOrDefaultAsync(ta => ta.Id == id);
+
+            if (currentTA.Status != PostgreEnums.AppointmentStatus.checked_in 
+                || currentTA.ExtendedCount >= maxTimes) return false;
+
+            var extendeds = await _context.TablesAppointments.AsNoTracking().Where(ta => ta.ExtendedOf == id).ToListAsync();
+            return extendeds.Count <= 0 || extendeds.All(e => e.Status == PostgreEnums.AppointmentStatus.cancelled || e.Status == PostgreEnums.AppointmentStatus.refunded || e.Status == PostgreEnums.AppointmentStatus.completed);
         }
     }
 }

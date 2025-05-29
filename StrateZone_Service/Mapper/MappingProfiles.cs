@@ -79,10 +79,13 @@ namespace StrateZone_Service.Mapper
 
             CreateMap<TablesAppointment, TablesAppointmentModel>()
                 .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                .ForMember(tr => tr.AllowExtend, u => u.MapFrom<TablesAppointmentAllowExtendResolver>())
                 .ReverseMap();
 
             CreateMap<TablesAppointment, TablesAppointmentResponse>()
-                .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()));
+                .ForMember(tr => tr.Status, u => u.MapFrom(src => src.Status.ToString()))
+                .ForMember(tr => tr.AllowExtend, u => u.MapFrom<TablesAppointmentRAllowExtendResolver>())
+                .ReverseMap();
 
             CreateMap<TablesAppointmentModel, TablesAppointmentResponse>().ReverseMap();
 
