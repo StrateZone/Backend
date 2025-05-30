@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Utilities;
+using StrateZone_Repository.Entities;
 using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.RequestModels;
@@ -37,6 +39,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                //request.UserId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var userWallet = await _walletService.GetWalletByUserIdAsync(request.UserId);
                 if(userWallet.Balance < request.TotalPrice )
                 {
@@ -103,6 +106,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                //userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var result = await _paymentService.CreateMembershipPaymentAsync(userId);
                 return Ok(result);
             }

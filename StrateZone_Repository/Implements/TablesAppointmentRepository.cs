@@ -853,5 +853,25 @@ namespace StrateZone_Repository.Implements
             var extendeds = await _context.TablesAppointments.AsNoTracking().Where(ta => ta.ExtendedOf == id).ToListAsync();
             return extendeds.Count <= 0 || extendeds.All(e => e.Status == PostgreEnums.AppointmentStatus.cancelled || e.Status == PostgreEnums.AppointmentStatus.refunded || e.Status == PostgreEnums.AppointmentStatus.completed);
         }
+
+        public async Task<List<(TablesAppointment, int)>> GetTablesAppointmentForAutoCheckin()
+        {
+            var Now = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
+
+            var tablesAppointments = await _context.TablesAppointments.AsNoTracking()
+                                                .Where(ta => ta.ExtendedOf != null && ta.ScheduleTime <= Now)
+                                                .ToListAsync();
+
+            List<(TablesAppointment, int)> results = new();
+            var TAs = tablesAppointments.Where(ta => ta.Status == PostgreEnums.AppointmentStatus.incoming).ToList();
+
+            foreach (var ta in TAs)
+            {
+                int a = await _context.Appointments.AsNoTracking().Where(a => a.AppointmentId == ta.AppointmentId).Select(a => a.UserId).FirstOrDefaultAsync();
+                results.Add(new(ta, a));
+            }
+
+            return results;
+        }
     }
 }

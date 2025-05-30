@@ -104,6 +104,8 @@ namespace StrateZone_Service.Implements
                     {
                         var tablesAppointmentsService = scope.ServiceProvider.GetRequiredService<ITablesAppointmentService>();
                         count = await tablesAppointmentsService.UpdateStatusForExpiredAndIncomingTablesAppointments();
+
+                        await tablesAppointmentsService.AutoCheckinExtendedTables();
                     }
 
                     _logger.LogInformation($"ITablesAppointmentsService cleanup executed: Changed status for {count} expired request(s).");
