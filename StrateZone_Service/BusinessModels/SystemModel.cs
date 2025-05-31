@@ -59,6 +59,8 @@ namespace StrateZone_Service.BusinessModels
         
         public int Min_Tables_For_MonthlyAppointment { get; set; }
 
+        public bool Enable_AutoCheckin_ForExtendedTables { get; set; }
+
         public string Status { get; set; }
 
 

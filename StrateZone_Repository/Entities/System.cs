@@ -60,6 +60,8 @@ namespace StrateZone_Repository.Entities
 
         public int Min_Tables_For_MonthlyAppointment { get; set; }
 
+        public bool Enable_AutoCheckin_ForExtendedTables { get; set; }
+
         public virtual User? User { get; set; }
     
         public virtual ICollection<AbnormalDay> AbnormalDays { get; set; } = new List<AbnormalDay>();

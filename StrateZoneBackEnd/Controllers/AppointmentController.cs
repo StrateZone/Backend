@@ -188,52 +188,8 @@ namespace StrateZone_APIs.Controllers
             }
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> CreateAppointment([FromBody] StrateZone_Service.CustomModels.RequestModels.AppointmentRequest request)
-        {
-            try
-            {
-                foreach (var tb in request.TablesAppointmentRequests)
-                {
-                    var (isValid, errorMessage) = await _scheduleTimeValidator.IsScheduleTimeValid(tb.ScheduleTime, tb.EndTime, false);
-                    if (!isValid) return BadRequest(new { message = errorMessage });
-                }
-
-                var result = await _appointmentService.CheckAppointmentAvailability(request);
-
-                if (result.Count > 0)
-                {
-                    var errorResponse = new
-                    {
-                        error = new
-                        {
-                            code = "TABLE_NOT_AVAILABLE",
-                            message = "Some tables are not available",
-                            unavailable_tables = result.Select(t => new
-                            {
-                                table_id = t.TableId,
-                                start_time = t.ScheduleTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                                end_time = t.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
-                            })
-                        }
-                    };
-
-                    return new JsonResult(errorResponse)
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest
-                    };
-                }
-
-                var appointment = await _appointmentService.CreateAppointmentAsync(request);
-                return Created("Appointment created", appointment);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateAppointment([FromBody] AppointmentModel appointmentModel, int id)
         {
             try
@@ -249,6 +205,7 @@ namespace StrateZone_APIs.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
             try

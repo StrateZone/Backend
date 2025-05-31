@@ -1257,6 +1257,9 @@ namespace StrateZone_Service.Implements
 
         public async Task AutoCheckinExtendedTables()
         {
+            var system = await _systemService.GetSystemsByIdAsync(1);
+            if (!system.Enable_AutoCheckin_ForExtendedTables) return;
+
             var tables = await _tablesAppointmentRepository.GetTablesAppointmentForAutoCheckin();
 
             foreach (var table in tables)

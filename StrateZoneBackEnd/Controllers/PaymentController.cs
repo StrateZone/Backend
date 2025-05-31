@@ -39,7 +39,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                //request.UserId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                request.UserId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var userWallet = await _walletService.GetWalletByUserIdAsync(request.UserId);
                 if(userWallet.Balance < request.TotalPrice )
                 {
@@ -106,7 +106,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
-                //userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
                 var result = await _paymentService.CreateMembershipPaymentAsync(userId);
                 return Ok(result);
             }
