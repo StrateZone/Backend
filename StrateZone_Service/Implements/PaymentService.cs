@@ -46,6 +46,7 @@ namespace StrateZone_Service.Implements
             ITableRepository tableRepository,
             ISystemService systemService)
         {
+            _appointmentRepository = appointmentRepository;
             _tablesAppointmentRepository = tablesAppointmentRepository;
             _appointmentrequestRepository = appointmentrequestRepository;
             _paymentRepository = paymentRepository;
