@@ -92,6 +92,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                request.ToUser = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
                 var result = await _paymentService.CreateAppointmentRequestPaymentBooking(request);
                 return Ok(result);
             }
@@ -122,6 +124,8 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                request.UserId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
                 var result = await _paymentService.CreateExtendedTablesAppointmentPaymentBooking(request);
                 return Ok(result);
             }

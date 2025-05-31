@@ -17,6 +17,7 @@ namespace StrateZone_Service.Implements
 {
     public class PaymentService : IPaymentService
     {
+        private readonly IAppointmentRepository _appointmentRepository;
         private readonly ITablesAppointmentRepository _tablesAppointmentRepository;
         private readonly IAppointmentrequestRepository _appointmentrequestRepository;
         private readonly IPaymentRepository _paymentRepository;
@@ -31,6 +32,7 @@ namespace StrateZone_Service.Implements
         private readonly ISystemService _systemService;
 
         public PaymentService(
+            IAppointmentRepository appointmentRepository,
             ITablesAppointmentRepository tablesAppointmentRepository,
             IAppointmentrequestRepository appointmentrequestRepository,
             IPaymentRepository paymentRepository,
@@ -489,6 +491,18 @@ namespace StrateZone_Service.Implements
                         Success = false,
                         StatusCode = 400,
                         Message = $"Mỗi bàn chỉ có thể gia hạn giờ chơi tối đa {system.Max_Tables_Extends_Count} lần.",
+                        Data = null
+                    };
+                }
+
+                var appointment = await _appointmentRepository.GetAppointmentByIdAsync((int)oldTableAppointment.AppointmentId);
+                if (appointment.UserId != request.UserId)
+                {
+                    return new ApiResponse<TablesAppointmentModel>
+                    {
+                        Success = false,
+                        StatusCode = 400,
+                        Message = $"Chỉ có chủ đơn mới được quyền gia hạn thêm thời gian.",
                         Data = null
                     };
                 }
