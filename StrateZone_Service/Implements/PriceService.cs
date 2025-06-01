@@ -228,5 +228,19 @@ namespace StrateZone_Service.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<PriceModel> DeleteRoomtypeAsync(string id)
+        {
+            try
+            {
+                var result = await _priceRepository.DeleteRoomtypeAsync(id);
+
+                return _mapper.Map<PriceModel>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

@@ -409,5 +409,22 @@ namespace StrateZone_Repository.Implements
                 throw new Exception($"Error retrieving prices: {ex.Message}");
             }
         }
+
+        public async Task<Price> DeleteRoomtypeAsync(string id)
+        {
+            var price = await _context.Prices.AsNoTracking().FirstOrDefaultAsync(p => p.RoomType == id)
+                            ?? throw new Exception("Price with this ID does not belong to a roomtype");
+
+            var roomsToDelete = await _context.Rooms.AsNoTracking().Where(r => r.Type == price.RoomType).ToListAsync();
+
+            if (roomsToDelete.Any(r => r.Status == RoomStatus.available))
+                throw new Exception("Không thể xóa loại phòng hiện đang có phòng đang hoạt động.");
+
+            _context.Prices.Remove(price);
+            _context.Rooms.RemoveRange(roomsToDelete);
+            await _context.SaveChangesAsync();
+
+            return price;
+        }
     }
 }

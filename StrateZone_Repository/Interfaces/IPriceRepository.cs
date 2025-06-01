@@ -23,5 +23,6 @@ namespace StrateZone_Repository.Interfaces
         Task<PagedList<Price>> GetServicePrices(PriceParameters parameters);
         Task<Price> GetTeachingSalaryAsync();
         Task<Price> UpdatePriceAsync(Price price, int id);
+        Task<Price> DeleteRoomtypeAsync(string id);
     }
 }

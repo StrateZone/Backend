@@ -14,6 +14,7 @@ namespace StrateZone_Service.Interfaces
         Task<PriceModel> GetPriceOfGameTypeAsync(string gameType);
         Task<PriceModel> GetPriceOfRoomTypeAsync(string roomType);
         Task<PriceModel> GetPriceOfCourseAsync(int courseId);
+        Task<PriceModel> DeleteRoomtypeAsync(string id);
         Task<decimal> GetPriceOfAppointmentAsync(int appointmentId);
         Task<PriceModel> GetProductPriceByIdAsync(int productId);
         Task<Dictionary<int, decimal>> GetPricesPerHourEachGameTypeAsync();

@@ -225,6 +225,21 @@ namespace StrateZone_APIs.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpDelete("roomtype/{type}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> DeleteRoomtype(string type)
+        {
+            try
+            {
+                var result = await _priceService.DeleteRoomtypeAsync(type);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 
     public class RoomTypeRequest
