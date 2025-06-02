@@ -66,6 +66,7 @@ namespace StrateZone_Service.Mapper
             CreateMap<StrateZone_Repository.Entities.Table, TableResponse>()
                     .ForMember(tr => tr.RoomName, u => u.MapFrom(src => src.Room.RoomName))
                     .ForMember(tr => tr.RoomDescription, u => u.MapFrom(src => src.Room.Description))
+                    .ForMember(tr => tr.IsForMonthlyBooking, u => u.MapFrom(src => src.Room.IsForMonthlyBooking))
                     .ForMember(tr => tr.RoomType, u => u.MapFrom(src => src.Room.Type.ToString()))
                     .ReverseMap();
 

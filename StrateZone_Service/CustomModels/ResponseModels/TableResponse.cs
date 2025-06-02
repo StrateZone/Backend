@@ -31,5 +31,7 @@ namespace StrateZone_Service.CustomModels.ResponseModels
         public float? DurationInHours { get; set; }
 
         public decimal? TotalPrice { get; set; }
+
+        public bool IsForMonthlyBooking { get; set; }
     }
 }
