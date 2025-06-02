@@ -641,6 +641,9 @@ public partial class StrateZoneDbContext : DbContext
             entity.Property(e => e.Enable_AutoCheckin_ForExtendedTables)
                     .HasColumnName("enable_auto_checkin_for_extended_tables");
 
+            entity.Property(e => e.Min_Minutes_TablesBooking_BeforeScheduleTime)
+                    .HasColumnName("min_minutes_tables_booking_before_scheduletime");
+
             entity.Property(e => e.Status)
                   .HasColumnName("status")
                   .HasDefaultValue("active");

@@ -38,11 +38,19 @@ namespace StrateZone_Service.Utils
         public async Task<(bool isValid, string errorMessage)> IsScheduleTimeValid(DateTime scheduleTime, DateTime endTime, bool softCheck)
         {
             string errorMessage = string.Empty;
+            var now = DateTime.UtcNow.AddHours(7);
 
-            if (scheduleTime <= DateTime.UtcNow.AddHours(7)
-                || endTime <= DateTime.UtcNow.AddHours(7))
+            if (scheduleTime <= now
+                || endTime <= now)
             {
                 errorMessage = "Can not select time in the past.";
+                return (false, errorMessage);
+            }
+
+            var system = await _systemService.GetSystemsByIdAsync(1);
+            if (now.AddMinutes(system.Min_Minutes_TablesBooking_BeforeScheduleTime) >= scheduleTime)
+            {
+                errorMessage = $"Giờ đặt bàn phải trước giờ chơi ít nhất {system.Min_Minutes_TablesBooking_BeforeScheduleTime} phút.";
                 return (false, errorMessage);
             }
 

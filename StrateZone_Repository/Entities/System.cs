@@ -32,6 +32,8 @@ namespace StrateZone_Repository.Entities
 
         public int Numberof_TopContributors_PerWeek { get; set; }
 
+        public int Min_Minutes_TablesBooking_BeforeScheduleTime { get; set; }
+
         public int Max_NumberOfUsers_InvitedToTable { get; set; }
 
         public float AppointmentRequest_MaxHours_UntilExpiration { get; set; }

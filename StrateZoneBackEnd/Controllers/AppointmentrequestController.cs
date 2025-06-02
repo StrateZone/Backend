@@ -7,6 +7,7 @@ using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Implements;
 using StrateZone_Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -43,6 +44,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var result = await _appointmentrequestService.GetAppointmentRequestsFromUserByUserIdAsync(parameters, userId);
                 
                 var response = new PagedListResponse<AppointmentrequestModel>(result);
@@ -88,6 +90,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var result = await _appointmentrequestService.GetAppointmentRequestsOfUserByUserIdAsync(parameters, userId);
                 
                 var response = new PagedListResponse<AppointmentrequestModel>(result);
@@ -105,6 +108,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                request.FromUser = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 List<AppointmentrequestRequest> requests = new();
 
                 foreach (var toUserId in request.ToUser)

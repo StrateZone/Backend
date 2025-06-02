@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace StrateZone_API.Controllers
 {
@@ -68,6 +69,7 @@ namespace StrateZone_API.Controllers
         {
             try
             {
+                request.UserId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var result = await _commentService.PostCommentAsync(request);
                 return CreatedAtAction(nameof(GetCommentById), new { id = result.CommentId }, result);
             }

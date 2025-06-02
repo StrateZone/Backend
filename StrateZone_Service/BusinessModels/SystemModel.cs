@@ -35,6 +35,8 @@ namespace StrateZone_Service.BusinessModels
 
         public int Max_NumberOfUsers_InvitedToTable { get; set; }
 
+        public int Min_Minutes_TablesBooking_BeforeScheduleTime { get; set; }
+
         public float AppointmentRequest_MaxHours_UntilExpiration { get; set; }
 
         public float AppointmentRequest_MinHours_UntilExpiration { get; set; }

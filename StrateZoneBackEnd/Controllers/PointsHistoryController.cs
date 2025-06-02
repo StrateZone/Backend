@@ -5,6 +5,7 @@ using StrateZone_Repository.Parameters;
 using StrateZone_Service.BusinessModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
+using System.Security.Claims;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -58,6 +59,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var result = await _pointsHistoryService.GetByUserIdAsync(userId, parameters);
                 var response = new PagedListResponse<PointsHistoryModel>(result);
 

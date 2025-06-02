@@ -6,6 +6,7 @@ using StrateZone_Service.CustomModels.RequestModels;
 using StrateZone_Service.CustomModels.ResponseModels;
 using StrateZone_Service.Interfaces;
 using StrateZone_Service.Utils;
+using System.Security.Claims;
 
 namespace StrateZone_APIs.Controllers
 {
@@ -132,6 +133,7 @@ namespace StrateZone_APIs.Controllers
         {
             try
             {
+                userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var appointments = await _appointmentService.GetAppointmentsByUserIdAsync(parameters, userId);
 
                 var response = new PagedListResponse<AppointmentResponse>(appointments);
