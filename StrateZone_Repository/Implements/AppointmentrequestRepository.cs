@@ -530,8 +530,11 @@ namespace StrateZone_Repository.Implements
                 "WHEN status = 'accepted' THEN 'table_cancelled' " +
                 "ELSE status " +
                 "END " +
-                "WHERE appointment_id = {0} AND table_id = {1}", 
-                ta.AppointmentId, ta.TableId
+                "WHERE appointment_id = {0} AND table_id = {1} AND start_time = {2} AND end_time = {3}", 
+                ta.AppointmentId, 
+                ta.TableId, 
+                DateTime.SpecifyKind(ta.ScheduleTime, DateTimeKind.Unspecified), 
+                DateTime.SpecifyKind(ta.EndTime, DateTimeKind.Unspecified)
             );
         }
 
