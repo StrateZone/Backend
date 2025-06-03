@@ -533,8 +533,8 @@ namespace StrateZone_Repository.Implements
                 "WHERE appointment_id = {0} AND table_id = {1} AND start_time = {2} AND end_time = {3}", 
                 ta.AppointmentId, 
                 ta.TableId, 
-                DateTime.SpecifyKind(ta.ScheduleTime, DateTimeKind.Unspecified), 
-                DateTime.SpecifyKind(ta.EndTime, DateTimeKind.Unspecified)
+                ta.ScheduleTime, 
+                ta.EndTime
             );
         }
 
