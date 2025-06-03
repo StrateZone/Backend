@@ -11,7 +11,8 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/tags")]
-    [Authorize(Policy = "ClubMember")]
+    [Authorize]
+    //[Authorize(Policy = "ClubMember")]
     public class TagController : ControllerBase
     {
         private readonly ITagService _tagService;

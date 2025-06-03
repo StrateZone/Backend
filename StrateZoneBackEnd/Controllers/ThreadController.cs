@@ -11,7 +11,8 @@ namespace StrateZone_API.Controllers
 {
     [ApiController]
     [Route("api/threads")]
-    [Authorize(Policy = "ClubMember")]
+    [Authorize]
+    //[Authorize(Policy = "ClubMember")]
     public class ThreadsController : ControllerBase
     {
         private readonly IThreadService _threadService;

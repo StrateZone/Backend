@@ -10,7 +10,8 @@ namespace StrateZone_Api.Controllers
 {
     [ApiController]
     [Route("api/threadstags")]
-    [Authorize(Policy = "ClubMember")]
+    [Authorize]
+    //[Authorize(Policy = "ClubMember")]
     public class ThreadsTagController : ControllerBase
     {
         private readonly IThreadsTagService _threadsTagService;

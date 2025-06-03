@@ -10,7 +10,8 @@ namespace StrateZone_API.Controllers
 {
     [ApiController]
     [Route("api/likes")]
-    [Authorize(Policy = "ClubMember")]
+    [Authorize]
+    //[Authorize(Policy = "ClubMember")]
     public class LikesController : ControllerBase
     {
         private readonly ILikeService _likeService;

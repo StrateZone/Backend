@@ -11,7 +11,8 @@ namespace StrateZone_APIs.Controllers
     /*
     [ApiController]
     [Route("api/messages")]
-    [Authorize(Policy = "ClubMember")]
+    [Authorize(Policy = "
+    ")]
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;

@@ -9,7 +9,8 @@ namespace StrateZone_APIs.Controllers
 {
     [ApiController]
     [Route("api/friendlists")]
-    [Authorize(Policy = "ClubMember")]
+    [Authorize]
+    //[Authorize(Policy = "ClubMember")]
     public class FriendlistController : ControllerBase
     {
         private readonly IFriendlistService _friendlistService;
