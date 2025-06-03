@@ -295,6 +295,7 @@ namespace StrateZone_Service.Implements
                     result.TablesAppointments.Add(tablesAppointmentModel);
                 }
 
+                result.TablesAppointments = result.TablesAppointments.OrderBy(ta => ta.ScheduleTime).ToList();
                 result.TablesAppointments = await _tablesAppointmentService.CreateTablesAppointmentsFromAppointmentAsync(result);
 
                 _ = Task.Run(async () =>
